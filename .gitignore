@@ -2,6 +2,7 @@
 # OSX
 #
 .DS_Store
+.goutputstream*
 
 # node.js
 #
