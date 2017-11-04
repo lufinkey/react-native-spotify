@@ -7,12 +7,8 @@
 @interface RCTSpotify() <SPTAudioStreamingDelegate, SPTAudioStreamingPlaybackDelegate>
 {
 	SPTAuth* _auth;
-	
-	
 }
 @end
-
-
 
 @implementation RCTSpotify
 
@@ -69,7 +65,7 @@ RCT_EXPORT_METHOD(start:(NSDictionary*)options completion:(RCTResponseSenderBloc
 		completion(@[@{
 						 @"domain":error.domain,
 						 @"code":@(error.code),
-						 @"description":error.description
+						 @"description":error.localizedDescription
 						 }]);
 	}
 }
