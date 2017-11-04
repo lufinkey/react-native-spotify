@@ -62,11 +62,21 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(createSpotifyInstance:(NSDictionary*)opti
 		auth.sessionUserDefaultsKey = sessionUserDefaultsKey;
 	}
 	
-	RCTSpotifyData* instance = [[RCTSpotifyData alloc] initWithAuth:auth];
+	NSError* error = nil;
+	RCTSpotifyData* instance = [[RCTSpotifyData alloc] initWithAuth:auth error:&error];
+	if(instance == nil)
+	{
+		return @{
+				 @"success":@NO,
+				 @"error":error.localizedDescription
+				 };
+	}
+	
 	[_spotifyInstances addObject:instance];
 	return @{
-		@"instanceID":instance.instanceID
-	};
+			 @"success":@YES,
+			 @"instanceID":instance.instanceID
+			 };
 }
 
 RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(destroySpotifyInstance:(NSString*)instanceID)

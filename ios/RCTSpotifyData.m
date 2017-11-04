@@ -14,7 +14,7 @@
 @synthesize auth = _auth;
 @synthesize player = _player;
 
--(id)initWithAuth:(SPTAuth*)auth
+-(id)initWithAuth:(SPTAuth*)auth error:(NSError**)error
 {
 	if(self = [super init])
 	{

@@ -8,6 +8,7 @@ export default class Spotify
 	constructor()
 	{
 		this.instanceID = null;
+		this.error = null;
 	}
 
 	initialize(options)
@@ -17,7 +18,13 @@ export default class Spotify
 			throw "Instance is already initialized";
 		}
 		var result = SpotifyManager.createSpotifyInstance(options);
-		this.instanceID = result["instanceID"];
+		if(!result.success)
+		{
+			this.error = result.error;
+			return false;
+		}
+		this.instanceID = result.instanceID;
+		return true;
 	}
 
 	destroy()

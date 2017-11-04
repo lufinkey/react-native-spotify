@@ -12,9 +12,7 @@
 
 @interface RCTSpotifyData : NSObject <SPTAudioStreamingDelegate, SPTAudioStreamingPlaybackDelegate>
 
--(id)initWithAuth:(SPTAuth*)auth;
-
--(void)start;
+-(id)initWithAuth:(SPTAuth*)auth error:(NSError**)error;
 
 @property (strong, readonly) NSString* instanceID;
 @property (strong, readonly) SPTAuth* auth;
