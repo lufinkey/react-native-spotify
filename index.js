@@ -5,13 +5,28 @@ var SpotifyManager = NativeModules.SpotifyManager || NativeModules.SpotifyManage
 
 export default class Spotify
 {
-	constructor(options)
+	constructor()
 	{
-		var result = SpotifyManager.createSpotify(options);
+		this.instanceID = null;
+	}
 
+	initialize(options)
+	{
+		if(this.instanceID != null)
+		{
+			throw "Instance is already initialized";
+		}
+		var result = SpotifyManager.createSpotifyInstance(options);
 		this.instanceID = result["instanceID"];
-		console.log("created Spotify instance with options:");
-		console.log(options);
+	}
+
+	destroy()
+	{
+		if(this.instanceID == null)
+		{
+			return;
+		}
+		SpotifyManager.destroySpotifyInstance(this.instanceID);
 	}
 
 	testTheThing()

@@ -4,9 +4,12 @@
 
 @interface RCTSpotifyManager()
 {
-	NSMutableDictionary<NSString*,RCTSpotifyData*>* _spotifyInstances;
+	NSMutableArray<RCTSpotifyData*>* _spotifyInstances;
 }
+-(RCTSpotifyData*)spotifyDataWithInstanceID:(NSString*)instanceID;
 @end
+
+
 
 @implementation RCTSpotifyManager
 
@@ -14,9 +17,21 @@
 {
 	if(self = [super init])
 	{
-		_spotifyInstances = [NSMutableDictionary dictionary];
+		_spotifyInstances = [NSMutableArray array];
 	}
 	return self;
+}
+
+-(RCTSpotifyData*)spotifyDataWithInstanceID:(NSString*)instanceID
+{
+	for(RCTSpotifyData* spotifyData in _spotifyInstances)
+	{
+		if([instanceID isEqualToString:spotifyData.instanceID])
+		{
+			return spotifyData;
+		}
+	}
+	return nil;
 }
 
 RCT_EXPORT_MODULE()
@@ -26,7 +41,7 @@ RCT_EXPORT_METHOD(test)
 	NSLog(@"ayy lmao");
 }
 
-RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(createSpotify:(NSDictionary*)options)
+RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(createSpotifyInstance:(NSDictionary*)options)
 {
 	SPTAuth* auth = [[SPTAuth alloc] init];
 	auth.requestedScopes = @[SPTAuthStreamingScope];
@@ -48,11 +63,20 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(createSpotify:(NSDictionary*)options)
 	}
 	
 	RCTSpotifyData* instance = [[RCTSpotifyData alloc] initWithAuth:auth];
-	NSString* instanceID = [NSString stringWithFormat:@"%p", instance];
-	_spotifyInstances[instanceID] = instance;
+	[_spotifyInstances addObject:instance];
 	return @{
-		@"instanceID":instanceID
+		@"instanceID":instance.instanceID
 	};
+}
+
+RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(destroySpotifyInstance:(NSString*)instanceID)
+{
+	RCTSpotifyData* spotifyData = [self spotifyDataWithInstanceID:instanceID];
+	if(spotifyData != nil)
+	{
+		[_spotifyInstances removeObject:spotifyData];
+	}
+	return nil;
 }
 
 @end

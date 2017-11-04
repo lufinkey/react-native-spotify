@@ -10,10 +10,14 @@
 #import <SpotifyMetadata/SpotifyMetadata.h>
 #import <SpotifyAudioPlayback/SpotifyAudioPlayback.h>
 
-@interface RCTSpotifyData : NSObject
+@interface RCTSpotifyData : NSObject <SPTAudioStreamingDelegate, SPTAudioStreamingPlaybackDelegate>
 
 -(id)initWithAuth:(SPTAuth*)auth;
 
-@property (strong) SPTAuth* auth;
+-(void)start;
+
+@property (strong, readonly) NSString* instanceID;
+@property (strong, readonly) SPTAuth* auth;
+@property (strong, readonly) SPTAudioStreamingController* player;
 
 @end

@@ -8,6 +8,7 @@
 @interface RCTSpotifyManager : NSObject <RCTBridgeModule>
 
 -(void)test;
--(NSDictionary*)createSpotify:(NSDictionary*)options;
+-(NSDictionary*)createSpotifyInstance:(NSDictionary*)options;
+-(id)destroySpotifyInstance:(NSString*)instanceID;
 
 @end
