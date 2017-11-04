@@ -1,13 +1,12 @@
 
 import { NativeModules } from 'react-native';
 
-const RNSpotify = NativeModules.RNSpotify || NativeModules.RNSpotify;
+var RCTSpotifyManager = NativeModules.RCTSpotifyManager || NativeModules.RCTSpotifyManager;
 
 export default class Spotify
 {
-	test()
+	constructor(client_id)
 	{
-		console.log("test");
+		RCTSpotifyManager.testSpotify();
 	}
 }
-

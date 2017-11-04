@@ -5,7 +5,9 @@
 #import <React/RCTBridgeModule.h>
 #endif
 
-@interface RNSpotify : NSObject <RCTBridgeModule>
+@interface RCTSpotifyManager : NSObject <RCTBridgeModule>
+
+-(void)testSpotify;
 
 @end
   

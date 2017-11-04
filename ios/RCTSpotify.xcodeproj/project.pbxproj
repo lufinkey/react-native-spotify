@@ -10,7 +10,7 @@
 		A0A4341D1FAE256D0073DAB9 /* SpotifyAudioPlayback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A0A4341B1FAE25690073DAB9 /* SpotifyAudioPlayback.framework */; };
 		A0A4341E1FAE256F0073DAB9 /* SpotifyAuthentication.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A0A4341C1FAE25690073DAB9 /* SpotifyAuthentication.framework */; };
 		A0A4341F1FAE25720073DAB9 /* SpotifyMetadata.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A0A4341A1FAE25690073DAB9 /* SpotifyMetadata.framework */; };
-		B3E7B58A1CC2AC0600A0062D /* RNSpotify.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* RNSpotify.m */; };
+		B3E7B58A1CC2AC0600A0062D /* RCTSpotifyManager.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* RCTSpotifyManager.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -26,12 +26,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		134814201AA4EA6300B7C361 /* libRNSpotify.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRNSpotify.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		134814201AA4EA6300B7C361 /* libRCTSpotify.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTSpotify.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		A0A4341A1FAE25690073DAB9 /* SpotifyMetadata.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SpotifyMetadata.framework; path = external/SpotifySDK/SpotifyMetadata.framework; sourceTree = "<group>"; };
 		A0A4341B1FAE25690073DAB9 /* SpotifyAudioPlayback.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SpotifyAudioPlayback.framework; path = external/SpotifySDK/SpotifyAudioPlayback.framework; sourceTree = "<group>"; };
 		A0A4341C1FAE25690073DAB9 /* SpotifyAuthentication.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SpotifyAuthentication.framework; path = external/SpotifySDK/SpotifyAuthentication.framework; sourceTree = "<group>"; };
-		B3E7B5881CC2AC0600A0062D /* RNSpotify.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNSpotify.h; sourceTree = "<group>"; };
-		B3E7B5891CC2AC0600A0062D /* RNSpotify.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNSpotify.m; sourceTree = "<group>"; };
+		B3E7B5881CC2AC0600A0062D /* RCTSpotifyManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTSpotifyManager.h; sourceTree = "<group>"; };
+		B3E7B5891CC2AC0600A0062D /* RCTSpotifyManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTSpotifyManager.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,7 +51,7 @@
 		134814211AA4EA7D00B7C361 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				134814201AA4EA6300B7C361 /* libRNSpotify.a */,
+				134814201AA4EA6300B7C361 /* libRCTSpotify.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -59,8 +59,8 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
-				B3E7B5881CC2AC0600A0062D /* RNSpotify.h */,
-				B3E7B5891CC2AC0600A0062D /* RNSpotify.m */,
+				B3E7B5881CC2AC0600A0062D /* RCTSpotifyManager.h */,
+				B3E7B5891CC2AC0600A0062D /* RCTSpotifyManager.m */,
 				A0A434191FAE254F0073DAB9 /* Frameworks */,
 				134814211AA4EA7D00B7C361 /* Products */,
 			);
@@ -79,9 +79,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		58B511DA1A9E6C8500147676 /* RNSpotify */ = {
+		58B511DA1A9E6C8500147676 /* RCTSpotify */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "RNSpotify" */;
+			buildConfigurationList = 58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "RCTSpotify" */;
 			buildPhases = (
 				58B511D71A9E6C8500147676 /* Sources */,
 				58B511D81A9E6C8500147676 /* Frameworks */,
@@ -91,9 +91,9 @@
 			);
 			dependencies = (
 			);
-			name = RNSpotify;
+			name = RCTSpotify;
 			productName = RCTDataManager;
-			productReference = 134814201AA4EA6300B7C361 /* libRNSpotify.a */;
+			productReference = 134814201AA4EA6300B7C361 /* libRCTSpotify.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -110,7 +110,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 58B511D61A9E6C8500147676 /* Build configuration list for PBXProject "RNSpotify" */;
+			buildConfigurationList = 58B511D61A9E6C8500147676 /* Build configuration list for PBXProject "RCTSpotify" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -122,7 +122,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				58B511DA1A9E6C8500147676 /* RNSpotify */,
+				58B511DA1A9E6C8500147676 /* RCTSpotify */,
 			);
 		};
 /* End PBXProject section */
@@ -132,7 +132,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B3E7B58A1CC2AC0600A0062D /* RNSpotify.m in Sources */,
+				B3E7B58A1CC2AC0600A0062D /* RCTSpotifyManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -235,7 +235,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = "-ObjC";
-				PRODUCT_NAME = RNSpotify;
+				PRODUCT_NAME = RCTSpotify;
 				SKIP_INSTALL = YES;
 			};
 			name = Debug;
@@ -255,7 +255,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = "-ObjC";
-				PRODUCT_NAME = RNSpotify;
+				PRODUCT_NAME = RCTSpotify;
 				SKIP_INSTALL = YES;
 			};
 			name = Release;
@@ -263,7 +263,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		58B511D61A9E6C8500147676 /* Build configuration list for PBXProject "RNSpotify" */ = {
+		58B511D61A9E6C8500147676 /* Build configuration list for PBXProject "RCTSpotify" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				58B511ED1A9E6C8500147676 /* Debug */,
@@ -272,7 +272,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "RNSpotify" */ = {
+		58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "RCTSpotify" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				58B511F01A9E6C8500147676 /* Debug */,
