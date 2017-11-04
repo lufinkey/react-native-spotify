@@ -1,0 +1,3 @@
+[submodule "ios/external/SpotifySDK"]
+	path = ios/external/SpotifySDK
+	url = https://github.com/spotify/ios-sdk
