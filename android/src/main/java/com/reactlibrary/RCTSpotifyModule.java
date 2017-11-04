@@ -17,6 +17,6 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule {
 
   @Override
   public String getName() {
-    return "RCTSpotifyManager";
+    return "RCTSpotify";
   }
 }
