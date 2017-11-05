@@ -5,6 +5,10 @@
 #import <SpotifyAudioPlayback/SpotifyAudioPlayback.h>
 #import "SpotifyWebViewController.h"
 
+
+NSString* const RCTSpotifyErrorDomain = @"RCTSpotifyErrorDomain";
+
+
 @interface RCTSpotify() <SPTAudioStreamingDelegate, SPTAudioStreamingPlaybackDelegate, SpotifyWebViewDelegate>
 {
 	SPTAuth* _auth;
@@ -13,12 +17,12 @@
 	NSNumber* _cacheSize;
 	
 	void(^_authControllerResponse)(BOOL loggedIn, NSError* error);
-	void(^_logBackInResponse)(BOOL loggedIn, NSError* error);
+	void(^_startResponse)(BOOL loggedIn, NSError* error);
 }
 +(id)objFromError:(NSError*)error;
 
 -(void)logBackInIfNeeded:(void(^)(BOOL loggedIn, NSError* error))completion;
--(void)start:(void(^)(NSError*))completion;
+-(void)start:(void(^)(BOOL,NSError*))completion;
 @end
 
 @implementation RCTSpotify
@@ -35,6 +39,13 @@
 		@"description":error.localizedDescription
 	};
 }
+
++(NSError*)errorWithCode:(RCTSpotifyErrorCode)code description:(NSString*)description
+{
+	return [NSError errorWithDomain:RCTSpotifyErrorDomain code:code userInfo:@{NSLocalizedDescriptionKey:description}];
+}
+
+#pragma mark - React Native functions
 
 RCT_EXPORT_MODULE()
 
@@ -95,11 +106,11 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSende
 	[self logBackInIfNeeded:^(BOOL loggedIn, NSError* error) {
 		if(loggedIn)
 		{
-			completion(@[ [NSNull null] ]);
+			completion(@[ @YES, [NSNull null] ]);
 		}
 		else
 		{
-			completion(@[ [RCTSpotify objFromError:error] ]);
+			completion(@[ @NO, [RCTSpotify objFromError:error] ]);
 		}
 	}];
 }
@@ -114,7 +125,11 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSende
 	{
 		completion(YES, nil);
 	}
-	else if(_auth.hasTokenRefreshService)
+	else if(!_auth.hasTokenRefreshService)
+	{
+		completion(NO, nil);
+	}
+	else
 	{
 		[_auth renewSession:_auth.session callback:^(NSError* error, SPTSession* session){
 			if(error!=nil)
@@ -124,15 +139,11 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSende
 			else
 			{
 				_auth.session = session;
-				NSLog(@"logged back in to Spotify");
-				//[_player loginWithAccessToken:_auth.session.accessToken];
-				completion(YES, nil);
+				[self start:^(BOOL loggedIn, NSError* error) {
+					completion(loggedIn, error);
+				}];
 			}
 		}];
-	}
-	else
-	{
-		completion(NO, nil);
 	}
 }
 
@@ -151,20 +162,36 @@ RCT_EXPORT_METHOD(login:(RCTResponseSenderBlock)completion)
 		}
 		else
 		{
+			__weak RCTSpotify* _self = self;
+			
 			if(_authControllerResponse != nil)
 			{
-				completion(@[ @NO, @{@"description":@"Cannot call login while login is already being called"} ]);
+				completion(@[ @NO, [RCTSpotify objFromError:[RCTSpotify errorWithCode:RCTSpotifyErrorCodeConflictingCallbacks description:@"Cannot call login while login is already being called"]] ]);
 				return;
 			}
 			
-			//wait for spotifyWebController:didLoginWithSession:
+			//wait for handleAuthURL:
 			// or spotifyWebControllerDidCancelLogin
 			_authControllerResponse = ^(BOOL loggedIn, NSError* error){
-				if(authController.presentingViewController != nil)
+				authController.view.userInteractionEnabled = NO;
+				if(!loggedIn)
 				{
-					[authController.presentingViewController dismissViewControllerAnimated:YES completion:nil];
+					if(authController.presentingViewController != nil)
+					{
+						[authController.presentingViewController dismissViewControllerAnimated:YES completion:nil];
+					}
+					completion(@[ @NO, [RCTSpotify objFromError:error] ]);
+					return;
 				}
-				completion(@[ [NSNumber numberWithBool:loggedIn], [RCTSpotify objFromError:error] ]);
+				[_self start:^(BOOL loggedIn, NSError* error) {
+					dispatch_async(dispatch_get_main_queue(), ^{
+						if(authController.presentingViewController != nil)
+						{
+							[authController.presentingViewController dismissViewControllerAnimated:YES completion:nil];
+						}
+						completion(@[ [NSNumber numberWithBool:loggedIn], [RCTSpotify objFromError:error] ]);
+					});
+				}];
 			};
 			[rootController presentViewController:authController animated:YES completion:nil];
 		}
@@ -209,7 +236,7 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(handleAuthURL:(NSString*)urlString)
 	return @NO;
 }
 
--(void)start:(void(^)(NSError*))completion
+-(void)start:(void(^)(BOOL,NSError*))completion
 {
 	BOOL allowCaching = (_cacheSize.unsignedIntegerValue > 0);
 	NSError* error = nil;
@@ -221,11 +248,25 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(handleAuthURL:(NSString*)urlString)
 		{
 			_player.diskCache = [[SPTDiskCache alloc] initWithCapacity:_cacheSize.unsignedIntegerValue];
 		}
-		completion(nil);
+		
+		dispatch_async(dispatch_get_main_queue(), ^{
+			if(_startResponse != nil)
+			{
+				completion(NO, [RCTSpotify errorWithCode:RCTSpotifyErrorCodeConflictingCallbacks description:@"cannot call start method while start is already being called"]);
+				return;
+			}
+			
+			//wait for audioStreamingDidLogin:
+			// or audioStreaming:didRecieveError:
+			_startResponse = ^(BOOL loggedIn, NSError* error){
+				completion(loggedIn, error);
+			};
+			[_player loginWithAccessToken:_auth.session.accessToken];
+		});
 	}
 	else
 	{
-		completion(error);
+		completion(NO, error);
 	}
 }
 
@@ -249,29 +290,27 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(handleAuthURL:(NSString*)urlString)
 
 -(void)audioStreamingDidLogin:(SPTAudioStreamingController*)audioStreaming
 {
-	NSLog(@"audioStreamingDidLogin");
+	if(_startResponse != nil)
+	{
+		//do login callback
+		void(^response)(BOOL,NSError*) = _startResponse;
+		_startResponse = nil;
+		response(YES, nil);
+	}
 }
 
 -(void)audioStreaming:(SPTAudioStreamingController*)audioStreaming didReceiveError:(NSError*)error
 {
-	NSLog(@"audioStreaming:didReceiveError: %@", error);
-	
-	/*NSMutableArray<void(^)(NSError*)>* _unfulfilledBlocks = [NSMutableArray array];
-	
-	if(_loginResponse != nil)
+	if(_startResponse != nil)
 	{
 		if(error.code==SPErrorGeneralLoginError || error.code==SPErrorLoginBadCredentials)
 		{
 			//do login callback
-			RCTResponseSenderBlock response = _loginResponse;
-			_loginResponse = nil;
-			response(@[@{
-				@"domain":error.domain,
-				@"code":@(error.code),
-				@"description":error.localizedDescription
-			}]);
+			void(^response)(BOOL,NSError*) = _startResponse;
+			_startResponse = nil;
+			response(NO, error);
 		}
-	}*/
+	}
 }
 
 @end

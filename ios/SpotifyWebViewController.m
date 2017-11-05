@@ -124,17 +124,17 @@
 
 -(void)webViewDidStartLoad:(UIWebView*)webView
 {
-	NSLog(@"didStartLoad: %@", webView.request.URL);
+	//
 }
 
 -(void)webViewDidFinishLoad:(UIWebView*)webView
 {
-	NSLog(@"webViewDidFinishLoad: %@", webView.request.URL);
+	//
 }
 
 -(void)webView:(UIWebView*)webView didFailLoadWithError:(NSError*)error
 {
-	NSLog(@"webView:didFailLoadWithError: %@", webView.request.URL);
+	//
 }
 
 @end
