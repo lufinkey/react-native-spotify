@@ -132,6 +132,10 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSende
 			}
 		}];
 	}
+	else
+	{
+		completion(NO, nil);
+	}
 }
 
 RCT_EXPORT_METHOD(login:(RCTResponseSenderBlock)completion)
