@@ -69,10 +69,8 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSende
 	NSString* redirectURL = options[@"redirectURL"];
 	if(redirectURL != nil)
 	{
-		NSLog(@"redirectURL: %@", redirectURL);
 		_auth.redirectURL = [NSURL URLWithString:redirectURL];
 	}
-	NSLog(@"auth.redirectURL: %@", _auth.redirectURL);
 	NSString* sessionUserDefaultsKey = options[@"sessionUserDefaultsKey"];
 	if(sessionUserDefaultsKey != nil)
 	{
