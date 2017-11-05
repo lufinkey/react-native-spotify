@@ -3,8 +3,9 @@
 #import <SpotifyAuthentication/SpotifyAuthentication.h>
 #import <SpotifyMetadata/SpotifyMetadata.h>
 #import <SpotifyAudioPlayback/SpotifyAudioPlayback.h>
+#import "SpotifyWebViewController.h"
 
-@interface RCTSpotify() <SPTAudioStreamingDelegate, SPTAudioStreamingPlaybackDelegate, SPTAuthViewDelegate>
+@interface RCTSpotify() <SPTAudioStreamingDelegate, SPTAudioStreamingPlaybackDelegate, SpotifyWebViewDelegate>
 {
 	SPTAuth* _auth;
 	SPTAudioStreamingController* _player;
@@ -14,7 +15,7 @@
 	void(^_authControllerResponse)(BOOL loggedIn, NSError* error);
 	void(^_logBackInResponse)(BOOL loggedIn, NSError* error);
 }
-+(id)dictFromError:(NSError*)error;
++(id)objFromError:(NSError*)error;
 
 -(void)logBackInIfNeeded:(void(^)(BOOL loggedIn, NSError* error))completion;
 -(void)start:(void(^)(NSError*))completion;
@@ -22,7 +23,7 @@
 
 @implementation RCTSpotify
 
-+(id)dictFromError:(NSError*)error
++(id)objFromError:(NSError*)error
 {
 	if(error==nil)
 	{
@@ -65,8 +66,18 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSende
 	
 	//get options
 	_auth.clientID = options[@"clientID"];
-	_auth.redirectURL = [NSURL URLWithString:options[@"redirectURL"]];
-	_auth.sessionUserDefaultsKey = options[@"sessionUserDefaultsKey"];
+	NSString* redirectURL = options[@"redirectURL"];
+	if(redirectURL != nil)
+	{
+		NSLog(@"redirectURL: %@", redirectURL);
+		_auth.redirectURL = [NSURL URLWithString:redirectURL];
+	}
+	NSLog(@"auth.redirectURL: %@", _auth.redirectURL);
+	NSString* sessionUserDefaultsKey = options[@"sessionUserDefaultsKey"];
+	if(sessionUserDefaultsKey != nil)
+	{
+		_auth.sessionUserDefaultsKey = sessionUserDefaultsKey;
+	}
 	NSNumber* cacheSize = options[@"cacheSize"];
 	if(cacheSize!=nil)
 	{
@@ -90,7 +101,7 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSende
 		}
 		else
 		{
-			completion(@[ [RCTSpotify dictFromError:error] ]);
+			completion(@[ [RCTSpotify objFromError:error] ]);
 		}
 	}];
 }
@@ -115,6 +126,7 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSende
 			else
 			{
 				_auth.session = session;
+				NSLog(@"logged back in to Spotify");
 				//[_player loginWithAccessToken:_auth.session.accessToken];
 				completion(YES, nil);
 			}
@@ -126,7 +138,8 @@ RCT_EXPORT_METHOD(login:(RCTResponseSenderBlock)completion)
 {
 	//do UI logic on main thread
 	dispatch_async(dispatch_get_main_queue(), ^{
-		SPTAuthViewController* authController = [SPTAuthViewController authenticationViewControllerWithAuth:_auth];
+		SpotifyWebViewController* authController = [[SpotifyWebViewController alloc] initWithURL:_auth.spotifyWebAuthenticationURL];
+		authController.title = @"Log into Spotify";
 		authController.delegate = self;
 		UIViewController* rootController = [UIApplication sharedApplication].keyWindow.rootViewController;
 		if(rootController == nil)
@@ -142,15 +155,56 @@ RCT_EXPORT_METHOD(login:(RCTResponseSenderBlock)completion)
 				return;
 			}
 			
-			//wait for authenticationViewController:didFailToLogin:
-			// or authenticationViewController:didLoginWithSession:
-			// or authenticationViewControllerDidCancelLogin
+			//wait for spotifyWebController:didLoginWithSession:
+			// or spotifyWebControllerDidCancelLogin
 			_authControllerResponse = ^(BOOL loggedIn, NSError* error){
-				completion(@[ [NSNumber numberWithBool:loggedIn], [RCTSpotify dictFromError:error] ]);
+				if(authController.presentingViewController != nil)
+				{
+					[authController.presentingViewController dismissViewControllerAnimated:YES completion:nil];
+				}
+				completion(@[ [NSNumber numberWithBool:loggedIn], [RCTSpotify objFromError:error] ]);
 			};
 			[rootController presentViewController:authController animated:YES completion:nil];
 		}
 	});
+}
+
+RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(isLoggedIn)
+{
+	if(_auth.session == nil)
+	{
+		return @NO;
+	}
+	else if(![_auth.session isValid])
+	{
+		return @NO;
+	}
+	return @YES;
+}
+
+RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(handleAuthURL:(NSString*)urlString)
+{
+	NSURL* url = [NSURL URLWithString:urlString];
+	if([_auth canHandleURL:url])
+	{
+		[_auth handleAuthCallbackWithTriggeredAuthURL:url callback:^(NSError* error, SPTSession* session){
+			if(_authControllerResponse != nil)
+			{
+				void(^response)(BOOL, NSError*) = _authControllerResponse;
+				_authControllerResponse = nil;
+				if(error!=nil)
+				{
+					response(NO, error);
+				}
+				else
+				{
+					response(YES, nil);
+				}
+			}
+		}];
+		return @YES;
+	}
+	return @NO;
 }
 
 -(void)start:(void(^)(NSError*))completion
@@ -175,36 +229,15 @@ RCT_EXPORT_METHOD(login:(RCTResponseSenderBlock)completion)
 
 
 
-#pragma mark - SPTAuthViewDelegate
+#pragma mark - SpotifyWebViewDelegate
 
--(void)authenticationViewControllerDidCancelLogin:(SPTAuthViewController*)authenticationViewController
+-(void)spotifyWebControllerDidCancel:(SpotifyWebViewController*)webController
 {
 	if(_authControllerResponse != nil)
 	{
 		void(^response)(BOOL, NSError*) = _authControllerResponse;
 		_authControllerResponse = nil;
 		response(NO, nil);
-	}
-}
-
--(void)authenticationViewController:(SPTAuthViewController*)authenticationViewController didFailToLogin:(NSError*)error
-{
-	if(_authControllerResponse != nil)
-	{
-		void(^response)(BOOL, NSError*) = _authControllerResponse;
-		_authControllerResponse = nil;
-		response(NO, error);
-	}
-}
-
--(void)authenticationViewController:(SPTAuthViewController*)authenticationViewController didLoginWithSession:(SPTSession*)session
-{
-	_auth.session = session;
-	if(_authControllerResponse != nil)
-	{
-		void(^response)(BOOL, NSError*) = _authControllerResponse;
-		_authControllerResponse = nil;
-		response(YES, nil);
 	}
 }
 
@@ -240,4 +273,4 @@ RCT_EXPORT_METHOD(login:(RCTResponseSenderBlock)completion)
 }
 
 @end
-  
+

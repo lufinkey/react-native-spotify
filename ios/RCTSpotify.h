@@ -14,5 +14,8 @@
 
 //login((loggedIn, error?))
 -(void)login:(RCTResponseSenderBlock)completion;
+-(id)isLoggedIn;
+
+-(id)handleAuthURL:(NSString*)url;
 
 @end
