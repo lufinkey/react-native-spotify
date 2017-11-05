@@ -9,7 +9,10 @@
 
 -(id)test;
 
--(void)start:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion;
--(id)stop;
+//initialize(options, (error?))
+-(void)initialize:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion;
+
+//login((loggedIn, error?))
+-(void)login:(RCTResponseSenderBlock)completion;
 
 @end
