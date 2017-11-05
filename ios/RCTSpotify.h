@@ -22,7 +22,7 @@ typedef enum
 //test()
 -(id)test;
 
-//initialize(options, (error?))
+//initialize(options, (loggedIn, error?))
 -(void)initialize:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion;
 
 //login((loggedIn, error?))
