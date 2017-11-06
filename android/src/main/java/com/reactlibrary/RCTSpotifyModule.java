@@ -19,6 +19,9 @@ import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
 
+import com.spotify.sdk.android.authentication.*;
+import com.spotify.sdk.android.player.*;
+
 public class RCTSpotifyModule extends ReactContextBaseJavaModule
 {
 	private final ReactApplicationContext reactContext;
