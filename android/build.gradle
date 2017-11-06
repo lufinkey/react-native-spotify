@@ -5,7 +5,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.3.0'
+        classpath 'com.android.tools.build:gradle:1.3.1'
     }
 }
 
@@ -32,5 +32,9 @@ repositories {
 
 dependencies {
 	compile 'com.facebook.react:react-native:+'
+	compile fileTree(dir: 'libs', include: ['*.jar'])
+	
+	compile(name: 'spotify-android-auth-1.0.0', ext: 'aar')
+	compile(name: 'spotify-player-24-noconnect-2.20b', ext: 'aar')
 }
 
