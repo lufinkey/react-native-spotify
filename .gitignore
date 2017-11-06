@@ -35,8 +35,8 @@ project.xcworkspace
 # Android/IntelliJ
 #
 /android/gradle/
-/android/gradlew
-/android/gradlew.bat
+gradlew
+gradlew.bat
 build/
 .idea
 .gradle
