@@ -33,7 +33,6 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule
 		this.reactContext = reactContext;
 
 		initialized = false;
-		player = null;
 		networkStateReceiver = null;
 	}
 
