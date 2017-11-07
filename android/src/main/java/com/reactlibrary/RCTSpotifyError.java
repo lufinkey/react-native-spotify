@@ -10,7 +10,9 @@ public class RCTSpotifyError
 
 	public enum Code
 	{
-		ALREADY_INITIALIZED(99),
+		ALREADY_INITIALIZED(90),
+		INITIALIZATION_FAILED(91),
+		MISSING_PARAMETERS(92),
 		CONFLICTING_CALLBACKS(100);
 
 		public final int value;
