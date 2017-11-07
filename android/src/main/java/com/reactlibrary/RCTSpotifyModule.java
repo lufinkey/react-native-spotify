@@ -73,18 +73,19 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	}
 
 	@ReactMethod
+	//test()
 	void test()
 	{
 		System.out.println("ayy lmao");
 	}
 
 	@ReactMethod
-	//initialize(options, (
-	void initialize(ReadableMap options, final Callback completion)
+	//initialize(options, (loggedIn, error?))
+	void initialize(ReadableMap options, final Callback callback)
 	{
 		if(initialized)
 		{
-			completion.invoke(
+			callback.invoke(
 					false,
 					new RCTSpotifyError(
 							RCTSpotifyError.Code.ALREADY_INITIALIZED,
@@ -107,7 +108,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		}
 		if(missingParameter!=null)
 		{
-			completion.invoke(
+			callback.invoke(
 					false,
 					new RCTSpotifyError(
 							RCTSpotifyError.Code.MISSING_PARAMETERS,
@@ -116,26 +117,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			return;
 		}
 
-		logBackInIfNeeded(new RCTSpotifyCallback<Boolean>() {
-			@Override
-			public void invoke(Boolean obj, RCTSpotifyError error) {
-				ReadableMap errorObj = null;
-				if(error!=null)
-				{
-					errorObj = error.toReactObject();
-				}
-				completion.invoke(
-						obj.booleanValue(),
-						errorObj
-				);
-			}
-		});
-	}
-
-	private void logBackInIfNeeded(final RCTSpotifyCallback<Boolean> completion)
-	{
-		//get access token
-		String clientID = options.getString("clientID");
+		//check for accessToken
 		String sessionUserDefaultsKey = options.getString("sessionUserDefaultsKey");
 		String accessToken = null;
 		if(sessionUserDefaultsKey!=null)
@@ -143,13 +125,32 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			SharedPreferences spotifyPrefs = getMainActivity().getSharedPreferences(sessionUserDefaultsKey, Context.MODE_PRIVATE);
 			accessToken = spotifyPrefs.getString("accessToken", null);
 		}
-
 		if(accessToken == null)
 		{
-			completion.invoke(false, null);
+			callback.invoke(false, null);
 			return;
 		}
 
+		//try to log back in
+		initializePlayer(accessToken, new RCTSpotifyCallback<Boolean>() {
+			@Override
+			public void invoke(Boolean loggedIn, RCTSpotifyError error) {
+				ReadableMap errorObj = null;
+				if(error!=null)
+				{
+					errorObj = error.toReactObject();
+				}
+				callback.invoke(
+						loggedIn.booleanValue(),
+						errorObj
+				);
+			}
+		});
+	}
+
+	private void initializePlayer(String accessToken, final RCTSpotifyCallback<Boolean> completion)
+	{
+		String clientID = options.getString("clientID");
 		Config playerConfig = new Config(getMainActivity().getApplicationContext(), accessToken, clientID);
 		player = Spotify.getPlayer(playerConfig, this, new SpotifyPlayer.InitializationObserver(){
 			@Override
@@ -172,6 +173,85 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	}
 
 	@ReactMethod
+	//login((loggedIn, error?))
+	void login(final Callback callback)
+	{
+		if(SpotifyAuthActivity.request != null)
+		{
+			callback.invoke(
+					false,
+					new RCTSpotifyError(
+							RCTSpotifyError.Code.CONFLICTING_CALLBACKS,
+							"Cannot call login while login is already being called").toReactObject()
+			);
+			return;
+		}
+
+		String clientID = options.getString("clientID");
+		String redirectURL = options.getString("redirectURL");
+
+		SpotifyAuthActivity.request = new AuthenticationRequest.Builder(clientID, AuthenticationResponse.Type.TOKEN, redirectURL)
+				.setScopes(new String[]{"user-read-private", "playlist-read", "playlist-read-private", "streaming"})
+				.build();
+		//wait for SpotifyAuthActivity::onActivityResult
+		SpotifyAuthActivity.completion = new RCTSpotifyCallback<AuthenticationResponse>() {
+			@Override
+			public void invoke(AuthenticationResponse response, RCTSpotifyError error)
+			{
+				if(error != null)
+				{
+					callback.invoke(
+							false,
+							error.toReactObject()
+					);
+					return;
+				}
+
+				switch(response.getType())
+				{
+					default:
+						callback.invoke(
+								false,
+								null
+						);
+						break;
+
+					case ERROR:
+						callback.invoke(
+								false,
+								new RCTSpotifyError(
+										RCTSpotifyError.Code.AUTHORIZATION_FAILED,
+										response.getError()).toReactObject()
+						);
+						break;
+
+					case TOKEN:
+						initializePlayer(response.getAccessToken(), new RCTSpotifyCallback<Boolean>() {
+							@Override
+							public void invoke(Boolean loggedIn, RCTSpotifyError error)
+							{
+								ReadableMap errorObj = null;
+								if(error!=null)
+								{
+									errorObj = error.toReactObject();
+								}
+								callback.invoke(
+										loggedIn.booleanValue(),
+										errorObj
+								);
+							}
+						});
+						break;
+				}
+			}
+		};
+
+		Activity activity = getMainActivity();
+		activity.startActivity(new Intent(activity, SpotifyAuthActivity.class));
+	}
+
+	@ReactMethod
+	//isLoggedIn()
 	boolean isLoggedIn()
 	{
 		if(player != null && player.isLoggedIn())
@@ -181,17 +261,27 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		return false;
 	}
 
+	@ReactMethod
+	//handleAuthURL
+	boolean handleAuthURL(String url)
+	{
+		System.out.println("handleAuthURL: "+url);
+		return false;
+	}
+
 	private final Player.OperationCallback playerOperationCallback = new Player.OperationCallback() {
 		@Override
 		public void onSuccess()
 		{
 			//TODO handle success
+			System.out.println("Player.OperationCallback.onSuccess");
 		}
 
 		@Override
 		public void onError(com.spotify.sdk.android.player.Error error)
 		{
 			//TODO handle error
+			System.out.println("Player.OperationCallback.onError");
 		}
 	};
 
