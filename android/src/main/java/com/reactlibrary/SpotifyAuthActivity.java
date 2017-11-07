@@ -12,6 +12,7 @@ public class SpotifyAuthActivity extends Activity
 {
 	private static final int REQUEST_CODE = 6969;
 
+	static SpotifyAuthActivity currentActivity;
 	static AuthenticationRequest request;
 	static RCTSpotifyCallback<AuthenticationResponse> completion;
 
@@ -19,7 +20,7 @@ public class SpotifyAuthActivity extends Activity
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-
+		currentActivity = this;
 		AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
 	}
 
@@ -34,7 +35,6 @@ public class SpotifyAuthActivity extends Activity
 			RCTSpotifyCallback<AuthenticationResponse> completionTmp = completion;
 			request = null;
 			completion = null;
-			finish();
 			completionTmp.invoke(response, null);
 		}
 	}
