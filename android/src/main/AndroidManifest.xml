@@ -8,11 +8,6 @@
 		<activity
 			android:name="com.reactlibrary.SpotifyAuthActivity">
 		</activity>
-
-		<activity
-			android:name="com.spotify.sdk.android.authentication.LoginActivity"
-			android:theme="@android:style/Theme.Translucent.NoTitleBar">
-		</activity>
 	</application>
 
 </manifest>
