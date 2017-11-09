@@ -4,6 +4,7 @@
 #import <SpotifyMetadata/SpotifyMetadata.h>
 #import <SpotifyAudioPlayback/SpotifyAudioPlayback.h>
 #import "SpotifyWebViewController.h"
+#import "RCTSpotifyConvert.h"
 #import "HelperMacros.h"
 
 
@@ -24,8 +25,6 @@ NSString* const RCTSpotifyErrorDomain = @"RCTSpotifyErrorDomain";
 	NSMutableArray<void(^)(BOOL, NSError*)>* _logBackInResponses;
 	NSMutableArray<void(^)(NSError*)>* _logoutResponses;
 }
-+(id)reactSafeArg:(id)arg;
-+(id)objFromError:(NSError*)error;
 +(NSError*)errorWithCode:(RCTSpotifyErrorCode)code description:(NSString*)description;
 +(NSError*)errorWithCode:(RCTSpotifyErrorCode)code description:(NSString*)description fields:(NSDictionary*)fields;
 +(NSMutableDictionary*)mutableDictFromDict:(NSDictionary*)dict;
@@ -104,7 +103,7 @@ RCT_EXPORT_MODULE()
 RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(test)
 {
 	NSLog(@"ayy lmao");
-	return nil;
+	return [NSNull null];
 }
 
 RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion)
@@ -159,7 +158,7 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSende
 		}
 		else
 		{
-			completion(@[ @NO, [RCTSpotify objFromError:error] ]);
+			completion(@[ @NO, [RCTSpotifyConvert NSError:error] ]);
 		}
 	}];
 }
@@ -250,7 +249,7 @@ RCT_EXPORT_METHOD(login:(RCTResponseSenderBlock)completion)
 			
 			if(_authControllerResponse != nil)
 			{
-				completion(@[ @NO, [RCTSpotify objFromError:[RCTSpotify errorWithCode:RCTSpotifyErrorCodeConflictingCallbacks description:@"Cannot call login while login is already being called"]] ]);
+				completion(@[ @NO, [RCTSpotifyConvert NSError:[RCTSpotify errorWithCode:RCTSpotifyErrorCodeConflictingCallbacks description:@"Cannot call login while login is already being called"]] ]);
 				return;
 			}
 			
@@ -264,7 +263,7 @@ RCT_EXPORT_METHOD(login:(RCTResponseSenderBlock)completion)
 					{
 						[authController.presentingViewController dismissViewControllerAnimated:YES completion:nil];
 					}
-					completion(@[ @NO, [RCTSpotify objFromError:error] ]);
+					completion(@[ @NO, [RCTSpotifyConvert NSError:error] ]);
 					return;
 				}
 				[_self start:^(BOOL loggedIn, NSError* error) {
@@ -273,7 +272,7 @@ RCT_EXPORT_METHOD(login:(RCTResponseSenderBlock)completion)
 						{
 							[authController.presentingViewController dismissViewControllerAnimated:YES completion:nil];
 						}
-						completion(@[ [NSNumber numberWithBool:loggedIn], [RCTSpotify objFromError:error] ]);
+						completion(@[ [NSNumber numberWithBool:loggedIn], [RCTSpotifyConvert NSError:error] ]);
 					});
 				}];
 			};
@@ -310,7 +309,7 @@ RCT_EXPORT_METHOD(logout:(RCTResponseSenderBlock)completion)
 			
 			if(completion!=nil)
 			{
-				completion(@[ [RCTSpotify objFromError:error] ]);
+				completion(@[ [RCTSpotifyConvert NSError:error] ]);
 			}
 		}];
 		[_player logout];
@@ -408,7 +407,7 @@ RCT_EXPORT_METHOD(playURI:(NSString*)uri startIndex:(NSUInteger)startIndex start
 		{
 			if(completion!=nil)
 			{
-				completion(@[ [RCTSpotify objFromError:error] ]);
+				completion(@[ [RCTSpotifyConvert NSError:error] ]);
 			}
 			return;
 		}
@@ -416,7 +415,7 @@ RCT_EXPORT_METHOD(playURI:(NSString*)uri startIndex:(NSUInteger)startIndex start
 		[_player playSpotifyURI:uri startingWithIndex:startIndex startingWithPosition:startPosition callback:^(NSError* error) {
 			if(completion!=nil)
 			{
-				completion(@[ [RCTSpotify objFromError:error] ]);
+				completion(@[ [RCTSpotifyConvert NSError:error] ]);
 			}
 		}];
 	}];
@@ -429,7 +428,7 @@ RCT_EXPORT_METHOD(queueURI:(NSString*)uri completion:(RCTResponseSenderBlock)com
 		{
 			if(completion)
 			{
-				completion(@[ [RCTSpotify objFromError:error] ]);
+				completion(@[ [RCTSpotifyConvert NSError:error] ]);
 			}
 			return;
 		}
@@ -437,7 +436,7 @@ RCT_EXPORT_METHOD(queueURI:(NSString*)uri completion:(RCTResponseSenderBlock)com
 		[_player queueSpotifyURI:uri callback:^(NSError* error) {
 			if(completion)
 			{
-				completion(@[ [RCTSpotify objFromError:error] ]);
+				completion(@[ [RCTSpotifyConvert NSError:error] ]);
 			}
 		}];
 	}];
@@ -448,7 +447,7 @@ RCT_EXPORT_METHOD(setVolume:(double)volume completion:(RCTResponseSenderBlock)co
 	[_player setVolume:(SPTVolume)volume callback:^(NSError *error){
 		if(completion)
 		{
-			completion(@[ [RCTSpotify objFromError:error] ]);
+			completion(@[ [RCTSpotifyConvert NSError:error] ]);
 		}
 	}];
 }
@@ -469,14 +468,14 @@ RCT_EXPORT_METHOD(setIsPlaying:(BOOL)playing completion:(RCTResponseSenderBlock)
 		{
 			if(completion)
 			{
-				completion(@[ [RCTSpotify objFromError:error] ]);
+				completion(@[ [RCTSpotifyConvert NSError:error] ]);
 			}
 			return;
 		}
 		[_player setIsPlaying:playing callback:^(NSError* error) {
 			if(completion)
 			{
-				completion(@[ [RCTSpotify objFromError:error] ]);
+				completion(@[ [RCTSpotifyConvert NSError:error] ]);
 			}
 		}];
 	}];
@@ -484,18 +483,7 @@ RCT_EXPORT_METHOD(setIsPlaying:(BOOL)playing completion:(RCTResponseSenderBlock)
 
 RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getPlaybackState)
 {
-	SPTPlaybackState* state = _player.playbackState;
-	if(state == nil)
-	{
-		return nil;
-	}
-	return @{
-		@"playing":[NSNumber numberWithBool:state.isPlaying],
-		@"repeating":[NSNumber numberWithBool:state.isRepeating],
-		@"shuffling":[NSNumber numberWithBool:state.isShuffling],
-		@"activeDevice":[NSNumber numberWithBool:state.isActiveDevice],
-		@"position":@(state.position)
-	};
+	return [RCTSpotifyConvert SPTPlaybackState:_player.playbackState];
 }
 
 RCT_EXPORT_METHOD(skipNext:(RCTResponseSenderBlock)completion)
@@ -505,14 +493,14 @@ RCT_EXPORT_METHOD(skipNext:(RCTResponseSenderBlock)completion)
 		{
 			if(completion)
 			{
-				completion(@[ [RCTSpotify objFromError:error] ]);
+				completion(@[ [RCTSpotifyConvert NSError:error] ]);
 			}
 			return;
 		}
 		[_player skipNext:^(NSError *error) {
 			if(completion)
 			{
-				completion(@[ [RCTSpotify objFromError:error] ]);
+				completion(@[ [RCTSpotifyConvert NSError:error] ]);
 			}
 		}];
 	}];
@@ -525,14 +513,14 @@ RCT_EXPORT_METHOD(skipPrevious:(RCTResponseSenderBlock)completion)
 		{
 			if(completion)
 			{
-				completion(@[ [RCTSpotify objFromError:error] ]);
+				completion(@[ [RCTSpotifyConvert NSError:error] ]);
 			}
 			return;
 		}
 		[_player skipPrevious:^(NSError *error) {
 			if(completion)
 			{
-				completion(@[ [RCTSpotify objFromError:error] ]);
+				completion(@[ [RCTSpotifyConvert NSError:error] ]);
 			}
 		}];
 	}];
@@ -614,7 +602,7 @@ RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method param
 	[self doAPIRequest:endpoint method:method params:params jsonBody:jsonBody completion:^(id resultObj, NSError *error) {
 		if(completion)
 		{
-			completion(@[ [RCTSpotify reactSafeArg:resultObj], [RCTSpotify objFromError:error] ]);
+			completion(@[ [RCTSpotifyConvert ID:resultObj], [RCTSpotifyConvert NSError:error] ]);
 		}
 	}];
 }
@@ -633,7 +621,7 @@ RCT_EXPORT_METHOD(search:(NSString*)query types:(NSArray<NSString*>*)types optio
 	body[@"type"] = [types componentsJoinedByString:@","];
 	
 	[self doAPIRequest:@"search" method:@"GET" params:body jsonBody:NO completion:^(id resultObj, NSError* error) {
-		completion(@[ [RCTSpotify reactSafeArg:resultObj], [RCTSpotify objFromError:error] ]);
+		completion(@[ [RCTSpotifyConvert ID:resultObj], [RCTSpotifyConvert NSError:error] ]);
 	}];
 }
 
@@ -643,7 +631,7 @@ RCT_EXPORT_METHOD(getAlbum:(NSString*)albumID options:(NSDictionary*)options com
 	
 	NSString* endpoint = NSString_concat(@"albums/", albumID);
 	[self doAPIRequest:endpoint method:@"GET" params:options jsonBody:NO completion:^(id resultObj, NSError *error) {
-		completion(@[ [RCTSpotify reactSafeArg:resultObj], [RCTSpotify objFromError:error] ]);
+		completion(@[ [RCTSpotifyConvert ID:resultObj], [RCTSpotifyConvert NSError:error] ]);
 	}];
 }
 
@@ -655,7 +643,7 @@ RCT_EXPORT_METHOD(getAlbums:(NSArray<NSString*>*)albumIDs options:(NSDictionary*
 	body[@"ids"] = [albumIDs componentsJoinedByString:@","];
 	
 	[self doAPIRequest:@"albums" method:@"GET" params:body jsonBody:NO completion:^(id resultObj, NSError* error) {
-		completion(@[ [RCTSpotify reactSafeArg:resultObj], [RCTSpotify objFromError:error] ]);
+		completion(@[ [RCTSpotifyConvert ID:resultObj], [RCTSpotifyConvert NSError:error] ]);
 	}];
 }
 
@@ -665,7 +653,7 @@ RCT_EXPORT_METHOD(getAlbumTracks:(NSString*)albumID options:(NSDictionary*)optio
 	
 	NSString* endpoint = NSString_concat(@"albums/", albumID, @"/tracks");
 	[self doAPIRequest:endpoint method:@"GET" params:options jsonBody:NO completion:^(id resultObj, NSError* error) {
-		completion(@[ [RCTSpotify reactSafeArg:resultObj], [RCTSpotify objFromError:error] ]);
+		completion(@[ [RCTSpotifyConvert ID:resultObj], [RCTSpotifyConvert NSError:error] ]);
 	}];
 }
 
@@ -675,7 +663,7 @@ RCT_EXPORT_METHOD(getArtist:(NSString*)artistID options:(NSDictionary*)options c
 	
 	NSString* endpoint = NSString_concat(@"artists/", artistID);
 	[self doAPIRequest:endpoint method:@"GET" params:options jsonBody:NO completion:^(id resultObj, NSError *error) {
-		completion(@[ [RCTSpotify reactSafeArg:resultObj], [RCTSpotify objFromError:error] ]);
+		completion(@[ [RCTSpotifyConvert ID:resultObj], [RCTSpotifyConvert NSError:error] ]);
 	}];
 }
 
@@ -687,7 +675,7 @@ RCT_EXPORT_METHOD(getArtists:(NSArray<NSString*>*)artistIDs options:(NSDictionar
 	body[@"ids"] = [artistIDs componentsJoinedByString:@","];
 	
 	[self doAPIRequest:@"artists" method:@"GET" params:body jsonBody:NO completion:^(id resultObj, NSError* error) {
-		completion(@[ [RCTSpotify reactSafeArg:resultObj], [RCTSpotify objFromError:error] ]);
+		completion(@[ [RCTSpotifyConvert ID:resultObj], [RCTSpotifyConvert NSError:error] ]);
 	}];
 }
 
@@ -697,7 +685,7 @@ RCT_EXPORT_METHOD(getArtistAlbums:(NSString*)artistID options:(NSDictionary*)opt
 	
 	NSString* endpoint = NSString_concat(@"artists/", artistID, @"/albums");
 	[self doAPIRequest:endpoint method:@"GET" params:options jsonBody:NO completion:^(id resultObj, NSError* error) {
-		completion(@[ [RCTSpotify reactSafeArg:resultObj], [RCTSpotify objFromError:error] ]);
+		completion(@[ [RCTSpotifyConvert ID:resultObj], [RCTSpotifyConvert NSError:error] ]);
 	}];
 }
 
@@ -711,7 +699,7 @@ RCT_EXPORT_METHOD(getArtistTopTracks:(NSString*)artistID country:(NSString*)coun
 	
 	NSString* endpoint = NSString_concat(@"artists/", artistID, @"/top-tracks");
 	[self doAPIRequest:endpoint method:@"GET" params:options jsonBody:NO completion:^(id resultObj, NSError* error) {
-		completion(@[ [RCTSpotify reactSafeArg:resultObj], [RCTSpotify objFromError:error] ]);
+		completion(@[ [RCTSpotifyConvert ID:resultObj], [RCTSpotifyConvert NSError:error] ]);
 	}];
 }
 
@@ -721,7 +709,7 @@ RCT_EXPORT_METHOD(getArtistRelatedArtists:(NSString*)artistID options:(NSDiction
 	
 	NSString* endpoint = NSString_concat(@"artists/", artistID, @"/related-artists");
 	[self doAPIRequest:endpoint method:@"GET" params:options jsonBody:NO completion:^(id resultObj, NSError* error) {
-		completion(@[ [RCTSpotify reactSafeArg:resultObj], [RCTSpotify objFromError:error] ]);
+		completion(@[ [RCTSpotifyConvert ID:resultObj], [RCTSpotifyConvert NSError:error] ]);
 	}];
 }
 
@@ -731,7 +719,7 @@ RCT_EXPORT_METHOD(getTrack:(NSString*)trackID options:(NSDictionary*)options com
 	
 	NSString* endpoint = NSString_concat(@"tracks/", trackID);
 	[self doAPIRequest:endpoint method:@"GET" params:options jsonBody:NO completion:^(id resultObj, NSError *error) {
-		completion(@[ [RCTSpotify reactSafeArg:resultObj], [RCTSpotify objFromError:error] ]);
+		completion(@[ [RCTSpotifyConvert ID:resultObj], [RCTSpotifyConvert NSError:error] ]);
 	}];
 }
 
@@ -743,7 +731,7 @@ RCT_EXPORT_METHOD(getTracks:(NSArray<NSString*>*)trackIDs options:(NSDictionary*
 	body[@"ids"] = [trackIDs componentsJoinedByString:@","];
 	
 	[self doAPIRequest:@"tracks" method:@"GET" params:body jsonBody:NO completion:^(id resultObj, NSError* error) {
-		completion(@[ [RCTSpotify reactSafeArg:resultObj], [RCTSpotify objFromError:error] ]);
+		completion(@[ [RCTSpotifyConvert ID:resultObj], [RCTSpotifyConvert NSError:error] ]);
 	}];
 }
 
@@ -753,7 +741,7 @@ RCT_EXPORT_METHOD(getTrackAudioAnalysis:(NSString*)trackID options:(NSDictionary
 	
 	NSString* endpoint = NSString_concat(@"audio-analysis/", trackID);
 	[self doAPIRequest:endpoint method:@"GET" params:options jsonBody:NO completion:^(id resultObj, NSError *error) {
-		completion(@[ [RCTSpotify reactSafeArg:resultObj], [RCTSpotify objFromError:error] ]);
+		completion(@[ [RCTSpotifyConvert ID:resultObj], [RCTSpotifyConvert NSError:error] ]);
 	}];
 }
 
@@ -763,7 +751,7 @@ RCT_EXPORT_METHOD(getTrackAudioFeatures:(NSString*)trackID options:(NSDictionary
 	
 	NSString* endpoint = NSString_concat(@"audio-features/", trackID);
 	[self doAPIRequest:endpoint method:@"GET" params:options jsonBody:NO completion:^(id resultObj, NSError* error) {
-		completion(@[ [RCTSpotify reactSafeArg:resultObj], [RCTSpotify objFromError:error] ]);
+		completion(@[ [RCTSpotifyConvert ID:resultObj], [RCTSpotifyConvert NSError:error] ]);
 	}];
 }
 
@@ -775,7 +763,7 @@ RCT_EXPORT_METHOD(getTracksAudioFeatures:(NSArray<NSString*>*)trackIDs options:(
 	body[@"ids"] = [trackIDs componentsJoinedByString:@","];
 	
 	[self doAPIRequest:@"audio-features" method:@"GET" params:body jsonBody:NO completion:^(id resultObj, NSError* error) {
-		completion(@[ [RCTSpotify reactSafeArg:resultObj], [RCTSpotify objFromError:error] ]);
+		completion(@[ [RCTSpotifyConvert ID:resultObj], [RCTSpotifyConvert NSError:error] ]);
 	}];
 }
 
