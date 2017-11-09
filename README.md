@@ -69,7 +69,7 @@ import Spotify from 'react-native-spotify';
 
 	Initializes the Spotify modules and resumes a logged in session if there is one
 	
-	* **parameters**
+	* *parameters*
 		* **options** - an object with options to pass to the Spotify Module
 			* **clientID** (*required*) - Your spotify application's ClientID that you registered with spotify [here](https://developer.spotify.com/my-applications)
 			* **redirectURL** (*required*) - The redirect URL to use when you've finished logging in. You need to set this up for your application [here](https://developer.spotify.com/my-applications)
@@ -86,7 +86,7 @@ import Spotify from 'react-native-spotify';
 
 	Opens a UI to log into spotify
 	
-	* **parameters**
+	* *parameters*
 	
 		* **loggedIn** - A boolean indicating whether or not the client was logged in
 	
@@ -97,7 +97,7 @@ import Spotify from 'react-native-spotify';
 
 * **isLoggedIn**()
 
-	* **returns**
+	* *returns*
 		
 		* *true* if the client is logged in
 		* *false* if the client is not logged in
@@ -109,11 +109,11 @@ import Spotify from 'react-native-spotify';
 
 	Handles an authentication URL sent to the app through deep linking. You are *required* to use this function in order for login to work correctly.
 	
-	* **parameters**
+	* *parameters*
 		
 		* **url** - A URL that was sent to the app
 		
-	* **returns**
+	* *returns*
 		
 		* *true* if the url passed to it was successfully handled as an authentication URL
 		* *false* if the url was not an authentication URL
