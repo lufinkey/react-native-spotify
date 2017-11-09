@@ -30,8 +30,10 @@ NSString* const RCTSpotifyErrorDomain = @"RCTSpotifyErrorDomain";
 +(NSError*)errorWithCode:(RCTSpotifyErrorCode)code description:(NSString*)description fields:(NSDictionary*)fields;
 
 -(void)logBackInIfNeeded:(void(^)(BOOL loggedIn, NSError* error))completion;
--(void)start:(void(^)(BOOL,NSError*))completion;
--(void)prepareForRequest:(void(^)(NSError*))completion;
+-(void)start:(void(^)(BOOL loggedIn, NSError* error))completion;
+-(void)prepareForRequest:(void(^)(NSError* error))completion;
+-(void)performRequest:(NSURLRequest*)request completion:(void(^)(id resultObj, NSError* error))completion;
+-(void)doAPIRequest:(NSString*)endpoint method:(NSString*)method params:(NSDictionary*)params jsonBody:(BOOL)jsonBody completion:(void(^)(id resultObj, NSError* error))completion;
 @end
 
 @implementation RCTSpotify
@@ -357,7 +359,7 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(handleAuthURL:(NSString*)urlString)
 	}];
 }
 
--(void)doRequest:(NSURLRequest*)request completion:(void(^)(id, NSError*))completion
+-(void)performRequest:(NSURLRequest*)request completion:(void(^)(id, NSError*))completion
 {
 	[[SPTRequest sharedHandler] performRequest:request callback:^(NSError* error, NSURLResponse* response, NSData* data) {
 		callbackAndReturnIfError(error, completion, nil, error);
@@ -386,37 +388,55 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(handleAuthURL:(NSString*)urlString)
 	}];
 }
 
+-(void)doAPIRequest:(NSString*)endpoint method:(NSString*)method params:(NSDictionary*)params jsonBody:(BOOL)jsonBody completion:(void(^)(id,NSError*))completion
+{
+	[self prepareForRequest:^(NSError* error) {
+		callbackAndReturnIfError(error, completion, nil, error);
+		
+		NSURLRequest* request = [SPTRequest createRequestForURL:SPOTIFY_API_URL(endpoint)
+												withAccessToken:_auth.session.accessToken
+													 httpMethod:method
+														 values:params
+												valueBodyIsJSON:jsonBody
+										  sendDataAsQueryString:!jsonBody
+														  error:&error];
+		callbackAndReturnIfError(error, completion, nil, error);
+		
+		[self performRequest:request completion:^(id resultObj, NSError* error){
+			completion(resultObj, error);
+		}];
+	}];
+}
+
 RCT_EXPORT_METHOD(search:(NSDictionary*)query completion:(RCTResponseSenderBlock)completion)
 {
 	reactCallbackAndReturnIfNil(query, completion, [NSNull null], );
 	
-	[self prepareForRequest:^(NSError* error) {
-		callbackAndReturnIfError(error, completion, @[ [NSNull null], [RCTSpotify objFromError:error] ]);
-		
-		NSMutableDictionary* body = query.mutableCopy;
-		
-		//change "type" field from array to comma separated string if necessary
-		id typeArg = body[@"type"];
-		if(typeArg==nil)
-		{
-			completion(@[ [NSNull null], NIL_OPTION_ERROR_OBJ(@"query", @"type") ]);
-			return;
-		}
-		else if([typeArg isKindOfClass:[NSArray class]])
-		{
-			body[@"type"] = [typeArg componentsJoinedByString:@","];
-		}
-		
-		NSURLRequest* request = [SPTRequest createRequestForURL:SPOTIFY_API_URL(@"search")
-												withAccessToken:_auth.session.accessToken
-													 httpMethod:@"GET"
-														 values:body
-												valueBodyIsJSON:NO sendDataAsQueryString:YES error:&error];
-		callbackAndReturnIfError(error, completion, @[ [NSNull null], [RCTSpotify objFromError:error] ]);
-		
-		[self doRequest:request completion:^(id resultObj, NSError* error){
-			completion(@[ [RCTSpotify reactSafeArg:resultObj], [RCTSpotify objFromError:error] ]);
-		}];
+	NSMutableDictionary* body = query.mutableCopy;
+	//change "type" field from array to comma separated string if necessary
+	id typeArg = body[@"type"];
+	if(typeArg==nil)
+	{
+		completion(@[ [NSNull null], NIL_OPTION_ERROR_OBJ(@"query", @"type") ]);
+		return;
+	}
+	else if([typeArg isKindOfClass:[NSArray class]])
+	{
+		body[@"type"] = [typeArg componentsJoinedByString:@","];
+	}
+	
+	[self doAPIRequest:@"search" method:@"GET" params:body jsonBody:NO completion:^(id resultObj, NSError* error) {
+		completion(@[ [RCTSpotify reactSafeArg:resultObj], [RCTSpotify objFromError:error] ]);
+	}];
+}
+
+RCT_EXPORT_METHOD(getAlbum:(NSString*)albumID options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion)
+{
+	reactCallbackAndReturnIfNil(albumID, completion, [NSNull null], );
+	
+	NSString* endpoint = NSString_concat(@"albums/", albumID);
+	[self doAPIRequest:endpoint method:@"GET" params:options jsonBody:NO completion:^(id resultObj, NSError *error) {
+		completion(@[ [RCTSpotify reactSafeArg:resultObj], [RCTSpotify objFromError:error] ]);
 	}];
 }
 
