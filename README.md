@@ -65,7 +65,7 @@ packagingOptions {
 import Spotify from 'react-native-spotify';
 ```
 
-* Spotify.**initialize**( *options*, ( *loggedIn*, *error*? ) => {} )
+* **initialize**( *options*, ( *loggedIn*, *error*? ) => {} )
 
 	Initializes the Spotify modules and resumes a logged in session if there is one
 	
@@ -82,7 +82,7 @@ import Spotify from 'react-native-spotify';
 
 
 
-* Spotify.**login**( ( *loggedIn*, *error*? ) => {} )
+* **login**( ( *loggedIn*, *error*? ) => {} )
 
 	Opens a UI to log into spotify
 	
@@ -95,7 +95,7 @@ import Spotify from 'react-native-spotify';
 
 
 
-* Spotify.**isLoggedIn**()
+* **isLoggedIn**()
 
 	* **returns**
 		
@@ -105,7 +105,7 @@ import Spotify from 'react-native-spotify';
 
 
 
-* Spotify.**handleAuthURL**( *url* )
+* **handleAuthURL**( *url* )
 
 	Handles an authentication URL sent to the app through deep linking. You are *required* to use this function in order for login to work correctly.
 	
