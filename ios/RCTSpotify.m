@@ -444,6 +444,18 @@ RCT_EXPORT_METHOD(getAlbum:(NSString*)albumID options:(NSDictionary*)options com
 	}];
 }
 
+RCT_EXPORT_METHOD(getAlbums:(NSArray<NSString*>*)albumIDs options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion)
+{
+	reactCallbackAndReturnIfNil(albumIDs, completion, [NSNull null], );
+	
+	NSMutableDictionary* body = [[self class] mutableDictFromDict:options];
+	body[@"ids"] = [albumIDs componentsJoinedByString:@","];
+	
+	[self doAPIRequest:@"albums" method:@"GET" params:body jsonBody:NO completion:^(id resultObj, NSError* error) {
+		completion(@[ [RCTSpotify reactSafeArg:resultObj], [RCTSpotify objFromError:error] ]);
+	}];
+}
+
 
 
 #pragma mark - SpotifyWebViewDelegate
