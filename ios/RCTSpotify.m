@@ -427,7 +427,7 @@ RCT_EXPORT_METHOD(queueURI:(NSString*)uri completion:(RCTResponseSenderBlock)com
 	[self prepareForRequest:^(NSError* error) {
 		if(error)
 		{
-			if(completion!=nil)
+			if(completion)
 			{
 				completion(@[ [RCTSpotify objFromError:error] ]);
 			}
@@ -435,7 +435,77 @@ RCT_EXPORT_METHOD(queueURI:(NSString*)uri completion:(RCTResponseSenderBlock)com
 		}
 		
 		[_player queueSpotifyURI:uri callback:^(NSError* error) {
-			if(completion!=nil)
+			if(completion)
+			{
+				completion(@[ [RCTSpotify objFromError:error] ]);
+			}
+		}];
+	}];
+}
+
+RCT_EXPORT_METHOD(setVolume:(double)volume completion:(RCTResponseSenderBlock)completion)
+{
+	[_player setVolume:(SPTVolume)volume callback:^(NSError *error){
+		if(completion)
+		{
+			completion(@[ [RCTSpotify objFromError:error] ]);
+		}
+	}];
+}
+
+RCT_EXPORT_METHOD(setIsPlaying:(BOOL)playing completion:(RCTResponseSenderBlock)completion)
+{
+	[self prepareForRequest:^(NSError* error) {
+		if(error)
+		{
+			if(completion)
+			{
+				completion(@[ [RCTSpotify objFromError:error] ]);
+			}
+			return;
+		}
+		[_player setIsPlaying:playing callback:^(NSError* error) {
+			if(completion)
+			{
+				completion(@[ [RCTSpotify objFromError:error] ]);
+			}
+		}];
+	}];
+}
+
+RCT_EXPORT_METHOD(skipNext:(RCTResponseSenderBlock)completion)
+{
+	[self prepareForRequest:^(NSError *error) {
+		if(error)
+		{
+			if(completion)
+			{
+				completion(@[ [RCTSpotify objFromError:error] ]);
+			}
+			return;
+		}
+		[_player skipNext:^(NSError *error) {
+			if(completion)
+			{
+				completion(@[ [RCTSpotify objFromError:error] ]);
+			}
+		}];
+	}];
+}
+
+RCT_EXPORT_METHOD(skipPrevious:(RCTResponseSenderBlock)completion)
+{
+	[self prepareForRequest:^(NSError *error) {
+		if(error)
+		{
+			if(completion)
+			{
+				completion(@[ [RCTSpotify objFromError:error] ]);
+			}
+			return;
+		}
+		[_player skipPrevious:^(NSError *error) {
+			if(completion)
 			{
 				completion(@[ [RCTSpotify objFromError:error] ]);
 			}

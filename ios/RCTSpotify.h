@@ -48,6 +48,14 @@ typedef enum
 -(void)playURI:(NSString*)uri startIndex:(NSUInteger)startIndex startPosition:(NSTimeInterval)startPosition completion:(RCTResponseSenderBlock)completion;
 //queueURI(spotifyURI, (error?))
 -(void)queueURI:(NSString*)uri completion:(RCTResponseSenderBlock)completion;
+//setVolume(volume, (error?))
+-(void)setVolume:(double)volume completion:(RCTResponseSenderBlock)completion;
+//setIsPlaying(playing, (error?))
+-(void)setIsPlaying:(BOOL)playing completion:(RCTResponseSenderBlock)completion;
+//skipNext((error?))
+-(void)skipNext:(RCTResponseSenderBlock)completion;
+//skipPrevious((error?))
+-(void)skipPrevious:(RCTResponseSenderBlock)completion;
 
 //sendRequest(endpoint, method, params, isJSONBody, (result?, error?))
 -(void)sendRequest:(NSString*)endpoint method:(NSString*)method params:(NSDictionary*)params isJSONBody:(BOOL)jsonBody completion:(RCTResponseSenderBlock)completion;
