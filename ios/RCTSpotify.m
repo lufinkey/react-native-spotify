@@ -286,7 +286,7 @@ RCT_EXPORT_METHOD(logout:(RCTResponseSenderBlock)completion)
 {
 	if(![[self isLoggedIn] boolValue])
 	{
-		if(completion != nil)
+		if(completion)
 		{
 			completion(@[ [NSNull null] ]);
 		}
@@ -295,7 +295,7 @@ RCT_EXPORT_METHOD(logout:(RCTResponseSenderBlock)completion)
 	dispatch_async(dispatch_get_main_queue(), ^{
 		if(![[self isLoggedIn] boolValue])
 		{
-			if(completion != nil)
+			if(completion)
 			{
 				completion(@[ [NSNull null] ]);
 			}
@@ -517,7 +517,10 @@ RCT_EXPORT_METHOD(queueURI:(NSString*)uri completion:(RCTResponseSenderBlock)com
 RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method params:(NSDictionary*)params isJSONBody:(BOOL)jsonBody completion:(RCTResponseSenderBlock)completion)
 {
 	[self doAPIRequest:endpoint method:method params:params jsonBody:jsonBody completion:^(id resultObj, NSError *error) {
-		completion(@[ [RCTSpotify reactSafeArg:resultObj], [RCTSpotify objFromError:error] ]);
+		if(completion)
+		{
+			completion(@[ [RCTSpotify reactSafeArg:resultObj], [RCTSpotify objFromError:error] ]);
+		}
 	}];
 }
 
