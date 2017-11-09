@@ -286,13 +286,19 @@ RCT_EXPORT_METHOD(logout:(RCTResponseSenderBlock)completion)
 {
 	if(![[self isLoggedIn] boolValue])
 	{
-		completion(@[ [NSNull null] ]);
+		if(completion != nil)
+		{
+			completion(@[ [NSNull null] ]);
+		}
 		return;
 	}
 	dispatch_async(dispatch_get_main_queue(), ^{
 		if(![[self isLoggedIn] boolValue])
 		{
-			completion(@[ [NSNull null] ]);
+			if(completion != nil)
+			{
+				completion(@[ [NSNull null] ]);
+			}
 			return;
 		}
 		
@@ -400,12 +406,18 @@ RCT_EXPORT_METHOD(playURI:(NSString*)uri startIndex:(NSUInteger)startIndex start
 	[self prepareForRequest:^(NSError* error) {
 		if(error)
 		{
-			completion(@[ [RCTSpotify objFromError:error] ]);
+			if(completion!=nil)
+			{
+				completion(@[ [RCTSpotify objFromError:error] ]);
+			}
 			return;
 		}
 		
 		[_player playSpotifyURI:uri startingWithIndex:startIndex startingWithPosition:startPosition callback:^(NSError* error) {
-			completion(@[ [RCTSpotify objFromError:error] ]);
+			if(completion!=nil)
+			{
+				completion(@[ [RCTSpotify objFromError:error] ]);
+			}
 		}];
 	}];
 }
@@ -415,12 +427,18 @@ RCT_EXPORT_METHOD(queueURI:(NSString*)uri completion:(RCTResponseSenderBlock)com
 	[self prepareForRequest:^(NSError* error) {
 		if(error)
 		{
-			completion(@[ [RCTSpotify objFromError:error] ]);
+			if(completion!=nil)
+			{
+				completion(@[ [RCTSpotify objFromError:error] ]);
+			}
 			return;
 		}
 		
 		[_player queueSpotifyURI:uri callback:^(NSError* error) {
-			completion(@[ [RCTSpotify objFromError:error] ]);
+			if(completion!=nil)
+			{
+				completion(@[ [RCTSpotify objFromError:error] ]);
+			}
 		}];
 	}];
 }
