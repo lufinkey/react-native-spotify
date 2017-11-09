@@ -18,6 +18,8 @@ NSString* const RCTSpotifyErrorDomain = @"RCTSpotifyErrorDomain";
 	
 	void(^_authControllerResponse)(BOOL loggedIn, NSError* error);
 	void(^_startResponse)(BOOL loggedIn, NSError* error);
+	
+	NSMutableArray<void(^)(BOOL, NSError*)>* _logBackInResponses;
 }
 +(id)objFromError:(NSError*)error;
 
@@ -62,6 +64,8 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSende
 	_player = [SPTAudioStreamingController sharedInstance];
 	_cacheSize = @(1024 * 1024 * 64);
 	_authControllerResponse = nil;
+	_startResponse = nil;
+	_logBackInResponses = [NSMutableArray array];
 	
 	//if a session exists, make sure it's using the same clientID. Otherwise, kill the session
 	if(_auth.session != nil)
@@ -117,13 +121,37 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSende
 
 -(void)logBackInIfNeeded:(void(^)(BOOL, NSError*))completion
 {
-	if(_auth.session == nil)
+	if(_auth==nil)
+	{
+		completion(NO, [RCTSpotify errorWithCode:RCTSpotifyErrorCodeNotInitialized description:@"Spotify has not been initialized"]);
+	}
+	else if(_auth.session == nil)
 	{
 		completion(NO, nil);
 	}
 	else if([_auth.session isValid])
 	{
-		completion(YES, nil);
+		if(!_player.initialized)
+		{
+			[self start:^(BOOL loggedIn, NSError* error) {
+				completion(loggedIn, error);
+			}];
+			return;
+		}
+		
+		dispatch_async(dispatch_get_main_queue(), ^{
+			if(!_player.loggedIn)
+			{
+				[_logBackInResponses addObject:^(BOOL loggedIn, NSError* error) {
+					completion(loggedIn, error);
+				}];
+				[_player loginWithAccessToken:_auth.session.accessToken];
+			}
+			else
+			{
+				completion(YES, nil);
+			}
+		});
 	}
 	else if(!_auth.hasTokenRefreshService)
 	{
@@ -240,7 +268,11 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(handleAuthURL:(NSString*)urlString)
 {
 	BOOL allowCaching = (_cacheSize.unsignedIntegerValue > 0);
 	NSError* error = nil;
-	if([_player startWithClientId:_auth.clientID audioController:nil allowCaching:allowCaching error:&error])
+	if(_player.initialized && _player.loggedIn)
+	{
+		completion(YES, nil);
+	}
+	else if([_player startWithClientId:_auth.clientID audioController:nil allowCaching:allowCaching error:&error])
 	{
 		_player.delegate = self;
 		_player.playbackDelegate = self;
@@ -270,6 +302,11 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(handleAuthURL:(NSString*)urlString)
 	}
 }
 
+RCT_EXPORT_METHOD(search:(NSString*)query completion:(RCTResponseSenderBlock)completion)
+{
+	//TODO implement search
+}
+
 
 
 #pragma mark - SpotifyWebViewDelegate
@@ -297,19 +334,56 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(handleAuthURL:(NSString*)urlString)
 		_startResponse = nil;
 		response(YES, nil);
 	}
+	
+	//do log back in callbacks
+	NSArray<void(^)(BOOL, NSError*)>* logBackInResponses = _logBackInResponses;
+	[_logBackInResponses removeAllObjects];
+	for(void(^response)(BOOL,NSError*) in logBackInResponses)
+	{
+		response(YES, nil);
+	}
 }
 
 -(void)audioStreaming:(SPTAudioStreamingController*)audioStreaming didReceiveError:(NSError*)error
 {
-	if(_startResponse != nil)
+	if(error.code==SPErrorGeneralLoginError || error.code==SPErrorLoginBadCredentials)
 	{
-		if(error.code==SPErrorGeneralLoginError || error.code==SPErrorLoginBadCredentials)
+		if(_startResponse != nil)
 		{
 			//do login callback
 			void(^response)(BOOL,NSError*) = _startResponse;
 			_startResponse = nil;
 			response(NO, error);
 		}
+		
+		//do log back in callbacks
+		NSArray<void(^)(BOOL, NSError*)>* logBackInResponses = _logBackInResponses;
+		[_logBackInResponses removeAllObjects];
+		for(void(^response)(BOOL,NSError*) in logBackInResponses)
+		{
+			response(YES, nil);
+		}
+	}
+}
+
+-(void)audioStreamingDidLogout:(SPTAudioStreamingController*)audioStreaming
+{
+	NSError* error = [RCTSpotify errorWithCode:RCTSpotifyErrorCodeNotLoggedIn description:@"Spotify was logged out"];
+	
+	if(_startResponse != nil)
+	{
+		//do login callback
+		void(^response)(BOOL,NSError*) = _startResponse;
+		_startResponse = nil;
+		response(NO, error);
+	}
+	
+	//do log back in callbacks
+	NSArray<void(^)(BOOL, NSError*)>* logBackInResponses = _logBackInResponses;
+	[_logBackInResponses removeAllObjects];
+	for(void(^response)(BOOL,NSError*) in logBackInResponses)
+	{
+		response(YES, error);
 	}
 }
 

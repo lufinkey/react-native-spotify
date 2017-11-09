@@ -12,7 +12,11 @@ typedef enum
 	//! Multiple calls of an asynchronous function are conflicting
 	RCTSpotifyErrorCodeConflictingCallbacks = 100,
 	//! Missing parameters or options
-	RCTSpotifyErrorCodeMissingParameters = 101
+	RCTSpotifyErrorCodeMissingParameters = 101,
+	//! RCTSpotify is not initialized
+	RCTSpotifyErrorCodeNotInitialized = 102,
+	//! RCTSpotify must be logged in to use this function
+	RCTSpotifyErrorCodeNotLoggedIn = 103
 } RCTSpotifyErrorCode;
 
 
@@ -33,5 +37,8 @@ typedef enum
 -(id)isLoggedIn;
 //handleAuthURL(url)
 -(id)handleAuthURL:(NSString*)url;
+
+//search(query, (results, error?))
+-(void)search:(NSString*)query completion:(RCTResponseSenderBlock)completion;
 
 @end
