@@ -50,12 +50,17 @@ typedef enum
 -(void)queueURI:(NSString*)uri completion:(RCTResponseSenderBlock)completion;
 //setVolume(volume, (error?))
 -(void)setVolume:(double)volume completion:(RCTResponseSenderBlock)completion;
+//getVolume()
+-(id)getVolume;
 //setIsPlaying(playing, (error?))
 -(void)setIsPlaying:(BOOL)playing completion:(RCTResponseSenderBlock)completion;
+//getPlaybackState;
+-(id)getPlaybackState;
 //skipNext((error?))
 -(void)skipNext:(RCTResponseSenderBlock)completion;
 //skipPrevious((error?))
 -(void)skipPrevious:(RCTResponseSenderBlock)completion;
+
 
 //sendRequest(endpoint, method, params, isJSONBody, (result?, error?))
 -(void)sendRequest:(NSString*)endpoint method:(NSString*)method params:(NSDictionary*)params isJSONBody:(BOOL)jsonBody completion:(RCTResponseSenderBlock)completion;

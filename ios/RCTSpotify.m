@@ -453,6 +453,15 @@ RCT_EXPORT_METHOD(setVolume:(double)volume completion:(RCTResponseSenderBlock)co
 	}];
 }
 
+RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getVolume)
+{
+	if(_player==nil)
+	{
+		return nil;
+	}
+	return @(_player.volume);
+}
+
 RCT_EXPORT_METHOD(setIsPlaying:(BOOL)playing completion:(RCTResponseSenderBlock)completion)
 {
 	[self prepareForRequest:^(NSError* error) {
@@ -471,6 +480,22 @@ RCT_EXPORT_METHOD(setIsPlaying:(BOOL)playing completion:(RCTResponseSenderBlock)
 			}
 		}];
 	}];
+}
+
+RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getPlaybackState)
+{
+	SPTPlaybackState* state = _player.playbackState;
+	if(state == nil)
+	{
+		return nil;
+	}
+	return @{
+		@"playing":[NSNumber numberWithBool:state.isPlaying],
+		@"repeating":[NSNumber numberWithBool:state.isRepeating],
+		@"shuffling":[NSNumber numberWithBool:state.isShuffling],
+		@"activeDevice":[NSNumber numberWithBool:state.isActiveDevice],
+		@"position":@(state.position)
+	};
 }
 
 RCT_EXPORT_METHOD(skipNext:(RCTResponseSenderBlock)completion)
