@@ -11,6 +11,8 @@ typedef enum
 {
 	//! Multiple calls of an asynchronous function are conflicting
 	RCTSpotifyErrorCodeConflictingCallbacks = 100,
+	//! Missing parameters or options
+	RCTSpotifyErrorCodeMissingParameters = 101
 } RCTSpotifyErrorCode;
 
 
