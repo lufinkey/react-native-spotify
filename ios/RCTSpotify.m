@@ -25,6 +25,7 @@ NSString* const RCTSpotifyErrorDomain = @"RCTSpotifyErrorDomain";
 
 -(void)logBackInIfNeeded:(void(^)(BOOL loggedIn, NSError* error))completion;
 -(void)start:(void(^)(BOOL,NSError*))completion;
+-(void)prepareForRequest:(void(^)(NSError*))completion;
 @end
 
 @implementation RCTSpotify
@@ -138,10 +139,17 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSende
 			}];
 			return;
 		}
-		
+		else if(_player.loggedIn)
+		{
+			completion(YES, nil);
+			return;
+		}
 		dispatch_async(dispatch_get_main_queue(), ^{
 			if(!_player.loggedIn)
 			{
+				//wait for audioStreamingDidLogin:
+				// or audioStreamingDidReceiveError:
+				// or audioStreamingDidLogout:
 				[_logBackInResponses addObject:^(BOOL loggedIn, NSError* error) {
 					completion(loggedIn, error);
 				}];
@@ -300,6 +308,24 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(handleAuthURL:(NSString*)urlString)
 	{
 		completion(NO, error);
 	}
+}
+
+-(void)prepareForRequest:(void(^)(NSError*))completion
+{
+	[self logBackInIfNeeded:^(BOOL loggedIn, NSError* error){
+		if(!loggedIn)
+		{
+			if(error == nil)
+			{
+				error = [RCTSpotify errorWithCode:RCTSpotifyErrorCodeNotLoggedIn description:@"You are not logged in"];
+			}
+			completion(error);
+		}
+		else
+		{
+			completion(nil);
+		}
+	}];
 }
 
 RCT_EXPORT_METHOD(search:(NSString*)query completion:(RCTResponseSenderBlock)completion)

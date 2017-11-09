@@ -38,7 +38,7 @@ typedef enum
 //handleAuthURL(url)
 -(id)handleAuthURL:(NSString*)url;
 
-//search(query, (results, error?))
+//search(query, (results?, error?))
 -(void)search:(NSString*)query completion:(RCTResponseSenderBlock)completion;
 
 @end
