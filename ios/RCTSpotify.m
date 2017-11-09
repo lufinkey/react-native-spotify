@@ -410,6 +410,21 @@ RCT_EXPORT_METHOD(playURI:(NSString*)uri startIndex:(NSUInteger)startIndex start
 	}];
 }
 
+RCT_EXPORT_METHOD(queueURI:(NSString*)uri completion:(RCTResponseSenderBlock)completion)
+{
+	[self prepareForRequest:^(NSError* error) {
+		if(error)
+		{
+			completion(@[ [RCTSpotify objFromError:error] ]);
+			return;
+		}
+		
+		[_player queueSpotifyURI:uri callback:^(NSError* error) {
+			completion(@[ [RCTSpotify objFromError:error] ]);
+		}];
+	}];
+}
+
 
 
 #pragma mark - React Native functions - Request Sending
