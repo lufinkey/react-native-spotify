@@ -164,6 +164,10 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSende
 	}];
 }
 
+
+
+#pragma mark - React Native functions - Session Handling
+
 -(void)logBackInIfNeeded:(void(^)(BOOL, NSError*))completion
 {
 	if(_auth==nil)
@@ -387,6 +391,10 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(handleAuthURL:(NSString*)urlString)
 	}
 }
 
+
+
+#pragma mark - React Native functions - Request Sending
+
 -(void)prepareForRequest:(void(^)(NSError*))completion
 {
 	[self logBackInIfNeeded:^(BOOL loggedIn, NSError* error){
@@ -454,7 +462,7 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(handleAuthURL:(NSString*)urlString)
 	}];
 }
 
--(void)sendRequest:(NSString*)endpoint method:(NSString*)method params:(NSDictionary*)params isJSONBody:(BOOL)jsonBody completion:(RCTResponseSenderBlock)completion
+RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method params:(NSDictionary*)params isJSONBody:(BOOL)jsonBody completion:(RCTResponseSenderBlock)completion)
 {
 	[self doAPIRequest:endpoint method:method params:params jsonBody:jsonBody completion:^(id resultObj, NSError *error) {
 		completion(@[ [RCTSpotify reactSafeArg:resultObj], [RCTSpotify objFromError:error] ]);
@@ -462,6 +470,8 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(handleAuthURL:(NSString*)urlString)
 }
 
 
+
+#pragma mark - React Native methods - Web API
 
 RCT_EXPORT_METHOD(search:(NSString*)query types:(NSArray<NSString*>*)types options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion)
 {
