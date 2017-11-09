@@ -21,8 +21,8 @@ NSString* const RCTSpotifyErrorDomain = @"RCTSpotifyErrorDomain";
 	
 	void(^_authControllerResponse)(BOOL loggedIn, NSError* error);
 	void(^_startResponse)(BOOL loggedIn, NSError* error);
-	
 	NSMutableArray<void(^)(BOOL, NSError*)>* _logBackInResponses;
+	NSMutableArray<void(^)(NSError*)>* _logoutResponses;
 }
 +(id)reactSafeArg:(id)arg;
 +(id)objFromError:(NSError*)error;
@@ -116,6 +116,7 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSende
 	_authControllerResponse = nil;
 	_startResponse = nil;
 	_logBackInResponses = [NSMutableArray array];
+	_logoutResponses = [NSMutableArray array];
 	
 	//if a session exists, make sure it's using the same clientID. Otherwise, kill the session
 	if(_auth.session != nil)
@@ -277,6 +278,35 @@ RCT_EXPORT_METHOD(login:(RCTResponseSenderBlock)completion)
 	});
 }
 
+RCT_EXPORT_METHOD(logout:(RCTResponseSenderBlock)completion)
+{
+	if(![[self isLoggedIn] boolValue])
+	{
+		completion(@[ [NSNull null] ]);
+		return;
+	}
+	dispatch_async(dispatch_get_main_queue(), ^{
+		if(![[self isLoggedIn] boolValue])
+		{
+			completion(@[ [NSNull null] ]);
+			return;
+		}
+		
+		__weak RCTSpotify* _self = self;
+		[_logoutResponses addObject:^void(NSError* error) {
+			RCTSpotify* __self = _self;
+			[__self->_player stopWithError:&error];
+			__self->_auth.session = nil;
+			
+			if(completion!=nil)
+			{
+				completion(@[ [RCTSpotify objFromError:error] ]);
+			}
+		}];
+		[_player logout];
+	});
+}
+
 RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(isLoggedIn)
 {
 	if(_auth.session == nil)
@@ -284,6 +314,10 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(isLoggedIn)
 		return @NO;
 	}
 	else if(![_auth.session isValid])
+	{
+		return @NO;
+	}
+	else if(!_player.loggedIn)
 	{
 		return @NO;
 	}
@@ -662,6 +696,14 @@ RCT_EXPORT_METHOD(getTracksAudioFeatures:(NSArray<NSString*>*)trackIDs options:(
 	for(void(^response)(BOOL,NSError*) in logBackInResponses)
 	{
 		response(YES, error);
+	}
+	
+	//do logout callbacks
+	NSArray<void(^)(NSError*)>* logoutResponses = _logoutResponses;
+	[_logoutResponses removeAllObjects];
+	for(void(^response)(NSError*) in logoutResponses)
+	{
+		response(nil);
 	}
 }
 

@@ -37,6 +37,8 @@ typedef enum
 
 //login((loggedIn, error?))
 -(void)login:(RCTResponseSenderBlock)completion;
+//logout((error?))
+-(void)logout:(RCTResponseSenderBlock)completion;
 //isLoggedIn()
 -(id)isLoggedIn;
 //handleAuthURL(url)
