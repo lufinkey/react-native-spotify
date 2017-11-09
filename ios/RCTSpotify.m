@@ -4,12 +4,13 @@
 #import <SpotifyMetadata/SpotifyMetadata.h>
 #import <SpotifyAudioPlayback/SpotifyAudioPlayback.h>
 #import "SpotifyWebViewController.h"
+#import "HelperMacros.h"
 
 
 NSString* const RCTSpotifyErrorDomain = @"RCTSpotifyErrorDomain";
 
 #define SPOTIFY_API_BASE_URL @"https://api.spotify.com/v1/"
-#define SPOTIFY_API_URL(endpoint) [NSURL URLWithString:[@[ SPOTIFY_API_BASE_URL, endpoint ] componentsJoinedByString:@""]]
+#define SPOTIFY_API_URL(endpoint) [NSURL URLWithString:NSString_concat(SPOTIFY_API_BASE_URL, endpoint)]
 
 @interface RCTSpotify() <SPTAudioStreamingDelegate, SPTAudioStreamingPlaybackDelegate, SpotifyWebViewDelegate>
 {
@@ -23,7 +24,10 @@ NSString* const RCTSpotifyErrorDomain = @"RCTSpotifyErrorDomain";
 	
 	NSMutableArray<void(^)(BOOL, NSError*)>* _logBackInResponses;
 }
++(id)reactSafeArg:(id)arg;
 +(id)objFromError:(NSError*)error;
++(NSError*)errorWithCode:(RCTSpotifyErrorCode)code description:(NSString*)description;
++(NSError*)errorWithCode:(RCTSpotifyErrorCode)code description:(NSString*)description fields:(NSDictionary*)fields;
 
 -(void)logBackInIfNeeded:(void(^)(BOOL loggedIn, NSError* error))completion;
 -(void)start:(void(^)(BOOL,NSError*))completion;
@@ -32,15 +36,14 @@ NSString* const RCTSpotifyErrorDomain = @"RCTSpotifyErrorDomain";
 
 @implementation RCTSpotify
 
-#define callbackAndReturnIfError(error, callback, ...) \
-	if(error!=nil)\
-	{\
-		if(callback!=nil)\
-		{\
-			callback(__VA_ARGS__);\
-		}\
-		return;\
++(id)reactSafeArg:(id)arg
+{
+	if(arg==nil)
+	{
+		return [NSNull null];
 	}
+	return arg;
+}
 
 +(id)objFromError:(NSError*)error
 {
@@ -48,16 +51,36 @@ NSString* const RCTSpotifyErrorDomain = @"RCTSpotifyErrorDomain";
 	{
 		return [NSNull null];
 	}
-	return @{
-		@"domain":error.domain,
-		@"code":@(error.code),
-		@"description":error.localizedDescription
-	};
+	NSDictionary* fields = error.userInfo[@"jsFields"];
+	NSMutableDictionary* obj = nil;
+	if(fields!=nil)
+	{
+		obj = fields.mutableCopy;
+	}
+	else
+	{
+		obj = [NSMutableDictionary dictionary];
+	}
+	obj[@"domain"] = error.domain;
+	obj[@"code"] = @(error.code);
+	obj[@"description"] = error.localizedDescription;
+	return obj;
 }
 
 +(NSError*)errorWithCode:(RCTSpotifyErrorCode)code description:(NSString*)description
 {
-	return [NSError errorWithDomain:RCTSpotifyErrorDomain code:code userInfo:@{NSLocalizedDescriptionKey:description}];
+	return [RCTSpotify errorWithCode:code description:description fields:nil];
+}
+
++(NSError*)errorWithCode:(RCTSpotifyErrorCode)code description:(NSString*)description fields:(NSDictionary*)fields
+{
+	NSMutableDictionary* userInfo = [NSMutableDictionary dictionary];
+	userInfo[NSLocalizedDescriptionKey] = description;
+	if(fields!=nil)
+	{
+		userInfo[@"jsFields"] = fields;
+	}
+	return [NSError errorWithDomain:RCTSpotifyErrorDomain code:code userInfo:userInfo];
 }
 
 #pragma mark - React Native functions
@@ -340,78 +363,54 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(handleAuthURL:(NSString*)urlString)
 	}];
 }
 
-#define getRequiredOption(type, lvalue, options_dict, field, ...) \
-type* lvalue = nil;\
-{\
-	id tmpVar = options_dict[field];\
-	if(tmpVar==nil)\
-	{\
-		completion(@[\
-			__VA_ARGS__ \
-			[RCTSpotify objFromError:[RCTSpotify errorWithCode:RCTSpotifyErrorCodeMissingParameters\
-						description:[NSString stringWithFormat:@"\"%@\" field in query is required", field]]]]);\
-		return;\
-	}\
-	else if(![tmpVar isKindOfClass:[type class]])\
-	{\
-		completion(@[\
-			__VA_ARGS__ \
-			[RCTSpotify objFromError:[RCTSpotify errorWithCode:RCTSpotifyErrorCodeBadParameters\
-						description:[NSString stringWithFormat:@"invalid type for field \"%@\"", field]]]]);\
-		return;\
-	}\
-	lvalue = tmpVar;\
+-(void)doRequest:(NSURLRequest*)request completion:(void(^)(id, NSError*))completion
+{
+	[[SPTRequest sharedHandler] performRequest:request callback:^(NSError* error, NSURLResponse* response, NSData* data) {
+		callbackAndReturnIfError(error, completion, nil, error);
+		
+		id jsonObj = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
+		callbackAndReturnIfError(error, completion, jsonObj, error);
+		
+		if([jsonObj isKindOfClass:[NSDictionary class]])
+		{
+			NSDictionary* errorObj = jsonObj[@"error"];
+			if(errorObj!=nil)
+			{
+				completion(jsonObj, [RCTSpotify errorWithCode:RCTSpotifyErrorCodeRequestError
+												  description:errorObj[@"message"]
+													   fields:@{@"statusCode":errorObj[@"status"]}]);
+			}
+			else
+			{
+				completion(jsonObj, nil);
+			}
+		}
+		else
+		{
+			completion(jsonObj, nil);
+		}
+	}];
 }
 
 RCT_EXPORT_METHOD(search:(NSDictionary*)query completion:(RCTResponseSenderBlock)completion)
 {
+	reactCallbackAndReturnIfNil(query, completion, [NSNull null], );
+	
 	[self prepareForRequest:^(NSError* error) {
 		callbackAndReturnIfError(error, completion, @[ [NSNull null], [RCTSpotify objFromError:error] ]);
 		
-		//types
-		getRequiredOption(NSArray, queryTypes, query, @"types", [NSNull null], );
-		for(id queryType in queryTypes)
-		{
-			if(![queryType isKindOfClass:[NSString class]])
-			{
-				completion(@[
-							 [NSNull null],
-							 [RCTSpotify objFromError:[RCTSpotify errorWithCode:RCTSpotifyErrorCodeBadParameters
-																	description:@"invalid type for field \"types\""]]]);
-				return;
-			}
-			else if(![@[@"track", @"artist", @"album", @"playlist"] containsObject:queryType])
-			{
-				completion(@[
-							 [NSNull null],
-							 [RCTSpotify objFromError:[RCTSpotify errorWithCode:RCTSpotifyErrorCodeBadParameters
-																	description:[NSString stringWithFormat:@"invalid value \"%@\" for field \"types\"", queryType]]]]);
-				return;
-			}
-		}
-		queryTypes = [[NSOrderedSet orderedSetWithArray:queryTypes] array];
+		NSMutableDictionary* body = query.mutableCopy;
 		
-		//text
-		getRequiredOption(NSString, text, query, @"text", [NSNull null], );
-		//TODO have constraints as separate field
-		
-		NSMutableDictionary* body = [NSMutableDictionary dictionary];
-		body[@"q"] = text;
-		body[@"type"] = [queryTypes componentsJoinedByString:@","];
-		id market = query[@"market"];
-		if(market != nil)
+		//change "type" field from array to comma separated string if necessary
+		id typeArg = body[@"type"];
+		if(typeArg==nil)
 		{
-			body[@"market"] = market;
+			completion(@[ [NSNull null], NIL_OPTION_ERROR_OBJ(@"query", @"type") ]);
+			return;
 		}
-		id limit = query[@"limit"];
-		if(limit != nil)
+		else if([typeArg isKindOfClass:[NSArray class]])
 		{
-			body[@"limit"] = limit;
-		}
-		id offset = query[@"offset"];
-		if(offset != nil)
-		{
-			body[@"offset"] = offset;
+			body[@"type"] = [typeArg componentsJoinedByString:@","];
 		}
 		
 		NSURLRequest* request = [SPTRequest createRequestForURL:SPOTIFY_API_URL(@"search")
@@ -419,26 +418,11 @@ RCT_EXPORT_METHOD(search:(NSDictionary*)query completion:(RCTResponseSenderBlock
 													 httpMethod:@"GET"
 														 values:body
 												valueBodyIsJSON:NO sendDataAsQueryString:YES error:&error];
-		if(error!=nil)
-		{
-			completion(@[ [NSNull null], [RCTSpotify objFromError:error] ]);
-			return;
-		}
+		callbackAndReturnIfError(error, completion, @[ [NSNull null], [RCTSpotify objFromError:error] ]);
 		
-		NSURLSessionTask* task = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData* data, NSURLResponse* response, NSError* error) {
-			callbackAndReturnIfError(error, completion, @[ [NSNull null], [RCTSpotify objFromError:error] ]);
-			
-			NSDictionary* jsonObj = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
-			NSDictionary* errorObj = jsonObj[@"error"];
-			if(errorObj!=nil)
-			{
-				completion(@[ jsonObj, @{@"statusCode":errorObj[@"status"], @"description":errorObj[@"message"]} ]);
-				return;
-			}
-			
-			completion(@[ jsonObj, [NSNull null] ]);
+		[self doRequest:request completion:^(id resultObj, NSError* error){
+			completion(@[ [RCTSpotify reactSafeArg:resultObj], [RCTSpotify objFromError:error] ]);
 		}];
-		[task resume];
 	}];
 }
 

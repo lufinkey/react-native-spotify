@@ -33,6 +33,7 @@
 		A0A4341A1FAE25690073DAB9 /* SpotifyMetadata.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SpotifyMetadata.framework; path = external/SpotifySDK/SpotifyMetadata.framework; sourceTree = "<group>"; };
 		A0A4341B1FAE25690073DAB9 /* SpotifyAudioPlayback.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SpotifyAudioPlayback.framework; path = external/SpotifySDK/SpotifyAudioPlayback.framework; sourceTree = "<group>"; };
 		A0A4341C1FAE25690073DAB9 /* SpotifyAuthentication.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SpotifyAuthentication.framework; path = external/SpotifySDK/SpotifyAuthentication.framework; sourceTree = "<group>"; };
+		A0CB1CFF1FB4D718009989EA /* HelperMacros.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HelperMacros.h; sourceTree = "<group>"; };
 		B3E7B5881CC2AC0600A0062D /* RCTSpotify.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTSpotify.h; sourceTree = "<group>"; };
 		B3E7B5891CC2AC0600A0062D /* RCTSpotify.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTSpotify.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -62,6 +63,7 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				A0CB1CFF1FB4D718009989EA /* HelperMacros.h */,
 				B3E7B5881CC2AC0600A0062D /* RCTSpotify.h */,
 				B3E7B5891CC2AC0600A0062D /* RCTSpotify.m */,
 				A01F099D1FAED1DB002AA48C /* SpotifyWebViewController.h */,

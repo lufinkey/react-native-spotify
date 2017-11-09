@@ -19,6 +19,8 @@ typedef enum
 	RCTSpotifyErrorCodeNotInitialized = 103,
 	//! RCTSpotify must be logged in to use this function
 	RCTSpotifyErrorCodeNotLoggedIn = 104,
+	//! A sent request returned an error
+	RCTSpotifyErrorCodeRequestError = 105
 } RCTSpotifyErrorCode;
 
 
