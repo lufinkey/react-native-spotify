@@ -42,8 +42,8 @@ typedef enum
 //handleAuthURL(url)
 -(id)handleAuthURL:(NSString*)url;
 
-//search(query, (results?, error?))
--(void)search:(NSDictionary*)query completion:(RCTResponseSenderBlock)completion;
+//search(query, types, options, (results?, error?))
+-(void)search:(NSString*)query types:(NSArray<NSString*>*)types options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion;
 //getAlbum(albumID, options, (result?, error?))
 -(void)getAlbum:(NSString*)albumID options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion;
 

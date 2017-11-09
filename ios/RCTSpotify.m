@@ -28,6 +28,7 @@ NSString* const RCTSpotifyErrorDomain = @"RCTSpotifyErrorDomain";
 +(id)objFromError:(NSError*)error;
 +(NSError*)errorWithCode:(RCTSpotifyErrorCode)code description:(NSString*)description;
 +(NSError*)errorWithCode:(RCTSpotifyErrorCode)code description:(NSString*)description fields:(NSDictionary*)fields;
++(NSMutableDictionary*)mutableDictFromDict:(NSDictionary*)dict;
 
 -(void)logBackInIfNeeded:(void(^)(BOOL loggedIn, NSError* error))completion;
 -(void)start:(void(^)(BOOL loggedIn, NSError* error))completion;
@@ -84,6 +85,17 @@ NSString* const RCTSpotifyErrorDomain = @"RCTSpotifyErrorDomain";
 	}
 	return [NSError errorWithDomain:RCTSpotifyErrorDomain code:code userInfo:userInfo];
 }
+
++(NSMutableDictionary*)mutableDictFromDict:(NSDictionary*)dict
+{
+	if(dict==nil)
+	{
+		return [NSMutableDictionary dictionary];
+	}
+	return dict.mutableCopy;
+}
+
+
 
 #pragma mark - React Native functions
 
@@ -408,22 +420,14 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(handleAuthURL:(NSString*)urlString)
 	}];
 }
 
-RCT_EXPORT_METHOD(search:(NSDictionary*)query completion:(RCTResponseSenderBlock)completion)
+RCT_EXPORT_METHOD(search:(NSString*)query types:(NSArray<NSString*>*)types options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion)
 {
 	reactCallbackAndReturnIfNil(query, completion, [NSNull null], );
+	reactCallbackAndReturnIfNil(types, completion, [NSNull null], );
 	
-	NSMutableDictionary* body = query.mutableCopy;
-	//change "type" field from array to comma separated string if necessary
-	id typeArg = body[@"type"];
-	if(typeArg==nil)
-	{
-		completion(@[ [NSNull null], NIL_OPTION_ERROR_OBJ(@"query", @"type") ]);
-		return;
-	}
-	else if([typeArg isKindOfClass:[NSArray class]])
-	{
-		body[@"type"] = [typeArg componentsJoinedByString:@","];
-	}
+	NSMutableDictionary* body = [[self class] mutableDictFromDict:options];
+	body[@"q"] = query;
+	body[@"type"] = [types componentsJoinedByString:@","];
 	
 	[self doAPIRequest:@"search" method:@"GET" params:body jsonBody:NO completion:^(id resultObj, NSError* error) {
 		completion(@[ [RCTSpotify reactSafeArg:resultObj], [RCTSpotify objFromError:error] ]);
