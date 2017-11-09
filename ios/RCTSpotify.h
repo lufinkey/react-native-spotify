@@ -48,5 +48,7 @@ typedef enum
 -(void)getAlbum:(NSString*)albumID options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion;
 //getAlbums(albumIDs, options, (result?, error?))
 -(void)getAlbums:(NSArray<NSString*>*)albumIDs options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion;
+//getAlbumTracks(albumID, options, (result?, error?))
+-(void)getAlbumTracks:(NSString*)albumID options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion;
 
 @end

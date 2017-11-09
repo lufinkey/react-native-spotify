@@ -456,6 +456,16 @@ RCT_EXPORT_METHOD(getAlbums:(NSArray<NSString*>*)albumIDs options:(NSDictionary*
 	}];
 }
 
+RCT_EXPORT_METHOD(getAlbumTracks:(NSString*)albumID options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion)
+{
+	reactCallbackAndReturnIfNil(albumID, completion, [NSNull null], );
+	
+	NSString* endpoint = NSString_concat(@"albums/", albumID, @"/tracks");
+	[self doAPIRequest:endpoint method:@"GET" params:options jsonBody:NO completion:^(id resultObj, NSError* error) {
+		completion(@[ [RCTSpotify reactSafeArg:resultObj], [RCTSpotify objFromError:error] ]);
+	}];
+}
+
 
 
 #pragma mark - SpotifyWebViewDelegate
