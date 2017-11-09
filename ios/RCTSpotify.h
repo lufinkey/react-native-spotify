@@ -13,10 +13,12 @@ typedef enum
 	RCTSpotifyErrorCodeConflictingCallbacks = 100,
 	//! Missing parameters or options
 	RCTSpotifyErrorCodeMissingParameters = 101,
+	//! Bad parameters or options
+	RCTSpotifyErrorCodeBadParameters = 102,
 	//! RCTSpotify is not initialized
-	RCTSpotifyErrorCodeNotInitialized = 102,
+	RCTSpotifyErrorCodeNotInitialized = 103,
 	//! RCTSpotify must be logged in to use this function
-	RCTSpotifyErrorCodeNotLoggedIn = 103
+	RCTSpotifyErrorCodeNotLoggedIn = 104,
 } RCTSpotifyErrorCode;
 
 
@@ -38,7 +40,7 @@ typedef enum
 //handleAuthURL(url)
 -(id)handleAuthURL:(NSString*)url;
 
-//search(query, (results?, error?))
--(void)search:(NSString*)query completion:(RCTResponseSenderBlock)completion;
+//search(query (results?, error?))
+-(void)search:(NSDictionary*)query completion:(RCTResponseSenderBlock)completion;
 
 @end

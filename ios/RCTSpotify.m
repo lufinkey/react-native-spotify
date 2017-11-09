@@ -8,6 +8,8 @@
 
 NSString* const RCTSpotifyErrorDomain = @"RCTSpotifyErrorDomain";
 
+#define SPOTIFY_API_BASE_URL @"https://api.spotify.com/v1/"
+#define SPOTIFY_API_URL(endpoint) [NSURL URLWithString:[@[ SPOTIFY_API_BASE_URL, endpoint ] componentsJoinedByString:@""]]
 
 @interface RCTSpotify() <SPTAudioStreamingDelegate, SPTAudioStreamingPlaybackDelegate, SpotifyWebViewDelegate>
 {
@@ -29,6 +31,16 @@ NSString* const RCTSpotifyErrorDomain = @"RCTSpotifyErrorDomain";
 @end
 
 @implementation RCTSpotify
+
+#define callbackAndReturnIfError(error, callback, ...) \
+	if(error!=nil)\
+	{\
+		if(callback!=nil)\
+		{\
+			callback(__VA_ARGS__);\
+		}\
+		return;\
+	}
 
 +(id)objFromError:(NSError*)error
 {
@@ -328,9 +340,106 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(handleAuthURL:(NSString*)urlString)
 	}];
 }
 
-RCT_EXPORT_METHOD(search:(NSString*)query completion:(RCTResponseSenderBlock)completion)
+#define getRequiredOption(type, lvalue, options_dict, field, ...) \
+type* lvalue = nil;\
+{\
+	id tmpVar = options_dict[field];\
+	if(tmpVar==nil)\
+	{\
+		completion(@[\
+			__VA_ARGS__ \
+			[RCTSpotify objFromError:[RCTSpotify errorWithCode:RCTSpotifyErrorCodeMissingParameters\
+						description:[NSString stringWithFormat:@"\"%@\" field in query is required", field]]]]);\
+		return;\
+	}\
+	else if(![tmpVar isKindOfClass:[type class]])\
+	{\
+		completion(@[\
+			__VA_ARGS__ \
+			[RCTSpotify objFromError:[RCTSpotify errorWithCode:RCTSpotifyErrorCodeBadParameters\
+						description:[NSString stringWithFormat:@"invalid type for field \"%@\"", field]]]]);\
+		return;\
+	}\
+	lvalue = tmpVar;\
+}
+
+RCT_EXPORT_METHOD(search:(NSDictionary*)query completion:(RCTResponseSenderBlock)completion)
 {
-	//TODO implement search
+	[self prepareForRequest:^(NSError* error) {
+		callbackAndReturnIfError(error, completion, @[ [NSNull null], [RCTSpotify objFromError:error] ]);
+		
+		//types
+		getRequiredOption(NSArray, queryTypes, query, @"types", [NSNull null], );
+		for(id queryType in queryTypes)
+		{
+			if(![queryType isKindOfClass:[NSString class]])
+			{
+				completion(@[
+							 [NSNull null],
+							 [RCTSpotify objFromError:[RCTSpotify errorWithCode:RCTSpotifyErrorCodeBadParameters
+																	description:@"invalid type for field \"types\""]]]);
+				return;
+			}
+			else if(![@[@"track", @"artist", @"album", @"playlist"] containsObject:queryType])
+			{
+				completion(@[
+							 [NSNull null],
+							 [RCTSpotify objFromError:[RCTSpotify errorWithCode:RCTSpotifyErrorCodeBadParameters
+																	description:[NSString stringWithFormat:@"invalid value \"%@\" for field \"types\"", queryType]]]]);
+				return;
+			}
+		}
+		queryTypes = [[NSOrderedSet orderedSetWithArray:queryTypes] array];
+		
+		//text
+		getRequiredOption(NSString, text, query, @"text", [NSNull null], );
+		//TODO have constraints as separate field
+		
+		NSMutableDictionary* body = [NSMutableDictionary dictionary];
+		body[@"q"] = text;
+		body[@"type"] = [queryTypes componentsJoinedByString:@","];
+		id market = query[@"market"];
+		if(market != nil)
+		{
+			body[@"market"] = market;
+		}
+		id limit = query[@"limit"];
+		if(limit != nil)
+		{
+			body[@"limit"] = limit;
+		}
+		id offset = query[@"offset"];
+		if(offset != nil)
+		{
+			body[@"offset"] = offset;
+		}
+		
+		NSURLRequest* request = [SPTRequest createRequestForURL:SPOTIFY_API_URL(@"search")
+												withAccessToken:_auth.session.accessToken
+													 httpMethod:@"GET"
+														 values:body
+												valueBodyIsJSON:NO sendDataAsQueryString:YES error:&error];
+		if(error!=nil)
+		{
+			completion(@[ [NSNull null], [RCTSpotify objFromError:error] ]);
+			return;
+		}
+		
+		NSURLSessionTask* task = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData* data, NSURLResponse* response, NSError* error) {
+			callbackAndReturnIfError(error, completion, @[ [NSNull null], [RCTSpotify objFromError:error] ]);
+			
+			NSDictionary* jsonObj = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
+			NSDictionary* errorObj = jsonObj[@"error"];
+			if(errorObj!=nil)
+			{
+				completion(@[ jsonObj, @{@"statusCode":errorObj[@"status"], @"description":errorObj[@"message"]} ]);
+				return;
+			}
+			
+			completion(@[ jsonObj, [NSNull null] ]);
+		}];
+		[task resume];
+	}];
 }
 
 
