@@ -393,6 +393,25 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(handleAuthURL:(NSString*)urlString)
 
 
 
+#pragma mark - React Native functions - Playback
+
+RCT_EXPORT_METHOD(playURI:(NSString*)uri startIndex:(NSUInteger)startIndex startPosition:(NSTimeInterval)startPosition completion:(RCTResponseSenderBlock)completion)
+{
+	[self prepareForRequest:^(NSError* error) {
+		if(error)
+		{
+			completion(@[ [RCTSpotify objFromError:error] ]);
+			return;
+		}
+		
+		[_player playSpotifyURI:uri startingWithIndex:startIndex startingWithPosition:startPosition callback:^(NSError* error) {
+			completion(@[ [RCTSpotify objFromError:error] ]);
+		}];
+	}];
+}
+
+
+
 #pragma mark - React Native functions - Request Sending
 
 -(void)prepareForRequest:(void(^)(NSError*))completion
