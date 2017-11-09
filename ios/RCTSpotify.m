@@ -522,6 +522,60 @@ RCT_EXPORT_METHOD(getArtistRelatedArtists:(NSString*)artistID options:(NSDiction
 	}];
 }
 
+RCT_EXPORT_METHOD(getTrack:(NSString*)trackID options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion)
+{
+	reactCallbackAndReturnIfNil(trackID, completion, [NSNull null], );
+	
+	NSString* endpoint = NSString_concat(@"tracks/", trackID);
+	[self doAPIRequest:endpoint method:@"GET" params:options jsonBody:NO completion:^(id resultObj, NSError *error) {
+		completion(@[ [RCTSpotify reactSafeArg:resultObj], [RCTSpotify objFromError:error] ]);
+	}];
+}
+
+RCT_EXPORT_METHOD(getTracks:(NSArray<NSString*>*)trackIDs options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion)
+{
+	reactCallbackAndReturnIfNil(trackIDs, completion, [NSNull null], );
+	
+	NSMutableDictionary* body = [[self class] mutableDictFromDict:options];
+	body[@"ids"] = [trackIDs componentsJoinedByString:@","];
+	
+	[self doAPIRequest:@"tracks" method:@"GET" params:body jsonBody:NO completion:^(id resultObj, NSError* error) {
+		completion(@[ [RCTSpotify reactSafeArg:resultObj], [RCTSpotify objFromError:error] ]);
+	}];
+}
+
+RCT_EXPORT_METHOD(getTrackAudioAnalysis:(NSString*)trackID options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion)
+{
+	reactCallbackAndReturnIfNil(trackID, completion, [NSNull null], );
+	
+	NSString* endpoint = NSString_concat(@"audio-analysis/", trackID);
+	[self doAPIRequest:endpoint method:@"GET" params:options jsonBody:NO completion:^(id resultObj, NSError *error) {
+		completion(@[ [RCTSpotify reactSafeArg:resultObj], [RCTSpotify objFromError:error] ]);
+	}];
+}
+
+RCT_EXPORT_METHOD(getTrackAudioFeatures:(NSString*)trackID options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion)
+{
+	reactCallbackAndReturnIfNil(trackID, completion, [NSNull null], );
+	
+	NSString* endpoint = NSString_concat(@"audio-features/", trackID);
+	[self doAPIRequest:endpoint method:@"GET" params:options jsonBody:NO completion:^(id resultObj, NSError* error) {
+		completion(@[ [RCTSpotify reactSafeArg:resultObj], [RCTSpotify objFromError:error] ]);
+	}];
+}
+
+RCT_EXPORT_METHOD(getTracksAudioFeatures:(NSArray<NSString*>*)trackIDs options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion)
+{
+	reactCallbackAndReturnIfNil(trackIDs, completion, [NSNull null], );
+	
+	NSMutableDictionary* body = [[self class] mutableDictFromDict:options];
+	body[@"ids"] = [trackIDs componentsJoinedByString:@","];
+	
+	[self doAPIRequest:@"audio-features" method:@"GET" params:body jsonBody:NO completion:^(id resultObj, NSError* error) {
+		completion(@[ [RCTSpotify reactSafeArg:resultObj], [RCTSpotify objFromError:error] ]);
+	}];
+}
+
 
 
 #pragma mark - SpotifyWebViewDelegate
