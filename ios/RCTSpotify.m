@@ -117,16 +117,10 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSende
 	
 	//get options
 	_auth.clientID = options[@"clientID"];
-	NSString* redirectURL = options[@"redirectURL"];
-	if(redirectURL != nil)
-	{
-		_auth.redirectURL = [NSURL URLWithString:redirectURL];
-	}
-	NSString* sessionUserDefaultsKey = options[@"sessionUserDefaultsKey"];
-	if(sessionUserDefaultsKey != nil)
-	{
-		_auth.sessionUserDefaultsKey = sessionUserDefaultsKey;
-	}
+	_auth.redirectURL = [NSURL URLWithString:options[@"redirectURL"]];
+	_auth.sessionUserDefaultsKey = options[@"sessionUserDefaultsKey"];
+	_auth.tokenSwapURL = [NSURL URLWithString:options[@"tokenSwapURL"]];
+	_auth.tokenRefreshURL = [NSURL URLWithString:options[@"tokenRefreshURL"]];
 	NSNumber* cacheSize = options[@"cacheSize"];
 	if(cacheSize!=nil)
 	{
