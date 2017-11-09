@@ -466,6 +466,62 @@ RCT_EXPORT_METHOD(getAlbumTracks:(NSString*)albumID options:(NSDictionary*)optio
 	}];
 }
 
+RCT_EXPORT_METHOD(getArtist:(NSString*)artistID options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion)
+{
+	reactCallbackAndReturnIfNil(artistID, completion, [NSNull null], );
+	
+	NSString* endpoint = NSString_concat(@"artists/", artistID);
+	[self doAPIRequest:endpoint method:@"GET" params:options jsonBody:NO completion:^(id resultObj, NSError *error) {
+		completion(@[ [RCTSpotify reactSafeArg:resultObj], [RCTSpotify objFromError:error] ]);
+	}];
+}
+
+RCT_EXPORT_METHOD(getArtists:(NSArray<NSString*>*)artistIDs options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion)
+{
+	reactCallbackAndReturnIfNil(artistIDs, completion, [NSNull null], );
+	
+	NSMutableDictionary* body = [[self class] mutableDictFromDict:options];
+	body[@"ids"] = [artistIDs componentsJoinedByString:@","];
+	
+	[self doAPIRequest:@"artists" method:@"GET" params:body jsonBody:NO completion:^(id resultObj, NSError* error) {
+		completion(@[ [RCTSpotify reactSafeArg:resultObj], [RCTSpotify objFromError:error] ]);
+	}];
+}
+
+RCT_EXPORT_METHOD(getArtistAlbums:(NSString*)artistID options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion)
+{
+	reactCallbackAndReturnIfNil(artistID, completion, [NSNull null], );
+	
+	NSString* endpoint = NSString_concat(@"artists/", artistID, @"/albums");
+	[self doAPIRequest:endpoint method:@"GET" params:options jsonBody:NO completion:^(id resultObj, NSError* error) {
+		completion(@[ [RCTSpotify reactSafeArg:resultObj], [RCTSpotify objFromError:error] ]);
+	}];
+}
+
+RCT_EXPORT_METHOD(getArtistTopTracks:(NSString*)artistID country:(NSString*)country options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion)
+{
+	reactCallbackAndReturnIfNil(artistID, completion, [NSNull null], );
+	reactCallbackAndReturnIfNil(country, completion, [NSNull null], );
+	
+	NSMutableDictionary* body = [[self class] mutableDictFromDict:options];
+	body[@"country"] = country;
+	
+	NSString* endpoint = NSString_concat(@"artists/", artistID, @"/top-tracks");
+	[self doAPIRequest:endpoint method:@"GET" params:options jsonBody:NO completion:^(id resultObj, NSError* error) {
+		completion(@[ [RCTSpotify reactSafeArg:resultObj], [RCTSpotify objFromError:error] ]);
+	}];
+}
+
+RCT_EXPORT_METHOD(getArtistRelatedArtists:(NSString*)artistID options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion)
+{
+	reactCallbackAndReturnIfNil(artistID, completion, [NSNull null], );
+	
+	NSString* endpoint = NSString_concat(@"artists/", artistID, @"/related-artists");
+	[self doAPIRequest:endpoint method:@"GET" params:options jsonBody:NO completion:^(id resultObj, NSError* error) {
+		completion(@[ [RCTSpotify reactSafeArg:resultObj], [RCTSpotify objFromError:error] ]);
+	}];
+}
+
 
 
 #pragma mark - SpotifyWebViewDelegate
