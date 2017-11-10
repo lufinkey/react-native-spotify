@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.preference.PreferenceManager;
 import android.view.WindowManager;
 
@@ -25,6 +26,11 @@ import com.facebook.react.bridge.WritableNativeMap;
 import com.spotify.sdk.android.authentication.*;
 import com.spotify.sdk.android.player.*;
 import com.spotify.sdk.android.player.Error;
+
+import java.net.CookieManager;
+import java.util.ArrayList;
+
+import okhttp3.Cookie;
 
 public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Player.NotificationCallback, ConnectionStateCallback
 {
@@ -48,6 +54,30 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		networkStateReceiver = null;
 		player = null;
 		playerLoginCompletion = null;
+	}
+
+	private Object nullobj()
+	{
+		return null;
+	}
+
+	private void clearCookies(String url)
+	{
+		android.webkit.CookieManager cookieManager = android.webkit.CookieManager.getInstance();
+		String bigcookie = cookieManager.getCookie(url);
+		String[] cookies = bigcookie.split(";");
+		for(int i=0; i<cookies.length; i++)
+		{
+			String[] cookieParts = cookies[i].split("=");
+			if(cookieParts.length == 2)
+			{
+				cookieManager.setCookie(url, cookieParts[0].trim()+"=");
+			}
+		}
+		if (Build.VERSION.SDK_INT >= 21)
+		{
+			cookieManager.flush();
+		}
 	}
 
 	Activity getMainActivity()
@@ -113,7 +143,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		if(accessToken == null)
 		{
 			System.out.println("access token is null. Finishing initialization");
-			callback.invoke(false, null);
+			callback.invoke(false, nullobj());
 			return;
 		}
 
@@ -310,7 +340,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 						SpotifyAuthActivity.currentActivity = null;
 						callback.invoke(
 								false,
-								null
+								nullobj()
 						);
 						break;
 
@@ -364,6 +394,34 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	}
 
 	@ReactMethod
+	void logout(final Callback callback)
+	{
+		if(!isLoggedIn())
+		{
+			callback.invoke(nullobj());
+			return;
+		}
+
+		//destroy the player
+		Spotify.destroyPlayer(player);
+		player = null;
+
+		//remove the saved access token
+		String sessionUserDefaultsKey = options.getString("sessionUserDefaultsKey");
+		if(sessionUserDefaultsKey != null)
+		{
+			SharedPreferences prefs = getMainActivity().getSharedPreferences(sessionUserDefaultsKey, Context.MODE_PRIVATE);
+			SharedPreferences.Editor prefsEditor = prefs.edit();
+			prefsEditor.remove("accessToken");
+			prefsEditor.commit();
+		}
+
+		clearCookies("https://accounts.spotify.com");
+
+		callback.invoke(nullobj());
+	}
+
+	@ReactMethod
 	//isLoggedIn()
 	boolean isLoggedIn()
 	{
@@ -381,6 +439,9 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		//TODO for some reason we don't use this on Android, despite having to give a redirectURL
 		return false;
 	}
+
+
+
 
 	private final Player.OperationCallback playerOperationCallback = new Player.OperationCallback() {
 		@Override
