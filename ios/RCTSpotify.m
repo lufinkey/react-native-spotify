@@ -339,6 +339,10 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(handleAuthURL:(NSString*)urlString)
 	if([_auth canHandleURL:url])
 	{
 		[_auth handleAuthCallbackWithTriggeredAuthURL:url callback:^(NSError* error, SPTSession* session){
+			if(session!=nil)
+			{
+				_auth.session = session;
+			}
 			if(_authControllerResponse != nil)
 			{
 				void(^response)(BOOL, NSError*) = _authControllerResponse;
@@ -796,7 +800,7 @@ RCT_EXPORT_METHOD(getTracksAudioFeatures:(NSArray<NSString*>*)trackIDs options:(
 	}
 	
 	//do log back in callbacks
-	NSArray<void(^)(BOOL, NSError*)>* logBackInResponses = _logBackInResponses;
+	NSArray<void(^)(BOOL, NSError*)>* logBackInResponses = [NSArray arrayWithArray:_logBackInResponses];
 	[_logBackInResponses removeAllObjects];
 	for(void(^response)(BOOL,NSError*) in logBackInResponses)
 	{
@@ -817,7 +821,7 @@ RCT_EXPORT_METHOD(getTracksAudioFeatures:(NSArray<NSString*>*)trackIDs options:(
 		}
 		
 		//do log back in callbacks
-		NSArray<void(^)(BOOL, NSError*)>* logBackInResponses = _logBackInResponses;
+		NSArray<void(^)(BOOL, NSError*)>* logBackInResponses = [NSArray arrayWithArray:_logBackInResponses];
 		[_logBackInResponses removeAllObjects];
 		for(void(^response)(BOOL,NSError*) in logBackInResponses)
 		{
@@ -839,7 +843,7 @@ RCT_EXPORT_METHOD(getTracksAudioFeatures:(NSArray<NSString*>*)trackIDs options:(
 	}
 	
 	//do log back in callbacks
-	NSArray<void(^)(BOOL, NSError*)>* logBackInResponses = _logBackInResponses;
+	NSArray<void(^)(BOOL, NSError*)>* logBackInResponses = [NSArray arrayWithArray:_logBackInResponses];
 	[_logBackInResponses removeAllObjects];
 	for(void(^response)(BOOL,NSError*) in logBackInResponses)
 	{
@@ -847,7 +851,7 @@ RCT_EXPORT_METHOD(getTracksAudioFeatures:(NSArray<NSString*>*)trackIDs options:(
 	}
 	
 	//do logout callbacks
-	NSArray<void(^)(NSError*)>* logoutResponses = _logoutResponses;
+	NSArray<void(^)(NSError*)>* logoutResponses = [NSArray arrayWithArray:_logoutResponses];
 	[_logoutResponses removeAllObjects];
 	for(void(^response)(NSError*) in logoutResponses)
 	{
