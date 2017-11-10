@@ -709,7 +709,21 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	//sendRequest(endpoint, method, params, isJSONBody, (result?, error?))
 	void sendRequest(String endpoint, String method, ReadableMap params, boolean jsonBody, final Callback callback)
 	{
-		//
+		doAPIRequest(endpoint, method, params, jsonBody, new RCTSpotifyCallback<ReadableMap>() {
+			@Override
+			public void invoke(ReadableMap responseObj, RCTSpotifyError error)
+			{
+				ReadableMap errorObj = null;
+				if(error!=null)
+				{
+					errorObj = error.toReactObject();
+				}
+				if(callback!=null)
+				{
+					callback.invoke(responseObj, errorObj);
+				}
+			}
+		});
 	}
 
 
