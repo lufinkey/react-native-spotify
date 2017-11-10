@@ -20,6 +20,7 @@ import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
@@ -290,6 +291,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		//get required options
 		String clientID = options.getString("clientID");
 		String redirectURL = options.getString("redirectURL");
+		ReadableArray scopes = options.getArray("scopes");
 		String missingOption = null;
 		if(clientID == null)
 		{
@@ -298,6 +300,10 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		else if(redirectURL == null)
 		{
 			missingOption = "redirectURL";
+		}
+		else if(scopes == null)
+		{
+			missingOption = "scopes";
 		}
 		if(missingOption != null)
 		{
@@ -310,6 +316,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			);
 			return;
 		}
+		String[] scopesArr = (String[])scopes.toArrayList().toArray();
 
 		//ensure no conflicting callbacks
 		if(SpotifyAuthActivity.request != null || SpotifyAuthActivity.currentActivity != null)
@@ -326,7 +333,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 		//show auth activity
 		SpotifyAuthActivity.request = new AuthenticationRequest.Builder(clientID, AuthenticationResponse.Type.TOKEN, redirectURL)
-				.setScopes(new String[]{"user-read-private", "playlist-read", "playlist-read-private", "streaming"})
+				.setScopes(scopesArr)
 				.build();
 		//wait for SpotifyAuthActivity.onActivityResult
 		SpotifyAuthActivity.completion = new RCTSpotifyCallback<AuthenticationResponse>() {
