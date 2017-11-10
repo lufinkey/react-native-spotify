@@ -118,14 +118,14 @@ import Spotify from 'react-native-spotify';
 		* *true* if the url passed to it was successfully handled as an authentication URL
 		* *false* if the url was not an authentication URL
 
-Example implementation:	
-```javascript
-App.handleOpenURL = (event) => {
-	if(Spotify.handleAuthURL(event.url))
-	{
-		return true;
-	}
-	return false;
-}
-Linking.addEventListener('url', App.handleOpenURL);
-```
+	* *example implementation*
+	```javascript
+		App.handleOpenURL = (event) => {
+			if(Spotify.handleAuthURL(event.url))
+			{
+				return true;
+			}
+			return false;
+		}
+		Linking.addEventListener('url', App.handleOpenURL);
+	```
