@@ -442,6 +442,15 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 
 
+	@ReactMethod
+	//sendRequest(endpoint, method, params, isJSONBody, (result?, error?))
+	void sendRequest(String endpoint, String method, ReadableMap params, boolean jsonBody, final Callback callback)
+	{
+		//
+	}
+
+
+
 
 	private final Player.OperationCallback playerOperationCallback = new Player.OperationCallback() {
 		@Override
