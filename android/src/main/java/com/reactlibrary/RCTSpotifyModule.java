@@ -659,6 +659,11 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			public void invoke(Boolean success, RCTSpotifyError error)
 			{
 				HashMap<String, String> headers = new HashMap<>();
+				String accessToken = getAccessToken();
+				if(accessToken != null)
+				{
+					headers.put("Authorization", "Bearer "+accessToken);
+				}
 				//TODO add authorization to headers
 				doHTTPRequest("https://api.spotify.com/v1/", method, params, jsonBody, headers, new RCTSpotifyCallback<String>() {
 					@Override
