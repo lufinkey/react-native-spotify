@@ -246,31 +246,41 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	{
 		System.out.println("loginPlayer");
 
-		if(player.isLoggedIn())
-		{
-			setAccessToken(accessToken);
-			completion.invoke(true, null);
-			return;
-		}
+		boolean loggedIn = false;
 
 		synchronized(playerLoginResponses)
 		{
-			//wait for RCTSpotifyModule.onLoggedIn
-			// or RCTSpotifyModule.onLoginFailed
-			playerLoginResponses.add(new RCTSpotifyCallback<Boolean>() {
-				@Override
-				public void invoke(Boolean loggedIn, RCTSpotifyError error)
-				{
-					if(loggedIn)
+			if(player.isLoggedIn())
+			{
+				loggedIn = true;
+			}
+			else
+			{
+				//wait for RCTSpotifyModule.onLoggedIn
+				// or RCTSpotifyModule.onLoginFailed
+				playerLoginResponses.add(new RCTSpotifyCallback<Boolean>() {
+					@Override
+					public void invoke(Boolean loggedIn, RCTSpotifyError error)
 					{
-						setAccessToken(accessToken);
+						if (loggedIn)
+						{
+							setAccessToken(accessToken);
+						}
+						completion.invoke(loggedIn, error);
 					}
-					completion.invoke(loggedIn, error);
-				}
-			});
+				});
+			}
 		}
 
-		player.login(accessToken);
+		if(loggedIn)
+		{
+			setAccessToken(accessToken);
+			completion.invoke(true, null);
+		}
+		else
+		{
+			player.login(accessToken);
+		}
 	}
 
 	@ReactMethod
