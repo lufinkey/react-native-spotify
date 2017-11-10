@@ -13,6 +13,7 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 import android.view.WindowManager;
 
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.Promise;
@@ -41,9 +42,9 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	private BroadcastReceiver networkStateReceiver;
 
 	private SpotifyPlayer player;
-	private ReadableMap options;
-
 	private RCTSpotifyCallback<Boolean> playerLoginCompletion;
+
+	private ReadableMap options;
 
 	public RCTSpotifyModule(ReactApplicationContext reactContext)
 	{
@@ -51,9 +52,13 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		this.reactContext = reactContext;
 
 		initialized = false;
+
 		networkStateReceiver = null;
+
 		player = null;
 		playerLoginCompletion = null;
+
+		options = null;
 	}
 
 	private Object nullobj()
@@ -130,16 +135,14 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			return;
 		}
 
+		if(options==null)
+		{
+			options = Arguments.createMap();
+		}
 		this.options = options;
 
 		//check for accessToken
-		String sessionUserDefaultsKey = options.getString("sessionUserDefaultsKey");
-		String accessToken = null;
-		if(sessionUserDefaultsKey!=null)
-		{
-			SharedPreferences prefs = getMainActivity().getSharedPreferences(sessionUserDefaultsKey, Context.MODE_PRIVATE);
-			accessToken = prefs.getString("accessToken", null);
-		}
+		String accessToken = getAccessToken();
 		if(accessToken == null)
 		{
 			System.out.println("access token is null. Finishing initialization");
@@ -215,14 +218,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 				player = newPlayer;
 
 				//save accessToken
-				String sessionUserDefaultsKey = options.getString("sessionUserDefaultsKey");
-				if(sessionUserDefaultsKey != null)
-				{
-					SharedPreferences prefs = getMainActivity().getSharedPreferences(sessionUserDefaultsKey, Context.MODE_PRIVATE);
-					SharedPreferences.Editor prefsEditor = prefs.edit();
-					prefsEditor.putString("accessToken", accessToken);
-					prefsEditor.commit();
-				}
+				setAccessToken(accessToken);
 
 				//ensure no conflicting callbacks
 				if(playerLoginCompletion != null)
@@ -430,6 +426,33 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			return true;
 		}
 		return false;
+	}
+
+	@ReactMethod
+	//getAccessToken()
+	String getAccessToken()
+	{
+		String sessionUserDefaultsKey = options.getString("sessionUserDefaultsKey");
+		if(sessionUserDefaultsKey == null)
+		{
+			return null;
+		}
+		SharedPreferences prefs = getMainActivity().getSharedPreferences(sessionUserDefaultsKey, Context.MODE_PRIVATE);
+		return prefs.getString("accessToken", null);
+	}
+
+	@ReactMethod
+	//setAccessToken(String accessToken)
+	void setAccessToken(String accessToken)
+	{
+		String sessionUserDefaultsKey = options.getString("sessionUserDefaultsKey");
+		if(sessionUserDefaultsKey != null)
+		{
+			SharedPreferences prefs = getMainActivity().getSharedPreferences(sessionUserDefaultsKey, Context.MODE_PRIVATE);
+			SharedPreferences.Editor prefsEditor = prefs.edit();
+			prefsEditor.putString("accessToken", accessToken);
+			prefsEditor.commit();
+		}
 	}
 
 	@ReactMethod
