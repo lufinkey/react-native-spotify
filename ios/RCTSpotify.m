@@ -126,13 +126,11 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSende
 		}
 	}
 	
-	//set default options
-	_auth.requestedScopes = @[SPTAuthStreamingScope];
-	
 	//get options
 	_auth.clientID = options[@"clientID"];
 	_auth.redirectURL = [NSURL URLWithString:options[@"redirectURL"]];
 	_auth.sessionUserDefaultsKey = options[@"sessionUserDefaultsKey"];
+	_auth.requestedScopes = options[@"scopes"];
 	_auth.tokenSwapURL = [NSURL URLWithString:options[@"tokenSwapURL"]];
 	_auth.tokenRefreshURL = [NSURL URLWithString:options[@"tokenRefreshURL"]];
 	NSNumber* cacheSize = options[@"cacheSize"];
