@@ -13,6 +13,13 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 import android.view.WindowManager;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.LifecycleEventListener;
@@ -29,8 +36,15 @@ import com.spotify.sdk.android.authentication.*;
 import com.spotify.sdk.android.player.*;
 import com.spotify.sdk.android.player.Error;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
 import java.net.CookieManager;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import okhttp3.Cookie;
 
@@ -518,13 +532,180 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		});
 	}
 
+	private RequestQueue requestQueue = null;
+
+	public void doHTTPRequest(String url, String method, final ReadableMap params, final boolean jsonBody, final HashMap<String,String> headers, final RCTSpotifyCallback<String> completion)
+	{
+		if(requestQueue == null)
+		{
+			requestQueue = Volley.newRequestQueue(getMainActivity());
+		}
+
+		//parse request method
+		int requestMethod;
+		if(method.equals("GET"))
+		{
+			requestMethod = Request.Method.GET;
+		}
+		else if(method.equals("POST"))
+		{
+			requestMethod = Request.Method.POST;
+		}
+		else if(method.equals("DELETE"))
+		{
+			requestMethod = Request.Method.DELETE;
+		}
+		else if(method.equals("PUT"))
+		{
+			requestMethod = Request.Method.PUT;
+		}
+		else if(method.equals("HEAD"))
+		{
+			requestMethod = Request.Method.HEAD;
+		}
+		else if(method.equals("PATCH"))
+		{
+			requestMethod = Request.Method.PATCH;
+		}
+		else
+		{
+			completion.invoke(null, new RCTSpotifyError(RCTSpotifyError.Code.BAD_PARAMETERS, "invalid request method "+method));
+			return;
+		}
+
+		//append query string to url if necessary
+		if(!jsonBody && params!=null)
+		{
+			url += "?";
+			HashMap<String, Object> map = params.toHashMap();
+			boolean firstArg = true;
+			for(String key : map.keySet())
+			{
+				if(firstArg)
+				{
+					firstArg = false;
+				}
+				else
+				{
+					url += "&";
+				}
+				String value = map.get(key).toString();
+				try
+				{
+					url += URLEncoder.encode(key, "UTF-8")+"="+URLEncoder.encode(value, "UTF-8");
+				}
+				catch (UnsupportedEncodingException e)
+				{
+					e.printStackTrace();
+					break;
+				}
+			}
+		}
+
+		//make request
+		StringRequest request = new StringRequest(requestMethod, url, new Response.Listener<String>() {
+			@Override
+			public void onResponse(String response)
+			{
+				completion.invoke(response, null);
+			}
+		}, new Response.ErrorListener() {
+			@Override
+			public void onErrorResponse(VolleyError error)
+			{
+				completion.invoke(null, new RCTSpotifyError(RCTSpotifyError.Code.REQUEST_ERROR, error.getLocalizedMessage()));
+			}
+		}) {
+			@Override
+			public Map<String, String> getHeaders()
+			{
+				return headers;
+			}
+
+			@Override
+			public String getBodyContentType()
+			{
+				if(jsonBody)
+				{
+					return "application/json; charset=utf-8";
+				}
+				return super.getBodyContentType();
+			}
+
+			@Override
+			public byte[] getBody() throws AuthFailureError
+			{
+				if(jsonBody && params!=null)
+				{
+					JSONObject obj = RCTSpotifyConvert.toJSONObject(params);
+					if(obj == null)
+					{
+						return null;
+					}
+					return obj.toString().getBytes();
+				}
+				return null;
+			}
+		};
+
+		//do request
+		requestQueue.add(request);
+	}
+
+	void doAPIRequest(String endpoint, final String method, final ReadableMap params, final boolean jsonBody, final RCTSpotifyCallback<ReadableMap> completion)
+	{
+		prepareForRequest(new RCTSpotifyCallback<Boolean>(){
+			@Override
+			public void invoke(Boolean success, RCTSpotifyError error)
+			{
+				HashMap<String, String> headers = new HashMap<>();
+				//TODO add authorization to headers
+				doHTTPRequest("https://api.spotify.com/v1/", method, params, jsonBody, headers, new RCTSpotifyCallback<String>() {
+					@Override
+					public void invoke(String response, RCTSpotifyError error) {
+						if(error != null)
+						{
+							completion.invoke(null, error);
+							return;
+						}
+
+						JSONObject responseObj;
+						try
+						{
+							responseObj = new JSONObject(response);
+						}
+						catch (JSONException e)
+						{
+							completion.invoke(null, new RCTSpotifyError(RCTSpotifyError.Code.REQUEST_ERROR, "Invalid response format"));
+							return;
+						}
+
+						try
+						{
+							JSONObject errorObj = responseObj.getJSONObject("error");
+							completion.invoke(RCTSpotifyConvert.fromJSONObject(responseObj),
+									new RCTSpotifyError(RCTSpotifyError.Code.REQUEST_ERROR,
+											errorObj.getString("message")));
+							return;
+						}
+						catch(JSONException e)
+						{
+							//do nothing. this means we don't have an error
+						}
+
+						completion.invoke(RCTSpotifyConvert.fromJSONObject(responseObj), null);
+					}
+				});
+			}
+		});
+	}
+
 	@ReactMethod
 	//sendRequest(endpoint, method, params, isJSONBody, (result?, error?))
-	public void sendRequest(String endpoint, String method, ReadableMap params, boolean jsonBody, final Callback callback)
+	void sendRequest(String endpoint, String method, ReadableMap params, boolean jsonBody, final Callback callback)
 	{
 		//
 	}
-
 
 
 
