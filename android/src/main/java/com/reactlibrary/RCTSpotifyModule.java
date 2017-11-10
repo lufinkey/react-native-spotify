@@ -316,7 +316,12 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			);
 			return;
 		}
-		String[] scopesArr = (String[])scopes.toArrayList().toArray();
+		//get string array of scopes
+		String[] scopesArr = new String[scopes.size()];
+		for(int i=0; i<scopes.size(); i++)
+		{
+			scopesArr[i] = scopes.getString(i);
+		}
 
 		//ensure no conflicting callbacks
 		if(SpotifyAuthActivity.request != null || SpotifyAuthActivity.currentActivity != null)
@@ -491,6 +496,27 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	}
 
 
+
+	void prepareForRequest(final RCTSpotifyCallback<Boolean> completion)
+	{
+		logBackInIfNeeded(new RCTSpotifyCallback<Boolean>() {
+			@Override
+			public void invoke(Boolean loggedIn, RCTSpotifyError error) {
+				if(!loggedIn)
+				{
+					if(error==null)
+					{
+						error = new RCTSpotifyError(RCTSpotifyError.Code.NOT_LOGGED_IN, "You are not logged in");
+					}
+					completion.invoke(false, error);
+				}
+				else
+				{
+					completion.invoke(true, error);
+				}
+			}
+		});
+	}
 
 	@ReactMethod
 	//sendRequest(endpoint, method, params, isJSONBody, (result?, error?))
