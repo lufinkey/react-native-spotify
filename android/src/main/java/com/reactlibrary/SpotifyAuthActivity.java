@@ -16,6 +16,8 @@ public class SpotifyAuthActivity extends Activity
 	static AuthenticationRequest request;
 	static RCTSpotifyCallback<AuthenticationResponse> completion;
 
+	RCTSpotifyCallback<Void> onFinishCompletion;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -36,6 +38,21 @@ public class SpotifyAuthActivity extends Activity
 			request = null;
 			completion = null;
 			completionTmp.invoke(response, null);
+		}
+	}
+
+	@Override
+	protected void onDestroy()
+	{
+		super.onDestroy();
+		if(isFinishing())
+		{
+			if(onFinishCompletion!=null)
+			{
+				RCTSpotifyCallback<Void> completionTmp = onFinishCompletion;
+				onFinishCompletion = null;
+				completionTmp.invoke(null, null);
+			}
 		}
 	}
 }

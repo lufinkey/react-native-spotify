@@ -357,17 +357,20 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		//wait for SpotifyAuthActivity.onActivityResult
 		SpotifyAuthActivity.completion = new RCTSpotifyCallback<AuthenticationResponse>() {
 			@Override
-			public void invoke(AuthenticationResponse response, RCTSpotifyError error)
+			public void invoke(final AuthenticationResponse response, final RCTSpotifyError error)
 			{
 				if(error != null)
 				{
 					System.out.println("error with spotify auth activity");
+					SpotifyAuthActivity.currentActivity.onFinishCompletion = new RCTSpotifyCallback<Void>() {
+						@Override
+						public void invoke(Void obj, RCTSpotifyError unusedError)
+						{
+							callback.invoke(false, error.toReactObject());
+						}
+					};
 					SpotifyAuthActivity.currentActivity.finish();
 					SpotifyAuthActivity.currentActivity = null;
-					callback.invoke(
-							false,
-							error.toReactObject()
-					);
 					return;
 				}
 
@@ -375,24 +378,31 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 				{
 					default:
 						System.out.println("user cancelled login activity");
+						SpotifyAuthActivity.currentActivity.onFinishCompletion = new RCTSpotifyCallback<Void>() {
+							@Override
+							public void invoke(Void obj, RCTSpotifyError unusedError)
+							{
+								callback.invoke(false, nullobj());
+							}
+						};
 						SpotifyAuthActivity.currentActivity.finish();
 						SpotifyAuthActivity.currentActivity = null;
-						callback.invoke(
-								false,
-								nullobj()
-						);
 						break;
 
 					case ERROR:
 						System.out.println("error with login activity");
+						SpotifyAuthActivity.currentActivity.onFinishCompletion = new RCTSpotifyCallback<Void>() {
+							@Override
+							public void invoke(Void obj, RCTSpotifyError unusedError)
+							{
+								callback.invoke(
+										false,
+										new RCTSpotifyError(RCTSpotifyError.Code.AUTHORIZATION_FAILED, response.getError()).toReactObject()
+								);
+							}
+						};
 						SpotifyAuthActivity.currentActivity.finish();
 						SpotifyAuthActivity.currentActivity = null;
-						callback.invoke(
-								false,
-								new RCTSpotifyError(
-										RCTSpotifyError.Code.AUTHORIZATION_FAILED,
-										response.getError()).toReactObject()
-						);
 						break;
 
 					case TOKEN:
@@ -404,23 +414,25 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 						//initialize player
 						initializePlayer(response.getAccessToken(), new RCTSpotifyCallback<Boolean>() {
 							@Override
-							public void invoke(Boolean loggedIn, RCTSpotifyError error)
+							public void invoke(final Boolean loggedIn, final RCTSpotifyError error)
 							{
 								//re-enable activity interaction and dismiss
 								SpotifyAuthActivity.currentActivity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+								SpotifyAuthActivity.currentActivity.onFinishCompletion = new RCTSpotifyCallback<Void>() {
+									@Override
+									public void invoke(Void obj, RCTSpotifyError unusedError)
+									{
+										//perform callback
+										ReadableMap errorObj = null;
+										if(error!=null)
+										{
+											errorObj = error.toReactObject();
+										}
+										callback.invoke(loggedIn.booleanValue(), errorObj);
+									}
+								};
 								SpotifyAuthActivity.currentActivity.finish();
 								SpotifyAuthActivity.currentActivity = null;
-
-								//perform callback
-								ReadableMap errorObj = null;
-								if(error!=null)
-								{
-									errorObj = error.toReactObject();
-								}
-								callback.invoke(
-										loggedIn.booleanValue(),
-										errorObj
-								);
 							}
 						});
 						break;
@@ -724,6 +736,15 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 				}
 			}
 		});
+	}
+
+
+
+	@ReactMethod
+	//search(query, types, options?, (result?, error?))
+	void search(String query, ReadableArray types, ReadableMap options, final Callback callback)
+	{
+		//TODO implement search
 	}
 
 
