@@ -155,4 +155,13 @@ public class RCTSpotifyConvert
 			return null;
 		}
 	}
+
+	public static ReadableMap fromRCTSpotifyError(RCTSpotifyError error)
+	{
+		if(error==null)
+		{
+			return null;
+		}
+		return error.toReactObject();
+	}
 }

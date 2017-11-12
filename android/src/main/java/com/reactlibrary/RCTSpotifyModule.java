@@ -449,7 +449,10 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	{
 		if(!isLoggedIn())
 		{
-			callback.invoke(nullobj());
+			if(callback!=null)
+			{
+				callback.invoke(nullobj());
+			}
 			return;
 		}
 
@@ -461,7 +464,10 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		setAccessToken(null);
 		clearCookies("https://accounts.spotify.com");
 
-		callback.invoke(nullobj());
+		if(callback!=null)
+		{
+			callback.invoke(nullobj());
+		}
 	}
 
 	@ReactMethod
@@ -619,13 +625,16 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			@Override
 			public void onResponse(String response)
 			{
+				System.out.println("got http request response");
 				completion.invoke(response, null);
 			}
 		}, new Response.ErrorListener() {
 			@Override
 			public void onErrorResponse(VolleyError error)
 			{
-				completion.invoke(null, new RCTSpotifyError(RCTSpotifyError.Code.REQUEST_ERROR, error.getLocalizedMessage()));
+				System.out.println("got volley error");
+				String errorMessage = error.getMessage();
+				completion.invoke(null, new RCTSpotifyError(RCTSpotifyError.Code.REQUEST_ERROR, "error: "+errorMessage));
 			}
 		}) {
 			@Override
@@ -664,7 +673,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		requestQueue.add(request);
 	}
 
-	void doAPIRequest(String endpoint, final String method, final ReadableMap params, final boolean jsonBody, final RCTSpotifyCallback<ReadableMap> completion)
+	void doAPIRequest(final String endpoint, final String method, final ReadableMap params, final boolean jsonBody, final RCTSpotifyCallback<ReadableMap> completion)
 	{
 		prepareForRequest(new RCTSpotifyCallback<Boolean>(){
 			@Override
@@ -677,7 +686,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 					headers.put("Authorization", "Bearer "+accessToken);
 				}
 				//TODO add authorization to headers
-				doHTTPRequest("https://api.spotify.com/v1/", method, params, jsonBody, headers, new RCTSpotifyCallback<String>() {
+				doHTTPRequest("https://api.spotify.com/v1/"+endpoint, method, params, jsonBody, headers, new RCTSpotifyCallback<String>() {
 					@Override
 					public void invoke(String response, RCTSpotifyError error) {
 						if(error != null)
@@ -744,7 +753,35 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	//search(query, types, options?, (result?, error?))
 	void search(String query, ReadableArray types, ReadableMap options, final Callback callback)
 	{
-		//TODO implement search
+		//TODO check for null query and types
+
+		WritableMap body = Arguments.createMap();
+		if(options!=null)
+		{
+			body.merge(options);
+		}
+		body.putString("q", query);
+		String type = "";
+		for(int i=0; i<types.size(); i++)
+		{
+			if(i==0)
+			{
+				type = types.getString(i);
+			}
+			else
+			{
+				type += ","+types.getString(i);
+			}
+		}
+		body.putString("type", type);
+
+		doAPIRequest("search", "GET", body, false, new RCTSpotifyCallback<ReadableMap>() {
+			@Override
+			public void invoke(ReadableMap responseObj, RCTSpotifyError error)
+			{
+				callback.invoke(responseObj, RCTSpotifyConvert.fromRCTSpotifyError(error));
+			}
+		});
 	}
 
 
