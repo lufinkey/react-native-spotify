@@ -164,4 +164,21 @@ public class RCTSpotifyConvert
 		}
 		return error.toReactObject();
 	}
+
+	public static String joinedIntoString(ReadableArray array, String delimiter)
+	{
+		String str = "";
+		for(int i=0; i<array.size(); i++)
+		{
+			if(i==0)
+			{
+				str = array.getString(i);
+			}
+			else
+			{
+				str += delimiter + array.getString(i);
+			}
+		}
+		return str;
+	}
 }

@@ -761,6 +761,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		else if(types==null)
 		{
 			callback.invoke(nullobj(), RCTSpotifyError.getNullParameterError("types"));
+			return;
 		}
 
 		WritableMap body = Arguments.createMap();
@@ -785,9 +786,63 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 		doAPIRequest("search", "GET", body, false, new RCTSpotifyCallback<ReadableMap>() {
 			@Override
-			public void invoke(ReadableMap responseObj, RCTSpotifyError error)
+			public void invoke(ReadableMap resultObj, RCTSpotifyError error)
 			{
-				callback.invoke(responseObj, RCTSpotifyConvert.fromRCTSpotifyError(error));
+				callback.invoke(resultObj, RCTSpotifyConvert.fromRCTSpotifyError(error));
+			}
+		});
+	}
+
+	void getAlbum(String albumID, ReadableMap options, final Callback callback)
+	{
+		if(albumID==null)
+		{
+			callback.invoke(nullobj(), RCTSpotifyError.getNullParameterError("albumID"));
+			return;
+		}
+		doAPIRequest("albums/"+albumID, "GET", options, false, new RCTSpotifyCallback<ReadableMap>() {
+			@Override
+			public void invoke(ReadableMap resultObj, RCTSpotifyError error)
+			{
+				callback.invoke(resultObj, RCTSpotifyConvert.fromRCTSpotifyError(error));
+			}
+		});
+	}
+
+	void getAlbums(ReadableArray albumIDs, ReadableMap options, final Callback callback)
+	{
+		if(albumIDs==null)
+		{
+			callback.invoke(nullobj(), RCTSpotifyError.getNullParameterError("albumIDs"));
+			return;
+		}
+		WritableMap body = Arguments.createMap();
+		if(options!=null)
+		{
+			body.merge(options);
+		}
+		body.putString("ids", RCTSpotifyConvert.joinedIntoString(albumIDs, ","));
+		doAPIRequest("albums", "GET", body, false, new RCTSpotifyCallback<ReadableMap>() {
+			@Override
+			public void invoke(ReadableMap resultObj, RCTSpotifyError error)
+			{
+				callback.invoke(resultObj, RCTSpotifyConvert.fromRCTSpotifyError(error));
+			}
+		});
+	}
+
+	void getAlbumTracks(String albumID, ReadableMap options, final Callback callback)
+	{
+		if(albumID==null)
+		{
+			callback.invoke(nullobj(), RCTSpotifyError.getNullParameterError("albumID"));
+			return;
+		}
+		doAPIRequest("albums/"+albumID+"/tracks", "GET", options, false, new RCTSpotifyCallback<ReadableMap>() {
+			@Override
+			public void invoke(ReadableMap resultObj, RCTSpotifyError error)
+			{
+				callback.invoke(resultObj, RCTSpotifyConvert.fromRCTSpotifyError(error));
 			}
 		});
 	}
