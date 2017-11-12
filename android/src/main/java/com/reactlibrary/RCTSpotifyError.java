@@ -54,4 +54,9 @@ public class RCTSpotifyError
 		map.putString("description", description);
 		return map;
 	}
+
+	public static RCTSpotifyError getNullParameterError(String parameterName)
+	{
+		return new RCTSpotifyError(Code.BAD_PARAMETERS, parameterName+" parameter cannot be null");
+	}
 }

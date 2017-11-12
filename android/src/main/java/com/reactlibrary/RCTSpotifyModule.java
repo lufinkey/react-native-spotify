@@ -753,7 +753,15 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	//search(query, types, options?, (result?, error?))
 	void search(String query, ReadableArray types, ReadableMap options, final Callback callback)
 	{
-		//TODO check for null query and types
+		if(query==null)
+		{
+			callback.invoke(nullobj(), RCTSpotifyError.getNullParameterError("query"));
+			return;
+		}
+		else if(types==null)
+		{
+			callback.invoke(nullobj(), RCTSpotifyError.getNullParameterError("types"));
+		}
 
 		WritableMap body = Arguments.createMap();
 		if(options!=null)
