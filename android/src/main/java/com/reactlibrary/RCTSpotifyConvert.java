@@ -181,4 +181,14 @@ public class RCTSpotifyConvert
 		}
 		return str;
 	}
+
+	public static WritableMap toWritableMap(ReadableMap map)
+	{
+		WritableMap mutMap = Arguments.createMap();
+		if(map!=null)
+		{
+			mutMap.merge(map);
+		}
+		return mutMap;
+	}
 }
