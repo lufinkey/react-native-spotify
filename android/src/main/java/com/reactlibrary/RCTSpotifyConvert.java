@@ -6,6 +6,7 @@ import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
+import com.spotify.sdk.android.player.PlaybackState;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -196,5 +197,16 @@ public class RCTSpotifyConvert
 	{
 		//TODO add a switch for nativeCode
 		return error.toString();
+	}
+
+	public static WritableMap fromPlaybackState(PlaybackState playbackState)
+	{
+		WritableMap map = Arguments.createMap();
+		map.putBoolean("playing", playbackState.isPlaying);
+		map.putBoolean("repeating", playbackState.isRepeating);
+		map.putBoolean("shuffling", playbackState.isShuffling);
+		map.putBoolean("activeDevice", playbackState.isActiveDevice);
+		map.putDouble("position", ((double)playbackState.positionMs)/1000.0);
+		return map;
 	}
 }

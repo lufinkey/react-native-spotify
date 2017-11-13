@@ -626,6 +626,76 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		return 1.0;
 	}
 
+	@ReactMethod
+	//setPlaying(playing, (error?))
+	void setPlaying(final boolean playing, final Callback callback)
+	{
+		prepareForRequest(new RCTSpotifyCallback<Boolean>() {
+			@Override
+			public void invoke(Boolean success, RCTSpotifyError error)
+			{
+				if(error!=null)
+				{
+					if(callback!=null)
+					{
+						callback.invoke(error.toReactObject());
+					}
+					return;
+				}
+				PlaybackState state = player.getPlaybackState();
+				if((!playing && !state.isPlaying) || (playing && state.isPlaying))
+				{
+					callback.invoke(nullobj());
+					return;
+				}
+
+				if(playing)
+				{
+					player.resume(new Player.OperationCallback(){
+						@Override
+						public void onError(com.spotify.sdk.android.player.Error error)
+						{
+							callback.invoke(new RCTSpotifyError(RCTSpotifyError.Code.SPOTIFY_ERROR, RCTSpotifyConvert.getErrorMessage(error)).toReactObject());
+						}
+
+						@Override
+						public void onSuccess()
+						{
+							callback.invoke(nullobj());
+						}
+					});
+				}
+				else
+				{
+					player.pause(new Player.OperationCallback(){
+						@Override
+						public void onError(com.spotify.sdk.android.player.Error error)
+						{
+							callback.invoke(new RCTSpotifyError(RCTSpotifyError.Code.SPOTIFY_ERROR, RCTSpotifyConvert.getErrorMessage(error)).toReactObject());
+						}
+
+						@Override
+						public void onSuccess()
+						{
+							callback.invoke(nullobj());
+						}
+					});
+				}
+			}
+		});
+	}
+
+	@ReactMethod
+	//getPlaybackState()
+	ReadableMap getPlaybackState()
+	{
+		if(player==null)
+		{
+			return null;
+		}
+		return RCTSpotifyConvert.fromPlaybackState(player.getPlaybackState());
+	}
+
 
 
 
