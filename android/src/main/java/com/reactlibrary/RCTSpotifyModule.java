@@ -77,6 +77,12 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		options = null;
 	}
 
+	@Override
+	public String getName()
+	{
+		return "RCTSpotify";
+	}
+
 	private Object nullobj()
 	{
 		return null;
@@ -121,11 +127,29 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		}
 	}
 
-	@Override
-	public String getName()
+	private boolean hasPlayerScope()
 	{
-		return "RCTSpotify";
+		if(this.options == null)
+		{
+			return false;
+		}
+		ReadableArray scopes = options.getArray("scopes");
+		if(scopes==null)
+		{
+			return false;
+		}
+		for(int i=0; i<scopes.size(); i++)
+		{
+			String scope = scopes.getString(i);
+			if(scope!=null && scope.equals("streaming"))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
+
+
 
 	@ReactMethod
 	//test()
@@ -184,7 +208,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			return;
 		}
 		//TODO refresh access token if needed
-		initializePlayer(accessToken, new RCTSpotifyCallback<Boolean>() {
+		initializePlayerIfNeeded(accessToken, new RCTSpotifyCallback<Boolean>() {
 			@Override
 			public void invoke(Boolean loggedIn, RCTSpotifyError error)
 			{
@@ -193,9 +217,17 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		});
 	}
 
-	private void initializePlayer(final String accessToken, final RCTSpotifyCallback<Boolean> completion)
+	private void initializePlayerIfNeeded(final String accessToken, final RCTSpotifyCallback<Boolean> completion)
 	{
 		System.out.println("initializePlayer");
+
+		//make sure we have the player scope
+		if(!hasPlayerScope())
+		{
+			completion.invoke(true, null);
+			return;
+		}
+
 		//get clientID
 		String clientID = options.getString("clientID");
 		if(clientID == null)
@@ -322,12 +354,12 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		}
 		if(missingOption != null)
 		{
-			System.out.println("missing login option "+clientID);
+			System.out.println("missing login option "+missingOption);
 			callback.invoke(
 					false,
 					new RCTSpotifyError(
 							RCTSpotifyError.Code.MISSING_PARAMETERS,
-							"missing option "+clientID).toReactObject()
+							"missing option "+missingOption).toReactObject()
 			);
 			return;
 		}
@@ -413,7 +445,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 								WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
 
 						//initialize player
-						initializePlayer(response.getAccessToken(), new RCTSpotifyCallback<Boolean>() {
+						initializePlayerIfNeeded(response.getAccessToken(), new RCTSpotifyCallback<Boolean>() {
 							@Override
 							public void invoke(final Boolean loggedIn, final RCTSpotifyError error)
 							{
