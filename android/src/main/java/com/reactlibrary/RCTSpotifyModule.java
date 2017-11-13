@@ -795,6 +795,39 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		});
 	}
 
+	@ReactMethod
+	//setRepeating(repeating, (error?))
+	void setRepeating(final boolean repeating, final Callback callback)
+	{
+		prepareForRequest(new RCTSpotifyCallback<Boolean>() {
+			@Override
+			public void invoke(Boolean obj, RCTSpotifyError error)
+			{
+				if(error!=null)
+				{
+					if(callback!=null)
+					{
+						callback.invoke(error.toReactObject());
+					}
+					return;
+				}
+				player.setRepeat(new Player.OperationCallback() {
+					@Override
+					public void onError(Error error)
+					{
+						callback.invoke(new RCTSpotifyError(error).toReactObject());
+					}
+
+					@Override
+					public void onSuccess()
+					{
+						callback.invoke(nullobj());
+					}
+				}, repeating);
+			}
+		});
+	}
+
 
 
 
