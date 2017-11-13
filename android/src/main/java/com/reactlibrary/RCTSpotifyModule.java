@@ -46,6 +46,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import okhttp3.Call;
 import okhttp3.Cookie;
 
 public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Player.NotificationCallback, ConnectionStateCallback
@@ -535,6 +536,11 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	//playURI(spotifyURI, startIndex, startPosition, (error?))
 	void playURI(final String spotifyURI, final int startIndex, final double startPosition, final Callback callback)
 	{
+		if(spotifyURI==null)
+		{
+			callback.invoke(nullobj(), RCTSpotifyError.getNullParameterError("spotifyURI"));
+			return;
+		}
 		prepareForRequest(new RCTSpotifyCallback<Boolean>() {
 			@Override
 			public void invoke(Boolean success, RCTSpotifyError error)
@@ -565,6 +571,60 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		});
 	}
 
+	@ReactMethod
+	//queueURI(spotifyURI, (error?))
+	void queueURI(final String spotifyURI, final Callback callback)
+	{
+		if(spotifyURI==null)
+		{
+			callback.invoke(nullobj(), RCTSpotifyError.getNullParameterError("spotifyURI"));
+			return;
+		}
+		prepareForRequest(new RCTSpotifyCallback<Boolean>() {
+			@Override
+			public void invoke(Boolean success, RCTSpotifyError error)
+			{
+				if(error!=null)
+				{
+					if(callback!=null)
+					{
+						callback.invoke(error.toReactObject());
+					}
+					return;
+				}
+
+				player.queue(new Player.OperationCallback() {
+					@Override
+					public void onError(com.spotify.sdk.android.player.Error error)
+					{
+						callback.invoke(new RCTSpotifyError(RCTSpotifyError.Code.SPOTIFY_ERROR, RCTSpotifyConvert.getErrorMessage(error)).toReactObject());
+					}
+
+					@Override
+					public void onSuccess()
+					{
+						callback.invoke(nullobj());
+					}
+				}, spotifyURI);
+			}
+		});
+	}
+
+	@ReactMethod
+	//setVolume(volume, (error?))
+	void setVolume(double volume, final Callback callback)
+	{
+		//TODO implement this with a custom AudioController
+		callback.invoke(new RCTSpotifyError(RCTSpotifyError.Code.NOT_IMPLEMENTED, "setVolume does not work on android"));
+	}
+
+	@ReactMethod
+	//getVolume()
+	double getVolume()
+	{
+		//TODO implement this with a custom AudioController
+		return 1.0;
+	}
 
 
 
