@@ -1400,14 +1400,13 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		public void onSuccess()
 		{
 			//TODO handle success
-			System.out.println("Player.OperationCallback.onSuccess");
 		}
 
 		@Override
 		public void onError(com.spotify.sdk.android.player.Error error)
 		{
 			//TODO handle error
-			System.out.println("Player.OperationCallback.onError");
+			System.out.println("Connectivity Error: "+error.toString());
 		}
 	};
 
