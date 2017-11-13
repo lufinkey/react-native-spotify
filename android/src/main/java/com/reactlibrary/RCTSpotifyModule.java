@@ -515,8 +515,6 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		return false;
 	}
 
-	@ReactMethod
-	//getAccessToken()
 	public String getAccessToken()
 	{
 		String sessionUserDefaultsKey = options.getString("sessionUserDefaultsKey");
@@ -528,8 +526,6 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		return prefs.getString("accessToken", null);
 	}
 
-	@ReactMethod
-	//setAccessToken(String accessToken)
 	public void setAccessToken(String accessToken)
 	{
 		boolean shouldOverwrite = false;
