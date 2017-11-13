@@ -463,7 +463,7 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getVolume)
 	return @(_player.volume);
 }
 
-RCT_EXPORT_METHOD(setIsPlaying:(BOOL)playing completion:(RCTResponseSenderBlock)completion)
+RCT_EXPORT_METHOD(setPlaying:(BOOL)playing completion:(RCTResponseSenderBlock)completion)
 {
 	[self prepareForRequest:^(NSError* error) {
 		if(error)

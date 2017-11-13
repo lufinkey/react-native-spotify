@@ -52,8 +52,8 @@ typedef enum
 -(void)setVolume:(double)volume completion:(RCTResponseSenderBlock)completion;
 //getVolume()
 -(id)getVolume;
-//setIsPlaying(playing, (error?))
--(void)setIsPlaying:(BOOL)playing completion:(RCTResponseSenderBlock)completion;
+//setPlaying(playing, (error?))
+-(void)setPlaying:(BOOL)playing completion:(RCTResponseSenderBlock)completion;
 //getPlaybackState()
 -(id)getPlaybackState;
 //skipNext((error?))
