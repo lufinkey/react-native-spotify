@@ -762,6 +762,39 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		});
 	}
 
+	@ReactMethod
+	//setShuffling(shuffling, (error?))
+	void setShuffling(final boolean shuffling, final Callback callback)
+	{
+		prepareForRequest(new RCTSpotifyCallback<Boolean>() {
+			@Override
+			public void invoke(Boolean success, RCTSpotifyError error)
+			{
+				if(error!=null)
+				{
+					if(callback!=null)
+					{
+						callback.invoke(error.toReactObject());
+					}
+					return;
+				}
+				player.setShuffle(new Player.OperationCallback() {
+					@Override
+					public void onError(Error error)
+					{
+						callback.invoke(new RCTSpotifyError(error).toReactObject());
+					}
+
+					@Override
+					public void onSuccess()
+					{
+						callback.invoke(nullobj());
+					}
+				}, shuffling);
+			}
+		});
+	}
+
 
 
 
