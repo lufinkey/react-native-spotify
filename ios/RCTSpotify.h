@@ -56,10 +56,10 @@ typedef enum
 -(void)setPlaying:(BOOL)playing completion:(RCTResponseSenderBlock)completion;
 //getPlaybackState()
 -(id)getPlaybackState;
-//skipNext((error?))
--(void)skipNext:(RCTResponseSenderBlock)completion;
-//skipPrevious((error?))
--(void)skipPrevious:(RCTResponseSenderBlock)completion;
+//skipToNext((error?))
+-(void)skipToNext:(RCTResponseSenderBlock)completion;
+//skipToPrevious((error?))
+-(void)skipToPrevious:(RCTResponseSenderBlock)completion;
 
 
 //sendRequest(endpoint, method, params, isJSONBody, (result?, error?))

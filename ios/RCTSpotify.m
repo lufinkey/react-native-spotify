@@ -488,7 +488,7 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getPlaybackState)
 	return [RCTSpotifyConvert SPTPlaybackState:_player.playbackState];
 }
 
-RCT_EXPORT_METHOD(skipNext:(RCTResponseSenderBlock)completion)
+RCT_EXPORT_METHOD(skipToNext:(RCTResponseSenderBlock)completion)
 {
 	[self prepareForRequest:^(NSError *error) {
 		if(error)
@@ -508,7 +508,7 @@ RCT_EXPORT_METHOD(skipNext:(RCTResponseSenderBlock)completion)
 	}];
 }
 
-RCT_EXPORT_METHOD(skipPrevious:(RCTResponseSenderBlock)completion)
+RCT_EXPORT_METHOD(skipToPrevious:(RCTResponseSenderBlock)completion)
 {
 	[self prepareForRequest:^(NSError *error) {
 		if(error)
