@@ -18,19 +18,22 @@ NSString* const RCTSpotifyErrorDomain = @"RCTSpotifyErrorDomain";
 	SPTAuth* _auth;
 	SPTAudioStreamingController* _player;
 	
+	NSDictionary* _options;
 	NSNumber* _cacheSize;
 	
 	void(^_authControllerResponse)(BOOL loggedIn, NSError* error);
-	void(^_startResponse)(BOOL loggedIn, NSError* error);
-	NSMutableArray<void(^)(BOOL, NSError*)>* _logBackInResponses;
+	NSMutableArray<void(^)(BOOL, NSError*)>* _loginPlayerResponses;
 	NSMutableArray<void(^)(NSError*)>* _logoutResponses;
 }
 +(NSError*)errorWithCode:(RCTSpotifyErrorCode)code description:(NSString*)description;
 +(NSError*)errorWithCode:(RCTSpotifyErrorCode)code description:(NSString*)description fields:(NSDictionary*)fields;
 +(NSMutableDictionary*)mutableDictFromDict:(NSDictionary*)dict;
+-(BOOL)hasPlayerScope;
 
 -(void)logBackInIfNeeded:(void(^)(BOOL loggedIn, NSError* error))completion;
--(void)start:(void(^)(BOOL loggedIn, NSError* error))completion;
+-(void)initializePlayerIfNeeded:(void(^)(BOOL loggedIn, NSError* error))completion;
+-(void)loginPlayer:(NSString*)accessToken completion:(void(^)(BOOL, NSError*))completion;
+
 -(void)prepareForRequest:(void(^)(NSError* error))completion;
 -(void)performRequest:(NSURLRequest*)request completion:(void(^)(id resultObj, NSError* error))completion;
 -(void)doAPIRequest:(NSString*)endpoint method:(NSString*)method params:(NSDictionary*)params jsonBody:(BOOL)jsonBody completion:(void(^)(id resultObj, NSError* error))completion;
@@ -94,6 +97,20 @@ NSString* const RCTSpotifyErrorDomain = @"RCTSpotifyErrorDomain";
 	return dict.mutableCopy;
 }
 
+-(BOOL)hasPlayerScope
+{
+	if(_options==nil)
+	{
+		return NO;
+	}
+	id scopes = _options[@"scopes"];
+	if(scopes==nil || ![scopes isKindOfClass:[NSArray class]])
+	{
+		return NO;
+	}
+	return [scopes containsObject:@"streaming"];
+}
+
 
 
 #pragma mark - React Native functions
@@ -109,12 +126,12 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(test)
 RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion)
 {
 	//set default values
+	_options = options;
 	_auth = [SPTAuth defaultInstance];
 	_player = [SPTAudioStreamingController sharedInstance];
 	_cacheSize = @(1024 * 1024 * 64);
 	_authControllerResponse = nil;
-	_startResponse = nil;
-	_logBackInResponses = [NSMutableArray array];
+	_loginPlayerResponses = [NSMutableArray array];
 	_logoutResponses = [NSMutableArray array];
 	
 	//if a session exists, make sure it's using the same clientID. Otherwise, kill the session
@@ -177,34 +194,9 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSende
 	}
 	else if([_auth.session isValid])
 	{
-		if(!_player.initialized)
-		{
-			[self start:^(BOOL loggedIn, NSError* error) {
-				completion(loggedIn, error);
-			}];
-			return;
-		}
-		else if(_player.loggedIn)
-		{
-			completion(YES, nil);
-			return;
-		}
-		dispatch_async(dispatch_get_main_queue(), ^{
-			if(!_player.loggedIn)
-			{
-				//wait for audioStreamingDidLogin:
-				// or audioStreamingDidReceiveError:
-				// or audioStreamingDidLogout:
-				[_logBackInResponses addObject:^(BOOL loggedIn, NSError* error) {
-					completion(loggedIn, error);
-				}];
-				[_player loginWithAccessToken:_auth.session.accessToken];
-			}
-			else
-			{
-				completion(YES, nil);
-			}
-		});
+		[self initializePlayerIfNeeded:^(BOOL loggedIn, NSError* error) {
+			completion(loggedIn, error);
+		}];
 	}
 	else if(!_auth.hasTokenRefreshService)
 	{
@@ -220,12 +212,68 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSende
 			else
 			{
 				_auth.session = session;
-				[self start:^(BOOL loggedIn, NSError* error) {
+				[self initializePlayerIfNeeded:^(BOOL loggedIn, NSError* error) {
 					completion(loggedIn, error);
 				}];
 			}
 		}];
 	}
+}
+
+-(void)initializePlayerIfNeeded:(void(^)(BOOL,NSError*))completion
+{
+	if(![self hasPlayerScope])
+	{
+		completion(YES, nil);
+		return;
+	}
+	BOOL allowCaching = (_cacheSize.unsignedIntegerValue > 0);
+	NSError* error = nil;
+	if(_player.initialized)
+	{
+		if(!_player.loggedIn)
+		{
+			[self loginPlayer:_auth.session.accessToken completion:^(BOOL loggedIn, NSError* error) {
+				completion(loggedIn, error);
+			}];
+			return;
+		}
+		completion(YES, nil);
+	}
+	else if([_player startWithClientId:_auth.clientID audioController:nil allowCaching:allowCaching error:&error])
+	{
+		_player.delegate = self;
+		_player.playbackDelegate = self;
+		if(allowCaching)
+		{
+			_player.diskCache = [[SPTDiskCache alloc] initWithCapacity:_cacheSize.unsignedIntegerValue];
+		}
+		
+		[self loginPlayer:_auth.session.accessToken completion:^(BOOL loggedIn, NSError* error) {
+			completion(loggedIn, error);
+		}];
+	}
+	else
+	{
+		completion(NO, error);
+	}
+}
+
+-(void)loginPlayer:(NSString*)accessToken completion:(void(^)(BOOL, NSError*))completion
+{
+	if(accessToken==nil)
+	{
+		completion(NO, [RCTSpotify errorWithCode:RCTSpotifyErrorCodeNotLoggedIn description:@"No access token has been received"]);
+		return;
+	}
+	dispatch_async(dispatch_get_main_queue(), ^{
+		//wait for audioStreamingDidLogin:
+		// or audioStreaming:didRecieveError:
+		[_loginPlayerResponses addObject:^(BOOL loggedIn, NSError* error){
+			completion(loggedIn, error);
+		}];
+		[_player loginWithAccessToken:accessToken];
+	});
 }
 
 RCT_EXPORT_METHOD(login:(RCTResponseSenderBlock)completion)
@@ -264,7 +312,7 @@ RCT_EXPORT_METHOD(login:(RCTResponseSenderBlock)completion)
 					completion(@[ @NO, [RCTSpotifyConvert NSError:error] ]);
 					return;
 				}
-				[_self start:^(BOOL loggedIn, NSError* error) {
+				[_self initializePlayerIfNeeded:^(BOOL loggedIn, NSError* error) {
 					dispatch_async(dispatch_get_main_queue(), ^{
 						if(authController.presentingViewController != nil)
 						{
@@ -358,44 +406,6 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(handleAuthURL:(NSString*)urlString)
 		return @YES;
 	}
 	return @NO;
-}
-
--(void)start:(void(^)(BOOL,NSError*))completion
-{
-	BOOL allowCaching = (_cacheSize.unsignedIntegerValue > 0);
-	NSError* error = nil;
-	if(_player.initialized && _player.loggedIn)
-	{
-		completion(YES, nil);
-	}
-	else if([_player startWithClientId:_auth.clientID audioController:nil allowCaching:allowCaching error:&error])
-	{
-		_player.delegate = self;
-		_player.playbackDelegate = self;
-		if(allowCaching)
-		{
-			_player.diskCache = [[SPTDiskCache alloc] initWithCapacity:_cacheSize.unsignedIntegerValue];
-		}
-		
-		dispatch_async(dispatch_get_main_queue(), ^{
-			if(_startResponse != nil)
-			{
-				completion(NO, [RCTSpotify errorWithCode:RCTSpotifyErrorCodeConflictingCallbacks description:@"cannot call start method while start is already being called"]);
-				return;
-			}
-			
-			//wait for audioStreamingDidLogin:
-			// or audioStreaming:didRecieveError:
-			_startResponse = ^(BOOL loggedIn, NSError* error){
-				completion(loggedIn, error);
-			};
-			[_player loginWithAccessToken:_auth.session.accessToken];
-		});
-	}
-	else
-	{
-		completion(NO, error);
-	}
 }
 
 
@@ -789,18 +799,10 @@ RCT_EXPORT_METHOD(getTracksAudioFeatures:(NSArray<NSString*>*)trackIDs options:(
 
 -(void)audioStreamingDidLogin:(SPTAudioStreamingController*)audioStreaming
 {
-	if(_startResponse != nil)
-	{
-		//do login callback
-		void(^response)(BOOL,NSError*) = _startResponse;
-		_startResponse = nil;
-		response(YES, nil);
-	}
-	
-	//do log back in callbacks
-	NSArray<void(^)(BOOL, NSError*)>* logBackInResponses = [NSArray arrayWithArray:_logBackInResponses];
-	[_logBackInResponses removeAllObjects];
-	for(void(^response)(BOOL,NSError*) in logBackInResponses)
+	//do initializePlayerIfNeeded callbacks
+	NSArray<void(^)(BOOL, NSError*)>* loginPlayerResponses = [NSArray arrayWithArray:_loginPlayerResponses];
+	[_loginPlayerResponses removeAllObjects];
+	for(void(^response)(BOOL,NSError*) in loginPlayerResponses)
 	{
 		response(YES, nil);
 	}
@@ -810,20 +812,12 @@ RCT_EXPORT_METHOD(getTracksAudioFeatures:(NSArray<NSString*>*)trackIDs options:(
 {
 	if(error.code==SPErrorGeneralLoginError || error.code==SPErrorLoginBadCredentials)
 	{
-		if(_startResponse != nil)
+		//do initializePlayerIfNeeded callbacks
+		NSArray<void(^)(BOOL, NSError*)>* loginPlayerResponses = [NSArray arrayWithArray:_loginPlayerResponses];
+		[_loginPlayerResponses removeAllObjects];
+		for(void(^response)(BOOL,NSError*) in loginPlayerResponses)
 		{
-			//do login callback
-			void(^response)(BOOL,NSError*) = _startResponse;
-			_startResponse = nil;
 			response(NO, error);
-		}
-		
-		//do log back in callbacks
-		NSArray<void(^)(BOOL, NSError*)>* logBackInResponses = [NSArray arrayWithArray:_logBackInResponses];
-		[_logBackInResponses removeAllObjects];
-		for(void(^response)(BOOL,NSError*) in logBackInResponses)
-		{
-			response(YES, nil);
 		}
 	}
 }
@@ -832,20 +826,12 @@ RCT_EXPORT_METHOD(getTracksAudioFeatures:(NSArray<NSString*>*)trackIDs options:(
 {
 	NSError* error = [RCTSpotify errorWithCode:RCTSpotifyErrorCodeNotLoggedIn description:@"Spotify was logged out"];
 	
-	if(_startResponse != nil)
+	//do initializePlayerIfNeeded callbacks
+	NSArray<void(^)(BOOL, NSError*)>* loginPlayerResponses = [NSArray arrayWithArray:_loginPlayerResponses];
+	[_loginPlayerResponses removeAllObjects];
+	for(void(^response)(BOOL,NSError*) in loginPlayerResponses)
 	{
-		//do login callback
-		void(^response)(BOOL,NSError*) = _startResponse;
-		_startResponse = nil;
 		response(NO, error);
-	}
-	
-	//do log back in callbacks
-	NSArray<void(^)(BOOL, NSError*)>* logBackInResponses = [NSArray arrayWithArray:_logBackInResponses];
-	[_logBackInResponses removeAllObjects];
-	for(void(^response)(BOOL,NSError*) in logBackInResponses)
-	{
-		response(YES, error);
 	}
 	
 	//do logout callbacks
