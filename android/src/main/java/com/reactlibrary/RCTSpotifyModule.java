@@ -774,13 +774,19 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 					@Override
 					public void onError(Error error)
 					{
-						callback.invoke(new RCTSpotifyError(error).toReactObject());
+						if(callback!=null)
+						{
+							callback.invoke(new RCTSpotifyError(error).toReactObject());
+						}
 					}
 
 					@Override
 					public void onSuccess()
 					{
-						callback.invoke(nullobj());
+						if(callback!=null)
+						{
+							callback.invoke(nullobj());
+						}
 					}
 				});
 			}
@@ -807,15 +813,60 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 					@Override
 					public void onError(Error error)
 					{
-						callback.invoke(new RCTSpotifyError(error).toReactObject());
+						if(callback!=null)
+						{
+							callback.invoke(new RCTSpotifyError(error).toReactObject());
+						}
 					}
 
 					@Override
 					public void onSuccess()
 					{
-						callback.invoke(nullobj());
+						if(callback!=null)
+						{
+							callback.invoke(nullobj());
+						}
 					}
 				});
+			}
+		});
+	}
+
+	@ReactMethod
+	//seekToPosition(position, (error?))
+	void seekToPosition(final double position, final Callback callback)
+	{
+		prepareForPlayer(new RCTSpotifyCallback<Boolean>() {
+			@Override
+			public void invoke(Boolean obj, RCTSpotifyError error)
+			{
+				if(error!=null)
+				{
+					if(callback!=null)
+					{
+						callback.invoke(error.toReactObject());
+					}
+					return;
+				}
+				player.seekToPosition(new Player.OperationCallback() {
+					@Override
+					public void onError(Error error)
+					{
+						if(callback!=null)
+						{
+							callback.invoke(new RCTSpotifyError(error).toReactObject());
+						}
+					}
+
+					@Override
+					public void onSuccess()
+					{
+						if(callback!=null)
+						{
+							callback.invoke(nullobj());
+						}
+					}
+				}, (int)(position*1000));
 			}
 		});
 	}
