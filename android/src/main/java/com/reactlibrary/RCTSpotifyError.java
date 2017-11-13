@@ -32,6 +32,13 @@ public class RCTSpotifyError
 	private Code code;
 	private String description;
 
+	public RCTSpotifyError(com.spotify.sdk.android.player.Error error)
+	{
+		//TODO add a switch for nativeCode
+		this.code = Code.SPOTIFY_ERROR;
+		this.description = error.toString();
+	}
+
 	public RCTSpotifyError(Code code, String description)
 	{
 		this.code = code;

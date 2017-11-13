@@ -558,7 +558,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 					@Override
 					public void onError(com.spotify.sdk.android.player.Error error)
 					{
-						callback.invoke(new RCTSpotifyError(RCTSpotifyError.Code.SPOTIFY_ERROR, RCTSpotifyConvert.getErrorMessage(error)).toReactObject());
+						callback.invoke(new RCTSpotifyError(error).toReactObject());
 					}
 
 					@Override
@@ -597,7 +597,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 					@Override
 					public void onError(com.spotify.sdk.android.player.Error error)
 					{
-						callback.invoke(new RCTSpotifyError(RCTSpotifyError.Code.SPOTIFY_ERROR, RCTSpotifyConvert.getErrorMessage(error)).toReactObject());
+						callback.invoke(new RCTSpotifyError(error).toReactObject());
 					}
 
 					@Override
@@ -655,7 +655,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 						@Override
 						public void onError(com.spotify.sdk.android.player.Error error)
 						{
-							callback.invoke(new RCTSpotifyError(RCTSpotifyError.Code.SPOTIFY_ERROR, RCTSpotifyConvert.getErrorMessage(error)).toReactObject());
+							callback.invoke(new RCTSpotifyError(error).toReactObject());
 						}
 
 						@Override
@@ -671,7 +671,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 						@Override
 						public void onError(com.spotify.sdk.android.player.Error error)
 						{
-							callback.invoke(new RCTSpotifyError(RCTSpotifyError.Code.SPOTIFY_ERROR, RCTSpotifyConvert.getErrorMessage(error)).toReactObject());
+							callback.invoke(new RCTSpotifyError(error).toReactObject());
 						}
 
 						@Override
@@ -694,6 +694,72 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			return null;
 		}
 		return RCTSpotifyConvert.fromPlaybackState(player.getPlaybackState());
+	}
+
+	@ReactMethod
+	//skipToNext((error?))
+	void skipToNext(final Callback callback)
+	{
+		prepareForRequest(new RCTSpotifyCallback<Boolean>() {
+			@Override
+			public void invoke(Boolean success, RCTSpotifyError error)
+			{
+				if(error!=null)
+				{
+					if(callback!=null)
+					{
+						callback.invoke(error.toReactObject());
+					}
+					return;
+				}
+				player.skipToNext(new Player.OperationCallback() {
+					@Override
+					public void onError(Error error)
+					{
+						callback.invoke(new RCTSpotifyError(error).toReactObject());
+					}
+
+					@Override
+					public void onSuccess()
+					{
+						callback.invoke(nullobj());
+					}
+				});
+			}
+		});
+	}
+
+	@ReactMethod
+	//skipToPrevious((error?))
+	void skipToPrevious(final Callback callback)
+	{
+		prepareForRequest(new RCTSpotifyCallback<Boolean>() {
+			@Override
+			public void invoke(Boolean success, RCTSpotifyError error)
+			{
+				if(error!=null)
+				{
+					if(callback!=null)
+					{
+						callback.invoke(error.toReactObject());
+					}
+					return;
+				}
+				player.skipToPrevious(new Player.OperationCallback() {
+					@Override
+					public void onError(Error error)
+					{
+						callback.invoke(new RCTSpotifyError(error).toReactObject());
+					}
+
+					@Override
+					public void onSuccess()
+					{
+						callback.invoke(nullobj());
+					}
+				});
+			}
+		});
 	}
 
 
@@ -1277,7 +1343,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		}
 		for(RCTSpotifyCallback<Boolean> response : loginResponses)
 		{
-			response.invoke(false, new RCTSpotifyError(RCTSpotifyError.Code.AUTHORIZATION_FAILED, RCTSpotifyConvert.getErrorMessage(error)));
+			response.invoke(false, new RCTSpotifyError(error));
 		}
 	}
 
