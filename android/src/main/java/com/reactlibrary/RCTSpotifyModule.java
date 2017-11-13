@@ -532,6 +532,32 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 
 
+	void prepareForPlayer(final RCTSpotifyCallback<Boolean> completion)
+	{
+		logBackInIfNeeded(new RCTSpotifyCallback<Boolean>() {
+			@Override
+			public void invoke(Boolean loggedIn, RCTSpotifyError error) {
+				if(error==null)
+				{
+					if(!loggedIn)
+					{
+						error = new RCTSpotifyError(RCTSpotifyError.Code.NOT_LOGGED_IN, "You are not logged in");
+					}
+					else if(player==null)
+					{
+						error = new RCTSpotifyError(RCTSpotifyError.Code.PLAYER_NOT_INITIALIZED, "Player is not initialized");
+					}
+				}
+				if(error!=null)
+				{
+					completion.invoke(false, error);
+					return;
+				}
+				completion.invoke(true, null);
+			}
+		});
+	}
+
 	@ReactMethod
 	//playURI(spotifyURI, startIndex, startPosition, (error?))
 	void playURI(final String spotifyURI, final int startIndex, final double startPosition, final Callback callback)
@@ -541,7 +567,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			callback.invoke(nullobj(), RCTSpotifyError.getNullParameterError("spotifyURI"));
 			return;
 		}
-		prepareForRequest(new RCTSpotifyCallback<Boolean>() {
+		prepareForPlayer(new RCTSpotifyCallback<Boolean>() {
 			@Override
 			public void invoke(Boolean success, RCTSpotifyError error)
 			{
@@ -580,7 +606,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			callback.invoke(nullobj(), RCTSpotifyError.getNullParameterError("spotifyURI"));
 			return;
 		}
-		prepareForRequest(new RCTSpotifyCallback<Boolean>() {
+		prepareForPlayer(new RCTSpotifyCallback<Boolean>() {
 			@Override
 			public void invoke(Boolean success, RCTSpotifyError error)
 			{
@@ -630,7 +656,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	//setPlaying(playing, (error?))
 	void setPlaying(final boolean playing, final Callback callback)
 	{
-		prepareForRequest(new RCTSpotifyCallback<Boolean>() {
+		prepareForPlayer(new RCTSpotifyCallback<Boolean>() {
 			@Override
 			public void invoke(Boolean success, RCTSpotifyError error)
 			{
@@ -700,7 +726,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	//skipToNext((error?))
 	void skipToNext(final Callback callback)
 	{
-		prepareForRequest(new RCTSpotifyCallback<Boolean>() {
+		prepareForPlayer(new RCTSpotifyCallback<Boolean>() {
 			@Override
 			public void invoke(Boolean success, RCTSpotifyError error)
 			{
@@ -733,7 +759,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	//skipToPrevious((error?))
 	void skipToPrevious(final Callback callback)
 	{
-		prepareForRequest(new RCTSpotifyCallback<Boolean>() {
+		prepareForPlayer(new RCTSpotifyCallback<Boolean>() {
 			@Override
 			public void invoke(Boolean success, RCTSpotifyError error)
 			{
@@ -766,7 +792,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	//setShuffling(shuffling, (error?))
 	void setShuffling(final boolean shuffling, final Callback callback)
 	{
-		prepareForRequest(new RCTSpotifyCallback<Boolean>() {
+		prepareForPlayer(new RCTSpotifyCallback<Boolean>() {
 			@Override
 			public void invoke(Boolean success, RCTSpotifyError error)
 			{
@@ -799,7 +825,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	//setRepeating(repeating, (error?))
 	void setRepeating(final boolean repeating, final Callback callback)
 	{
-		prepareForRequest(new RCTSpotifyCallback<Boolean>() {
+		prepareForPlayer(new RCTSpotifyCallback<Boolean>() {
 			@Override
 			public void invoke(Boolean obj, RCTSpotifyError error)
 			{
@@ -836,18 +862,16 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		logBackInIfNeeded(new RCTSpotifyCallback<Boolean>() {
 			@Override
 			public void invoke(Boolean loggedIn, RCTSpotifyError error) {
-				if(!loggedIn)
+				if(!loggedIn && error==null)
 				{
-					if(error==null)
-					{
-						error = new RCTSpotifyError(RCTSpotifyError.Code.NOT_LOGGED_IN, "You are not logged in");
-					}
+					error = new RCTSpotifyError(RCTSpotifyError.Code.NOT_LOGGED_IN, "You are not logged in");
+				}
+				if(error!=null)
+				{
 					completion.invoke(false, error);
+					return;
 				}
-				else
-				{
-					completion.invoke(true, error);
-				}
+				completion.invoke(true, null);
 			}
 		});
 	}
