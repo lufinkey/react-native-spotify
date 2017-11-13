@@ -242,7 +242,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 				player = newPlayer;
 
 				//setup player
-				player.setConnectivityStatus(playerOperationCallback, getNetworkConnectivity(getMainActivity()));
+				player.setConnectivityStatus(connectivityStatusCallback, getNetworkConnectivity(getMainActivity()));
 				player.addNotificationCallback(RCTSpotifyModule.this);
 				player.addConnectionStateCallback(RCTSpotifyModule.this);
 
@@ -527,6 +527,45 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		//TODO for some reason we don't use this on Android, despite having to give a redirectURL
 		return false;
 	}
+
+
+
+
+	@ReactMethod
+	//playURI(spotifyURI, startIndex, startPosition, (error?))
+	void playURI(final String spotifyURI, final int startIndex, final double startPosition, final Callback callback)
+	{
+		prepareForRequest(new RCTSpotifyCallback<Boolean>() {
+			@Override
+			public void invoke(Boolean success, RCTSpotifyError error)
+			{
+				if(error!=null)
+				{
+					if(callback!=null)
+					{
+						callback.invoke(error.toReactObject());
+					}
+					return;
+				}
+
+				player.playUri( new Player.OperationCallback() {
+					@Override
+					public void onError(com.spotify.sdk.android.player.Error error)
+					{
+						callback.invoke(new RCTSpotifyError(RCTSpotifyError.Code.SPOTIFY_ERROR, RCTSpotifyConvert.getErrorMessage(error)).toReactObject());
+					}
+
+					@Override
+					public void onSuccess()
+					{
+						callback.invoke(nullobj());
+					}
+				}, spotifyURI, startIndex, (int)(startPosition*1000));
+			}
+		});
+	}
+
+
 
 
 
@@ -1038,7 +1077,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 
 
-	private final Player.OperationCallback playerOperationCallback = new Player.OperationCallback() {
+	private final Player.OperationCallback connectivityStatusCallback = new Player.OperationCallback() {
 		@Override
 		public void onSuccess()
 		{
@@ -1108,7 +1147,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		}
 		for(RCTSpotifyCallback<Boolean> response : loginResponses)
 		{
-			response.invoke(false, new RCTSpotifyError(RCTSpotifyError.Code.AUTHORIZATION_FAILED, "login failed: "+error));
+			response.invoke(false, new RCTSpotifyError(RCTSpotifyError.Code.AUTHORIZATION_FAILED, RCTSpotifyConvert.getErrorMessage(error)));
 		}
 	}
 

@@ -191,4 +191,10 @@ public class RCTSpotifyConvert
 		}
 		return mutMap;
 	}
+
+	public static String getErrorMessage(com.spotify.sdk.android.player.Error error)
+	{
+		//TODO add a switch for nativeCode
+		return error.toString();
+	}
 }
