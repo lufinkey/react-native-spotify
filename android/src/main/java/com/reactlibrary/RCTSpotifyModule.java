@@ -942,7 +942,99 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		});
 	}
 
+	@ReactMethod
+	//getTrack(trackID, options?, (result?, error?))
+	void getTrack(String trackID, ReadableMap options, final Callback callback)
+	{
+		if(trackID==null)
+		{
+			callback.invoke(nullobj(), RCTSpotifyError.getNullParameterError("trackID"));
+			return;
+		}
+		doAPIRequest("tracks/"+trackID, "GET", options, false, new RCTSpotifyCallback<ReadableMap>() {
+			@Override
+			public void invoke(ReadableMap resultObj, RCTSpotifyError error)
+			{
+				callback.invoke(resultObj, RCTSpotifyConvert.fromRCTSpotifyError(error));
+			}
+		});
+	}
 
+	@ReactMethod
+	//getTracks(trackIDs, options?, (result?, error?))
+	void getTracks(ReadableArray trackIDs, ReadableMap options, final Callback callback)
+	{
+		if(trackIDs==null)
+		{
+			callback.invoke(nullobj(), RCTSpotifyError.getNullParameterError("trackIDs"));
+			return;
+		}
+		WritableMap body = RCTSpotifyConvert.toWritableMap(options);
+		body.putString("ids", RCTSpotifyConvert.joinedIntoString(trackIDs, ","));
+		doAPIRequest("tracks", "GET", body, false, new RCTSpotifyCallback<ReadableMap>() {
+			@Override
+			public void invoke(ReadableMap resultObj, RCTSpotifyError error)
+			{
+				callback.invoke(resultObj, RCTSpotifyConvert.fromRCTSpotifyError(error));
+			}
+		});
+	}
+
+	@ReactMethod
+	//getTrackAudioAnalysis(trackID, options?, (result?, error?))
+	void getTrackAudioAnalysis(String trackID, ReadableMap options, final Callback callback)
+	{
+		if(trackID==null)
+		{
+			callback.invoke(nullobj(), RCTSpotifyError.getNullParameterError("trackID"));
+			return;
+		}
+		doAPIRequest("audio-analysis/"+trackID, "GET", options, false, new RCTSpotifyCallback<ReadableMap>() {
+			@Override
+			public void invoke(ReadableMap resultObj, RCTSpotifyError error)
+			{
+				callback.invoke(resultObj, RCTSpotifyConvert.fromRCTSpotifyError(error));
+			}
+		});
+	}
+
+	@ReactMethod
+	//getTrackAudioFeatures(trackID, options?, (result?, error?))
+	void getTrackAudioFeatures(String trackID, ReadableMap options, final Callback callback)
+	{
+		if(trackID==null)
+		{
+			callback.invoke(nullobj(), RCTSpotifyError.getNullParameterError("trackID"));
+			return;
+		}
+		doAPIRequest("audio-features/"+trackID, "GET", options, false, new RCTSpotifyCallback<ReadableMap>() {
+			@Override
+			public void invoke(ReadableMap resultObj, RCTSpotifyError error)
+			{
+				callback.invoke(resultObj, RCTSpotifyConvert.fromRCTSpotifyError(error));
+			}
+		});
+	}
+
+	@ReactMethod
+	//getTracks(trackIDs, options?, (result?, error?))
+	void getTracksAudioFeatures(ReadableArray trackIDs, ReadableMap options, final Callback callback)
+	{
+		if(trackIDs==null)
+		{
+			callback.invoke(nullobj(), RCTSpotifyError.getNullParameterError("trackIDs"));
+			return;
+		}
+		WritableMap body = RCTSpotifyConvert.toWritableMap(options);
+		body.putString("ids", RCTSpotifyConvert.joinedIntoString(trackIDs, ","));
+		doAPIRequest("audio-features", "GET", body, false, new RCTSpotifyCallback<ReadableMap>() {
+			@Override
+			public void invoke(ReadableMap resultObj, RCTSpotifyError error)
+			{
+				callback.invoke(resultObj, RCTSpotifyConvert.fromRCTSpotifyError(error));
+			}
+		});
+	}
 
 
 
