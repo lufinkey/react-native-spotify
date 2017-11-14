@@ -97,7 +97,6 @@ public class Auth
 	public void clearSession()
 	{
 		clearCookies("https://accounts.spotify.com");
-		//TODO clear facebook cookies
 
 		accessToken = null;
 		refreshToken = null;

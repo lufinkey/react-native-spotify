@@ -163,6 +163,10 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 				{
 					completion.invoke(false, null);
 				}
+				else if(auth.getAccessToken()==null)
+				{
+					completion.invoke(false, null);
+				}
 				else
 				{
 					initializePlayerIfNeeded(auth.getAccessToken(), new RCTSpotifyCallback<Boolean>() {
@@ -339,6 +343,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		}
 
 		//destroy the player
+		player.logout();
 		Spotify.destroyPlayer(player);
 		player = null;
 
