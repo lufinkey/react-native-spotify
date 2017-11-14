@@ -1,53 +1,29 @@
 
 package com.reactlibrary;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Build;
-import android.preference.PreferenceManager;
 import android.view.WindowManager;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
-import com.facebook.react.bridge.LifecycleEventListener;
-import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
-import com.facebook.react.bridge.WritableNativeMap;
 
-import com.spotify.sdk.android.authentication.*;
 import com.spotify.sdk.android.player.*;
 import com.spotify.sdk.android.player.Error;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
-import java.net.CookieManager;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
-
-import okhttp3.Call;
-import okhttp3.Cookie;
 
 public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Player.NotificationCallback, ConnectionStateCallback
 {
@@ -57,6 +33,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	private BroadcastReceiver networkStateReceiver;
 
+	private Auth auth;
 	private SpotifyPlayer player;
 	private final ArrayList<RCTSpotifyCallback<Boolean>> playerLoginResponses;
 
@@ -66,11 +43,13 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	{
 		super(reactContext);
 		this.reactContext = reactContext;
+		Utils.reactContext = reactContext;
 
 		initialized = false;
 
 		networkStateReceiver = null;
 
+		auth = null;
 		player = null;
 		playerLoginResponses = new ArrayList<>();
 
@@ -88,30 +67,6 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		return null;
 	}
 
-	private void clearCookies(String url)
-	{
-		android.webkit.CookieManager cookieManager = android.webkit.CookieManager.getInstance();
-		String bigcookie = cookieManager.getCookie(url);
-		String[] cookies = bigcookie.split(";");
-		for(int i=0; i<cookies.length; i++)
-		{
-			String[] cookieParts = cookies[i].split("=");
-			if(cookieParts.length == 2)
-			{
-				cookieManager.setCookie(url, cookieParts[0].trim()+"=");
-			}
-		}
-		if (Build.VERSION.SDK_INT >= 21)
-		{
-			cookieManager.flush();
-		}
-	}
-
-	Activity getMainActivity()
-	{
-		return reactContext.getCurrentActivity();
-	}
-
 	private Connectivity getNetworkConnectivity(Context context)
 	{
 		ConnectivityManager connectivityManager;
@@ -125,28 +80,6 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		{
 			return Connectivity.OFFLINE;
 		}
-	}
-
-	private boolean hasPlayerScope()
-	{
-		if(this.options == null)
-		{
-			return false;
-		}
-		ReadableArray scopes = options.getArray("scopes");
-		if(scopes==null)
-		{
-			return false;
-		}
-		for(int i=0; i<scopes.size(); i++)
-		{
-			String scope = scopes.getString(i);
-			if(scope!=null && scope.equals("streaming"))
-			{
-				return true;
-			}
-		}
-		return false;
 	}
 
 
@@ -180,6 +113,24 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			options = Arguments.createMap();
 		}
 		this.options = options;
+		auth = new Auth();
+		auth.reactContext = reactContext;
+		auth.clientID = options.getString("clientID");
+		auth.redirectURL = options.getString("redirectURL");
+		auth.sessionUserDefaultsKey = options.getString("sessionUserDefaultsKey");
+		ReadableArray scopes = options.getArray("scopes");
+		if(scopes!=null)
+		{
+			String[] requestedScopes = new String[scopes.size()];
+			for(int i=0; i<scopes.size(); i++)
+			{
+				requestedScopes[i] = scopes.getString(i);
+			}
+			auth.requestedScopes = requestedScopes;
+		}
+		auth.tokenSwapURL = options.getString("tokenSwapURL");
+		auth.tokenRefreshURL = options.getString("tokenRefreshURL");
+		auth.load();
 
 		//try to log back in
 		logBackInIfNeeded(new RCTSpotifyCallback<Boolean>() {
@@ -200,19 +151,28 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	private void logBackInIfNeeded(final RCTSpotifyCallback<Boolean> completion)
 	{
-		String accessToken = getAccessToken();
-		if(accessToken == null)
-		{
-			System.out.println("access token is null. Finishing initialization");
-			completion.invoke(false, null);
-			return;
-		}
-		//TODO refresh access token if needed
-		initializePlayerIfNeeded(accessToken, new RCTSpotifyCallback<Boolean>() {
+		auth.renewSessionIfNeeded(new RCTSpotifyCallback<Boolean>() {
 			@Override
-			public void invoke(Boolean loggedIn, RCTSpotifyError error)
+			public void invoke(Boolean success, RCTSpotifyError error)
 			{
-				completion.invoke(loggedIn, error);
+				if(error!=null)
+				{
+					completion.invoke(false, error);
+				}
+				else if(!success)
+				{
+					completion.invoke(false, null);
+				}
+				else
+				{
+					initializePlayerIfNeeded(auth.getAccessToken(), new RCTSpotifyCallback<Boolean>() {
+						@Override
+						public void invoke(Boolean loggedIn, RCTSpotifyError error)
+						{
+							completion.invoke(loggedIn, error);
+						}
+					});
+				}
 			}
 		});
 	}
@@ -222,7 +182,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		System.out.println("initializePlayer");
 
 		//make sure we have the player scope
-		if(!hasPlayerScope())
+		if(!auth.hasPlayerScope())
 		{
 			completion.invoke(true, null);
 			return;
@@ -245,7 +205,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		//check if player already exists
 		if(player != null)
 		{
-			loginPlayer(getAccessToken(), new RCTSpotifyCallback<Boolean>() {
+			loginPlayer(auth.getAccessToken(), new RCTSpotifyCallback<Boolean>() {
 				@Override
 				public void invoke(Boolean loggedIn, RCTSpotifyError error)
 				{
@@ -256,7 +216,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		}
 
 		//initialize player
-		Config playerConfig = new Config(getMainActivity().getApplicationContext(), accessToken, clientID);
+		Config playerConfig = new Config(reactContext.getCurrentActivity().getApplicationContext(), accessToken, clientID);
 		player = Spotify.getPlayer(playerConfig, this, new SpotifyPlayer.InitializationObserver(){
 			@Override
 			public void onError(Throwable error)
@@ -275,7 +235,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 				player = newPlayer;
 
 				//setup player
-				player.setConnectivityStatus(connectivityStatusCallback, getNetworkConnectivity(getMainActivity()));
+				player.setConnectivityStatus(connectivityStatusCallback, getNetworkConnectivity(reactContext.getCurrentActivity()));
 				player.addNotificationCallback(RCTSpotifyModule.this);
 				player.addConnectionStateCallback(RCTSpotifyModule.this);
 
@@ -310,10 +270,6 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 					@Override
 					public void invoke(Boolean loggedIn, RCTSpotifyError error)
 					{
-						if (loggedIn)
-						{
-							setAccessToken(accessToken);
-						}
 						completion.invoke(loggedIn, error);
 					}
 				});
@@ -322,7 +278,6 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 		if(loggedIn)
 		{
-			setAccessToken(accessToken);
 			completion.invoke(true, null);
 		}
 		else
@@ -335,146 +290,39 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	//login((loggedIn, error?))
 	public void login(final Callback callback)
 	{
-		//get required options
-		String clientID = options.getString("clientID");
-		String redirectURL = options.getString("redirectURL");
-		ReadableArray scopes = options.getArray("scopes");
-		String missingOption = null;
-		if(clientID == null)
-		{
-			missingOption = "clientID";
-		}
-		else if(redirectURL == null)
-		{
-			missingOption = "redirectURL";
-		}
-		else if(scopes == null)
-		{
-			missingOption = "scopes";
-		}
-		if(missingOption != null)
-		{
-			System.out.println("missing login option "+missingOption);
-			callback.invoke(
-					false,
-					new RCTSpotifyError(
-							RCTSpotifyError.Code.MISSING_PARAMETERS,
-							"missing option "+missingOption).toReactObject()
-			);
-			return;
-		}
-		//get string array of scopes
-		String[] scopesArr = new String[scopes.size()];
-		for(int i=0; i<scopes.size(); i++)
-		{
-			scopesArr[i] = scopes.getString(i);
-		}
-
-		//ensure no conflicting callbacks
-		if(SpotifyAuthActivity.request != null || SpotifyAuthActivity.currentActivity != null)
-		{
-			System.out.println("login is already being called");
-			callback.invoke(
-					false,
-					new RCTSpotifyError(
-							RCTSpotifyError.Code.CONFLICTING_CALLBACKS,
-							"Cannot call login while login is already being called").toReactObject()
-			);
-			return;
-		}
-
-		//show auth activity
-		SpotifyAuthActivity.request = new AuthenticationRequest.Builder(clientID, AuthenticationResponse.Type.TOKEN, redirectURL)
-				.setScopes(scopesArr)
-				.build();
-		//wait for SpotifyAuthActivity.onActivityResult
-		SpotifyAuthActivity.completion = new RCTSpotifyCallback<AuthenticationResponse>() {
+		auth.showAuthActivity(new RCTSpotifyCallback<Boolean>() {
 			@Override
-			public void invoke(final AuthenticationResponse response, final RCTSpotifyError error)
+			public void invoke(Boolean loggedIn, RCTSpotifyError error)
 			{
-				if(error != null)
+				if(!loggedIn || error!=null)
 				{
-					System.out.println("error with spotify auth activity");
-					SpotifyAuthActivity.currentActivity.onFinishCompletion = new RCTSpotifyCallback<Void>() {
-						@Override
-						public void invoke(Void obj, RCTSpotifyError unusedError)
-						{
-							callback.invoke(false, error.toReactObject());
-						}
-					};
-					SpotifyAuthActivity.currentActivity.finish();
-					SpotifyAuthActivity.currentActivity = null;
+					callback.invoke(loggedIn, RCTSpotifyConvert.fromRCTSpotifyError(error));
 					return;
 				}
-
-				switch(response.getType())
-				{
-					default:
-						System.out.println("user cancelled login activity");
+				//disable activity interaction
+				SpotifyAuthActivity.currentActivity.getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+						WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+				//initialize player
+				initializePlayerIfNeeded(auth.getAccessToken(), new RCTSpotifyCallback<Boolean>() {
+					@Override
+					public void invoke(final Boolean loggedIn, final RCTSpotifyError error)
+					{
+						//re-enable activity interaction and dismiss
+						SpotifyAuthActivity.currentActivity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
 						SpotifyAuthActivity.currentActivity.onFinishCompletion = new RCTSpotifyCallback<Void>() {
 							@Override
 							public void invoke(Void obj, RCTSpotifyError unusedError)
 							{
-								callback.invoke(false, nullobj());
+								//perform callback
+								callback.invoke(loggedIn, RCTSpotifyConvert.fromRCTSpotifyError(error));
 							}
 						};
 						SpotifyAuthActivity.currentActivity.finish();
 						SpotifyAuthActivity.currentActivity = null;
-						break;
-
-					case ERROR:
-						System.out.println("error with login activity");
-						SpotifyAuthActivity.currentActivity.onFinishCompletion = new RCTSpotifyCallback<Void>() {
-							@Override
-							public void invoke(Void obj, RCTSpotifyError unusedError)
-							{
-								callback.invoke(
-										false,
-										new RCTSpotifyError(RCTSpotifyError.Code.AUTHORIZATION_FAILED, response.getError()).toReactObject()
-								);
-							}
-						};
-						SpotifyAuthActivity.currentActivity.finish();
-						SpotifyAuthActivity.currentActivity = null;
-						break;
-
-					case TOKEN:
-						System.out.println("got that access token boi");
-						//disable activity interaction
-						SpotifyAuthActivity.currentActivity.getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
-								WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-
-						//initialize player
-						initializePlayerIfNeeded(response.getAccessToken(), new RCTSpotifyCallback<Boolean>() {
-							@Override
-							public void invoke(final Boolean loggedIn, final RCTSpotifyError error)
-							{
-								//re-enable activity interaction and dismiss
-								SpotifyAuthActivity.currentActivity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-								SpotifyAuthActivity.currentActivity.onFinishCompletion = new RCTSpotifyCallback<Void>() {
-									@Override
-									public void invoke(Void obj, RCTSpotifyError unusedError)
-									{
-										//perform callback
-										ReadableMap errorObj = null;
-										if(error!=null)
-										{
-											errorObj = error.toReactObject();
-										}
-										callback.invoke(loggedIn.booleanValue(), errorObj);
-									}
-								};
-								SpotifyAuthActivity.currentActivity.finish();
-								SpotifyAuthActivity.currentActivity = null;
-							}
-						});
-						break;
-				}
+					}
+				});
 			}
-		};
-
-		Activity activity = getMainActivity();
-		activity.startActivity(new Intent(activity, SpotifyAuthActivity.class));
+		});
 	}
 
 	@ReactMethod
@@ -494,9 +342,8 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		Spotify.destroyPlayer(player);
 		player = null;
 
-		//delete accessToken and cookies
-		setAccessToken(null);
-		clearCookies("https://accounts.spotify.com");
+		//clear session
+		auth.clearSession();
 
 		if(callback!=null)
 		{
@@ -513,40 +360,6 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			return true;
 		}
 		return false;
-	}
-
-	public String getAccessToken()
-	{
-		String sessionUserDefaultsKey = options.getString("sessionUserDefaultsKey");
-		if(sessionUserDefaultsKey == null)
-		{
-			return null;
-		}
-		SharedPreferences prefs = getMainActivity().getSharedPreferences(sessionUserDefaultsKey, Context.MODE_PRIVATE);
-		return prefs.getString("accessToken", null);
-	}
-
-	public void setAccessToken(String accessToken)
-	{
-		boolean shouldOverwrite = false;
-		String oldAccessToken = getAccessToken();
-		if((oldAccessToken==null && accessToken!=null)
-			|| (oldAccessToken!=null && accessToken==null)
-				|| (oldAccessToken!=null && accessToken!=null && !oldAccessToken.equals(accessToken)))
-		{
-			shouldOverwrite = true;
-		}
-		if(shouldOverwrite)
-		{
-			String sessionUserDefaultsKey = options.getString("sessionUserDefaultsKey");
-			if (sessionUserDefaultsKey != null)
-			{
-				SharedPreferences prefs = getMainActivity().getSharedPreferences(sessionUserDefaultsKey, Context.MODE_PRIVATE);
-				SharedPreferences.Editor prefsEditor = prefs.edit();
-				prefsEditor.putString("accessToken", accessToken);
-				prefsEditor.apply();
-			}
-		}
 	}
 
 	@ReactMethod
@@ -955,129 +768,6 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		});
 	}
 
-	private RequestQueue requestQueue = null;
-
-	public void doHTTPRequest(String url, String method, final ReadableMap params, final boolean jsonBody, final HashMap<String,String> headers, final RCTSpotifyCallback<String> completion)
-	{
-		if(requestQueue == null)
-		{
-			requestQueue = Volley.newRequestQueue(getMainActivity());
-		}
-
-		//parse request method
-		int requestMethod;
-		if(method.equals("GET"))
-		{
-			requestMethod = Request.Method.GET;
-		}
-		else if(method.equals("POST"))
-		{
-			requestMethod = Request.Method.POST;
-		}
-		else if(method.equals("DELETE"))
-		{
-			requestMethod = Request.Method.DELETE;
-		}
-		else if(method.equals("PUT"))
-		{
-			requestMethod = Request.Method.PUT;
-		}
-		else if(method.equals("HEAD"))
-		{
-			requestMethod = Request.Method.HEAD;
-		}
-		else if(method.equals("PATCH"))
-		{
-			requestMethod = Request.Method.PATCH;
-		}
-		else
-		{
-			completion.invoke(null, new RCTSpotifyError(RCTSpotifyError.Code.BAD_PARAMETERS, "invalid request method "+method));
-			return;
-		}
-
-		//append query string to url if necessary
-		if(!jsonBody && params!=null)
-		{
-			url += "?";
-			HashMap<String, Object> map = params.toHashMap();
-			boolean firstArg = true;
-			for(String key : map.keySet())
-			{
-				if(firstArg)
-				{
-					firstArg = false;
-				}
-				else
-				{
-					url += "&";
-				}
-				String value = map.get(key).toString();
-				try
-				{
-					url += URLEncoder.encode(key, "UTF-8")+"="+URLEncoder.encode(value, "UTF-8");
-				}
-				catch (UnsupportedEncodingException e)
-				{
-					e.printStackTrace();
-					break;
-				}
-			}
-		}
-
-		//make request
-		StringRequest request = new StringRequest(requestMethod, url, new Response.Listener<String>() {
-			@Override
-			public void onResponse(String response)
-			{
-				System.out.println("got http request response");
-				completion.invoke(response, null);
-			}
-		}, new Response.ErrorListener() {
-			@Override
-			public void onErrorResponse(VolleyError error)
-			{
-				System.out.println("got volley error");
-				String errorMessage = error.getMessage();
-				completion.invoke(null, new RCTSpotifyError(RCTSpotifyError.Code.REQUEST_ERROR, "error: "+errorMessage));
-			}
-		}) {
-			@Override
-			public Map<String, String> getHeaders()
-			{
-				return headers;
-			}
-
-			@Override
-			public String getBodyContentType()
-			{
-				if(jsonBody)
-				{
-					return "application/json; charset=utf-8";
-				}
-				return super.getBodyContentType();
-			}
-
-			@Override
-			public byte[] getBody() throws AuthFailureError
-			{
-				if(jsonBody && params!=null)
-				{
-					JSONObject obj = RCTSpotifyConvert.toJSONObject(params);
-					if(obj == null)
-					{
-						return null;
-					}
-					return obj.toString().getBytes();
-				}
-				return null;
-			}
-		};
-
-		//do request
-		requestQueue.add(request);
-	}
-
 	void doAPIRequest(final String endpoint, final String method, final ReadableMap params, final boolean jsonBody, final RCTSpotifyCallback<ReadableMap> completion)
 	{
 		prepareForRequest(new RCTSpotifyCallback<Boolean>(){
@@ -1085,13 +775,13 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			public void invoke(Boolean success, RCTSpotifyError error)
 			{
 				HashMap<String, String> headers = new HashMap<>();
-				String accessToken = getAccessToken();
+				String accessToken = auth.getAccessToken();
 				if(accessToken != null)
 				{
 					headers.put("Authorization", "Bearer "+accessToken);
 				}
 				//TODO add authorization to headers
-				doHTTPRequest("https://api.spotify.com/v1/"+endpoint, method, params, jsonBody, headers, new RCTSpotifyCallback<String>() {
+				Utils.doHTTPRequest("https://api.spotify.com/v1/"+endpoint, method, params, jsonBody, headers, new RCTSpotifyCallback<String>() {
 					@Override
 					public void invoke(String response, RCTSpotifyError error) {
 						if(error != null)
