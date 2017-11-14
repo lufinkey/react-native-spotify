@@ -152,7 +152,7 @@ import Spotify from 'react-native-spotify';
 		
 		* **startPosition** - starting position for playback in seconds
 		
-		* **error** - An error object if an error occurred, or null if no error occurred
+		* **error** - An error object if an error occurred, or *null* if no error occurred
 
 
 
@@ -165,7 +165,7 @@ import Spotify from 'react-native-spotify';
 	
 		* **spotifyURI** - The Spotify URI to queue
 		
-		* **error** - An error object if an error occurred, or null if no error occurred
+		* **error** - An error object if an error occurred, or *null* if no error occurred
 
 
 
@@ -178,7 +178,7 @@ import Spotify from 'react-native-spotify';
 	
 		* **playing** - pass *true* to resume playback, or *false* to pause it
 		
-		* **error** - An error object if an error occurred, or null if no error occurred
+		* **error** - An error object if an error occurred, or *null* if no error occurred
 
 * **getPlaybackState**()
 
@@ -203,7 +203,7 @@ import Spotify from 'react-native-spotify';
 	
 	* *parameters*
 	
-		* **error** - An error object if an error occurred, or null if no error occurred
+		* **error** - An error object if an error occurred, or *null* if no error occurred
 
 
 
@@ -214,7 +214,7 @@ import Spotify from 'react-native-spotify';
 	
 	* *parameters*
 	
-		* **error** - An error object if an error occurred, or null if no error occurred
+		* **error** - An error object if an error occurred, or *null* if no error occurred
 
 
 
@@ -227,7 +227,7 @@ import Spotify from 'react-native-spotify';
 	
 		* **shuffling** - *true* to enable shuffle, *false* to disable it
 		
-		* **error** - An error object if an error occurred, or null if no error occurred
+		* **error** - An error object if an error occurred, or *null* if no error occurred
 
 
 
@@ -240,4 +240,269 @@ import Spotify from 'react-native-spotify';
 	
 		* **repeating** - *true* to enable repeat, *false* to disable it
 		
-		* **error** - An error object if an error occurred, or null if no error occurred
+		* **error** - An error object if an error occurred, or *null* if no error occurred
+
+
+
+
+### Metadata Methods
+
+* **sendRequest**( *endpoint*, *method*, *params*, *isJSONBody*, ( *result*?, *error*? ) => {} )
+
+	Sends a general request to the spotify api.
+	
+	* *parameters*
+	
+		* **endpoint** - the api endpoint, without a leading slash
+		
+		* **method** - the HTTP method to use
+		
+		* **params** - the request parameters
+		
+		* **isJSONBody** - whether or not to send he request parameters as json in the body of the request
+		
+		* **result** - the request result object
+		
+		* **error** - An error object if an error occurred, or *null* if no error occurred
+
+
+
+
+* **search**( *query*, *types*, *options*?, ( *result*?, *error*? ) => {} )
+
+	Sends a [search](https://developer.spotify.com/web-api/search-item/) request to spotify.
+	
+	* *parameters*
+	
+		* **query** - The search query string. Same as the *q* parameter on the [search](https://developer.spotify.com/web-api/search-item/) endpoint
+		
+		* **types** - An array of item types to search for. Valid types are: `album`, `artist`, `playlist`, and `track`.
+		
+		* **options** - A map of other optional parameters to specify for the query
+		
+		* **result** - The search result object. An example response can be seen [here](https://developer.spotify.com/web-api/search-item/#example)
+		
+		* **error** - An error object if an error occurred, or *null* if no error occurred
+
+
+
+
+* **getAlbum**( *albumID*, *options*?, ( *result*?. *error*? ) => {} )
+
+	Gets Spotify catalog information for a single album.
+	
+	* *parameters*
+	
+		* **albumID** - The Spotify ID for the album
+		
+		* **options** - A map of other optional parameters to specify for the query
+		
+		* **result** - The request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-album/#example)
+		
+		* **error** - An error object if an error occurred, or *null* if no error occurred
+
+
+
+
+* **getAlbums**( *albumIDs*, *options*?, ( *result*?, *error*? ) => {} )
+
+	Gets Spotify catalog information for multiple albums identified by their Spotify IDs.
+	
+	* *parameters*
+	
+		* **albumIDs** - An array of the Spotify IDs for the albums
+		
+		* **options** - A map of other optional parameters to specify for the query
+		
+		* **result** - The request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-several-albums/#example)
+		
+		* **error** - An error object if an error occurred, or *null* if no error occurred
+
+
+
+
+* **getAlbumTracks**( *albumID*, *options*?, ( *result*?, *error*? ) => {} )
+
+	Gets Spotify catalog information about an album’s tracks.
+
+	* *parameters*
+	
+		* **albumID** - The Spotify ID for the album
+		
+		* **options** - A map of other optional parameters to specify for the query
+		
+		* **result** - The request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-albums-tracks/#example)
+		
+		* **error** - An error object if an error occurred, or *null* if no error occurred
+
+
+
+
+* **getArtist**( *artistID*, *options*?, ( *result*?, *error*? ) => {} )
+
+	Gets Spotify catalog information for a single artist.
+	
+	* *parameters*
+	
+		* **artistID** - The Spotify ID for the artist
+		
+		* **options** - A map of other optional parameters to specify for the query
+		
+		* **result** - The request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-artist/#example)
+		
+		* **error** - An error object if an error occurred, or *null* if no error occurred
+
+
+
+
+* **getArtists**( *artistIDs*, *options*?, ( *result*?, *error*? ) => {} )
+
+	Gets Spotify catalog information for several artists based on their Spotify IDs.
+	
+	* *parameters*
+	
+		* **artistIDs** - An array of the Spotify IDs for the artists
+		
+		* **options** - A map of other optional parameters to specify for the query
+		
+		* **result** - The request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-several-artists/#example)
+		
+		* **error** - An error object if an error occurred, or *null* if no error occurred
+
+
+
+
+* **getArtistAlbums**( *artistID*, *options*?, ( *result*?, *error*? ) => {} )
+
+	Gets Spotify catalog information about an artist’s albums.
+	
+	* *parameters*
+	
+		* **artistID** - The Spotify ID for the artist
+		
+		* **options** - A map of other optional parameters to specify for the query
+		
+		* **result** - The request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-artists-albums/#example)
+		
+		* **error** - An error object if an error occurred, or *null* if no error occurred
+
+
+
+
+* **getArtistTopTracks**( *artistID*, *country*, *options*?, ( *result*?, *error*? ) => {} )
+
+	Gets Spotify catalog information about an artist’s top tracks by country.
+	
+	* *parameters*
+	
+		* **artistID** - The Spotify ID for the artist
+		
+		* **country** - The country: an [ISO 3166-1 alpha-2 country code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2).
+		
+		* **options** - A map of other optional parameters to specify for the query
+		
+		* **result** - The request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-artists-top-tracks/#example)
+		
+		* **error** - An error object if an error occurred, or *null* if no error occurred
+
+
+
+
+* **getArtistRelatedArtists**( *artistID*, *options*?, ( *result*?, *error*? ) => {} )
+
+	Gets Spotify catalog information about artists similar to a given artist.
+	
+	* *parameters*
+	
+		* **artistID** - The Spotify ID for the artist
+		
+		* **options** - A map of other optional parameters to specify for the query
+		
+		* **result** - The request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-related-artists/#example)
+		
+		* **error** - An error object if an error occurred, or *null* if no error occurred
+
+
+
+
+* **getTrack**( *trackID*, *options*?, ( *result*?, *error*? ) => {} )
+
+	Gets Spotify catalog information for a single track identified by its unique Spotify ID.
+	
+	* *parameters*
+	
+		* **trackID** - The Spotify ID for the track
+		
+		* **options** - A map of other optional parameters to specify for the query
+		
+		* **result** - The request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-track/#example)
+		
+		* **error** - An error object if an error occurred, or *null* if no error occurred
+
+
+
+
+* **getTracks**( *trackIDs*, *options*?, ( *result*?, *error*? ) => {} )
+
+	Gets Spotify catalog information for multiple tracks based on their Spotify IDs.
+	
+	* *parameters*
+	
+		* **trackIDs** - An array of the Spotify IDs for the tracks
+		
+		* **options** - A map of other optional parameters to specify for the query
+		
+		* **result** - The request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-several-tracks/#example)
+		
+		* **error** - An error object if an error occurred, or *null* if no error occurred
+
+
+
+
+* **getTrackAudioAnalysis**( *trackID*, *options*?, ( *result*?, *error*? ) => {} )
+
+	Gets a detailed audio analysis for a single track identified by its unique Spotify ID.
+	
+	* *parameters*
+	
+		* **trackID** - The Spotify ID for the track
+		
+		* **options** - A map of other optional parameters to specify for the query
+		
+		* **result** - The request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-audio-analysis/#example)
+		
+		* **error** - An error object if an error occurred, or *null* if no error occurred
+
+
+
+
+* **getTrackAudioFeatures**( *trackID*, *options*?, ( *result*?, *error*? ) => {} )
+
+	Gets audio feature information for a single track identified by its unique Spotify ID.
+	
+	* *parameters*
+	
+		* **trackID** - The Spotify ID for the track
+		
+		* **options** - A map of other optional parameters to specify for the query
+		
+		* **result** - The request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-audio-features/#example)
+		
+		* **error** - An error object if an error occurred, or *null* if no error occurred
+
+
+
+
+* **getTracksAudioFeatures**( *trackIDs*, *options*?, ( *result*?, *error*? ) => {} )
+
+	Gets audio features for multiple tracks based on their Spotify IDs.
+	
+	* *parameters*
+	
+		* **trackIDs** - An array of the Spotify IDs for the tracks
+		
+		* **options** - A map of other optional parameters to specify for the query
+		
+		* **result** - The request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-several-audio-features/#example)
+		
+		* **error** - An error object if an error occurred, or *null* if no error occurred
