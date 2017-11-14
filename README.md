@@ -65,6 +65,8 @@ packagingOptions {
 import Spotify from 'react-native-spotify';
 ```
 
+### Initialization/Authorization Methods
+
 * **initialize**( *options*, ( *loggedIn*, *error*? ) => {} )
 
 	Initializes the Spotify modules and resumes a logged in session if there is one
@@ -74,6 +76,9 @@ import Spotify from 'react-native-spotify';
 			* **clientID** (*required*) - Your spotify application's ClientID that you registered with spotify [here](https://developer.spotify.com/my-applications)
 			* **redirectURL** (*required*) - The redirect URL to use when you've finished logging in. You need to set this up for your application [here](https://developer.spotify.com/my-applications)
 			* **sessionUserDefaultsKey** - The preference key to use to store session data for this module
+			* **scopes** - An array of scopes to use in the application. A list of scopes can be found [here](https://developer.spotify.com/web-api/using-scopes/)
+			* **tokenSwapURL** - The URL to use to swap an authentication code for an access token
+			* **tokenRefreshURL** - The URL to use to get a new access token from a refresh token
   		
 		* **loggedIn** - A boolean indicating whether or not a session was automatically logged back in
   	
@@ -119,7 +124,7 @@ import Spotify from 'react-native-spotify';
 		* *false* if the url was not an authentication URL
 
 	* *example implementation*
-	```javascript
+		```javascript
 		App.handleOpenURL = (event) => {
 			if(Spotify.handleAuthURL(event.url))
 			{
@@ -128,4 +133,111 @@ import Spotify from 'react-native-spotify';
 			return false;
 		}
 		Linking.addEventListener('url', App.handleOpenURL);
-	```
+		```
+
+
+
+
+### Player Methods
+
+* **playURI**( *spotifyURI*, *startIndex*, *startPosition*, ( *error*? ) => {} )
+
+	Play a Spotify URI.
+	
+	* *parameters*
+		
+		* **spotifyURI** - The Spotify URI to play
+		
+		* **startIndex** - The index of an item that should be played first, e.g. 0 - for the very first track in the playlist or a single track
+		
+		* **startPosition** - starting position for playback in seconds
+		
+		* **error** - An error object if an error occurred, or null if no error occurred
+
+
+
+
+* **queueURI**( *spotifyURI*, ( *error*? ) => {} )
+
+	Queue a Spotify URI.
+	
+	* *parameters*
+	
+		* **spotifyURI** - The Spotify URI to queue
+		
+		* **error** - An error object if an error occurred, or null if no error occurred
+
+
+
+
+* **setPlaying**( *playing*, ( *error*? ) => {} )
+
+	Set the “playing” status of the player.
+	
+	* *parameters*
+	
+		* **playing** - pass *true* to resume playback, or *false* to pause it
+		
+		* **error** - An error object if an error occurred, or null if no error occurred
+
+* **getPlaybackState**()
+
+	Gives the player's current state.
+	
+	* *returns*
+	
+		An object with the current player state. The state properties are:
+		
+		* **playing** - boolean indicating whether the player is playing
+		* **repeating** - boolean indicating whether the player is repeating
+		* **shuffling** - boolean indicating whether the player is shuffling
+		* **activeDevice** - boolean indicating whether the current device is the one playing
+		* **position** - the position of the player in the current track, in seconds
+
+
+
+
+* **skipToNext**( ( *error*? ) => {} )
+
+	Skips to the next track.
+	
+	* *parameters*
+	
+		* **error** - An error object if an error occurred, or null if no error occurred
+
+
+
+
+* **skipToPrevious**( ( *error*? ) => {} )
+
+	Skips to the previous track.
+	
+	* *parameters*
+	
+		* **error** - An error object if an error occurred, or null if no error occurred
+
+
+
+
+* **setShuffling**( *shuffling*, ( *error*? ) => {] )
+
+	Enables or disables shuffling on the player.
+	
+	* *parameters*
+	
+		* **shuffling** - *true* to enable shuffle, *false* to disable it
+		
+		* **error** - An error object if an error occurred, or null if no error occurred
+
+
+
+
+* **setRepeating**( *repeating*, ( *error*? ) => {} )
+
+	Enables or disables repeating on the player.
+	
+	* *parameters*
+	
+		* **repeating** - *true* to enable repeat, *false* to disable it
+		
+		* **error** - An error object if an error occurred, or null if no error occurred
