@@ -33,7 +33,7 @@ NSString* const RCTSpotifyErrorDomain = @"RCTSpotifyErrorDomain";
 -(void)logBackInIfNeeded:(void(^)(BOOL loggedIn, NSError* error))completion;
 -(void)initializePlayerIfNeeded:(void(^)(BOOL loggedIn, NSError* error))completion;
 -(void)loginPlayer:(NSString*)accessToken completion:(void(^)(BOOL, NSError*))completion;
-
+-(void)prepareForPlayer:(void(^)(NSError*))completion;
 -(void)prepareForRequest:(void(^)(NSError* error))completion;
 -(void)performRequest:(NSURLRequest*)request completion:(void(^)(id resultObj, NSError* error))completion;
 -(void)doAPIRequest:(NSString*)endpoint method:(NSString*)method params:(NSDictionary*)params jsonBody:(BOOL)jsonBody completion:(void(^)(id resultObj, NSError* error))completion;
@@ -428,9 +428,20 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(handleAuthURL:(NSString*)urlString)
 
 #pragma mark - React Native functions - Playback
 
+-(void)prepareForPlayer:(void(^)(NSError*))completion
+{
+	[self logBackInIfNeeded:^(BOOL loggedIn, NSError* error){
+		if(!loggedIn && error==nil)
+		{
+			error = [RCTSpotify errorWithCode:RCTSpotifyErrorCodeNotLoggedIn description:@"You are not logged in"];
+		}
+		completion(error);
+	}];
+}
+
 RCT_EXPORT_METHOD(playURI:(NSString*)uri startIndex:(NSUInteger)startIndex startPosition:(NSTimeInterval)startPosition completion:(RCTResponseSenderBlock)completion)
 {
-	[self prepareForRequest:^(NSError* error) {
+	[self prepareForPlayer:^(NSError* error) {
 		if(error)
 		{
 			if(completion!=nil)
@@ -451,7 +462,7 @@ RCT_EXPORT_METHOD(playURI:(NSString*)uri startIndex:(NSUInteger)startIndex start
 
 RCT_EXPORT_METHOD(queueURI:(NSString*)uri completion:(RCTResponseSenderBlock)completion)
 {
-	[self prepareForRequest:^(NSError* error) {
+	[self prepareForPlayer:^(NSError* error) {
 		if(error)
 		{
 			if(completion)
@@ -491,7 +502,7 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getVolume)
 
 RCT_EXPORT_METHOD(setPlaying:(BOOL)playing completion:(RCTResponseSenderBlock)completion)
 {
-	[self prepareForRequest:^(NSError* error) {
+	[self prepareForPlayer:^(NSError* error) {
 		if(error)
 		{
 			if(completion)
@@ -509,6 +520,51 @@ RCT_EXPORT_METHOD(setPlaying:(BOOL)playing completion:(RCTResponseSenderBlock)co
 	}];
 }
 
+RCT_EXPORT_METHOD(setShuffling:(BOOL)shuffling completion:(RCTResponseSenderBlock)completion)
+{
+	[self prepareForPlayer:^(NSError* error) {
+		if(error)
+		{
+			if(completion)
+			{
+				completion(@[ [RCTSpotifyConvert NSError:error] ]);
+			}
+			return;
+		}
+		[_player setShuffle:shuffling callback:^(NSError* error) {
+			if(completion)
+			{
+				completion(@[ [RCTSpotifyConvert NSError:error] ]);
+			}
+		}];
+	}];
+}
+
+RCT_EXPORT_METHOD(setRepeating:(BOOL)repeating completion:(RCTResponseSenderBlock)completion)
+{
+	[self prepareForPlayer:^(NSError* error) {
+		if(error)
+		{
+			if(completion)
+			{
+				completion(@[ [RCTSpotifyConvert NSError:error] ]);
+			}
+			return;
+		}
+		SPTRepeatMode repeatMode = SPTRepeatOff;
+		if(repeating)
+		{
+			repeatMode = SPTRepeatOne;
+		}
+		[_player setRepeat:repeatMode callback:^(NSError* error) {
+			if(completion)
+			{
+				completion(@[ [RCTSpotifyConvert NSError:error] ]);
+			}
+		}];
+	}];
+}
+
 RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getPlaybackState)
 {
 	return [RCTSpotifyConvert SPTPlaybackState:_player.playbackState];
@@ -516,7 +572,7 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getPlaybackState)
 
 RCT_EXPORT_METHOD(skipToNext:(RCTResponseSenderBlock)completion)
 {
-	[self prepareForRequest:^(NSError *error) {
+	[self prepareForPlayer:^(NSError *error) {
 		if(error)
 		{
 			if(completion)
@@ -536,7 +592,7 @@ RCT_EXPORT_METHOD(skipToNext:(RCTResponseSenderBlock)completion)
 
 RCT_EXPORT_METHOD(skipToPrevious:(RCTResponseSenderBlock)completion)
 {
-	[self prepareForRequest:^(NSError *error) {
+	[self prepareForPlayer:^(NSError *error) {
 		if(error)
 		{
 			if(completion)
@@ -561,18 +617,11 @@ RCT_EXPORT_METHOD(skipToPrevious:(RCTResponseSenderBlock)completion)
 -(void)prepareForRequest:(void(^)(NSError*))completion
 {
 	[self logBackInIfNeeded:^(BOOL loggedIn, NSError* error){
-		if(!loggedIn)
+		if(!loggedIn && error==nil)
 		{
-			if(error == nil)
-			{
-				error = [RCTSpotify errorWithCode:RCTSpotifyErrorCodeNotLoggedIn description:@"You are not logged in"];
-			}
-			completion(error);
+			error = [RCTSpotify errorWithCode:RCTSpotifyErrorCodeNotLoggedIn description:@"You are not logged in"];
 		}
-		else
-		{
-			completion(nil);
-		}
+		completion(error);
 	}];
 }
 

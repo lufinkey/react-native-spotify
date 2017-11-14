@@ -60,7 +60,10 @@ typedef enum
 -(void)skipToNext:(RCTResponseSenderBlock)completion;
 //skipToPrevious((error?))
 -(void)skipToPrevious:(RCTResponseSenderBlock)completion;
-
+//setShuffling(shuffling, (error?))
+-(void)setShuffling:(BOOL)shuffling completion:(RCTResponseSenderBlock)completion;
+//setRepeating(repeating, (error?))
+-(void)setRepeating:(BOOL)repeating completion:(RCTResponseSenderBlock)completion;
 
 //sendRequest(endpoint, method, params, isJSONBody, (result?, error?))
 -(void)sendRequest:(NSString*)endpoint method:(NSString*)method params:(NSDictionary*)params isJSONBody:(BOOL)jsonBody completion:(RCTResponseSenderBlock)completion;
