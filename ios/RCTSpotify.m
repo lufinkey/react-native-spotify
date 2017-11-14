@@ -236,9 +236,11 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSende
 			[self loginPlayer:_auth.session.accessToken completion:^(BOOL loggedIn, NSError* error) {
 				completion(loggedIn, error);
 			}];
-			return;
 		}
-		completion(YES, nil);
+		else
+		{
+			completion(YES, nil);
+		}
 	}
 	else if([_player startWithClientId:_auth.clientID audioController:nil allowCaching:allowCaching error:&error])
 	{
@@ -266,6 +268,11 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSende
 		completion(NO, [RCTSpotify errorWithCode:RCTSpotifyErrorCodeNotLoggedIn description:@"No access token has been received"]);
 		return;
 	}
+	else if(_player.loggedIn)
+	{
+		completion(YES, nil);
+		return;
+	}
 	dispatch_async(dispatch_get_main_queue(), ^{
 		//wait for audioStreamingDidLogin:
 		// or audioStreaming:didRecieveError:
@@ -273,6 +280,15 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSende
 			completion(loggedIn, error);
 		}];
 		[_player loginWithAccessToken:accessToken];
+		if(_player.loggedIn)
+		{
+			NSArray<void(^)(BOOL,NSError*)>* loginPlayerResponses = [NSArray arrayWithArray:_loginPlayerResponses];
+			[_loginPlayerResponses removeAllObjects];
+			for(void(^response)(BOOL,NSError*) in loginPlayerResponses)
+			{
+				response(YES, nil);
+			}
+		}
 	});
 }
 
