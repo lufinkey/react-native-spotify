@@ -253,7 +253,7 @@ import Spotify from 'react-native-spotify';
 	
 	* *parameters*
 	
-		* **endpoint** - the api endpoint, without a leading slash, e.g. `browse/new-releases`
+		* **endpoint** - the api endpoint, without a leading slash, e.g. `v1/browse/new-releases`
 		
 		* **method** - the HTTP method to use
 		
