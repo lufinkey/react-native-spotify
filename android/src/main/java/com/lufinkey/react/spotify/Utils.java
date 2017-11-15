@@ -1,4 +1,4 @@
-package com.reactlibrary;
+package com.lufinkey.react.spotify;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;

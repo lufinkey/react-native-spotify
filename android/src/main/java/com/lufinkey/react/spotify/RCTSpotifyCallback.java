@@ -1,4 +1,4 @@
-package com.reactlibrary;
+package com.lufinkey.react.spotify;
 
 public interface RCTSpotifyCallback<T>
 {

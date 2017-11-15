@@ -1,5 +1,4 @@
-
-package com.reactlibrary;
+package com.lufinkey.react.spotify;
 
 import java.util.Arrays;
 import java.util.Collections;

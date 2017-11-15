@@ -1,4 +1,4 @@
-package com.reactlibrary;
+package com.lufinkey.react.spotify;
 
 import android.app.Activity;
 import android.content.Intent;

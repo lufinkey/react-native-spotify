@@ -1,4 +1,4 @@
-package com.reactlibrary;
+package com.lufinkey.react.spotify;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReadableMap;

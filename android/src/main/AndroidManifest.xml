@@ -1,12 +1,12 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.reactlibrary">
+          package="com.lufinkey.react.spotify">
 
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
 	<application>
 		<activity
-			android:name="com.reactlibrary.SpotifyAuthActivity">
+			android:name="com.lufinkey.react.spotify.SpotifyAuthActivity">
 		</activity>
 	</application>
 

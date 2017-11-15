@@ -1,5 +1,4 @@
-
-package com.reactlibrary;
+package com.lufinkey.react.spotify;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
