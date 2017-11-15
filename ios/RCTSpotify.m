@@ -9,6 +9,7 @@
 
 
 NSString* const RCTSpotifyErrorDomain = @"RCTSpotifyErrorDomain";
+NSString* const RCTSpotifyWebAPIDomain = @"com.spotify.web-api";
 
 #define SPOTIFY_API_BASE_URL @"https://api.spotify.com/v1/"
 #define SPOTIFY_API_URL(endpoint) [NSURL URLWithString:NSString_concat(SPOTIFY_API_BASE_URL, endpoint)]
@@ -632,9 +633,9 @@ RCT_EXPORT_METHOD(skipToPrevious:(RCTResponseSenderBlock)completion)
 			NSDictionary* errorObj = jsonObj[@"error"];
 			if(errorObj!=nil)
 			{
-				completion(jsonObj, [RCTSpotify errorWithCode:RCTSpotifyErrorCodeRequestError
-												  description:errorObj[@"message"]
-													   fields:@{@"statusCode":errorObj[@"status"]}]);
+				completion(jsonObj, [NSError errorWithDomain:RCTSpotifyWebAPIDomain
+														code:[errorObj[@"status"] integerValue]
+													userInfo:@{NSLocalizedDescriptionKey:errorObj[@"message"]}]);
 			}
 			else
 			{

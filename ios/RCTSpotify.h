@@ -6,6 +6,7 @@
 #endif
 
 extern NSString* const RCTSpotifyErrorDomain;
+extern NSString* const RCTSpotifyWebAPIDomain;
 
 typedef enum
 {
