@@ -102,16 +102,27 @@ public class Utils
 			@Override
 			public void onResponse(String response)
 			{
-				System.out.println("got http request response");
 				completion.invoke(response, null);
 			}
 		}, new Response.ErrorListener() {
 			@Override
-			public void onErrorResponse(VolleyError error)
+			public void onErrorResponse(VolleyError volleyError)
 			{
-				System.out.println("got volley error");
-				String errorMessage = error.getMessage();
-				completion.invoke(null, new RCTSpotifyError(RCTSpotifyError.Code.REQUEST_ERROR, "error: "+errorMessage));
+				String response = null;
+				RCTSpotifyError error = null;
+				if(volleyError.networkResponse!=null)
+				{
+					if(volleyError.networkResponse.data!=null)
+					{
+						response = new String(volleyError.networkResponse.data);
+					}
+					error = new RCTSpotifyError("VolleyErrorDomain", volleyError.networkResponse.statusCode, volleyError.getMessage());
+				}
+				else
+				{
+					error = new RCTSpotifyError(RCTSpotifyError.Code.REQUEST_ERROR, volleyError.getMessage());
+				}
+				completion.invoke(response, error);
 			}
 		}) {
 			@Override

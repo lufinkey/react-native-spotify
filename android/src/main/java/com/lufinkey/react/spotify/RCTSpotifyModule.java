@@ -788,37 +788,39 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 				Utils.doHTTPRequest("https://api.spotify.com/v1/"+endpoint, method, params, jsonBody, headers, new RCTSpotifyCallback<String>() {
 					@Override
 					public void invoke(String response, RCTSpotifyError error) {
-						if(error != null)
+						if(response==null)
 						{
 							completion.invoke(null, error);
-							return;
 						}
+						else
+						{
+							JSONObject responseObj;
+							try
+							{
+								responseObj = new JSONObject(response);
+							}
+							catch (JSONException e)
+							{
+								completion.invoke(null, new RCTSpotifyError(RCTSpotifyError.Code.REQUEST_ERROR, "Invalid response format"));
+								return;
+							}
 
-						JSONObject responseObj;
-						try
-						{
-							responseObj = new JSONObject(response);
-						}
-						catch (JSONException e)
-						{
-							completion.invoke(null, new RCTSpotifyError(RCTSpotifyError.Code.REQUEST_ERROR, "Invalid response format"));
-							return;
-						}
+							try
+							{
+								JSONObject errorObj = responseObj.getJSONObject("error");
+								completion.invoke(RCTSpotifyConvert.fromJSONObject(responseObj),
+										new RCTSpotifyError(RCTSpotifyError.SPOTIFY_WEB_DOMAIN,
+												errorObj.getInt("status"),
+												errorObj.getString("message")));
+								return;
+							}
+							catch(JSONException e)
+							{
+								//do nothing. this means we don't have an error
+							}
 
-						try
-						{
-							JSONObject errorObj = responseObj.getJSONObject("error");
-							completion.invoke(RCTSpotifyConvert.fromJSONObject(responseObj),
-									new RCTSpotifyError(RCTSpotifyError.Code.REQUEST_ERROR,
-											errorObj.getString("message")));
-							return;
+							completion.invoke(RCTSpotifyConvert.fromJSONObject(responseObj), null);
 						}
-						catch(JSONException e)
-						{
-							//do nothing. this means we don't have an error
-						}
-
-						completion.invoke(RCTSpotifyConvert.fromJSONObject(responseObj), null);
 					}
 				});
 			}

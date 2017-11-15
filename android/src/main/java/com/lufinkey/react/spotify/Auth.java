@@ -231,6 +231,7 @@ public class Auth
 						break;
 
 					case TOKEN:
+						refreshToken = null;
 						accessToken = response.getAccessToken();
 						expireDate = getExpireDate(response.getExpiresIn());
 						save();
@@ -257,41 +258,49 @@ public class Auth
 			@Override
 			public void invoke(String response, RCTSpotifyError error)
 			{
-				if(error!=null)
+				if(response==null)
 				{
 					completion.invoke(null, error);
-					return;
 				}
-				JSONObject responseObj;
-				try
+				else
 				{
-					responseObj = new JSONObject(response);
-				}
-				catch(JSONException e)
-				{
-					completion.invoke(null, new RCTSpotifyError(RCTSpotifyError.Code.REQUEST_ERROR, "Invalid response format"));
-					return;
-				}
-
-				try
-				{
-					if(responseObj.has("error"))
+					JSONObject responseObj;
+					try
 					{
-						completion.invoke(null, new RCTSpotifyError(RCTSpotifyError.Code.REQUEST_ERROR, responseObj.getString("error_description")));
+						responseObj = new JSONObject(response);
+					}
+					catch(JSONException e)
+					{
+						completion.invoke(null, new RCTSpotifyError(RCTSpotifyError.Code.REQUEST_ERROR, "Invalid response format"));
 						return;
 					}
 
-					accessToken = responseObj.getString("access_token");
-					refreshToken = responseObj.getString("refresh_token");
-					expireDate = getExpireDate(responseObj.getInt("expires_in"));
-					save();
-				}
-				catch(JSONException e)
-				{
-					completion.invoke(null, new RCTSpotifyError(RCTSpotifyError.Code.REQUEST_ERROR, "Missing expected response parameters"));
-				}
+					try
+					{
+						if(responseObj.has("error"))
+						{
+							if(error!=null)
+							{
+								completion.invoke(null, new RCTSpotifyError(RCTSpotifyError.SPOTIFY_AUTH_DOMAIN, error.getCode(), responseObj.getString("error_description")));
+							}
+							else
+							{
+								completion.invoke(null, new RCTSpotifyError(RCTSpotifyError.Code.REQUEST_ERROR, responseObj.getString("error_description")));
+							}
+							return;
+						}
 
-				completion.invoke(accessToken, null);
+						accessToken = responseObj.getString("access_token");
+						refreshToken = responseObj.getString("refresh_token");
+						expireDate = getExpireDate(responseObj.getInt("expires_in"));
+						save();
+					}
+					catch(JSONException e)
+					{
+						completion.invoke(null, new RCTSpotifyError(RCTSpotifyError.Code.REQUEST_ERROR, "Missing expected response parameters"));
+					}
+					completion.invoke(accessToken, null);
+				}
 			}
 		});
 	}
@@ -304,7 +313,6 @@ public class Auth
 		}
 		else if(refreshToken==null)
 		{
-			clearSession();
 			completion.invoke(false, null);
 		}
 		else
@@ -327,6 +335,7 @@ public class Auth
 		}
 		else if(refreshToken==null)
 		{
+			clearSession();
 			completion.invoke(false, new RCTSpotifyError(RCTSpotifyError.Code.AUTHORIZATION_FAILED, "Can't refresh session without a refresh token"));
 		}
 		else
@@ -337,39 +346,48 @@ public class Auth
 				@Override
 				public void invoke(String response, RCTSpotifyError error)
 				{
-					if(error!=null)
+					if(response==null)
 					{
 						completion.invoke(false, error);
-						return;
 					}
-					JSONObject responseObj;
-					try
+					else
 					{
-						responseObj = new JSONObject(response);
-					}
-					catch(JSONException e)
-					{
-						completion.invoke(false, new RCTSpotifyError(RCTSpotifyError.Code.REQUEST_ERROR, "Invalid response format"));
-						return;
-					}
-
-					try
-					{
-						if(responseObj.has("error"))
+						JSONObject responseObj;
+						try
 						{
-							completion.invoke(false, new RCTSpotifyError(RCTSpotifyError.Code.REQUEST_ERROR, responseObj.getString("error_description")));
+							responseObj = new JSONObject(response);
+						}
+						catch(JSONException e)
+						{
+							completion.invoke(false, new RCTSpotifyError(RCTSpotifyError.Code.REQUEST_ERROR, "Invalid response format"));
 							return;
 						}
 
-						accessToken = responseObj.getString("access_token");
-						expireDate = getExpireDate(responseObj.getInt("expires_in"));
-					}
-					catch(JSONException e)
-					{
-						completion.invoke(false, new RCTSpotifyError(RCTSpotifyError.Code.REQUEST_ERROR, "Missing expected response parameters"));
-					}
+						try
+						{
+							if(responseObj.has("error"))
+							{
+								if(error!=null)
+								{
+									completion.invoke(false, new RCTSpotifyError(RCTSpotifyError.SPOTIFY_AUTH_DOMAIN, error.getCode(), responseObj.getString("error_description")));
+								}
+								else
+								{
+									completion.invoke(false, new RCTSpotifyError(RCTSpotifyError.Code.REQUEST_ERROR, responseObj.getString("error_description")));
+								}
+								return;
+							}
 
-					completion.invoke(true, null);
+							accessToken = responseObj.getString("access_token");
+							expireDate = getExpireDate(responseObj.getInt("expires_in"));
+							save();
+						}
+						catch(JSONException e)
+						{
+							completion.invoke(false, new RCTSpotifyError(RCTSpotifyError.Code.REQUEST_ERROR, "Missing expected response parameters"));
+						}
+						completion.invoke(true, null);
+					}
 				}
 			});
 		}
