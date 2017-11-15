@@ -366,11 +366,19 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	//isLoggedIn()
 	public boolean isLoggedIn()
 	{
-		if(player != null && player.isLoggedIn())
+		if(!initialized)
 		{
-			return true;
+			return false;
 		}
-		return false;
+		else if(auth.getAccessToken()==null)
+		{
+			return false;
+		}
+		else if(auth.hasPlayerScope() && (player==null || !player.isLoggedIn()))
+		{
+			return false;
+		}
+		return true;
 	}
 
 	@ReactMethod
