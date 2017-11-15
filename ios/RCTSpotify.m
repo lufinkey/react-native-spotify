@@ -11,7 +11,7 @@
 NSString* const RCTSpotifyErrorDomain = @"RCTSpotifyErrorDomain";
 NSString* const RCTSpotifyWebAPIDomain = @"com.spotify.web-api";
 
-#define SPOTIFY_API_BASE_URL @"https://api.spotify.com/v1/"
+#define SPOTIFY_API_BASE_URL @"https://api.spotify.com/"
 #define SPOTIFY_API_URL(endpoint) [NSURL URLWithString:NSString_concat(SPOTIFY_API_BASE_URL, endpoint)]
 
 @interface RCTSpotify() <SPTAudioStreamingDelegate, SPTAudioStreamingPlaybackDelegate, SpotifyWebViewDelegate>
@@ -707,7 +707,7 @@ RCT_EXPORT_METHOD(search:(NSString*)query types:(NSArray<NSString*>*)types optio
 	body[@"q"] = query;
 	body[@"type"] = [types componentsJoinedByString:@","];
 	
-	[self doAPIRequest:@"search" method:@"GET" params:body jsonBody:NO completion:^(id resultObj, NSError* error) {
+	[self doAPIRequest:@"v1/search" method:@"GET" params:body jsonBody:NO completion:^(id resultObj, NSError* error) {
 		if(completion)
 		{
 			completion(@[ [RCTSpotifyConvert ID:resultObj], [RCTSpotifyConvert NSError:error] ]);
@@ -719,7 +719,7 @@ RCT_EXPORT_METHOD(getAlbum:(NSString*)albumID options:(NSDictionary*)options com
 {
 	reactCallbackAndReturnIfNil(albumID, completion, [NSNull null], );
 	
-	NSString* endpoint = NSString_concat(@"albums/", albumID);
+	NSString* endpoint = NSString_concat(@"v1/albums/", albumID);
 	[self doAPIRequest:endpoint method:@"GET" params:options jsonBody:NO completion:^(id resultObj, NSError *error) {
 		if(completion)
 		{
@@ -735,7 +735,7 @@ RCT_EXPORT_METHOD(getAlbums:(NSArray<NSString*>*)albumIDs options:(NSDictionary*
 	NSMutableDictionary* body = [[self class] mutableDictFromDict:options];
 	body[@"ids"] = [albumIDs componentsJoinedByString:@","];
 	
-	[self doAPIRequest:@"albums" method:@"GET" params:body jsonBody:NO completion:^(id resultObj, NSError* error) {
+	[self doAPIRequest:@"v1/albums" method:@"GET" params:body jsonBody:NO completion:^(id resultObj, NSError* error) {
 		if(completion)
 		{
 			completion(@[ [RCTSpotifyConvert ID:resultObj], [RCTSpotifyConvert NSError:error] ]);
@@ -747,7 +747,7 @@ RCT_EXPORT_METHOD(getAlbumTracks:(NSString*)albumID options:(NSDictionary*)optio
 {
 	reactCallbackAndReturnIfNil(albumID, completion, [NSNull null], );
 	
-	NSString* endpoint = NSString_concat(@"albums/", albumID, @"/tracks");
+	NSString* endpoint = NSString_concat(@"v1/albums/", albumID, @"/tracks");
 	[self doAPIRequest:endpoint method:@"GET" params:options jsonBody:NO completion:^(id resultObj, NSError* error) {
 		if(completion)
 		{
@@ -760,7 +760,7 @@ RCT_EXPORT_METHOD(getArtist:(NSString*)artistID options:(NSDictionary*)options c
 {
 	reactCallbackAndReturnIfNil(artistID, completion, [NSNull null], );
 	
-	NSString* endpoint = NSString_concat(@"artists/", artistID);
+	NSString* endpoint = NSString_concat(@"v1/artists/", artistID);
 	[self doAPIRequest:endpoint method:@"GET" params:options jsonBody:NO completion:^(id resultObj, NSError *error) {
 		if(completion)
 		{
@@ -776,7 +776,7 @@ RCT_EXPORT_METHOD(getArtists:(NSArray<NSString*>*)artistIDs options:(NSDictionar
 	NSMutableDictionary* body = [[self class] mutableDictFromDict:options];
 	body[@"ids"] = [artistIDs componentsJoinedByString:@","];
 	
-	[self doAPIRequest:@"artists" method:@"GET" params:body jsonBody:NO completion:^(id resultObj, NSError* error) {
+	[self doAPIRequest:@"v1/artists" method:@"GET" params:body jsonBody:NO completion:^(id resultObj, NSError* error) {
 		if(completion)
 		{
 			completion(@[ [RCTSpotifyConvert ID:resultObj], [RCTSpotifyConvert NSError:error] ]);
@@ -788,7 +788,7 @@ RCT_EXPORT_METHOD(getArtistAlbums:(NSString*)artistID options:(NSDictionary*)opt
 {
 	reactCallbackAndReturnIfNil(artistID, completion, [NSNull null], );
 	
-	NSString* endpoint = NSString_concat(@"artists/", artistID, @"/albums");
+	NSString* endpoint = NSString_concat(@"v1/artists/", artistID, @"/albums");
 	[self doAPIRequest:endpoint method:@"GET" params:options jsonBody:NO completion:^(id resultObj, NSError* error) {
 		if(completion)
 		{
@@ -805,7 +805,7 @@ RCT_EXPORT_METHOD(getArtistTopTracks:(NSString*)artistID country:(NSString*)coun
 	NSMutableDictionary* body = [[self class] mutableDictFromDict:options];
 	body[@"country"] = country;
 	
-	NSString* endpoint = NSString_concat(@"artists/", artistID, @"/top-tracks");
+	NSString* endpoint = NSString_concat(@"v1/artists/", artistID, @"/top-tracks");
 	[self doAPIRequest:endpoint method:@"GET" params:options jsonBody:NO completion:^(id resultObj, NSError* error) {
 		if(completion)
 		{
@@ -818,7 +818,7 @@ RCT_EXPORT_METHOD(getArtistRelatedArtists:(NSString*)artistID options:(NSDiction
 {
 	reactCallbackAndReturnIfNil(artistID, completion, [NSNull null], );
 	
-	NSString* endpoint = NSString_concat(@"artists/", artistID, @"/related-artists");
+	NSString* endpoint = NSString_concat(@"v1/artists/", artistID, @"/related-artists");
 	[self doAPIRequest:endpoint method:@"GET" params:options jsonBody:NO completion:^(id resultObj, NSError* error) {
 		if(completion)
 		{
@@ -831,7 +831,7 @@ RCT_EXPORT_METHOD(getTrack:(NSString*)trackID options:(NSDictionary*)options com
 {
 	reactCallbackAndReturnIfNil(trackID, completion, [NSNull null], );
 	
-	NSString* endpoint = NSString_concat(@"tracks/", trackID);
+	NSString* endpoint = NSString_concat(@"v1/tracks/", trackID);
 	[self doAPIRequest:endpoint method:@"GET" params:options jsonBody:NO completion:^(id resultObj, NSError *error) {
 		if(completion)
 		{
@@ -847,7 +847,7 @@ RCT_EXPORT_METHOD(getTracks:(NSArray<NSString*>*)trackIDs options:(NSDictionary*
 	NSMutableDictionary* body = [[self class] mutableDictFromDict:options];
 	body[@"ids"] = [trackIDs componentsJoinedByString:@","];
 	
-	[self doAPIRequest:@"tracks" method:@"GET" params:body jsonBody:NO completion:^(id resultObj, NSError* error) {
+	[self doAPIRequest:@"v1/tracks" method:@"GET" params:body jsonBody:NO completion:^(id resultObj, NSError* error) {
 		if(completion)
 		{
 			completion(@[ [RCTSpotifyConvert ID:resultObj], [RCTSpotifyConvert NSError:error] ]);
@@ -859,7 +859,7 @@ RCT_EXPORT_METHOD(getTrackAudioAnalysis:(NSString*)trackID options:(NSDictionary
 {
 	reactCallbackAndReturnIfNil(trackID, completion, [NSNull null], );
 	
-	NSString* endpoint = NSString_concat(@"audio-analysis/", trackID);
+	NSString* endpoint = NSString_concat(@"v1/audio-analysis/", trackID);
 	[self doAPIRequest:endpoint method:@"GET" params:options jsonBody:NO completion:^(id resultObj, NSError *error) {
 		if(completion)
 		{
@@ -872,7 +872,7 @@ RCT_EXPORT_METHOD(getTrackAudioFeatures:(NSString*)trackID options:(NSDictionary
 {
 	reactCallbackAndReturnIfNil(trackID, completion, [NSNull null], );
 	
-	NSString* endpoint = NSString_concat(@"audio-features/", trackID);
+	NSString* endpoint = NSString_concat(@"v1/audio-features/", trackID);
 	[self doAPIRequest:endpoint method:@"GET" params:options jsonBody:NO completion:^(id resultObj, NSError* error) {
 		if(completion)
 		{
@@ -888,7 +888,7 @@ RCT_EXPORT_METHOD(getTracksAudioFeatures:(NSArray<NSString*>*)trackIDs options:(
 	NSMutableDictionary* body = [[self class] mutableDictFromDict:options];
 	body[@"ids"] = [trackIDs componentsJoinedByString:@","];
 	
-	[self doAPIRequest:@"audio-features" method:@"GET" params:body jsonBody:NO completion:^(id resultObj, NSError* error) {
+	[self doAPIRequest:@"v1/audio-features" method:@"GET" params:body jsonBody:NO completion:^(id resultObj, NSError* error) {
 		if(completion)
 		{
 			completion(@[ [RCTSpotifyConvert ID:resultObj], [RCTSpotifyConvert NSError:error] ]);
