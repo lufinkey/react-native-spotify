@@ -224,7 +224,6 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			@Override
 			public void onError(Throwable error)
 			{
-				System.out.println("Player onError");
 				Spotify.destroyPlayer(player);
 				player = null;
 				completion.invoke(false, new RCTSpotifyError(RCTSpotifyError.Code.INITIALIZATION_FAILED, error.getLocalizedMessage()));
@@ -233,8 +232,6 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			@Override
 			public void onInitialized(SpotifyPlayer newPlayer)
 			{
-				System.out.println("Player onInitialized");
-
 				player = newPlayer;
 
 				//setup player
@@ -255,8 +252,6 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	private void loginPlayer(final String accessToken, final RCTSpotifyCallback<Boolean> completion)
 	{
-		System.out.println("loginPlayer");
-
 		boolean loggedIn = false;
 
 		synchronized(playerLoginResponses)
@@ -1181,7 +1176,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		public void onError(com.spotify.sdk.android.player.Error error)
 		{
 			//TODO handle error
-			System.out.println("Connectivity Error: "+error.toString());
+			System.out.println("Spotify Connectivity Error: "+error.toString());
 		}
 	};
 
@@ -1192,8 +1187,6 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	@Override
 	public void onLoggedIn()
 	{
-		System.out.println("onLoggedIn");
-
 		//handle loginPlayer callbacks
 		ArrayList<RCTSpotifyCallback<Boolean>> loginResponses;
 		synchronized(playerLoginResponses)
@@ -1210,8 +1203,6 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	@Override
 	public void onLoggedOut()
 	{
-		System.out.println("onLoggedOut");
-
 		//handle loginPlayer callbacks
 		ArrayList<RCTSpotifyCallback<Boolean>> loginResponses;
 		synchronized(playerLoginResponses)
@@ -1228,8 +1219,6 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	@Override
 	public void onLoginFailed(com.spotify.sdk.android.player.Error error)
 	{
-		System.out.println("onLoginFailed");
-
 		//handle loginPlayer callbacks
 		ArrayList<RCTSpotifyCallback<Boolean>> loginResponses;
 		synchronized(playerLoginResponses)
@@ -1246,7 +1235,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	@Override
 	public void onTemporaryError()
 	{
-		System.out.println("onTemporaryError");
+		//TODO handle temporary connection error
 	}
 
 	@Override

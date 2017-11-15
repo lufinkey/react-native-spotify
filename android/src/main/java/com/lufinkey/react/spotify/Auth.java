@@ -171,7 +171,6 @@ public class Auth
 			{
 				if(error != null)
 				{
-					System.out.println("error with spotify auth activity");
 					SpotifyAuthActivity.currentActivity.onFinishCompletion = new RCTSpotifyCallback<Void>() {
 						@Override
 						public void invoke(Void obj, RCTSpotifyError unusedError)
@@ -187,7 +186,6 @@ public class Auth
 				switch(response.getType())
 				{
 					default:
-						System.out.println("user cancelled login activity");
 						SpotifyAuthActivity.currentActivity.onFinishCompletion = new RCTSpotifyCallback<Void>() {
 							@Override
 							public void invoke(Void obj, RCTSpotifyError unusedError)
@@ -200,7 +198,6 @@ public class Auth
 						break;
 
 					case ERROR:
-						System.out.println("error with login activity");
 						SpotifyAuthActivity.currentActivity.onFinishCompletion = new RCTSpotifyCallback<Void>() {
 							@Override
 							public void invoke(Void obj, RCTSpotifyError unusedError)
