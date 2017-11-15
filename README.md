@@ -1,7 +1,7 @@
 
 # react-native-spotify
 
-A Spotify module to use with react native applications
+A react native module for the Spotify SDK
 
 ## Install
 
