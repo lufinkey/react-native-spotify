@@ -383,7 +383,11 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			@Override
 			public void invoke(Boolean loggedIn, RCTSpotifyError error) {
 				error = null;
-				if(player==null)
+				if(!initialized)
+				{
+					error = new RCTSpotifyError(RCTSpotifyError.Code.NOT_INITIALIZED, "Spotify has not been initiaized");
+				}
+				else if(player==null)
 				{
 					error = RCTSpotifyError.fromSDKError(RCTSpotifyError.getNativeCode(Error.kSpErrorUninitialized));
 				}
@@ -787,7 +791,11 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			@Override
 			public void invoke(Boolean loggedIn, RCTSpotifyError error) {
 				error = null;
-				if(auth.getAccessToken()==null)
+				if(!initialized)
+				{
+					error = new RCTSpotifyError(RCTSpotifyError.Code.NOT_INITIALIZED, "Spotify has not been initiaized");
+				}
+				else if(auth.getAccessToken()==null)
 				{
 					error = new RCTSpotifyError(RCTSpotifyError.Code.NOT_LOGGED_IN, "You are not logged in");
 				}
