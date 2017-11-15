@@ -382,23 +382,12 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		logBackInIfNeeded(new RCTSpotifyCallback<Boolean>() {
 			@Override
 			public void invoke(Boolean loggedIn, RCTSpotifyError error) {
-				if(error==null)
+				error = null;
+				if(player==null)
 				{
-					if(!loggedIn)
-					{
-						error = new RCTSpotifyError(RCTSpotifyError.Code.NOT_LOGGED_IN, "You are not logged in");
-					}
-					else if(player==null)
-					{
-						error = new RCTSpotifyError(RCTSpotifyError.Code.PLAYER_NOT_INITIALIZED, "Player is not initialized");
-					}
+					error = RCTSpotifyError.fromSDKError(RCTSpotifyError.getNativeCode(Error.kSpErrorUninitialized));
 				}
-				if(error!=null)
-				{
-					completion.invoke(false, error);
-					return;
-				}
-				completion.invoke(true, null);
+				completion.invoke(loggedIn, error);
 			}
 		});
 	}
@@ -409,7 +398,10 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	{
 		if(spotifyURI==null)
 		{
-			callback.invoke(nullobj(), RCTSpotifyError.getNullParameterError("spotifyURI"));
+			if(callback!=null)
+			{
+				callback.invoke(nullobj(), RCTSpotifyError.getNullParameterError("spotifyURI"));
+			}
 			return;
 		}
 		prepareForPlayer(new RCTSpotifyCallback<Boolean>() {
@@ -429,13 +421,19 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 					@Override
 					public void onError(com.spotify.sdk.android.player.Error error)
 					{
-						callback.invoke(new RCTSpotifyError(error).toReactObject());
+						if(callback!=null)
+						{
+							callback.invoke(new RCTSpotifyError(error).toReactObject());
+						}
 					}
 
 					@Override
 					public void onSuccess()
 					{
-						callback.invoke(nullobj());
+						if(callback!=null)
+						{
+							callback.invoke(nullobj());
+						}
 					}
 				}, spotifyURI, startIndex, (int)(startPosition*1000));
 			}
@@ -448,7 +446,10 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	{
 		if(spotifyURI==null)
 		{
-			callback.invoke(nullobj(), RCTSpotifyError.getNullParameterError("spotifyURI"));
+			if(callback!=null)
+			{
+				callback.invoke(nullobj(), RCTSpotifyError.getNullParameterError("spotifyURI"));
+			}
 			return;
 		}
 		prepareForPlayer(new RCTSpotifyCallback<Boolean>() {
@@ -516,7 +517,10 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 				PlaybackState state = player.getPlaybackState();
 				if((!playing && !state.isPlaying) || (playing && state.isPlaying))
 				{
-					callback.invoke(nullobj());
+					if(callback!=null)
+					{
+						callback.invoke(nullobj());
+					}
 					return;
 				}
 
@@ -526,13 +530,19 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 						@Override
 						public void onError(com.spotify.sdk.android.player.Error error)
 						{
-							callback.invoke(new RCTSpotifyError(error).toReactObject());
+							if(callback!=null)
+							{
+								callback.invoke(new RCTSpotifyError(error).toReactObject());
+							}
 						}
 
 						@Override
 						public void onSuccess()
 						{
-							callback.invoke(nullobj());
+							if(callback!=null)
+							{
+								callback.invoke(nullobj());
+							}
 						}
 					});
 				}
@@ -542,13 +552,19 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 						@Override
 						public void onError(com.spotify.sdk.android.player.Error error)
 						{
-							callback.invoke(new RCTSpotifyError(error).toReactObject());
+							if(callback!=null)
+							{
+								callback.invoke(new RCTSpotifyError(error).toReactObject());
+							}
 						}
 
 						@Override
 						public void onSuccess()
 						{
-							callback.invoke(nullobj());
+							if(callback!=null)
+							{
+								callback.invoke(nullobj());
+							}
 						}
 					});
 				}
@@ -704,13 +720,19 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 					@Override
 					public void onError(Error error)
 					{
-						callback.invoke(new RCTSpotifyError(error).toReactObject());
+						if(callback!=null)
+						{
+							callback.invoke(new RCTSpotifyError(error).toReactObject());
+						}
 					}
 
 					@Override
 					public void onSuccess()
 					{
-						callback.invoke(nullobj());
+						if(callback!=null)
+						{
+							callback.invoke(nullobj());
+						}
 					}
 				}, shuffling);
 			}
@@ -737,13 +759,19 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 					@Override
 					public void onError(Error error)
 					{
-						callback.invoke(new RCTSpotifyError(error).toReactObject());
+						if(callback!=null)
+						{
+							callback.invoke(new RCTSpotifyError(error).toReactObject());
+						}
 					}
 
 					@Override
 					public void onSuccess()
 					{
-						callback.invoke(nullobj());
+						if(callback!=null)
+						{
+							callback.invoke(nullobj());
+						}
 					}
 				}, repeating);
 			}
@@ -758,16 +786,12 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		logBackInIfNeeded(new RCTSpotifyCallback<Boolean>() {
 			@Override
 			public void invoke(Boolean loggedIn, RCTSpotifyError error) {
-				if(!loggedIn && error==null)
+				error = null;
+				if(auth.getAccessToken()==null)
 				{
 					error = new RCTSpotifyError(RCTSpotifyError.Code.NOT_LOGGED_IN, "You are not logged in");
 				}
-				if(error!=null)
-				{
-					completion.invoke(false, error);
-					return;
-				}
-				completion.invoke(true, null);
+				completion.invoke(loggedIn, error);
 			}
 		});
 	}
