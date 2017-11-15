@@ -253,13 +253,13 @@ import Spotify from 'react-native-spotify';
 	
 	* *parameters*
 	
-		* **endpoint** - the api endpoint, without a leading slash
+		* **endpoint** - the api endpoint, without a leading slash, e.g. `browse/new-releases`
 		
 		* **method** - the HTTP method to use
 		
 		* **params** - the request parameters
 		
-		* **isJSONBody** - whether or not to send he request parameters as json in the body of the request
+		* **isJSONBody** - whether or not to send the parameters as json in the body of the request
 		
 		* **result** - the request result object
 		
