@@ -9,6 +9,8 @@ extern NSString* const RCTSpotifyErrorDomain;
 
 typedef enum
 {
+	//! RCTSpotify has already been initialized
+	RCTSpotifyAlreadyInitialized = 90,
 	//! Multiple calls of an asynchronous function are conflicting
 	RCTSpotifyErrorCodeConflictingCallbacks = 100,
 	//! Missing parameters or options

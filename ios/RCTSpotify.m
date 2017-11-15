@@ -125,6 +125,15 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(test)
 
 RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion)
 {
+	if(_auth!=nil)
+	{
+		if(completion)
+		{
+			completion(@[ [self isLoggedIn], [RCTSpotify errorWithCode:RCTSpotifyAlreadyInitialized description:@"Spotify has already been initialized"] ]);
+		}
+		return;
+	}
+	
 	//set default values
 	_options = options;
 	_auth = [SPTAuth defaultInstance];
@@ -133,15 +142,6 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSende
 	_authControllerResponse = nil;
 	_loginPlayerResponses = [NSMutableArray array];
 	_logoutResponses = [NSMutableArray array];
-	
-	//if a session exists, make sure it's using the same clientID. Otherwise, kill the session
-	if(_auth.session != nil)
-	{
-		if(![_auth.clientID isEqualToString:options[@"clientID"]])
-		{
-			_auth.session = nil;
-		}
-	}
 	
 	//get options
 	_auth.clientID = options[@"clientID"];
@@ -156,24 +156,10 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSende
 		_cacheSize = cacheSize;
 	}
 	
-	if(_player.initialized)
-	{
-		NSLog(@"stopping player");
-		NSError* error = nil;
-		if(![_player stopWithError:&error])
-		{
-			NSLog(@"error stopping Spotify player: %@", error.localizedDescription);
-		}
-	}
-	
 	[self logBackInIfNeeded:^(BOOL loggedIn, NSError* error) {
-		if(loggedIn)
+		if(completion)
 		{
-			completion(@[ @YES, [NSNull null] ]);
-		}
-		else
-		{
-			completion(@[ @NO, [RCTSpotifyConvert NSError:error] ]);
+			completion(@[ [NSNumber numberWithBool:loggedIn], [RCTSpotifyConvert NSError:error] ]);
 		}
 	}];
 }
@@ -426,14 +412,17 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(handleAuthURL:(NSString*)urlString)
 
 
 
+
+
 #pragma mark - React Native functions - Playback
 
 -(void)prepareForPlayer:(void(^)(NSError*))completion
 {
 	[self logBackInIfNeeded:^(BOOL loggedIn, NSError* error){
-		if(!loggedIn && error==nil)
+		error = nil;
+		if(_auth==nil)
 		{
-			error = [RCTSpotify errorWithCode:RCTSpotifyErrorCodeNotLoggedIn description:@"You are not logged in"];
+			error = [RCTSpotify errorWithCode:RCTSpotifyErrorCodeNotInitialized description:@"Spotify has not been initialized"];
 		}
 		completion(error);
 	}];
@@ -617,7 +606,12 @@ RCT_EXPORT_METHOD(skipToPrevious:(RCTResponseSenderBlock)completion)
 -(void)prepareForRequest:(void(^)(NSError*))completion
 {
 	[self logBackInIfNeeded:^(BOOL loggedIn, NSError* error){
-		if(!loggedIn && error==nil)
+		error = nil;
+		if(_auth==nil)
+		{
+			error = [RCTSpotify errorWithCode:RCTSpotifyErrorCodeNotInitialized description:@"Spotify has not been initialized"];
+		}
+		else if(_auth.session==nil || _auth.session.accessToken==nil)
 		{
 			error = [RCTSpotify errorWithCode:RCTSpotifyErrorCodeNotLoggedIn description:@"You are not logged in"];
 		}

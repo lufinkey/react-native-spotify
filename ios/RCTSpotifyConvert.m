@@ -18,6 +18,7 @@
 	{
 		return [NSNull null];
 	}
+	SPTErrorCodeFailed
 	NSDictionary* fields = error.userInfo[@"jsFields"];
 	NSMutableDictionary* obj = nil;
 	if(fields!=nil)
