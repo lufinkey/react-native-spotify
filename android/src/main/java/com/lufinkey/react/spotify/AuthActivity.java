@@ -8,15 +8,15 @@ import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
 
-public class SpotifyAuthActivity extends Activity
+public class AuthActivity extends Activity
 {
 	private static final int REQUEST_CODE = 6969;
 
-	static SpotifyAuthActivity currentActivity;
+	static AuthActivity currentActivity;
 	static AuthenticationRequest request;
-	static RCTSpotifyCallback<AuthenticationResponse> completion;
+	static CompletionBlock<AuthenticationResponse> completion;
 
-	RCTSpotifyCallback<Void> onFinishCompletion;
+	CompletionBlock<Void> onFinishCompletion;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -34,7 +34,7 @@ public class SpotifyAuthActivity extends Activity
 		if(requestCode == REQUEST_CODE)
 		{
 			AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
-			RCTSpotifyCallback<AuthenticationResponse> completionTmp = completion;
+			CompletionBlock<AuthenticationResponse> completionTmp = completion;
 			request = null;
 			completion = null;
 			completionTmp.invoke(response, null);
@@ -49,7 +49,7 @@ public class SpotifyAuthActivity extends Activity
 		{
 			if(onFinishCompletion!=null)
 			{
-				RCTSpotifyCallback<Void> completionTmp = onFinishCompletion;
+				CompletionBlock<Void> completionTmp = onFinishCompletion;
 				onFinishCompletion = null;
 				completionTmp.invoke(null, null);
 			}

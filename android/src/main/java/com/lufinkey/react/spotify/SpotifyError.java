@@ -8,7 +8,7 @@ import com.spotify.sdk.android.player.Error;
 
 import java.lang.reflect.Field;
 
-public class RCTSpotifyError
+public class SpotifyError
 {
 	public static final String DOMAIN = "RCTSpotifyErrorDomain";
 	public static final String SPOTIFY_SDK_DOMAIN = "com.spotify.ios-sdk.playback";
@@ -56,7 +56,7 @@ public class RCTSpotifyError
 		}
 	}
 
-	public static RCTSpotifyError fromSDKError(int nativeCode)
+	public static SpotifyError fromSDKError(int nativeCode)
 	{
 		String description = null;
 		if(nativeCode==getNativeCode(Error.kSpErrorOk))
@@ -175,17 +175,17 @@ public class RCTSpotifyError
 		{
 			return null;
 		}
-		return new RCTSpotifyError(SPOTIFY_SDK_DOMAIN, nativeCode, description);
+		return new SpotifyError(SPOTIFY_SDK_DOMAIN, nativeCode, description);
 	}
 
-	public RCTSpotifyError(Error error)
+	public SpotifyError(Error error)
 	{
 		int nativeCode = getNativeCode(error);
 		if(nativeCode!=getNativeCode(Error.UNKNOWN))
 		{
 			domain = SPOTIFY_SDK_DOMAIN;
 			code = nativeCode;
-			RCTSpotifyError spotifyError = fromSDKError(nativeCode);
+			SpotifyError spotifyError = fromSDKError(nativeCode);
 			if(spotifyError==null)
 			{
 				description = error.toString();
@@ -203,14 +203,14 @@ public class RCTSpotifyError
 		}
 	}
 
-	public RCTSpotifyError(Code code, String description)
+	public SpotifyError(Code code, String description)
 	{
 		this.domain = DOMAIN;
 		this.code = code.value;
 		this.description = description;
 	}
 
-	public RCTSpotifyError(String domain, int code, String description)
+	public SpotifyError(String domain, int code, String description)
 	{
 		this.domain = domain;
 		this.code = code;
@@ -236,8 +236,8 @@ public class RCTSpotifyError
 		return map;
 	}
 
-	public static RCTSpotifyError getNullParameterError(String parameterName)
+	public static SpotifyError getNullParameterError(String parameterName)
 	{
-		return new RCTSpotifyError(Code.BAD_PARAMETERS, parameterName+" parameter cannot be null");
+		return new SpotifyError(Code.BAD_PARAMETERS, parameterName+" parameter cannot be null");
 	}
 }

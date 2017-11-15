@@ -52,7 +52,7 @@ public class Utils
 		return query;
 	}
 
-	public static void doHTTPRequest(String url, final String method, final ReadableMap params, final boolean jsonBody, final HashMap<String,String> headers, final RCTSpotifyCallback<String> completion)
+	public static void doHTTPRequest(String url, final String method, final ReadableMap params, final boolean jsonBody, final HashMap<String,String> headers, final CompletionBlock<String> completion)
 	{
 		if(requestQueue == null)
 		{
@@ -87,7 +87,7 @@ public class Utils
 		}
 		else
 		{
-			completion.invoke(null, new RCTSpotifyError(RCTSpotifyError.Code.BAD_PARAMETERS, "invalid request method "+method));
+			completion.invoke(null, new SpotifyError(SpotifyError.Code.BAD_PARAMETERS, "invalid request method "+method));
 			return;
 		}
 
@@ -109,18 +109,18 @@ public class Utils
 			public void onErrorResponse(VolleyError volleyError)
 			{
 				String response = null;
-				RCTSpotifyError error = null;
+				SpotifyError error = null;
 				if(volleyError.networkResponse!=null)
 				{
 					if(volleyError.networkResponse.data!=null)
 					{
 						response = new String(volleyError.networkResponse.data);
 					}
-					error = new RCTSpotifyError("VolleyErrorDomain", volleyError.networkResponse.statusCode, volleyError.getMessage());
+					error = new SpotifyError("VolleyErrorDomain", volleyError.networkResponse.statusCode, volleyError.getMessage());
 				}
 				else
 				{
-					error = new RCTSpotifyError(RCTSpotifyError.Code.REQUEST_ERROR, volleyError.getMessage());
+					error = new SpotifyError(SpotifyError.Code.REQUEST_ERROR, volleyError.getMessage());
 				}
 				completion.invoke(response, error);
 			}
@@ -155,7 +155,7 @@ public class Utils
 				{
 					if(jsonBody)
 					{
-						JSONObject obj = RCTSpotifyConvert.toJSONObject(params);
+						JSONObject obj = Convert.toJSONObject(params);
 						if (obj == null)
 						{
 							return null;

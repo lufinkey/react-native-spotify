@@ -128,15 +128,15 @@ public class Auth
 		return false;
 	}
 
-	void showAuthActivity(final RCTSpotifyCallback<Boolean> completion)
+	void showAuthActivity(final CompletionBlock<Boolean> completion)
 	{
 		//check for missing options
 		if(clientID == null)
 		{
 			completion.invoke(
 					false,
-					new RCTSpotifyError(
-							RCTSpotifyError.Code.MISSING_PARAMETERS,
+					new SpotifyError(
+							SpotifyError.Code.MISSING_PARAMETERS,
 							"missing option clientID"));
 			return;
 		}
@@ -149,73 +149,73 @@ public class Auth
 		}
 
 		//ensure no conflicting callbacks
-		if(SpotifyAuthActivity.request != null || SpotifyAuthActivity.currentActivity != null)
+		if(AuthActivity.request != null || AuthActivity.currentActivity != null)
 		{
 			System.out.println("login is already being called");
 			completion.invoke(
 					false,
-					new RCTSpotifyError(
-							RCTSpotifyError.Code.CONFLICTING_CALLBACKS,
+					new SpotifyError(
+							SpotifyError.Code.CONFLICTING_CALLBACKS,
 							"Cannot call showAuthActivity while it is already being called"));
 			return;
 		}
 
 		//show auth activity
-		SpotifyAuthActivity.request = new AuthenticationRequest.Builder(clientID, responseType, redirectURL)
+		AuthActivity.request = new AuthenticationRequest.Builder(clientID, responseType, redirectURL)
 				.setScopes(requestedScopes)
 				.build();
-		//wait for SpotifyAuthActivity.onActivityResult
-		SpotifyAuthActivity.completion = new RCTSpotifyCallback<AuthenticationResponse>() {
+		//wait for AuthActivity.onActivityResult
+		AuthActivity.completion = new CompletionBlock<AuthenticationResponse>() {
 			@Override
-			public void invoke(final AuthenticationResponse response, final RCTSpotifyError error)
+			public void invoke(final AuthenticationResponse response, final SpotifyError error)
 			{
 				if(error != null)
 				{
-					SpotifyAuthActivity.currentActivity.onFinishCompletion = new RCTSpotifyCallback<Void>() {
+					AuthActivity.currentActivity.onFinishCompletion = new CompletionBlock<Void>() {
 						@Override
-						public void invoke(Void obj, RCTSpotifyError unusedError)
+						public void invoke(Void obj, SpotifyError unusedError)
 						{
 							completion.invoke(false, error);
 						}
 					};
-					SpotifyAuthActivity.currentActivity.finish();
-					SpotifyAuthActivity.currentActivity = null;
+					AuthActivity.currentActivity.finish();
+					AuthActivity.currentActivity = null;
 					return;
 				}
 
 				switch(response.getType())
 				{
 					default:
-						SpotifyAuthActivity.currentActivity.onFinishCompletion = new RCTSpotifyCallback<Void>() {
+						AuthActivity.currentActivity.onFinishCompletion = new CompletionBlock<Void>() {
 							@Override
-							public void invoke(Void obj, RCTSpotifyError unusedError)
+							public void invoke(Void obj, SpotifyError unusedError)
 							{
 								completion.invoke(false, null);
 							}
 						};
-						SpotifyAuthActivity.currentActivity.finish();
-						SpotifyAuthActivity.currentActivity = null;
+						AuthActivity.currentActivity.finish();
+						AuthActivity.currentActivity = null;
 						break;
 
 					case ERROR:
-						SpotifyAuthActivity.currentActivity.onFinishCompletion = new RCTSpotifyCallback<Void>() {
+						AuthActivity.currentActivity.onFinishCompletion = new CompletionBlock<Void>() {
 							@Override
-							public void invoke(Void obj, RCTSpotifyError unusedError)
+							public void invoke(Void obj, SpotifyError unusedError)
 							{
 								completion.invoke(
 										false,
-										new RCTSpotifyError(RCTSpotifyError.Code.AUTHORIZATION_FAILED, response.getError())
+										new SpotifyError(SpotifyError.Code.AUTHORIZATION_FAILED, response.getError())
 								);
 							}
 						};
-						SpotifyAuthActivity.currentActivity.finish();
-						SpotifyAuthActivity.currentActivity = null;
+						AuthActivity.currentActivity.finish();
+						AuthActivity.currentActivity = null;
 						break;
 
 					case CODE:
-						swapCodeForToken(response.getCode(), new RCTSpotifyCallback<String>() {
+						swapCodeForToken(response.getCode(), new CompletionBlock<String>() {
 							@Override
-							public void invoke(String accessToken, RCTSpotifyError error)
+							public void invoke(String accessToken, SpotifyError error)
 							{
 								if(error!=null)
 								{
@@ -239,21 +239,21 @@ public class Auth
 		};
 
 		Activity activity = reactContext.getCurrentActivity();
-		activity.startActivity(new Intent(activity, SpotifyAuthActivity.class));
+		activity.startActivity(new Intent(activity, AuthActivity.class));
 	}
 
-	private void swapCodeForToken(String code, final RCTSpotifyCallback<String> completion)
+	private void swapCodeForToken(String code, final CompletionBlock<String> completion)
 	{
 		if(tokenSwapURL==null)
 		{
-			completion.invoke(null, new RCTSpotifyError(RCTSpotifyError.Code.MISSING_PARAMETERS, "cannot swap code for token without tokenSwapURL option"));
+			completion.invoke(null, new SpotifyError(SpotifyError.Code.MISSING_PARAMETERS, "cannot swap code for token without tokenSwapURL option"));
 			return;
 		}
 		WritableMap params = Arguments.createMap();
 		params.putString("code", code);
-		Utils.doHTTPRequest(tokenSwapURL, "POST", params, false, null, new RCTSpotifyCallback<String>() {
+		Utils.doHTTPRequest(tokenSwapURL, "POST", params, false, null, new CompletionBlock<String>() {
 			@Override
-			public void invoke(String response, RCTSpotifyError error)
+			public void invoke(String response, SpotifyError error)
 			{
 				if(response==null)
 				{
@@ -268,7 +268,7 @@ public class Auth
 					}
 					catch(JSONException e)
 					{
-						completion.invoke(null, new RCTSpotifyError(RCTSpotifyError.Code.REQUEST_ERROR, "Invalid response format"));
+						completion.invoke(null, new SpotifyError(SpotifyError.Code.REQUEST_ERROR, "Invalid response format"));
 						return;
 					}
 
@@ -278,11 +278,11 @@ public class Auth
 						{
 							if(error!=null)
 							{
-								completion.invoke(null, new RCTSpotifyError(RCTSpotifyError.SPOTIFY_AUTH_DOMAIN, error.getCode(), responseObj.getString("error_description")));
+								completion.invoke(null, new SpotifyError(SpotifyError.SPOTIFY_AUTH_DOMAIN, error.getCode(), responseObj.getString("error_description")));
 							}
 							else
 							{
-								completion.invoke(null, new RCTSpotifyError(RCTSpotifyError.Code.REQUEST_ERROR, responseObj.getString("error_description")));
+								completion.invoke(null, new SpotifyError(SpotifyError.Code.REQUEST_ERROR, responseObj.getString("error_description")));
 							}
 							return;
 						}
@@ -294,7 +294,7 @@ public class Auth
 					}
 					catch(JSONException e)
 					{
-						completion.invoke(null, new RCTSpotifyError(RCTSpotifyError.Code.REQUEST_ERROR, "Missing expected response parameters"));
+						completion.invoke(null, new SpotifyError(SpotifyError.Code.REQUEST_ERROR, "Missing expected response parameters"));
 					}
 					completion.invoke(accessToken, null);
 				}
@@ -302,7 +302,7 @@ public class Auth
 		});
 	}
 
-	public void renewSessionIfNeeded(final RCTSpotifyCallback<Boolean> completion)
+	public void renewSessionIfNeeded(final CompletionBlock<Boolean> completion)
 	{
 		if(isSessionValid())
 		{
@@ -314,9 +314,9 @@ public class Auth
 		}
 		else
 		{
-			renewSession(new RCTSpotifyCallback<Boolean>() {
+			renewSession(new CompletionBlock<Boolean>() {
 				@Override
-				public void invoke(Boolean success, RCTSpotifyError error)
+				public void invoke(Boolean success, SpotifyError error)
 				{
 					completion.invoke(success, error);
 				}
@@ -324,24 +324,24 @@ public class Auth
 		}
 	}
 
-	public void renewSession(final RCTSpotifyCallback<Boolean> completion)
+	public void renewSession(final CompletionBlock<Boolean> completion)
 	{
 		if(tokenRefreshURL==null)
 		{
-			completion.invoke(false, new RCTSpotifyError(RCTSpotifyError.Code.MISSING_PARAMETERS, "Cannot renew session without tokenRefreshURL option"));
+			completion.invoke(false, new SpotifyError(SpotifyError.Code.MISSING_PARAMETERS, "Cannot renew session without tokenRefreshURL option"));
 		}
 		else if(refreshToken==null)
 		{
 			clearSession();
-			completion.invoke(false, new RCTSpotifyError(RCTSpotifyError.Code.AUTHORIZATION_FAILED, "Can't refresh session without a refresh token"));
+			completion.invoke(false, new SpotifyError(SpotifyError.Code.AUTHORIZATION_FAILED, "Can't refresh session without a refresh token"));
 		}
 		else
 		{
 			WritableMap params = Arguments.createMap();
 			params.putString("refresh_token", refreshToken);
-			Utils.doHTTPRequest(tokenRefreshURL, "POST", params, false, null, new RCTSpotifyCallback<String>() {
+			Utils.doHTTPRequest(tokenRefreshURL, "POST", params, false, null, new CompletionBlock<String>() {
 				@Override
-				public void invoke(String response, RCTSpotifyError error)
+				public void invoke(String response, SpotifyError error)
 				{
 					if(response==null)
 					{
@@ -356,7 +356,7 @@ public class Auth
 						}
 						catch(JSONException e)
 						{
-							completion.invoke(false, new RCTSpotifyError(RCTSpotifyError.Code.REQUEST_ERROR, "Invalid response format"));
+							completion.invoke(false, new SpotifyError(SpotifyError.Code.REQUEST_ERROR, "Invalid response format"));
 							return;
 						}
 
@@ -366,11 +366,11 @@ public class Auth
 							{
 								if(error!=null)
 								{
-									completion.invoke(false, new RCTSpotifyError(RCTSpotifyError.SPOTIFY_AUTH_DOMAIN, error.getCode(), responseObj.getString("error_description")));
+									completion.invoke(false, new SpotifyError(SpotifyError.SPOTIFY_AUTH_DOMAIN, error.getCode(), responseObj.getString("error_description")));
 								}
 								else
 								{
-									completion.invoke(false, new RCTSpotifyError(RCTSpotifyError.Code.REQUEST_ERROR, responseObj.getString("error_description")));
+									completion.invoke(false, new SpotifyError(SpotifyError.Code.REQUEST_ERROR, responseObj.getString("error_description")));
 								}
 								return;
 							}
@@ -381,7 +381,7 @@ public class Auth
 						}
 						catch(JSONException e)
 						{
-							completion.invoke(false, new RCTSpotifyError(RCTSpotifyError.Code.REQUEST_ERROR, "Missing expected response parameters"));
+							completion.invoke(false, new SpotifyError(SpotifyError.Code.REQUEST_ERROR, "Missing expected response parameters"));
 						}
 						completion.invoke(true, null);
 					}

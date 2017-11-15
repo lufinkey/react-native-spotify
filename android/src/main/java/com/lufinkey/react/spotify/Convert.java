@@ -14,7 +14,7 @@ import org.json.JSONObject;
 
 import java.util.Iterator;
 
-public class RCTSpotifyConvert
+public class Convert
 {
 	public static JSONObject toJSONObject(ReadableMap readableMap)
 	{
@@ -157,7 +157,7 @@ public class RCTSpotifyConvert
 		}
 	}
 
-	public static ReadableMap fromRCTSpotifyError(RCTSpotifyError error)
+	public static ReadableMap fromRCTSpotifyError(SpotifyError error)
 	{
 		if(error==null)
 		{

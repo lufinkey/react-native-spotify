@@ -6,7 +6,7 @@
 
 	<application>
 		<activity
-			android:name="com.lufinkey.react.spotify.SpotifyAuthActivity">
+			android:name="com.lufinkey.react.spotify.AuthActivity">
 		</activity>
 	</application>
 
