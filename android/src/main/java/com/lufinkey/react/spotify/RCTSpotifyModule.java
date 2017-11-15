@@ -98,12 +98,15 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		if(initialized)
 		{
 			System.out.println("already initialized. Finishing initialization");
-			callback.invoke(
-					false,
-					new SpotifyError(
-							SpotifyError.Code.ALREADY_INITIALIZED,
-							"Spotify has already been initialized").toReactObject()
-			);
+			if(callback!=null)
+			{
+				callback.invoke(
+						false,
+						new SpotifyError(
+								SpotifyError.Code.ALREADY_INITIALIZED,
+								"Spotify has already been initialized").toReactObject()
+				);
+			}
 			return;
 		}
 
@@ -140,10 +143,13 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 				{
 					errorObj = error.toReactObject();
 				}
-				callback.invoke(
-						loggedIn.booleanValue(),
-						errorObj
-				);
+				if(callback!=null)
+				{
+					callback.invoke(
+							loggedIn.booleanValue(),
+							errorObj
+					);
+				}
 			}
 		});
 	}
@@ -294,7 +300,10 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			{
 				if(!loggedIn || error!=null)
 				{
-					callback.invoke(loggedIn, Convert.fromRCTSpotifyError(error));
+					if(callback!=null)
+					{
+						callback.invoke(loggedIn, Convert.fromRCTSpotifyError(error));
+					}
 					return;
 				}
 				//disable activity interaction
@@ -312,7 +321,10 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 							public void invoke(Void obj, SpotifyError unusedError)
 							{
 								//perform callback
-								callback.invoke(loggedIn, Convert.fromRCTSpotifyError(error));
+								if(callback!=null)
+								{
+									callback.invoke(loggedIn, Convert.fromRCTSpotifyError(error));
+								}
 							}
 						};
 						AuthActivity.currentActivity.finish();
@@ -468,13 +480,19 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 					@Override
 					public void onError(com.spotify.sdk.android.player.Error error)
 					{
-						callback.invoke(new SpotifyError(error).toReactObject());
+						if(callback!=null)
+						{
+							callback.invoke(new SpotifyError(error).toReactObject());
+						}
 					}
 
 					@Override
 					public void onSuccess()
 					{
-						callback.invoke(nullobj());
+						if(callback!=null)
+						{
+							callback.invoke(nullobj());
+						}
 					}
 				}, spotifyURI);
 			}
@@ -883,12 +901,18 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	{
 		if(query==null)
 		{
-			callback.invoke(nullobj(), SpotifyError.getNullParameterError("query"));
+			if(callback!=null)
+			{
+				callback.invoke(nullobj(), SpotifyError.getNullParameterError("query"));
+			}
 			return;
 		}
 		else if(types==null)
 		{
-			callback.invoke(nullobj(), SpotifyError.getNullParameterError("types"));
+			if(callback!=null)
+			{
+				callback.invoke(nullobj(), SpotifyError.getNullParameterError("types"));
+			}
 			return;
 		}
 
@@ -916,7 +940,10 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			@Override
 			public void invoke(ReadableMap resultObj, SpotifyError error)
 			{
-				callback.invoke(resultObj, Convert.fromRCTSpotifyError(error));
+				if(callback!=null)
+				{
+					callback.invoke(resultObj, Convert.fromRCTSpotifyError(error));
+				}
 			}
 		});
 	}
@@ -927,14 +954,20 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	{
 		if(albumID==null)
 		{
-			callback.invoke(nullobj(), SpotifyError.getNullParameterError("albumID"));
+			if(callback!=null)
+			{
+				callback.invoke(nullobj(), SpotifyError.getNullParameterError("albumID"));
+			}
 			return;
 		}
 		doAPIRequest("albums/"+albumID, "GET", options, false, new CompletionBlock<ReadableMap>() {
 			@Override
 			public void invoke(ReadableMap resultObj, SpotifyError error)
 			{
-				callback.invoke(resultObj, Convert.fromRCTSpotifyError(error));
+				if(callback!=null)
+				{
+					callback.invoke(resultObj, Convert.fromRCTSpotifyError(error));
+				}
 			}
 		});
 	}
@@ -945,7 +978,10 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	{
 		if(albumIDs==null)
 		{
-			callback.invoke(nullobj(), SpotifyError.getNullParameterError("albumIDs"));
+			if(callback!=null)
+			{
+				callback.invoke(nullobj(), SpotifyError.getNullParameterError("albumIDs"));
+			}
 			return;
 		}
 		WritableMap body = Convert.toWritableMap(options);
@@ -954,7 +990,10 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			@Override
 			public void invoke(ReadableMap resultObj, SpotifyError error)
 			{
-				callback.invoke(resultObj, Convert.fromRCTSpotifyError(error));
+				if(callback!=null)
+				{
+					callback.invoke(resultObj, Convert.fromRCTSpotifyError(error));
+				}
 			}
 		});
 	}
@@ -965,14 +1004,20 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	{
 		if(albumID==null)
 		{
-			callback.invoke(nullobj(), SpotifyError.getNullParameterError("albumID"));
+			if(callback!=null)
+			{
+				callback.invoke(nullobj(), SpotifyError.getNullParameterError("albumID"));
+			}
 			return;
 		}
 		doAPIRequest("albums/"+albumID+"/tracks", "GET", options, false, new CompletionBlock<ReadableMap>() {
 			@Override
 			public void invoke(ReadableMap resultObj, SpotifyError error)
 			{
-				callback.invoke(resultObj, Convert.fromRCTSpotifyError(error));
+				if(callback!=null)
+				{
+					callback.invoke(resultObj, Convert.fromRCTSpotifyError(error));
+				}
 			}
 		});
 	}
@@ -983,14 +1028,20 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	{
 		if(artistID==null)
 		{
-			callback.invoke(nullobj(), SpotifyError.getNullParameterError("artistID"));
+			if(callback!=null)
+			{
+				callback.invoke(nullobj(), SpotifyError.getNullParameterError("artistID"));
+			}
 			return;
 		}
 		doAPIRequest("artists/"+artistID, "GET", options, false, new CompletionBlock<ReadableMap>() {
 			@Override
 			public void invoke(ReadableMap resultObj, SpotifyError error)
 			{
-				callback.invoke(resultObj, Convert.fromRCTSpotifyError(error));
+				if(callback!=null)
+				{
+					callback.invoke(resultObj, Convert.fromRCTSpotifyError(error));
+				}
 			}
 		});
 	}
@@ -1001,7 +1052,10 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	{
 		if(artistIDs==null)
 		{
-			callback.invoke(nullobj(), SpotifyError.getNullParameterError("artistIDs"));
+			if(callback!=null)
+			{
+				callback.invoke(nullobj(), SpotifyError.getNullParameterError("artistIDs"));
+			}
 			return;
 		}
 		WritableMap body = Convert.toWritableMap(options);
@@ -1010,7 +1064,10 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			@Override
 			public void invoke(ReadableMap resultObj, SpotifyError error)
 			{
-				callback.invoke(resultObj, Convert.fromRCTSpotifyError(error));
+				if(callback!=null)
+				{
+					callback.invoke(resultObj, Convert.fromRCTSpotifyError(error));
+				}
 			}
 		});
 	}
@@ -1021,14 +1078,20 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	{
 		if(artistID==null)
 		{
-			callback.invoke(nullobj(), SpotifyError.getNullParameterError("artistID"));
+			if(callback!=null)
+			{
+				callback.invoke(nullobj(), SpotifyError.getNullParameterError("artistID"));
+			}
 			return;
 		}
 		doAPIRequest("artists/"+artistID+"/albums", "GET", options, false, new CompletionBlock<ReadableMap>() {
 			@Override
 			public void invoke(ReadableMap resultObj, SpotifyError error)
 			{
-				callback.invoke(resultObj, Convert.fromRCTSpotifyError(error));
+				if(callback!=null)
+				{
+					callback.invoke(resultObj, Convert.fromRCTSpotifyError(error));
+				}
 			}
 		});
 	}
@@ -1039,14 +1102,20 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	{
 		if(artistID==null)
 		{
-			callback.invoke(nullobj(), SpotifyError.getNullParameterError("artistID"));
+			if(callback!=null)
+			{
+				callback.invoke(nullobj(), SpotifyError.getNullParameterError("artistID"));
+			}
 			return;
 		}
 		doAPIRequest("artists/"+artistID+"/top-tracks", "GET", options, false, new CompletionBlock<ReadableMap>() {
 			@Override
 			public void invoke(ReadableMap resultObj, SpotifyError error)
 			{
-				callback.invoke(resultObj, Convert.fromRCTSpotifyError(error));
+				if(callback!=null)
+				{
+					callback.invoke(resultObj, Convert.fromRCTSpotifyError(error));
+				}
 			}
 		});
 	}
@@ -1057,14 +1126,20 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	{
 		if(artistID==null)
 		{
-			callback.invoke(nullobj(), SpotifyError.getNullParameterError("artistID"));
+			if(callback!=null)
+			{
+				callback.invoke(nullobj(), SpotifyError.getNullParameterError("artistID"));
+			}
 			return;
 		}
 		doAPIRequest("artists/"+artistID+"/related-artists", "GET", options, false, new CompletionBlock<ReadableMap>() {
 			@Override
 			public void invoke(ReadableMap resultObj, SpotifyError error)
 			{
-				callback.invoke(resultObj, Convert.fromRCTSpotifyError(error));
+				if(callback!=null)
+				{
+					callback.invoke(resultObj, Convert.fromRCTSpotifyError(error));
+				}
 			}
 		});
 	}
@@ -1075,14 +1150,20 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	{
 		if(trackID==null)
 		{
-			callback.invoke(nullobj(), SpotifyError.getNullParameterError("trackID"));
+			if(callback!=null)
+			{
+				callback.invoke(nullobj(), SpotifyError.getNullParameterError("trackID"));
+			}
 			return;
 		}
 		doAPIRequest("tracks/"+trackID, "GET", options, false, new CompletionBlock<ReadableMap>() {
 			@Override
 			public void invoke(ReadableMap resultObj, SpotifyError error)
 			{
-				callback.invoke(resultObj, Convert.fromRCTSpotifyError(error));
+				if(callback!=null)
+				{
+					callback.invoke(resultObj, Convert.fromRCTSpotifyError(error));
+				}
 			}
 		});
 	}
@@ -1093,7 +1174,10 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	{
 		if(trackIDs==null)
 		{
-			callback.invoke(nullobj(), SpotifyError.getNullParameterError("trackIDs"));
+			if(callback!=null)
+			{
+				callback.invoke(nullobj(), SpotifyError.getNullParameterError("trackIDs"));
+			}
 			return;
 		}
 		WritableMap body = Convert.toWritableMap(options);
@@ -1102,7 +1186,10 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			@Override
 			public void invoke(ReadableMap resultObj, SpotifyError error)
 			{
-				callback.invoke(resultObj, Convert.fromRCTSpotifyError(error));
+				if(callback!=null)
+				{
+					callback.invoke(resultObj, Convert.fromRCTSpotifyError(error));
+				}
 			}
 		});
 	}
@@ -1113,14 +1200,20 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	{
 		if(trackID==null)
 		{
-			callback.invoke(nullobj(), SpotifyError.getNullParameterError("trackID"));
+			if(callback!=null)
+			{
+				callback.invoke(nullobj(), SpotifyError.getNullParameterError("trackID"));
+			}
 			return;
 		}
 		doAPIRequest("audio-analysis/"+trackID, "GET", options, false, new CompletionBlock<ReadableMap>() {
 			@Override
 			public void invoke(ReadableMap resultObj, SpotifyError error)
 			{
-				callback.invoke(resultObj, Convert.fromRCTSpotifyError(error));
+				if(callback!=null)
+				{
+					callback.invoke(resultObj, Convert.fromRCTSpotifyError(error));
+				}
 			}
 		});
 	}
@@ -1131,14 +1224,20 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	{
 		if(trackID==null)
 		{
-			callback.invoke(nullobj(), SpotifyError.getNullParameterError("trackID"));
+			if(callback!=null)
+			{
+				callback.invoke(nullobj(), SpotifyError.getNullParameterError("trackID"));
+			}
 			return;
 		}
 		doAPIRequest("audio-features/"+trackID, "GET", options, false, new CompletionBlock<ReadableMap>() {
 			@Override
 			public void invoke(ReadableMap resultObj, SpotifyError error)
 			{
-				callback.invoke(resultObj, Convert.fromRCTSpotifyError(error));
+				if(callback!=null)
+				{
+					callback.invoke(resultObj, Convert.fromRCTSpotifyError(error));
+				}
 			}
 		});
 	}
@@ -1149,7 +1248,10 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	{
 		if(trackIDs==null)
 		{
-			callback.invoke(nullobj(), SpotifyError.getNullParameterError("trackIDs"));
+			if(callback!=null)
+			{
+				callback.invoke(nullobj(), SpotifyError.getNullParameterError("trackIDs"));
+			}
 			return;
 		}
 		WritableMap body = Convert.toWritableMap(options);
@@ -1158,7 +1260,10 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			@Override
 			public void invoke(ReadableMap resultObj, SpotifyError error)
 			{
-				callback.invoke(resultObj, Convert.fromRCTSpotifyError(error));
+				if(callback!=null)
+				{
+					callback.invoke(resultObj, Convert.fromRCTSpotifyError(error));
+				}
 			}
 		});
 	}
