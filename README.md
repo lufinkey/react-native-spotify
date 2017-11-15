@@ -69,9 +69,9 @@ import Spotify from 'react-native-spotify';
 
 * **initialize**( *options*, ( *loggedIn*, *error*? ) => {} )
 
-	Initializes the Spotify modules and resumes a logged in session if there is one
+	Initializes the Spotify module and resumes a logged in session if there is one
 	
-	* *parameters*
+	* *Parameters*
 		* **options** - an object with options to pass to the Spotify Module
 			* **clientID** (*required*) - Your spotify application's ClientID that you registered with spotify [here](https://developer.spotify.com/my-applications)
 			* **redirectURL** (*required*) - The redirect URL to use when you've finished logging in. You need to set this up for your application [here](https://developer.spotify.com/my-applications)
@@ -89,9 +89,9 @@ import Spotify from 'react-native-spotify';
 
 * **login**( ( *loggedIn*, *error*? ) => {} )
 
-	Opens a UI to log into spotify
+	Opens a UI to log into Spotify
 	
-	* *parameters*
+	* *Parameters*
 	
 		* **loggedIn** - A boolean indicating whether or not the client was logged in
 	
@@ -102,7 +102,7 @@ import Spotify from 'react-native-spotify';
 
 * **isLoggedIn**()
 
-	* *returns*
+	* *Returns*
 		
 		* *true* if the client is logged in
 		* *false* if the client is not logged in
@@ -114,16 +114,16 @@ import Spotify from 'react-native-spotify';
 
 	Handles an authentication URL sent to the app through deep linking. You are *required* to use this function in order for login to work correctly.
 	
-	* *parameters*
+	* *Parameters*
 		
 		* **url** - A URL that was sent to the app
 		
-	* *returns*
+	* *Returns*
 		
 		* *true* if the url passed to it was successfully handled as an authentication URL
 		* *false* if the url was not an authentication URL
 
-	* *example implementation*
+	* *Example Implementation*
 		```javascript
 		App.handleOpenURL = (event) => {
 			if(Spotify.handleAuthURL(event.url))
@@ -144,7 +144,7 @@ import Spotify from 'react-native-spotify';
 
 	Play a Spotify URI.
 	
-	* *parameters*
+	* *Parameters*
 		
 		* **spotifyURI** - The Spotify URI to play
 		
@@ -161,7 +161,7 @@ import Spotify from 'react-native-spotify';
 
 	Queue a Spotify URI.
 	
-	* *parameters*
+	* *Parameters*
 	
 		* **spotifyURI** - The Spotify URI to queue
 		
@@ -174,7 +174,7 @@ import Spotify from 'react-native-spotify';
 
 	Set the “playing” status of the player.
 	
-	* *parameters*
+	* *Parameters*
 	
 		* **playing** - pass *true* to resume playback, or *false* to pause it
 		
@@ -184,7 +184,7 @@ import Spotify from 'react-native-spotify';
 
 	Gives the player's current state.
 	
-	* *returns*
+	* *Returns*
 	
 		An object with the current player state. The state properties are:
 		
@@ -201,7 +201,7 @@ import Spotify from 'react-native-spotify';
 
 	Skips to the next track.
 	
-	* *parameters*
+	* *Parameters*
 	
 		* **error** - An error object if an error occurred, or *null* if no error occurred
 
@@ -212,7 +212,7 @@ import Spotify from 'react-native-spotify';
 
 	Skips to the previous track.
 	
-	* *parameters*
+	* *Parameters*
 	
 		* **error** - An error object if an error occurred, or *null* if no error occurred
 
@@ -223,7 +223,7 @@ import Spotify from 'react-native-spotify';
 
 	Enables or disables shuffling on the player.
 	
-	* *parameters*
+	* *Parameters*
 	
 		* **shuffling** - *true* to enable shuffle, *false* to disable it
 		
@@ -236,7 +236,7 @@ import Spotify from 'react-native-spotify';
 
 	Enables or disables repeating on the player.
 	
-	* *parameters*
+	* *Parameters*
 	
 		* **repeating** - *true* to enable repeat, *false* to disable it
 		
@@ -251,7 +251,7 @@ import Spotify from 'react-native-spotify';
 
 	Sends a general request to the spotify api.
 	
-	* *parameters*
+	* *Parameters*
 	
 		* **endpoint** - the api endpoint, without a leading slash, e.g. `v1/browse/new-releases`
 		
@@ -272,7 +272,7 @@ import Spotify from 'react-native-spotify';
 
 	Sends a [search](https://developer.spotify.com/web-api/search-item/) request to spotify.
 	
-	* *parameters*
+	* *Parameters*
 	
 		* **query** - The search query string. Same as the *q* parameter on the [search](https://developer.spotify.com/web-api/search-item/) endpoint
 		
@@ -291,7 +291,7 @@ import Spotify from 'react-native-spotify';
 
 	Gets Spotify catalog information for a single album.
 	
-	* *parameters*
+	* *Parameters*
 	
 		* **albumID** - The Spotify ID for the album
 		
@@ -308,7 +308,7 @@ import Spotify from 'react-native-spotify';
 
 	Gets Spotify catalog information for multiple albums identified by their Spotify IDs.
 	
-	* *parameters*
+	* *Parameters*
 	
 		* **albumIDs** - An array of the Spotify IDs for the albums
 		
@@ -325,7 +325,7 @@ import Spotify from 'react-native-spotify';
 
 	Gets Spotify catalog information about an album’s tracks.
 
-	* *parameters*
+	* *Parameters*
 	
 		* **albumID** - The Spotify ID for the album
 		
@@ -342,7 +342,7 @@ import Spotify from 'react-native-spotify';
 
 	Gets Spotify catalog information for a single artist.
 	
-	* *parameters*
+	* *Parameters*
 	
 		* **artistID** - The Spotify ID for the artist
 		
@@ -359,7 +359,7 @@ import Spotify from 'react-native-spotify';
 
 	Gets Spotify catalog information for several artists based on their Spotify IDs.
 	
-	* *parameters*
+	* *Parameters*
 	
 		* **artistIDs** - An array of the Spotify IDs for the artists
 		
@@ -376,7 +376,7 @@ import Spotify from 'react-native-spotify';
 
 	Gets Spotify catalog information about an artist’s albums.
 	
-	* *parameters*
+	* *Parameters*
 	
 		* **artistID** - The Spotify ID for the artist
 		
@@ -393,7 +393,7 @@ import Spotify from 'react-native-spotify';
 
 	Gets Spotify catalog information about an artist’s top tracks by country.
 	
-	* *parameters*
+	* *Parameters*
 	
 		* **artistID** - The Spotify ID for the artist
 		
@@ -412,7 +412,7 @@ import Spotify from 'react-native-spotify';
 
 	Gets Spotify catalog information about artists similar to a given artist.
 	
-	* *parameters*
+	* *Parameters*
 	
 		* **artistID** - The Spotify ID for the artist
 		
@@ -429,7 +429,7 @@ import Spotify from 'react-native-spotify';
 
 	Gets Spotify catalog information for a single track identified by its unique Spotify ID.
 	
-	* *parameters*
+	* *Parameters*
 	
 		* **trackID** - The Spotify ID for the track
 		
@@ -446,7 +446,7 @@ import Spotify from 'react-native-spotify';
 
 	Gets Spotify catalog information for multiple tracks based on their Spotify IDs.
 	
-	* *parameters*
+	* *Parameters*
 	
 		* **trackIDs** - An array of the Spotify IDs for the tracks
 		
@@ -463,7 +463,7 @@ import Spotify from 'react-native-spotify';
 
 	Gets a detailed audio analysis for a single track identified by its unique Spotify ID.
 	
-	* *parameters*
+	* *Parameters*
 	
 		* **trackID** - The Spotify ID for the track
 		
@@ -480,7 +480,7 @@ import Spotify from 'react-native-spotify';
 
 	Gets audio feature information for a single track identified by its unique Spotify ID.
 	
-	* *parameters*
+	* *Parameters*
 	
 		* **trackID** - The Spotify ID for the track
 		
@@ -497,7 +497,7 @@ import Spotify from 'react-native-spotify';
 
 	Gets audio features for multiple tracks based on their Spotify IDs.
 	
-	* *parameters*
+	* *Parameters*
 	
 		* **trackIDs** - An array of the Spotify IDs for the tracks
 		
