@@ -838,7 +838,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 					headers.put("Authorization", "Bearer "+accessToken);
 				}
 				//TODO add authorization to headers
-				Utils.doHTTPRequest("https://api.spotify.com/v1/"+endpoint, method, params, jsonBody, headers, new CompletionBlock<String>() {
+				Utils.doHTTPRequest("https://api.spotify.com/"+endpoint, method, params, jsonBody, headers, new CompletionBlock<String>() {
 					@Override
 					public void invoke(String response, SpotifyError error) {
 						if(response==null)
@@ -944,7 +944,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		}
 		body.putString("type", type);
 
-		doAPIRequest("search", "GET", body, false, new CompletionBlock<ReadableMap>() {
+		doAPIRequest("v1/search", "GET", body, false, new CompletionBlock<ReadableMap>() {
 			@Override
 			public void invoke(ReadableMap resultObj, SpotifyError error)
 			{
@@ -968,7 +968,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			}
 			return;
 		}
-		doAPIRequest("albums/"+albumID, "GET", options, false, new CompletionBlock<ReadableMap>() {
+		doAPIRequest("v1/albums/"+albumID, "GET", options, false, new CompletionBlock<ReadableMap>() {
 			@Override
 			public void invoke(ReadableMap resultObj, SpotifyError error)
 			{
@@ -994,7 +994,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		}
 		WritableMap body = Convert.toWritableMap(options);
 		body.putString("ids", Convert.joinedIntoString(albumIDs, ","));
-		doAPIRequest("albums", "GET", body, false, new CompletionBlock<ReadableMap>() {
+		doAPIRequest("v1/albums", "GET", body, false, new CompletionBlock<ReadableMap>() {
 			@Override
 			public void invoke(ReadableMap resultObj, SpotifyError error)
 			{
@@ -1018,7 +1018,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			}
 			return;
 		}
-		doAPIRequest("albums/"+albumID+"/tracks", "GET", options, false, new CompletionBlock<ReadableMap>() {
+		doAPIRequest("v1/albums/"+albumID+"/tracks", "GET", options, false, new CompletionBlock<ReadableMap>() {
 			@Override
 			public void invoke(ReadableMap resultObj, SpotifyError error)
 			{
@@ -1042,7 +1042,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			}
 			return;
 		}
-		doAPIRequest("artists/"+artistID, "GET", options, false, new CompletionBlock<ReadableMap>() {
+		doAPIRequest("v1/artists/"+artistID, "GET", options, false, new CompletionBlock<ReadableMap>() {
 			@Override
 			public void invoke(ReadableMap resultObj, SpotifyError error)
 			{
@@ -1068,7 +1068,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		}
 		WritableMap body = Convert.toWritableMap(options);
 		body.putString("ids", Convert.joinedIntoString(artistIDs, ","));
-		doAPIRequest("artists", "GET", body, false, new CompletionBlock<ReadableMap>() {
+		doAPIRequest("v1/artists", "GET", body, false, new CompletionBlock<ReadableMap>() {
 			@Override
 			public void invoke(ReadableMap resultObj, SpotifyError error)
 			{
@@ -1092,7 +1092,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			}
 			return;
 		}
-		doAPIRequest("artists/"+artistID+"/albums", "GET", options, false, new CompletionBlock<ReadableMap>() {
+		doAPIRequest("v1/artists/"+artistID+"/albums", "GET", options, false, new CompletionBlock<ReadableMap>() {
 			@Override
 			public void invoke(ReadableMap resultObj, SpotifyError error)
 			{
@@ -1116,7 +1116,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			}
 			return;
 		}
-		doAPIRequest("artists/"+artistID+"/top-tracks", "GET", options, false, new CompletionBlock<ReadableMap>() {
+		doAPIRequest("v1/artists/"+artistID+"/top-tracks", "GET", options, false, new CompletionBlock<ReadableMap>() {
 			@Override
 			public void invoke(ReadableMap resultObj, SpotifyError error)
 			{
@@ -1140,7 +1140,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			}
 			return;
 		}
-		doAPIRequest("artists/"+artistID+"/related-artists", "GET", options, false, new CompletionBlock<ReadableMap>() {
+		doAPIRequest("v1/artists/"+artistID+"/related-artists", "GET", options, false, new CompletionBlock<ReadableMap>() {
 			@Override
 			public void invoke(ReadableMap resultObj, SpotifyError error)
 			{
@@ -1164,7 +1164,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			}
 			return;
 		}
-		doAPIRequest("tracks/"+trackID, "GET", options, false, new CompletionBlock<ReadableMap>() {
+		doAPIRequest("v1/tracks/"+trackID, "GET", options, false, new CompletionBlock<ReadableMap>() {
 			@Override
 			public void invoke(ReadableMap resultObj, SpotifyError error)
 			{
@@ -1190,7 +1190,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		}
 		WritableMap body = Convert.toWritableMap(options);
 		body.putString("ids", Convert.joinedIntoString(trackIDs, ","));
-		doAPIRequest("tracks", "GET", body, false, new CompletionBlock<ReadableMap>() {
+		doAPIRequest("v1/tracks", "GET", body, false, new CompletionBlock<ReadableMap>() {
 			@Override
 			public void invoke(ReadableMap resultObj, SpotifyError error)
 			{
@@ -1214,7 +1214,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			}
 			return;
 		}
-		doAPIRequest("audio-analysis/"+trackID, "GET", options, false, new CompletionBlock<ReadableMap>() {
+		doAPIRequest("v1/audio-analysis/"+trackID, "GET", options, false, new CompletionBlock<ReadableMap>() {
 			@Override
 			public void invoke(ReadableMap resultObj, SpotifyError error)
 			{
@@ -1238,7 +1238,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			}
 			return;
 		}
-		doAPIRequest("audio-features/"+trackID, "GET", options, false, new CompletionBlock<ReadableMap>() {
+		doAPIRequest("v1/audio-features/"+trackID, "GET", options, false, new CompletionBlock<ReadableMap>() {
 			@Override
 			public void invoke(ReadableMap resultObj, SpotifyError error)
 			{
@@ -1264,7 +1264,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		}
 		WritableMap body = Convert.toWritableMap(options);
 		body.putString("ids", Convert.joinedIntoString(trackIDs, ","));
-		doAPIRequest("audio-features", "GET", body, false, new CompletionBlock<ReadableMap>() {
+		doAPIRequest("v1/audio-features", "GET", body, false, new CompletionBlock<ReadableMap>() {
 			@Override
 			public void invoke(ReadableMap resultObj, SpotifyError error)
 			{
