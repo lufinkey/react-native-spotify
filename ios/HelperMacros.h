@@ -33,7 +33,7 @@
 #define callbackAndReturnIfError(error, callback, ...) \
 	if(error!=nil)\
 	{\
-		if(callback!=nil)\
+		if(callback)\
 		{\
 			callback(__VA_ARGS__);\
 		}\
@@ -43,7 +43,7 @@
 #define reactCallbackAndReturnIfNil(parameter, callback, ...) \
 	if(parameter == nil)\
 	{\
-		if(callback!=nil)\
+		if(callback)\
 		{\
 			callback(@[ __VA_ARGS__ NIL_PARAMETER_ERROR_OBJ(@#parameter) ]);\
 		}\
