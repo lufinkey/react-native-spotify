@@ -10,7 +10,6 @@ To add react-native-spotify to your project, cd into your project directory and 
 npm install --save https://github.com/lufinkey/react-native-spotify
 react-native link react-native-spotify
 ```
-(The project isn't on npm yet because some chump took this package name for some half-finished module)
 
 Next, do the manual setup for each platform:
 
