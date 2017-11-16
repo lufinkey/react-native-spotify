@@ -87,6 +87,16 @@ import Spotify from 'react-native-spotify';
 
 
 
+* **isInitialized**()
+
+	* *Returns*
+	
+		* *true* if the Spotify module has been initialized
+		* *false* if the Spotify module has not been initialized
+
+
+
+
 * **login**( ( *loggedIn*, *error*? ) => {} )
 
 	Opens a UI to log into Spotify
