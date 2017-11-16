@@ -143,6 +143,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 				{
 					errorObj = error.toReactObject();
 				}
+				initialized = true;
 				if(callback!=null)
 				{
 					callback.invoke(
@@ -152,6 +153,13 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 				}
 			}
 		});
+	}
+
+	@ReactMethod
+	//isInitialized()
+	boolean isInitialized()
+	{
+		return initialized;
 	}
 
 	private void logBackInIfNeeded(final CompletionBlock<Boolean> completion)
