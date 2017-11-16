@@ -37,6 +37,8 @@ typedef enum
 
 //initialize(options, (loggedIn, error?))
 -(void)initialize:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion;
+//isInitialized()
+-(id)isInitialized;
 
 //login((loggedIn, error?))
 -(void)login:(RCTResponseSenderBlock)completion;
