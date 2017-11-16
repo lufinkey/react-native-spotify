@@ -73,8 +73,8 @@ import Spotify from 'react-native-spotify';
 	
 	* *Parameters*
 		* **options** - an object with options to pass to the Spotify Module
-			* **clientID** (*required*) - Your spotify application's ClientID that you registered with spotify [here](https://developer.spotify.com/my-applications)
-			* **redirectURL** (*required*) - The redirect URL to use when you've finished logging in. You need to set this up for your application [here](https://developer.spotify.com/my-applications)
+			* **clientID** - Your spotify application's ClientID that you registered with spotify [here](https://developer.spotify.com/my-applications)
+			* **redirectURL** - The redirect URL to use when you've finished logging in. You need to set this up for your application [here](https://developer.spotify.com/my-applications)
 			* **sessionUserDefaultsKey** - The preference key to use to store session data for this module
 			* **scopes** - An array of scopes to use in the application. A list of scopes can be found [here](https://developer.spotify.com/web-api/using-scopes/)
 			* **tokenSwapURL** - The URL to use to swap an authentication code for an access token
