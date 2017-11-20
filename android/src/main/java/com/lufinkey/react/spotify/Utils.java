@@ -116,11 +116,11 @@ public class Utils
 					{
 						response = new String(volleyError.networkResponse.data);
 					}
-					error = new SpotifyError("VolleyErrorDomain", volleyError.networkResponse.statusCode, volleyError.getMessage());
+					error = new SpotifyError("VolleyErrorDomain", volleyError.networkResponse.statusCode, "Request Error "+volleyError.networkResponse.statusCode);
 				}
 				else
 				{
-					error = new SpotifyError(SpotifyError.Code.REQUEST_ERROR, volleyError.getMessage());
+					error = new SpotifyError(SpotifyError.Code.REQUEST_ERROR, "Could not communicate with server");
 				}
 				completion.invoke(response, error);
 			}
