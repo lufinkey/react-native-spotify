@@ -14,7 +14,7 @@ react-native link react-native-spotify
 Next, do the manual setup for each platform:
 
 #### iOS
-Manually add the Frameworks from `node_modules/react-native-spotify/ios/external/SpotifySDK` to Embedded Binaries in your project settings
+Manually add the Frameworks from `node_modules/react-native-spotify/ios/external/SpotifySDK` to Embedded Binaries in your project settings. Then add `../node_modules/react-native-spotify/ios/external/SpotifySDK` to *Framework Search Paths* in your project settings.
 
 Ensure you have enabled deep linking for react native in your Objective-C code. You can follow the instructions for that [here](https://facebook.github.io/react-native/docs/linking.html)
 
