@@ -18,6 +18,26 @@ Manually add the Frameworks from `node_modules/react-native-spotify/ios/external
 
 Ensure you have enabled deep linking for react native in your Objective-C code. You can follow the instructions for that [here](https://facebook.github.io/react-native/docs/linking.html)
 
+In order for your redirect URL to be recognized, you have to add your URL scheme to your app's Info.plist file:
+
+```plist
+...
+<key>CFBundleURLTypes</key>
+<array>
+	<dict>
+		<key>CFBundleTypeRole</key>
+		<string>Viewer</string>
+		<key>CFBundleURLName</key>
+		<string>com.example.examplespotifyapp-auth</string>
+		<key>CFBundleURLSchemes</key>
+		<array>
+			<string>examplespotifyapp</string>
+		</array>
+	</dict>
+</array>
+...
+```
+
 #### Android
 
 Edit `android/build.grandle` and add `flatDir`
