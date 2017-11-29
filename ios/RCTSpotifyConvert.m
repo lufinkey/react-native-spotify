@@ -30,7 +30,7 @@
 	}
 	obj[@"domain"] = error.domain;
 	obj[@"code"] = @(error.code);
-	obj[@"description"] = error.localizedDescription;
+	obj[@"message"] = error.localizedDescription;
 	return obj;
 }
 

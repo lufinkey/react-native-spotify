@@ -542,10 +542,10 @@ import Spotify from 'react-native-spotify';
 
 ### Error Handling
 
-Error objects are passed to callback functions to indicate something went wrong during the function call. You can use these error objects to determine what to show to the user. Right now, there are some uniformity issues between iOS and Android on the errors that get returned, but for now, use the **description** attribute to display a message to the user. I, or someone else will eventually make constants for **domain** and **code**.
+Error objects are passed to callback functions to indicate something went wrong during the function call. You can use these error objects to determine what to show to the user. Right now, there are some uniformity issues between iOS and Android on the errors that get returned, but for now, use the **message** attribute to display a message to the user. I, or someone else will eventually make constants for **domain** and **code**.
 
 #### The Error Object
 
 * **domain** - A string indicating what part of the system the error belongs to
 * **code** - An integer containing the actual error code of the error
-* **description** - A string containing a user-readable description of the error
+* **message** - A string containing a user-readable description of the error

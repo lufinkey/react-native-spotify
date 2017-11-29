@@ -58,7 +58,7 @@ export class InitialScreen extends Component
 		Spotify.initialize(spotifyOptions, (loggedIn, error) => {
 			if(error != null)
 			{
-				Alert.alert("Error", error.description);
+				Alert.alert("Error", error.message);
 			}
 			//update UI state
 			this.setState((state) => {
@@ -78,7 +78,7 @@ export class InitialScreen extends Component
 		Spotify.login((loggedIn, error) => {
 			if(error)
 			{
-				Alert.alert("Error", error.description);
+				Alert.alert("Error", error.message);
 			}
 			if(loggedIn)
 			{

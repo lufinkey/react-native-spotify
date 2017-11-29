@@ -232,7 +232,8 @@ public class SpotifyError
 		WritableMap map = Arguments.createMap();
 		map.putString("domain", DOMAIN);
 		map.putInt("code", code);
-		map.putString("description", description);
+		map.putString("message", description);
+
 		return map;
 	}
 
