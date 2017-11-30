@@ -134,10 +134,6 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		{
 			scopes = options.getArray("scopes");
 		}
-		else
-		{
-			scopes = Arguments.createArray();
-		}
 		if(scopes!=null)
 		{
 			String[] requestedScopes = new String[scopes.size()];
