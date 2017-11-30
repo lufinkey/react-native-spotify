@@ -117,10 +117,27 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		this.options = options;
 		auth = new Auth();
 		auth.reactContext = reactContext;
-		auth.clientID = options.getString("clientID");
-		auth.redirectURL = options.getString("redirectURL");
-		auth.sessionUserDefaultsKey = options.getString("sessionUserDefaultsKey");
-		ReadableArray scopes = options.getArray("scopes");
+		if(options.hasKey("clientID"))
+		{
+			auth.clientID = options.getString("clientID");
+		}
+		if(options.hasKey("redirectURL"))
+		{
+			auth.redirectURL = options.getString("redirectURL");
+		}
+		if(options.hasKey("sessionUserDefaultsKey"))
+		{
+			auth.sessionUserDefaultsKey = options.getString("sessionUserDefaultsKey");
+		}
+		ReadableArray scopes = null;
+		if(options.hasKey("scopes"))
+		{
+			scopes = options.getArray("scopes");
+		}
+		else
+		{
+			scopes = Arguments.createArray();
+		}
 		if(scopes!=null)
 		{
 			String[] requestedScopes = new String[scopes.size()];
@@ -130,8 +147,14 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			}
 			auth.requestedScopes = requestedScopes;
 		}
-		auth.tokenSwapURL = options.getString("tokenSwapURL");
-		auth.tokenRefreshURL = options.getString("tokenRefreshURL");
+		if(options.hasKey("tokenSwapURL"))
+		{
+			auth.tokenSwapURL = options.getString("tokenSwapURL");
+		}
+		if(options.hasKey("tokenRefreshURL"))
+		{
+			auth.tokenRefreshURL = options.getString("tokenRefreshURL");
+		}
 		auth.load();
 
 		//try to log back in
@@ -205,11 +228,9 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			return;
 		}
 
-		//get clientID
-		String clientID = options.getString("clientID");
-		if(clientID == null)
+		//check for clientID
+		if(auth.clientID == null)
 		{
-			System.out.println("client id is null");
 			completion.invoke(
 					false,
 					new SpotifyError(
@@ -233,7 +254,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		}
 
 		//initialize player
-		Config playerConfig = new Config(reactContext.getCurrentActivity().getApplicationContext(), accessToken, clientID);
+		Config playerConfig = new Config(reactContext.getCurrentActivity().getApplicationContext(), accessToken, auth.clientID);
 		player = Spotify.getPlayer(playerConfig, this, new SpotifyPlayer.InitializationObserver(){
 			@Override
 			public void onError(Throwable error)
