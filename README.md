@@ -142,6 +142,17 @@ import Spotify from 'react-native-spotify';
 
 
 
+* **logout**( ( *error*? ) => {} )
+
+	Logs out of Spotify
+	
+	* *Parameters*
+	
+		* **error** - An error that occurred during logout, or *null* if no error occurred
+
+
+
+
 * **handleAuthURL**( *url* )
 
 	Handles an authentication URL sent to the app through deep linking. You are *required* to use this function in order for login to work correctly.
