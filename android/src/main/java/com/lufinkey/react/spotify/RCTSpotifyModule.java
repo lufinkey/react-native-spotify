@@ -177,7 +177,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		});
 	}
 
-	@ReactMethod
+	@ReactMethod(isBlockingSynchronousMethod = true)
 	//isInitialized()
 	boolean isInitialized()
 	{
@@ -390,7 +390,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		}
 	}
 
-	@ReactMethod
+	@ReactMethod(isBlockingSynchronousMethod = true)
 	//isLoggedIn()
 	public boolean isLoggedIn()
 	{
@@ -543,7 +543,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		callback.invoke(new SpotifyError(SpotifyError.Code.NOT_IMPLEMENTED, "setVolume does not work on android"));
 	}
 
-	@ReactMethod
+	@ReactMethod(isBlockingSynchronousMethod = true)
 	//getVolume()
 	double getVolume()
 	{
@@ -625,7 +625,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		});
 	}
 
-	@ReactMethod
+	@ReactMethod(isBlockingSynchronousMethod = true)
 	//getPlaybackState()
 	ReadableMap getPlaybackState()
 	{
