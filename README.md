@@ -77,6 +77,8 @@ packagingOptions {
 ...
 ```
 
+If you have issues linking the module, please check that gradle is updated to the latest version and that your project is synced.
+
 
 
 ## Usage
@@ -136,6 +138,17 @@ import Spotify from 'react-native-spotify';
 		
 		* *true* if the client is logged in
 		* *false* if the client is not logged in
+
+
+
+
+* **logout**( ( *error*? ) => {} )
+
+	Logs out of Spotify
+	
+	* *Parameters*
+	
+		* **error** - An error that occurred during logout, or *null* if no error occurred
 
 
 
