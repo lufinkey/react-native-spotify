@@ -627,7 +627,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	@ReactMethod(isBlockingSynchronousMethod = true)
 	//getPlaybackState()
-	ReadableMap getPlaybackState()
+	WritableMap getPlaybackState()
 	{
 		if(player==null)
 		{
