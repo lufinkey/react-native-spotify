@@ -740,6 +740,16 @@ RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method param
 
 #pragma mark - React Native methods - Web API
 
+RCT_EXPORT_METHOD(getMe:(RCTResponseSenderBlock)completion)
+{
+	[self doAPIRequest:@"v1/me" method:@"GET" params:nil jsonBody:NO completion:^(id resultObj, NSError* error) {
+		if(completion)
+		{
+			completion(@[ [RCTSpotifyConvert ID:resultObj], [RCTSpotifyConvert NSError:error] ]);
+		}
+	}];
+}
+
 RCT_EXPORT_METHOD(search:(NSString*)query types:(NSArray<NSString*>*)types options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion)
 {
 	reactCallbackAndReturnIfNil(query, completion, [NSNull null], );
