@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.telecom.Call;
 import android.view.WindowManager;
 
 import com.android.volley.NetworkResponse;
@@ -182,6 +183,13 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	Boolean isInitialized()
 	{
 		return initialized;
+	}
+
+	@ReactMethod
+	//isInitializedAsync((initialized))
+	void isInitializedAsync(final Callback callback)
+	{
+		callback.invoke(isInitialized());
 	}
 
 	private void logBackInIfNeeded(final CompletionBlock<Boolean> completion)
@@ -404,6 +412,13 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	}
 
 	@ReactMethod
+	//isLoggedInAsync((loggedIn))
+	public void isLoggedInAsync(final Callback callback)
+	{
+		callback.invoke(isLoggedIn());
+	}
+
+	@ReactMethod
 	//handleAuthURL(url)
 	public Boolean handleAuthURL(String url)
 	{
@@ -546,6 +561,13 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	}
 
 	@ReactMethod
+	//getVolumeAsync((volume))
+	public void getVolumeAsync(final Callback callback)
+	{
+		callback.invoke(getVolume());
+	}
+
+	@ReactMethod
 	//setPlaying(playing, (error?))
 	public void setPlaying(final boolean playing, final Callback callback)
 	{
@@ -628,6 +650,13 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			return null;
 		}
 		return Convert.fromPlaybackState(player.getPlaybackState());
+	}
+
+	@ReactMethod
+	//getPlaybackStateAsync((playbackState))
+	public void getPlaybackStateAsync(final Callback callback)
+	{
+		callback.invoke(getPlaybackState());
 	}
 
 	@ReactMethod
