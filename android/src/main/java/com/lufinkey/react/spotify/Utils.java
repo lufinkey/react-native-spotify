@@ -1,10 +1,12 @@
 package com.lufinkey.react.spotify;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -52,122 +54,41 @@ public class Utils
 		return query;
 	}
 
-	public static void doHTTPRequest(String url, final String method, final ReadableMap params, final boolean jsonBody, final HashMap<String,String> headers, final CompletionBlock<String> completion)
+	public static String getResponseString(NetworkResponse response)
+	{
+		if(response == null)
+		{
+			return null;
+		}
+		try
+		{
+			return new String(response.data, HttpHeaderParser.parseCharset(response.headers));
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			return new String(response.data);
+		}
+	}
+
+	public static void doHTTPRequest(String url, String method, final HashMap<String,String> headers, final byte[] body, final CompletionBlock<NetworkResponse> completion)
 	{
 		if(requestQueue == null)
 		{
 			requestQueue = Volley.newRequestQueue(reactContext.getCurrentActivity());
 		}
 
-		//parse request method
-		int requestMethod;
-		if(method.equals("GET"))
-		{
-			requestMethod = Request.Method.GET;
-		}
-		else if(method.equals("POST"))
-		{
-			requestMethod = Request.Method.POST;
-		}
-		else if(method.equals("DELETE"))
-		{
-			requestMethod = Request.Method.DELETE;
-		}
-		else if(method.equals("PUT"))
-		{
-			requestMethod = Request.Method.PUT;
-		}
-		else if(method.equals("HEAD"))
-		{
-			requestMethod = Request.Method.HEAD;
-		}
-		else if(method.equals("PATCH"))
-		{
-			requestMethod = Request.Method.PATCH;
-		}
-		else
-		{
-			completion.invoke(null, new SpotifyError(SpotifyError.Code.BAD_PARAMETERS, "invalid request method "+method));
-			return;
-		}
-
-		//append query string to url if necessary
-		if(!jsonBody && params!=null && method.equals("GET"))
-		{
-			url += "?"+makeQueryString(params);
-		}
-
 		//make request
-		StringRequest request = new StringRequest(requestMethod, url, new Response.Listener<String>() {
+		HTTPRequest request = new HTTPRequest(method, url, headers, body) {
 			@Override
-			public void onResponse(String response)
+			public void onError(VolleyError error)
+			{
+				completion.invoke(null, new SpotifyError(SpotifyError.Code.REQUEST_ERROR, "Could not communicate with server"));
+			}
+
+			@Override
+			public void onResponse(NetworkResponse response)
 			{
 				completion.invoke(response, null);
-			}
-		}, new Response.ErrorListener() {
-			@Override
-			public void onErrorResponse(VolleyError volleyError)
-			{
-				String response = null;
-				SpotifyError error = null;
-				if(volleyError.networkResponse!=null)
-				{
-					if(volleyError.networkResponse.data!=null)
-					{
-						response = new String(volleyError.networkResponse.data);
-					}
-					error = new SpotifyError("VolleyErrorDomain", volleyError.networkResponse.statusCode, "Request Error "+volleyError.networkResponse.statusCode);
-				}
-				else
-				{
-					error = new SpotifyError(SpotifyError.Code.REQUEST_ERROR, "Could not communicate with server");
-				}
-				completion.invoke(response, error);
-			}
-		}) {
-			@Override
-			public Map<String, String> getHeaders() throws AuthFailureError
-			{
-				if(headers==null)
-				{
-					return super.getHeaders();
-				}
-				return headers;
-			}
-
-			@Override
-			public String getBodyContentType()
-			{
-				if(jsonBody)
-				{
-					return "application/json; charset=utf-8";
-				}
-				else
-				{
-					return "application/x-www-form-urlencoded";
-				}
-			}
-
-			@Override
-			public byte[] getBody() throws AuthFailureError
-			{
-				if(params!=null)
-				{
-					if(jsonBody)
-					{
-						JSONObject obj = Convert.toJSONObject(params);
-						if (obj == null)
-						{
-							return null;
-						}
-						return obj.toString().getBytes();
-					}
-					else if(!method.equals("GET"))
-					{
-						return makeQueryString(params).getBytes();
-					}
-				}
-				return null;
 			}
 		};
 

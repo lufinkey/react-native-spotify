@@ -6,6 +6,8 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.view.WindowManager;
 
+import com.android.volley.NetworkResponse;
+import com.android.volley.toolbox.HttpHeaderParser;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -21,6 +23,7 @@ import com.spotify.sdk.android.player.Error;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -850,7 +853,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		});
 	}
 
-	void doAPIRequest(final String endpoint, final String method, final ReadableMap params, final boolean jsonBody, final CompletionBlock<ReadableMap> completion)
+	void doAPIRequest(final String endpoint, final String method, final ReadableMap params, final boolean jsonBody, final CompletionBlock<Object> completion)
 	{
 		prepareForRequest(new CompletionBlock<Boolean>(){
 			@Override
@@ -862,43 +865,95 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 				{
 					headers.put("Authorization", "Bearer "+accessToken);
 				}
-				//TODO add authorization to headers
-				Utils.doHTTPRequest("https://api.spotify.com/"+endpoint, method, params, jsonBody, headers, new CompletionBlock<String>() {
+
+				String url = "https://api.spotify.com/"+endpoint;
+
+				//append query string to url if necessary
+				if(!jsonBody && params!=null && method.equalsIgnoreCase("GET"))
+				{
+					url += "?"+Utils.makeQueryString(params);
+				}
+
+				//create request body
+				byte[] body = null;
+				if(params!=null)
+				{
+					if(jsonBody)
+					{
+						JSONObject obj = Convert.toJSONObject(params);
+						if (obj != null)
+						{
+							body = obj.toString().getBytes();
+						}
+					}
+					else if(!method.equalsIgnoreCase("GET"))
+					{
+						body = Utils.makeQueryString(params).getBytes();
+					}
+				}
+
+				if(jsonBody)
+				{
+					headers.put("Content-Type", "application/json");
+				}
+
+				Utils.doHTTPRequest(url, method, headers, body, new CompletionBlock<NetworkResponse>() {
 					@Override
-					public void invoke(String response, SpotifyError error) {
+					public void invoke(NetworkResponse response, SpotifyError error) {
 						if(response==null)
 						{
 							completion.invoke(null, error);
+							return;
 						}
-						else
+
+						String responseStr = Utils.getResponseString(response);
+
+						JSONObject resultObj = null;
+						String contentType = response.headers.get("Content-Type");
+						if(contentType!=null && contentType.equalsIgnoreCase("application/json") && response.statusCode!=204)
 						{
-							JSONObject responseObj;
 							try
 							{
-								responseObj = new JSONObject(response);
+								resultObj = new JSONObject(responseStr);
 							}
 							catch (JSONException e)
 							{
 								completion.invoke(null, new SpotifyError(SpotifyError.Code.REQUEST_ERROR, "Invalid response format"));
 								return;
 							}
+						}
 
+						if(resultObj != null)
+						{
 							try
 							{
-								JSONObject errorObj = responseObj.getJSONObject("error");
-								completion.invoke(Convert.fromJSONObject(responseObj),
-										new SpotifyError(SpotifyError.SPOTIFY_WEB_DOMAIN,
-												errorObj.getInt("status"),
-												errorObj.getString("message")));
-								return;
+								String errorDescription = resultObj.getString("error_description");
+								error = new SpotifyError(SpotifyError.SPOTIFY_AUTH_DOMAIN, response.statusCode, errorDescription);
 							}
-							catch(JSONException e)
+							catch(JSONException e1)
 							{
-								//do nothing. this means we don't have an error
+								try
+								{
+									JSONObject errorObj = resultObj.getJSONObject("error");
+									error = new SpotifyError(SpotifyError.SPOTIFY_WEB_DOMAIN, errorObj.getInt("status"), errorObj.getString("message"));
+								}
+								catch(JSONException e2)
+								{
+									//do nothing. this means we don't have an error
+								}
 							}
-
-							completion.invoke(Convert.fromJSONObject(responseObj), null);
 						}
+
+						Object result = null;
+						if(resultObj != null)
+						{
+							result = Convert.fromJSONObject(resultObj);
+						}
+						else
+						{
+							result = responseStr;
+						}
+						completion.invoke(result, error);
 					}
 				});
 			}
@@ -909,9 +964,9 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	//sendRequest(endpoint, method, params, isJSONBody, (result?, error?))
 	void sendRequest(String endpoint, String method, ReadableMap params, boolean jsonBody, final Callback callback)
 	{
-		doAPIRequest(endpoint, method, params, jsonBody, new CompletionBlock<ReadableMap>() {
+		doAPIRequest(endpoint, method, params, jsonBody, new CompletionBlock<Object>() {
 			@Override
-			public void invoke(ReadableMap responseObj, SpotifyError error)
+			public void invoke(Object responseObj, SpotifyError error)
 			{
 				ReadableMap errorObj = null;
 				if(error!=null)
@@ -969,9 +1024,9 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		}
 		body.putString("type", type);
 
-		doAPIRequest("v1/search", "GET", body, false, new CompletionBlock<ReadableMap>() {
+		doAPIRequest("v1/search", "GET", body, false, new CompletionBlock<Object>() {
 			@Override
-			public void invoke(ReadableMap resultObj, SpotifyError error)
+			public void invoke(Object resultObj, SpotifyError error)
 			{
 				if(callback!=null)
 				{
@@ -993,9 +1048,9 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			}
 			return;
 		}
-		doAPIRequest("v1/albums/"+albumID, "GET", options, false, new CompletionBlock<ReadableMap>() {
+		doAPIRequest("v1/albums/"+albumID, "GET", options, false, new CompletionBlock<Object>() {
 			@Override
-			public void invoke(ReadableMap resultObj, SpotifyError error)
+			public void invoke(Object resultObj, SpotifyError error)
 			{
 				if(callback!=null)
 				{
@@ -1019,9 +1074,9 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		}
 		WritableMap body = Convert.toWritableMap(options);
 		body.putString("ids", Convert.joinedIntoString(albumIDs, ","));
-		doAPIRequest("v1/albums", "GET", body, false, new CompletionBlock<ReadableMap>() {
+		doAPIRequest("v1/albums", "GET", body, false, new CompletionBlock<Object>() {
 			@Override
-			public void invoke(ReadableMap resultObj, SpotifyError error)
+			public void invoke(Object resultObj, SpotifyError error)
 			{
 				if(callback!=null)
 				{
@@ -1043,9 +1098,9 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			}
 			return;
 		}
-		doAPIRequest("v1/albums/"+albumID+"/tracks", "GET", options, false, new CompletionBlock<ReadableMap>() {
+		doAPIRequest("v1/albums/"+albumID+"/tracks", "GET", options, false, new CompletionBlock<Object>() {
 			@Override
-			public void invoke(ReadableMap resultObj, SpotifyError error)
+			public void invoke(Object resultObj, SpotifyError error)
 			{
 				if(callback!=null)
 				{
@@ -1067,9 +1122,9 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			}
 			return;
 		}
-		doAPIRequest("v1/artists/"+artistID, "GET", options, false, new CompletionBlock<ReadableMap>() {
+		doAPIRequest("v1/artists/"+artistID, "GET", options, false, new CompletionBlock<Object>() {
 			@Override
-			public void invoke(ReadableMap resultObj, SpotifyError error)
+			public void invoke(Object resultObj, SpotifyError error)
 			{
 				if(callback!=null)
 				{
@@ -1093,9 +1148,9 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		}
 		WritableMap body = Convert.toWritableMap(options);
 		body.putString("ids", Convert.joinedIntoString(artistIDs, ","));
-		doAPIRequest("v1/artists", "GET", body, false, new CompletionBlock<ReadableMap>() {
+		doAPIRequest("v1/artists", "GET", body, false, new CompletionBlock<Object>() {
 			@Override
-			public void invoke(ReadableMap resultObj, SpotifyError error)
+			public void invoke(Object resultObj, SpotifyError error)
 			{
 				if(callback!=null)
 				{
@@ -1117,9 +1172,9 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			}
 			return;
 		}
-		doAPIRequest("v1/artists/"+artistID+"/albums", "GET", options, false, new CompletionBlock<ReadableMap>() {
+		doAPIRequest("v1/artists/"+artistID+"/albums", "GET", options, false, new CompletionBlock<Object>() {
 			@Override
-			public void invoke(ReadableMap resultObj, SpotifyError error)
+			public void invoke(Object resultObj, SpotifyError error)
 			{
 				if(callback!=null)
 				{
@@ -1141,9 +1196,9 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			}
 			return;
 		}
-		doAPIRequest("v1/artists/"+artistID+"/top-tracks", "GET", options, false, new CompletionBlock<ReadableMap>() {
+		doAPIRequest("v1/artists/"+artistID+"/top-tracks", "GET", options, false, new CompletionBlock<Object>() {
 			@Override
-			public void invoke(ReadableMap resultObj, SpotifyError error)
+			public void invoke(Object resultObj, SpotifyError error)
 			{
 				if(callback!=null)
 				{
@@ -1165,9 +1220,9 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			}
 			return;
 		}
-		doAPIRequest("v1/artists/"+artistID+"/related-artists", "GET", options, false, new CompletionBlock<ReadableMap>() {
+		doAPIRequest("v1/artists/"+artistID+"/related-artists", "GET", options, false, new CompletionBlock<Object>() {
 			@Override
-			public void invoke(ReadableMap resultObj, SpotifyError error)
+			public void invoke(Object resultObj, SpotifyError error)
 			{
 				if(callback!=null)
 				{
@@ -1189,9 +1244,9 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			}
 			return;
 		}
-		doAPIRequest("v1/tracks/"+trackID, "GET", options, false, new CompletionBlock<ReadableMap>() {
+		doAPIRequest("v1/tracks/"+trackID, "GET", options, false, new CompletionBlock<Object>() {
 			@Override
-			public void invoke(ReadableMap resultObj, SpotifyError error)
+			public void invoke(Object resultObj, SpotifyError error)
 			{
 				if(callback!=null)
 				{
@@ -1215,9 +1270,9 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		}
 		WritableMap body = Convert.toWritableMap(options);
 		body.putString("ids", Convert.joinedIntoString(trackIDs, ","));
-		doAPIRequest("v1/tracks", "GET", body, false, new CompletionBlock<ReadableMap>() {
+		doAPIRequest("v1/tracks", "GET", body, false, new CompletionBlock<Object>() {
 			@Override
-			public void invoke(ReadableMap resultObj, SpotifyError error)
+			public void invoke(Object resultObj, SpotifyError error)
 			{
 				if(callback!=null)
 				{
@@ -1239,9 +1294,9 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			}
 			return;
 		}
-		doAPIRequest("v1/audio-analysis/"+trackID, "GET", options, false, new CompletionBlock<ReadableMap>() {
+		doAPIRequest("v1/audio-analysis/"+trackID, "GET", options, false, new CompletionBlock<Object>() {
 			@Override
-			public void invoke(ReadableMap resultObj, SpotifyError error)
+			public void invoke(Object resultObj, SpotifyError error)
 			{
 				if(callback!=null)
 				{
@@ -1263,9 +1318,9 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			}
 			return;
 		}
-		doAPIRequest("v1/audio-features/"+trackID, "GET", options, false, new CompletionBlock<ReadableMap>() {
+		doAPIRequest("v1/audio-features/"+trackID, "GET", options, false, new CompletionBlock<Object>() {
 			@Override
-			public void invoke(ReadableMap resultObj, SpotifyError error)
+			public void invoke(Object resultObj, SpotifyError error)
 			{
 				if(callback!=null)
 				{
@@ -1289,9 +1344,9 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		}
 		WritableMap body = Convert.toWritableMap(options);
 		body.putString("ids", Convert.joinedIntoString(trackIDs, ","));
-		doAPIRequest("v1/audio-features", "GET", body, false, new CompletionBlock<ReadableMap>() {
+		doAPIRequest("v1/audio-features", "GET", body, false, new CompletionBlock<Object>() {
 			@Override
-			public void invoke(ReadableMap resultObj, SpotifyError error)
+			public void invoke(Object resultObj, SpotifyError error)
 			{
 				if(callback!=null)
 				{

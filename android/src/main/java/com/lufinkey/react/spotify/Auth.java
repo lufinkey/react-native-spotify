@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 
+import com.android.volley.Network;
+import com.android.volley.NetworkResponse;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.WritableMap;
@@ -249,11 +251,16 @@ public class Auth
 			completion.invoke(null, new SpotifyError(SpotifyError.Code.MISSING_PARAMETERS, "cannot swap code for token without tokenSwapURL option"));
 			return;
 		}
+
 		WritableMap params = Arguments.createMap();
 		params.putString("code", code);
-		Utils.doHTTPRequest(tokenSwapURL, "POST", params, false, null, new CompletionBlock<String>() {
+
+		String url = tokenSwapURL;
+		url += "?"+Utils.makeQueryString(params);
+
+		Utils.doHTTPRequest(url, "POST", null, null, new CompletionBlock<NetworkResponse>() {
 			@Override
-			public void invoke(String response, SpotifyError error)
+			public void invoke(NetworkResponse response, SpotifyError error)
 			{
 				if(response==null)
 				{
@@ -261,10 +268,12 @@ public class Auth
 				}
 				else
 				{
+					String responseStr = Utils.getResponseString(response);
+
 					JSONObject responseObj;
 					try
 					{
-						responseObj = new JSONObject(response);
+						responseObj = new JSONObject(responseStr);
 					}
 					catch(JSONException e)
 					{
@@ -339,9 +348,13 @@ public class Auth
 		{
 			WritableMap params = Arguments.createMap();
 			params.putString("refresh_token", refreshToken);
-			Utils.doHTTPRequest(tokenRefreshURL, "POST", params, false, null, new CompletionBlock<String>() {
+
+			String url = tokenRefreshURL;
+			url += "?"+Utils.makeQueryString(params);
+
+			Utils.doHTTPRequest(url, "POST", null, null, new CompletionBlock<NetworkResponse>() {
 				@Override
-				public void invoke(String response, SpotifyError error)
+				public void invoke(NetworkResponse response, SpotifyError error)
 				{
 					if(response==null)
 					{
@@ -349,10 +362,12 @@ public class Auth
 					}
 					else
 					{
+						String responseStr = Utils.getResponseString(response);
+
 						JSONObject responseObj;
 						try
 						{
-							responseObj = new JSONObject(response);
+							responseObj = new JSONObject(responseStr);
 						}
 						catch(JSONException e)
 						{
