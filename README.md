@@ -350,6 +350,19 @@ import Spotify from 'react-native-spotify';
 
 
 
+* **getMe**( ( *result*?. *error*? ) => {} )
+
+	Retrieves information about the logged in Spotify user.
+	
+	* *Parameters*
+	
+		* **result** - The request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-current-users-profile/#example)
+		
+		* **error** - An error object if an error occurred, or *null* if no error occurred
+
+
+
+
 * **search**( *query*, *types*, *options*?, ( *result*?, *error*? ) => {} )
 
 	Sends a [search](https://developer.spotify.com/web-api/search-item/) request to spotify.
