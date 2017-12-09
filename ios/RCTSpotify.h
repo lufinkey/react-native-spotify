@@ -39,6 +39,8 @@ typedef enum
 -(void)initialize:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion;
 //isInitialized()
 -(id)isInitialized;
+//isInitializedAsync((initialized))
+-(void)isInitializedAsync:(RCTResponseSenderBlock)completion;
 
 //login((loggedIn, error?))
 -(void)login:(RCTResponseSenderBlock)completion;
@@ -46,6 +48,8 @@ typedef enum
 -(void)logout:(RCTResponseSenderBlock)completion;
 //isLoggedIn()
 -(id)isLoggedIn;
+//isLoggedInAsync((loggedIn))
+-(void)isLoggedInAsync:(RCTResponseSenderBlock)completion;
 //handleAuthURL(url)
 -(id)handleAuthURL:(NSString*)url;
 
@@ -57,10 +61,14 @@ typedef enum
 -(void)setVolume:(double)volume completion:(RCTResponseSenderBlock)completion;
 //getVolume()
 -(id)getVolume;
+//getVolumeAsync((volume))
+-(void)getVolumeAsync:(RCTResponseSenderBlock)completion;
 //setPlaying(playing, (error?))
 -(void)setPlaying:(BOOL)playing completion:(RCTResponseSenderBlock)completion;
 //getPlaybackState()
 -(id)getPlaybackState;
+//getPlaybackStateAsync((playbackState))
+-(void)getPlaybackStateAsync:(RCTResponseSenderBlock)completion;
 //skipToNext((error?))
 -(void)skipToNext:(RCTResponseSenderBlock)completion;
 //skipToPrevious((error?))

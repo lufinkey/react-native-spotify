@@ -177,6 +177,11 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(isInitialized)
 	return [NSNumber numberWithBool:initialized];
 }
 
+RCT_EXPORT_METHOD(isInitializedAsync:(RCTResponseSenderBlock)completion)
+{
+	completion(@[ [RCTSpotifyConvert ID:[self isInitialized]] ]);
+}
+
 
 
 #pragma mark - React Native functions - Session Handling
@@ -406,6 +411,11 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(isLoggedIn)
 	return @YES;
 }
 
+RCT_EXPORT_METHOD(isLoggedInAsync:(RCTResponseSenderBlock)completion)
+{
+	completion(@[ [RCTSpotifyConvert ID:[self isLoggedIn]] ]);
+}
+
 RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(handleAuthURL:(NSString*)urlString)
 {
 	NSURL* url = [NSURL URLWithString:urlString];
@@ -514,6 +524,11 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getVolume)
 	return @(_player.volume);
 }
 
+RCT_EXPORT_METHOD(getVolumeAsync:(RCTResponseSenderBlock)completion)
+{
+	completion(@[ [RCTSpotifyConvert ID:[self getVolume]] ]);
+}
+
 RCT_EXPORT_METHOD(setPlaying:(BOOL)playing completion:(RCTResponseSenderBlock)completion)
 {
 	[self prepareForPlayer:^(NSError* error) {
@@ -582,6 +597,11 @@ RCT_EXPORT_METHOD(setRepeating:(BOOL)repeating completion:(RCTResponseSenderBloc
 RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getPlaybackState)
 {
 	return [RCTSpotifyConvert SPTPlaybackState:_player.playbackState];
+}
+
+RCT_EXPORT_METHOD(getPlaybackStateAsync:(RCTResponseSenderBlock)completion)
+{
+	completion(@[ [RCTSpotifyConvert ID:[self getPlaybackState]] ]);
 }
 
 RCT_EXPORT_METHOD(skipToNext:(RCTResponseSenderBlock)completion)
