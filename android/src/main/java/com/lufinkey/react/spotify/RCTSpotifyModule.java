@@ -169,7 +169,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 				if(callback!=null)
 				{
 					callback.invoke(
-							loggedIn.booleanValue(),
+							loggedIn,
 							errorObj
 					);
 				}
@@ -179,7 +179,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	@ReactMethod(isBlockingSynchronousMethod = true)
 	//isInitialized()
-	boolean isInitialized()
+	Boolean isInitialized()
 	{
 		return initialized;
 	}
@@ -367,19 +367,13 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	//logout((error?))
 	public void logout(final Callback callback)
 	{
-		if(!isLoggedIn())
-		{
-			if(callback!=null)
-			{
-				callback.invoke(nullobj());
-			}
-			return;
-		}
-
 		//destroy the player
-		player.logout();
-		Spotify.destroyPlayer(player);
-		player = null;
+		if(player != null)
+		{
+			player.logout();
+			Spotify.destroyPlayer(player);
+			player = null;
+		}
 
 		//clear session
 		auth.clearSession();
@@ -392,7 +386,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	@ReactMethod(isBlockingSynchronousMethod = true)
 	//isLoggedIn()
-	public boolean isLoggedIn()
+	public Boolean isLoggedIn()
 	{
 		if(!initialized)
 		{
@@ -411,7 +405,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	@ReactMethod
 	//handleAuthURL(url)
-	public boolean handleAuthURL(String url)
+	public Boolean handleAuthURL(String url)
 	{
 		//TODO for some reason we don't use this on Android, despite having to give a redirectURL
 		return false;
@@ -441,7 +435,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	@ReactMethod
 	//playURI(spotifyURI, startIndex, startPosition, (error?))
-	void playURI(final String spotifyURI, final int startIndex, final double startPosition, final Callback callback)
+	public void playURI(final String spotifyURI, final int startIndex, final double startPosition, final Callback callback)
 	{
 		if(spotifyURI==null)
 		{
@@ -489,7 +483,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	@ReactMethod
 	//queueURI(spotifyURI, (error?))
-	void queueURI(final String spotifyURI, final Callback callback)
+	public void queueURI(final String spotifyURI, final Callback callback)
 	{
 		if(spotifyURI==null)
 		{
@@ -537,7 +531,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	@ReactMethod
 	//setVolume(volume, (error?))
-	void setVolume(double volume, final Callback callback)
+	public void setVolume(double volume, final Callback callback)
 	{
 		//TODO implement this with a custom AudioController
 		callback.invoke(new SpotifyError(SpotifyError.Code.NOT_IMPLEMENTED, "setVolume does not work on android"));
@@ -545,7 +539,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	@ReactMethod(isBlockingSynchronousMethod = true)
 	//getVolume()
-	double getVolume()
+	public Double getVolume()
 	{
 		//TODO implement this with a custom AudioController
 		return 1.0;
@@ -553,7 +547,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	@ReactMethod
 	//setPlaying(playing, (error?))
-	void setPlaying(final boolean playing, final Callback callback)
+	public void setPlaying(final boolean playing, final Callback callback)
 	{
 		prepareForPlayer(new CompletionBlock<Boolean>() {
 			@Override
@@ -627,7 +621,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	@ReactMethod(isBlockingSynchronousMethod = true)
 	//getPlaybackState()
-	WritableMap getPlaybackState()
+	public WritableMap getPlaybackState()
 	{
 		if(player==null)
 		{
@@ -638,7 +632,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	@ReactMethod
 	//skipToNext((error?))
-	void skipToNext(final Callback callback)
+	public void skipToNext(final Callback callback)
 	{
 		prepareForPlayer(new CompletionBlock<Boolean>() {
 			@Override
@@ -677,7 +671,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	@ReactMethod
 	//skipToPrevious((error?))
-	void skipToPrevious(final Callback callback)
+	public void skipToPrevious(final Callback callback)
 	{
 		prepareForPlayer(new CompletionBlock<Boolean>() {
 			@Override
@@ -716,7 +710,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	@ReactMethod
 	//seekToPosition(position, (error?))
-	void seekToPosition(final double position, final Callback callback)
+	public void seekToPosition(final double position, final Callback callback)
 	{
 		prepareForPlayer(new CompletionBlock<Boolean>() {
 			@Override
@@ -755,7 +749,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	@ReactMethod
 	//setShuffling(shuffling, (error?))
-	void setShuffling(final boolean shuffling, final Callback callback)
+	public void setShuffling(final boolean shuffling, final Callback callback)
 	{
 		prepareForPlayer(new CompletionBlock<Boolean>() {
 			@Override
@@ -794,7 +788,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	@ReactMethod
 	//setRepeating(repeating, (error?))
-	void setRepeating(final boolean repeating, final Callback callback)
+	public void setRepeating(final boolean repeating, final Callback callback)
 	{
 		prepareForPlayer(new CompletionBlock<Boolean>() {
 			@Override
@@ -962,7 +956,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	@ReactMethod
 	//sendRequest(endpoint, method, params, isJSONBody, (result?, error?))
-	void sendRequest(String endpoint, String method, ReadableMap params, boolean jsonBody, final Callback callback)
+	public void sendRequest(String endpoint, String method, ReadableMap params, boolean jsonBody, final Callback callback)
 	{
 		doAPIRequest(endpoint, method, params, jsonBody, new CompletionBlock<Object>() {
 			@Override
@@ -985,7 +979,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	@ReactMethod
 	//search(query, types, options?, (result?, error?))
-	void search(String query, ReadableArray types, ReadableMap options, final Callback callback)
+	public void search(String query, ReadableArray types, ReadableMap options, final Callback callback)
 	{
 		if(query==null)
 		{
@@ -1038,7 +1032,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	@ReactMethod
 	//getAlbum(albumID, options?, (result?, error?))
-	void getAlbum(String albumID, ReadableMap options, final Callback callback)
+	public void getAlbum(String albumID, ReadableMap options, final Callback callback)
 	{
 		if(albumID==null)
 		{
@@ -1062,7 +1056,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	@ReactMethod
 	//getAlbums(albumIDs, options?, (result?, error?))
-	void getAlbums(ReadableArray albumIDs, ReadableMap options, final Callback callback)
+	public void getAlbums(ReadableArray albumIDs, ReadableMap options, final Callback callback)
 	{
 		if(albumIDs==null)
 		{
@@ -1088,7 +1082,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	@ReactMethod
 	//getAlbumTracks(albumID, options?, (result?, error?))
-	void getAlbumTracks(String albumID, ReadableMap options, final Callback callback)
+	public void getAlbumTracks(String albumID, ReadableMap options, final Callback callback)
 	{
 		if(albumID==null)
 		{
@@ -1112,7 +1106,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	@ReactMethod
 	//getArtist(artistID, options?, (result?, error?))
-	void getArtist(String artistID, ReadableMap options, final Callback callback)
+	public void getArtist(String artistID, ReadableMap options, final Callback callback)
 	{
 		if(artistID==null)
 		{
@@ -1136,7 +1130,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	@ReactMethod
 	//getArtists(artistIDs, options?, (result?, error?))
-	void getArtists(ReadableArray artistIDs, ReadableMap options, final Callback callback)
+	public void getArtists(ReadableArray artistIDs, ReadableMap options, final Callback callback)
 	{
 		if(artistIDs==null)
 		{
@@ -1162,7 +1156,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	@ReactMethod
 	//getArtistAlbums(artistID, options?, (result?, error?))
-	void getArtistAlbums(String artistID, ReadableMap options, final Callback callback)
+	public void getArtistAlbums(String artistID, ReadableMap options, final Callback callback)
 	{
 		if(artistID==null)
 		{
@@ -1186,7 +1180,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	@ReactMethod
 	//getArtistTopTracks(artistID, country, options?, (result?, error?))
-	void getArtistTopTracks(String artistID, ReadableMap options, final Callback callback)
+	public void getArtistTopTracks(String artistID, ReadableMap options, final Callback callback)
 	{
 		if(artistID==null)
 		{
@@ -1210,7 +1204,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	@ReactMethod
 	//getArtistRelatedArtists(artistID, options?, (result?, error?))
-	void getArtistRelatedArtists(String artistID, ReadableMap options, final Callback callback)
+	public void getArtistRelatedArtists(String artistID, ReadableMap options, final Callback callback)
 	{
 		if(artistID==null)
 		{
@@ -1234,7 +1228,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	@ReactMethod
 	//getTrack(trackID, options?, (result?, error?))
-	void getTrack(String trackID, ReadableMap options, final Callback callback)
+	public void getTrack(String trackID, ReadableMap options, final Callback callback)
 	{
 		if(trackID==null)
 		{
@@ -1258,7 +1252,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	@ReactMethod
 	//getTracks(trackIDs, options?, (result?, error?))
-	void getTracks(ReadableArray trackIDs, ReadableMap options, final Callback callback)
+	public void getTracks(ReadableArray trackIDs, ReadableMap options, final Callback callback)
 	{
 		if(trackIDs==null)
 		{
@@ -1284,7 +1278,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	@ReactMethod
 	//getTrackAudioAnalysis(trackID, options?, (result?, error?))
-	void getTrackAudioAnalysis(String trackID, ReadableMap options, final Callback callback)
+	public void getTrackAudioAnalysis(String trackID, ReadableMap options, final Callback callback)
 	{
 		if(trackID==null)
 		{
@@ -1308,7 +1302,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	@ReactMethod
 	//getTrackAudioFeatures(trackID, options?, (result?, error?))
-	void getTrackAudioFeatures(String trackID, ReadableMap options, final Callback callback)
+	public void getTrackAudioFeatures(String trackID, ReadableMap options, final Callback callback)
 	{
 		if(trackID==null)
 		{
@@ -1332,7 +1326,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	@ReactMethod
 	//getTracks(trackIDs, options?, (result?, error?))
-	void getTracksAudioFeatures(ReadableArray trackIDs, ReadableMap options, final Callback callback)
+	public void getTracksAudioFeatures(ReadableArray trackIDs, ReadableMap options, final Callback callback)
 	{
 		if(trackIDs==null)
 		{
