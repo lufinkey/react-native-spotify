@@ -978,6 +978,24 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 
 	@ReactMethod
+	//getMe((result?, error?))
+	public void getMe(final Callback callback)
+	{
+		doAPIRequest("v1/me", "GET", null, false, new CompletionBlock<Object>() {
+			@Override
+			public void invoke(Object resultObj, SpotifyError error)
+			{
+				if(callback!=null)
+				{
+					callback.invoke(resultObj, Convert.fromRCTSpotifyError(error));
+				}
+			}
+		});
+	}
+
+
+
+	@ReactMethod
 	//search(query, types, options?, (result?, error?))
 	public void search(String query, ReadableArray types, ReadableMap options, final Callback callback)
 	{
