@@ -951,7 +951,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 							try
 							{
 								String errorDescription = resultObj.getString("error_description");
-								error = new SpotifyError(SpotifyError.SPOTIFY_AUTH_DOMAIN, response.statusCode, errorDescription);
+								error = new SpotifyError(SpotifyError.SPOTIFY_WEB_DOMAIN, response.statusCode, errorDescription);
 							}
 							catch(JSONException e1)
 							{
