@@ -649,26 +649,56 @@ RCT_EXPORT_METHOD(skipToPrevious:(RCTResponseSenderBlock)completion)
 	[[SPTRequest sharedHandler] performRequest:request callback:^(NSError* error, NSURLResponse* response, NSData* data) {
 		callbackAndReturnIfError(error, completion, nil, error);
 		
-		id jsonObj = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
-		callbackAndReturnIfError(error, completion, jsonObj, error);
-		
-		if([jsonObj isKindOfClass:[NSDictionary class]])
+		BOOL isJSON = NO;
+		NSError* httpError = nil;
+		if([response isKindOfClass:[NSHTTPURLResponse class]])
 		{
-			NSDictionary* errorObj = jsonObj[@"error"];
-			if(errorObj!=nil)
+			NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
+			NSString* contentType = httpResponse.allHeaderFields[@"Content-Type"];
+			if([contentType isEqualToString:@"application/json"])
 			{
-				completion(jsonObj, [NSError errorWithDomain:RCTSpotifyWebAPIDomain
-														code:[errorObj[@"status"] integerValue]
-													userInfo:@{NSLocalizedDescriptionKey:errorObj[@"message"]}]);
+				isJSON = YES;
 			}
-			else
+			if(httpResponse.statusCode < 200 || httpResponse.statusCode >= 300)
 			{
-				completion(jsonObj, nil);
+				httpError = [NSError errorWithDomain:RCTSpotifyWebAPIDomain code:httpResponse.statusCode userInfo:@{NSLocalizedDescriptionKey:[NSHTTPURLResponse localizedStringForStatusCode:httpResponse.statusCode]}];
 			}
+		}
+		
+		id resultObj = nil;
+		if(isJSON)
+		{
+			resultObj = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
+			callbackAndReturnIfError(error, completion, resultObj, error);
 		}
 		else
 		{
-			completion(jsonObj, nil);
+			resultObj = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+		}
+		
+		if(resultObj != nil && [resultObj isKindOfClass:[NSDictionary class]])
+		{
+			id errorObj = resultObj[@"error_description"];
+			if(errorObj!=nil && [errorObj isKindOfClass:[NSString class]])
+			{
+				completion(resultObj, [NSError errorWithDomain:RCTSpotifyWebAPIDomain
+														  code:httpError.code
+													  userInfo:@{NSLocalizedDescriptionKey:errorObj}]);
+				return;
+			}
+			errorObj = resultObj[@"error"];
+			if(errorObj!=nil && [errorObj isKindOfClass:[NSDictionary class]])
+			{
+				completion(resultObj, [NSError errorWithDomain:RCTSpotifyWebAPIDomain
+														code:[errorObj[@"status"] integerValue]
+													userInfo:@{NSLocalizedDescriptionKey:errorObj[@"message"]}]);
+				return;
+			}
+			completion(resultObj, httpError);
+		}
+		else
+		{
+			completion(resultObj, httpError);
 		}
 	}];
 }
