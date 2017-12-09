@@ -91,7 +91,7 @@ import Spotify from 'react-native-spotify';
 
 * **initialize**( *options*, ( *loggedIn*, *error*? ) => {} )
 
-	Initializes the Spotify module and resumes a logged in session if there is one
+	Initializes the Spotify module and resumes a logged in session if there is one.
 	
 	* *Parameters*
 		* **options** - an object with options to pass to the Spotify Module
@@ -111,6 +111,8 @@ import Spotify from 'react-native-spotify';
 
 * **isInitialized**()
 
+	Checks if the Spotify module has been initialized yet.
+
 	* *Returns*
 	
 		* *true* if the Spotify module has been initialized
@@ -119,9 +121,20 @@ import Spotify from 'react-native-spotify';
 
 
 
+* **isInitializedAsync**( ( *initialized* ) => {} )
+
+	Checks if the Spotify module has been initialized yet, but passes the result to a callback rather than returning it.
+	
+	* *Parameters*
+	
+		* **initialized** - A boolean indicating whether or not the Spotify module has been initialized
+
+
+
+
 * **login**( ( *loggedIn*, *error*? ) => {} )
 
-	Opens a UI to log into Spotify
+	Opens a UI to log into Spotify.
 	
 	* *Parameters*
 	
@@ -134,6 +147,8 @@ import Spotify from 'react-native-spotify';
 
 * **isLoggedIn**()
 
+	Checks if the client is logged in.
+
 	* *Returns*
 		
 		* *true* if the client is logged in
@@ -142,9 +157,20 @@ import Spotify from 'react-native-spotify';
 
 
 
+* **isLoggedInAsync**( ( *loggedIn* ) => {} )
+
+	Checks if the client is logged in, but passes the result to a callback rather than returning it.
+	
+	* *Parameters*
+	
+		* **loggedIn** - A boolean indicating whether or not the client is logged in
+
+
+
+
 * **logout**( ( *error*? ) => {} )
 
-	Logs out of Spotify
+	Logs out of Spotify.
 	
 	* *Parameters*
 	
@@ -229,13 +255,26 @@ import Spotify from 'react-native-spotify';
 	
 	* *Returns*
 	
-		An object with the current player state. The state properties are:
+		An object with the current player state, or null if the player has not been initialized.
+		
+		The state properties are:
 		
 		* **playing** - boolean indicating whether the player is playing
 		* **repeating** - boolean indicating whether the player is repeating
 		* **shuffling** - boolean indicating whether the player is shuffling
 		* **activeDevice** - boolean indicating whether the current device is the one playing
 		* **position** - the position of the player in the current track, in seconds
+
+
+
+
+* **getPlaybackStateAsync**( ( *playbackState*? ) => {} )
+
+	Gives the player's current state, but passes the result to a callback rather than returning it.
+	
+	* *Parameters*
+	
+		* **playbackState** - An object with the current player state, or null if the player has not been initialized. See getPlaybackState for the object's properties
 
 
 
