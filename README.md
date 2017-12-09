@@ -77,6 +77,8 @@ packagingOptions {
 ...
 ```
 
+If you have issues linking the module, please check that gradle is updated to the latest version and that your project is synced.
+
 
 
 ## Usage
