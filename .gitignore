@@ -48,3 +48,5 @@ buck-out/
 \.buckd/
 *.keystore
       
+# example app
+/example/package-lock.json
