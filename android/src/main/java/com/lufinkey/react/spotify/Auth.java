@@ -256,9 +256,9 @@ public class Auth
 		params.putString("code", code);
 
 		String url = tokenSwapURL;
-		url += "?"+Utils.makeQueryString(params);
+		String body = Utils.makeQueryString(params);
 
-		Utils.doHTTPRequest(url, "POST", null, null, new CompletionBlock<NetworkResponse>() {
+		Utils.doHTTPRequest(url, "POST", null, body.getBytes(), new CompletionBlock<NetworkResponse>() {
 			@Override
 			public void invoke(NetworkResponse response, SpotifyError error)
 			{
@@ -350,9 +350,9 @@ public class Auth
 			params.putString("refresh_token", refreshToken);
 
 			String url = tokenRefreshURL;
-			url += "?"+Utils.makeQueryString(params);
+			String body = Utils.makeQueryString(params);
 
-			Utils.doHTTPRequest(url, "POST", null, null, new CompletionBlock<NetworkResponse>() {
+			Utils.doHTTPRequest(url, "POST", null, body.getBytes(), new CompletionBlock<NetworkResponse>() {
 				@Override
 				public void invoke(NetworkResponse response, SpotifyError error)
 				{
