@@ -130,7 +130,7 @@ public class Auth
 		return false;
 	}
 
-	void showAuthActivity(final CompletionBlock<Boolean> completion)
+	public void showAuthActivity(final CompletionBlock<Boolean> completion)
 	{
 		//check for missing options
 		if(clientID == null)
@@ -242,6 +242,19 @@ public class Auth
 
 		Activity activity = reactContext.getCurrentActivity();
 		activity.startActivity(new Intent(activity, AuthActivity.class));
+	}
+
+	void destroyAuthActivity()
+	{
+		AuthActivity activity = AuthActivity.currentActivity;
+		if(activity != null)
+		{
+			activity.onFinishCompletion = null;
+			AuthActivity.currentActivity = null;
+			AuthActivity.request = null;
+			AuthActivity.completion = null;
+			activity.finish();
+		}
 	}
 
 	private void swapCodeForToken(String code, final CompletionBlock<String> completion)

@@ -31,7 +31,7 @@ public class AuthActivity extends Activity
 	{
 		super.onActivityResult(requestCode, resultCode, intent);
 
-		if(requestCode == REQUEST_CODE)
+		if(requestCode == REQUEST_CODE && completion != null)
 		{
 			AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
 			CompletionBlock<AuthenticationResponse> completionTmp = completion;

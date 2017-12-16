@@ -45,6 +45,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	public RCTSpotifyModule(ReactApplicationContext reactContext)
 	{
 		super(reactContext);
+
 		this.reactContext = reactContext;
 		Utils.reactContext = reactContext;
 
@@ -84,8 +85,6 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			return Connectivity.OFFLINE;
 		}
 	}
-
-
 
 	@ReactMethod
 	//test()
