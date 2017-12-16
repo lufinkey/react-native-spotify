@@ -422,6 +422,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	//handleAuthURL(url)
 	public Boolean handleAuthURL(String url)
 	{
+		System.out.println("Sent URL to handleAuthURL: "+url);
 		//TODO for some reason we don't use this on Android, despite having to give a redirectURL
 		return false;
 	}

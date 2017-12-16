@@ -139,12 +139,15 @@ public class HTTPRequest extends Request<NetworkResponse>
 	public String getBodyContentType()
 	{
 		String contentType = null;
-		for(String key : headers.keySet())
+		if(headers != null)
 		{
-			if(key.equalsIgnoreCase("Content-Type"))
+			for (String key : headers.keySet())
 			{
-				contentType = headers.get(key);
-				break;
+				if (key.equalsIgnoreCase("Content-Type"))
+				{
+					contentType = headers.get(key);
+					break;
+				}
 			}
 		}
 		if(contentType == null)
