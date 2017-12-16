@@ -39,6 +39,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	private Auth auth;
 	private SpotifyPlayer player;
 	private final ArrayList<CompletionBlock<Boolean>> playerLoginResponses;
+	private final ArrayList<CompletionBlock<Boolean>> playerLogoutResponses;
 
 	private ReadableMap options;
 
@@ -56,6 +57,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		auth = null;
 		player = null;
 		playerLoginResponses = new ArrayList<>();
+		playerLogoutResponses = new ArrayList<>();
 
 		options = null;
 	}
@@ -323,6 +325,52 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		}
 	}
 
+	private void destroyPlayer(final CompletionBlock<Boolean> completion)
+	{
+		if(player == null)
+		{
+			completion.invoke(true, null);
+			return;
+		}
+
+		boolean loggedOut = false;
+
+		synchronized(playerLogoutResponses)
+		{
+			if(!player.isLoggedIn())
+			{
+				loggedOut = true;
+			}
+			else
+			{
+				//wait for RCTSpotifyModule.onLoggedOut
+				playerLogoutResponses.add(new CompletionBlock<Boolean>() {
+					@Override
+					public void invoke(Boolean loggedOut, SpotifyError error)
+					{
+						if(player != null)
+						{
+							Spotify.destroyPlayer(player);
+							player = null;
+						}
+						completion.invoke(loggedOut, error);
+					}
+				});
+			}
+		}
+
+		if(loggedOut)
+		{
+			Spotify.destroyPlayer(player);
+			player = null;
+			completion.invoke(true, null);
+		}
+		else
+		{
+			player.logout();
+		}
+	}
+
 	@ReactMethod
 	//login((loggedIn, error?))
 	public void login(final Callback callback)
@@ -373,20 +421,29 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	public void logout(final Callback callback)
 	{
 		//destroy the player
-		if(player != null)
-		{
-			player.logout();
-			Spotify.destroyPlayer(player);
-			player = null;
-		}
+		destroyPlayer(new CompletionBlock<Boolean>() {
+			@Override
+			public void invoke(Boolean loggedOut, SpotifyError error)
+			{
+				/*if(error!=null)
+				{
+					callback.invoke(error);
+					return;
+				}*/
 
-		//clear session
-		auth.clearSession();
-
-		if(callback!=null)
-		{
-			callback.invoke(nullobj());
-		}
+				//clear session
+				auth.logout(new CompletionBlock<Void>() {
+					@Override
+					public void invoke(Void obj, SpotifyError error)
+					{
+						if(callback!=null)
+						{
+							callback.invoke(nullobj());
+						}
+					}
+				});
+			}
+		});
 	}
 
 	@ReactMethod(isBlockingSynchronousMethod = true)
@@ -1450,6 +1507,18 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		for(CompletionBlock<Boolean> response : loginResponses)
 		{
 			response.invoke(false, new SpotifyError(SpotifyError.Code.NOT_LOGGED_IN, "You have been logged out"));
+		}
+
+		//handle destroyPlayer callbacks
+		ArrayList<CompletionBlock<Boolean>> logoutResponses;
+		synchronized(playerLogoutResponses)
+		{
+			logoutResponses = new ArrayList<>(playerLogoutResponses);
+			playerLogoutResponses.clear();
+		}
+		for(CompletionBlock<Boolean> response : logoutResponses)
+		{
+			response.invoke(true, null);
 		}
 	}
 

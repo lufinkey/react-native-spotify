@@ -27,10 +27,15 @@ public class Utils
 
 	public static String makeQueryString(ReadableMap params)
 	{
-		String query = "";
 		HashMap<String, Object> map = params.toHashMap();
+		return makeQueryString(map);
+	}
+
+	public static String makeQueryString(HashMap<String,Object> params)
+	{
+		String query = "";
 		boolean firstArg = true;
-		for(String key : map.keySet())
+		for(String key : params.keySet())
 		{
 			if(firstArg)
 			{
@@ -40,7 +45,7 @@ public class Utils
 			{
 				query += "&";
 			}
-			String value = map.get(key).toString();
+			String value = params.get(key).toString();
 			try
 			{
 				query += URLEncoder.encode(key, "UTF-8")+"="+URLEncoder.encode(value, "UTF-8");

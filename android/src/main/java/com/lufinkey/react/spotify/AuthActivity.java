@@ -42,6 +42,13 @@ public class AuthActivity extends Activity
 	}
 
 	@Override
+	public void finish()
+	{
+		AuthenticationClient.stopLoginActivity(this, REQUEST_CODE);
+		super.finish();
+	}
+
+	@Override
 	protected void onDestroy()
 	{
 		super.onDestroy();

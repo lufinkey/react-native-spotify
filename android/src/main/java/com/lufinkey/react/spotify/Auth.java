@@ -11,6 +11,7 @@ import com.android.volley.NetworkResponse;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.WritableMap;
+import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
 
@@ -19,6 +20,7 @@ import org.json.JSONObject;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 
 public class Auth
 {
@@ -60,22 +62,38 @@ public class Auth
 		}
 	}
 
-	public void clearCookies(String url)
+	private static HashMap<String,String> getCookies(android.webkit.CookieManager cookieManager, String url)
 	{
-		android.webkit.CookieManager cookieManager = android.webkit.CookieManager.getInstance();
 		String bigcookie = cookieManager.getCookie(url);
 		if(bigcookie==null)
 		{
-			return;
+			return new HashMap<>();
 		}
-		String[] cookies = bigcookie.split(";");
-		for(int i=0; i<cookies.length; i++)
+		HashMap<String, String> cookies = new HashMap<String,String>();
+		String[] cookieParts = bigcookie.split(";");
+		for(int i=0; i<cookieParts.length; i++)
 		{
-			String[] cookieParts = cookies[i].split("=");
-			if(cookieParts.length == 2)
+			String[] cookie = cookieParts[i].split("=");
+			if(cookie.length == 2)
 			{
-				cookieManager.setCookie(url, cookieParts[0].trim()+"=");
+				cookies.put(cookie[0].trim(), cookie[1].trim());
 			}
+		}
+		return cookies;
+	}
+
+	public String getCookie(String url, String cookie)
+	{
+		return getCookies(android.webkit.CookieManager.getInstance(), url).get(cookie);
+	}
+
+	public void clearCookies(String url)
+	{
+		android.webkit.CookieManager cookieManager = android.webkit.CookieManager.getInstance();
+		HashMap<String, String> cookies = getCookies(cookieManager, url);
+		for(String key : cookies.keySet())
+		{
+			cookieManager.setCookie(url, key+"=");
 		}
 		if(Build.VERSION.SDK_INT >= 21)
 		{
@@ -96,13 +114,22 @@ public class Auth
 		return accessToken;
 	}
 
-	public void clearSession()
+	private void clearSession()
 	{
 		clearCookies("https://accounts.spotify.com");
 
 		accessToken = null;
 		refreshToken = null;
 		save();
+	}
+
+	public void logout(final CompletionBlock<Void> completion)
+	{
+		clearSession();
+		if(completion != null)
+		{
+			completion.invoke(null, null);
+		}
 	}
 
 	public boolean isSessionValid()
@@ -132,6 +159,8 @@ public class Auth
 
 	public void showAuthActivity(final CompletionBlock<Boolean> completion)
 	{
+		clearCookies("https://accounts.spotify.com");
+
 		//check for missing options
 		if(clientID == null)
 		{
@@ -163,9 +192,9 @@ public class Auth
 		}
 
 		//show auth activity
-		AuthActivity.request = new AuthenticationRequest.Builder(clientID, responseType, redirectURL)
-				.setScopes(requestedScopes)
-				.build();
+		AuthenticationRequest.Builder requestBuilder = new AuthenticationRequest.Builder(clientID, responseType, redirectURL);
+		requestBuilder.setScopes(requestedScopes);
+		AuthActivity.request = requestBuilder.build();
 		//wait for AuthActivity.onActivityResult
 		AuthActivity.completion = new CompletionBlock<AuthenticationResponse>() {
 			@Override
@@ -346,7 +375,7 @@ public class Auth
 		}
 	}
 
-	public void renewSession(final CompletionBlock<Boolean> completion)
+	private void renewSession(final CompletionBlock<Boolean> completion)
 	{
 		if(tokenRefreshURL==null)
 		{
@@ -354,7 +383,6 @@ public class Auth
 		}
 		else if(refreshToken==null)
 		{
-			clearSession();
 			completion.invoke(false, new SpotifyError(SpotifyError.Code.AUTHORIZATION_FAILED, "Can't refresh session without a refresh token"));
 		}
 		else
