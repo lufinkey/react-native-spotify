@@ -916,7 +916,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 				if(jsonBody)
 				{
-					headers.put("Content-Type", "application/json");
+					headers.put("Content-Type", "application/json; charset=utf-8");
 				}
 
 				Utils.doHTTPRequest(url, method, headers, body, new CompletionBlock<NetworkResponse>() {
@@ -932,6 +932,11 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 						JSONObject resultObj = null;
 						String contentType = response.headers.get("Content-Type");
+						if(contentType!=null)
+						{
+							contentType = contentType.split(";")[0].trim();
+						}
+						System.out.println("contentType: "+contentType);
 						if(contentType!=null && contentType.equalsIgnoreCase("application/json") && response.statusCode!=204)
 						{
 							try
