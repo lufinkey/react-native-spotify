@@ -1,10 +1,12 @@
 
 import React, { Component } from 'react';
 import {
+	Alert,
 	StyleSheet,
 	Text,
 	View
 } from 'react-native';
+import Spotify from 'react-native-spotify';
 
 export class PlayerScreen extends Component
 {
@@ -15,15 +17,44 @@ export class PlayerScreen extends Component
 	constructor()
 	{
 		super();
+
+		this.state = {
+			spotifyUserName:null
+		};
+	}
+
+	componentDidMount()
+	{
+		console.log("sending getMe request");
+		Spotify.getMe((result, error) => {
+			console.log("got getMe result");
+			if(error)
+			{
+				Alert.alert("Error Sending getMe request", error.message);
+			}
+			else
+			{
+				this.setState((state) => {
+					state.spotifyUserName = result.display_name;
+					return state;
+				});
+			}
+		});
 	}
 
 	render()
 	{
 		return (
 			<View style={styles.container}>
-				<Text style={styles.greeting}>
-					This is the player screen
-				</Text>
+				{ this.state.spotifyUserName!=null ? (
+					<Text style={styles.greeting}>
+						You are logged in as {this.state.spotifyUserName}
+					</Text>
+				) : (
+					<Text style={styles.greeting}>
+						Getting user info...
+					</Text>
+				)}
 			</View>
 		);
 	}
