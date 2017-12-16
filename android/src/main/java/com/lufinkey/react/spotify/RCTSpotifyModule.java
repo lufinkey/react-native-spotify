@@ -98,7 +98,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	//initialize(options, (loggedIn, error?))
 	public void initialize(ReadableMap options, final Callback callback)
 	{
-		System.out.println("initialize");
+		System.out.println("initializing Spotify module");
 		if(initialized)
 		{
 			System.out.println("already initialized. Finishing initialization");
@@ -226,8 +226,6 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	private void initializePlayerIfNeeded(final String accessToken, final CompletionBlock<Boolean> completion)
 	{
-		System.out.println("initializePlayer");
-
 		//make sure we have the player scope
 		if(!auth.hasPlayerScope())
 		{
