@@ -4,8 +4,10 @@ import {
 	Alert,
 	StyleSheet,
 	Text,
+	TouchableHighlight,
 	View
 } from 'react-native';
+import { NavigationActions } from 'react-navigation';
 import Spotify from 'react-native-spotify';
 
 export class PlayerScreen extends Component
@@ -18,9 +20,9 @@ export class PlayerScreen extends Component
 	{
 		super();
 
-		this.state = {
-			spotifyUserName:null
-		};
+		this.state = { spotifyUserName:null };
+
+		this.spotifyLogoutButtonWasPressed = this.spotifyLogoutButtonWasPressed.bind(this);
 	}
 
 	componentDidMount()
@@ -42,6 +44,31 @@ export class PlayerScreen extends Component
 		});
 	}
 
+	goToInitialScreen()
+	{
+		const navAction = NavigationActions.reset({
+			index: 0,
+			actions: [
+			  NavigationActions.navigate({ routeName: 'initial'})
+			]
+		});
+		this.props.navigation.dispatch(navAction);
+	}
+
+	spotifyLogoutButtonWasPressed()
+	{
+		Spotify.logout((error) => {
+			if(error)
+			{
+				Alert.alert("Error", error.message);
+			}
+			else
+			{
+				this.goToInitialScreen();
+			}
+		});
+	}
+
 	render()
 	{
 		return (
@@ -55,6 +82,9 @@ export class PlayerScreen extends Component
 						Getting user info...
 					</Text>
 				)}
+				<TouchableHighlight onPress={this.spotifyLogoutButtonWasPressed}>
+					<Text>Logout</Text>
+				</TouchableHighlight>
 			</View>
 		);
 	}
