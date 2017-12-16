@@ -21,9 +21,7 @@ export class InitialScreen extends Component
 	{
 		super();
 
-		this.initialMount = true;
-		this.state = {initialized: false};
-
+		this.state = {spotifyInitialized: false};
 		this.spotifyLoginButtonWasPressed = this.spotifyLoginButtonWasPressed.bind(this);
 	}
 
@@ -40,38 +38,45 @@ export class InitialScreen extends Component
 
 	componentDidMount()
 	{
-		if(this.initialMount)
+		if(!Spotify.isInitialized())
 		{
-			this.initialMount = false;
-			this.componentDidInitialMount();
+			//initialize spotify
+			var spotifyOptions = {
+				"clientID":"<INSERT-YOUR-CLIENT-ID-HERE>",
+				"sessionUserDefaultsKey":"SpotifySession",
+				"redirectURL":"examplespotifyapp://auth",
+				"scopes":["user-read-private", "playlist-read", "playlist-read-private", "streaming"],
+			};
+			Spotify.initialize(spotifyOptions, (loggedIn, error) => {
+				if(error != null)
+				{
+					Alert.alert("Error", error.message);
+				}
+				//update UI state
+				this.setState((state) => {
+					state.spotifyInitialized = true;
+					return state;
+				});
+				//handle initialization
+				if(loggedIn)
+				{
+					this.goToPlayer();
+				}
+			});
 		}
-	}
-
-	componentDidInitialMount()
-	{
-		//initialize spotify
-		var spotifyOptions = {
-			"clientID":"<INSERT-YOUR-CLIENT-ID-HERE>",
-			"sessionUserDefaultsKey":"SpotifySession",
-			"redirectURL":"examplespotifyapp://auth",
-			"scopes":["user-read-private", "playlist-read", "playlist-read-private", "streaming"],
-		};
-		Spotify.initialize(spotifyOptions, (loggedIn, error) => {
-			if(error != null)
-			{
-				Alert.alert("Error", error.message);
-			}
+		else
+		{
 			//update UI state
 			this.setState((state) => {
-				state.initialized = true;
+				state.spotifyInitialized = true;
 				return state;
 			});
-			//handle initialization
-			if(loggedIn)
+			//handle logged in
+			if(Spotify.isLoggedIn())
 			{
 				this.goToPlayer();
 			}
-		});
+		}
 	}
 
 	spotifyLoginButtonWasPressed()
@@ -90,7 +95,7 @@ export class InitialScreen extends Component
 
 	render()
 	{
-		if(!this.state.initialized)
+		if(!this.state.spotifyInitialized)
 		{
 			return (
 				<View style={styles.container}>
