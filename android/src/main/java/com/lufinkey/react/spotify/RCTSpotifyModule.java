@@ -425,23 +425,12 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			@Override
 			public void invoke(Boolean loggedOut, SpotifyError error)
 			{
-				/*if(error!=null)
-				{
-					callback.invoke(error);
-					return;
-				}*/
-
 				//clear session
-				auth.logout(new CompletionBlock<Void>() {
-					@Override
-					public void invoke(Void obj, SpotifyError error)
-					{
-						if(callback!=null)
-						{
-							callback.invoke(nullobj());
-						}
-					}
-				});
+				auth.clearSession();
+				if(callback!=null)
+				{
+					callback.invoke(nullobj());
+				}
 			}
 		});
 	}

@@ -114,22 +114,13 @@ public class Auth
 		return accessToken;
 	}
 
-	private void clearSession()
+	public void clearSession()
 	{
-		clearCookies("https://accounts.spotify.com");
+		//clearCookies("https://accounts.spotify.com");
 
 		accessToken = null;
 		refreshToken = null;
 		save();
-	}
-
-	public void logout(final CompletionBlock<Void> completion)
-	{
-		clearSession();
-		if(completion != null)
-		{
-			completion.invoke(null, null);
-		}
 	}
 
 	public boolean isSessionValid()
@@ -159,8 +150,6 @@ public class Auth
 
 	public void showAuthActivity(final CompletionBlock<Boolean> completion)
 	{
-		clearCookies("https://accounts.spotify.com");
-
 		//check for missing options
 		if(clientID == null)
 		{
@@ -194,6 +183,7 @@ public class Auth
 		//show auth activity
 		AuthenticationRequest.Builder requestBuilder = new AuthenticationRequest.Builder(clientID, responseType, redirectURL);
 		requestBuilder.setScopes(requestedScopes);
+		requestBuilder.setShowDialog(true);
 		AuthActivity.request = requestBuilder.build();
 		//wait for AuthActivity.onActivityResult
 		AuthActivity.completion = new CompletionBlock<AuthenticationResponse>() {
