@@ -461,7 +461,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		callback.invoke(isLoggedIn());
 	}
 
-	@ReactMethod
+	@ReactMethod(isBlockingSynchronousMethod = true)
 	//handleAuthURL(url)
 	public Boolean handleAuthURL(String url)
 	{
