@@ -999,7 +999,6 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 						{
 							contentType = contentType.split(";")[0].trim();
 						}
-						System.out.println("contentType: "+contentType);
 						if(contentType!=null && contentType.equalsIgnoreCase("application/json") && response.statusCode!=204)
 						{
 							try
