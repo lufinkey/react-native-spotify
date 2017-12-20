@@ -310,7 +310,7 @@ import Spotify from 'react-native-spotify';
 	
 	* *Returns*
 	
-		A *PlaybackState* object, or *null* if the player has not been initialized
+		* A *PlaybackState* object, or *null* if the player has not been initialized
 
 
 
@@ -331,7 +331,7 @@ import Spotify from 'react-native-spotify';
 	
 	* *Returns*
 	
-		A *PlaybackMetadata* object, or *null* if the player has not been initialized
+		* A *PlaybackMetadata* object, or *null* if the player has not been initialized
 
 
 
