@@ -87,6 +87,61 @@ If you have issues linking the module, please check that gradle is updated to th
 import Spotify from 'react-native-spotify';
 ```
 
+### Types
+
+* **PlaybackState**
+
+	Contains information about the current state of the player
+	
+	* *Properties*
+		* **playing** - boolean indicating whether the player is playing
+		* **repeating** - boolean indicating whether the player is repeating
+		* **shuffling** - boolean indicating whether the player is shuffling
+		* **activeDevice** - boolean indicating whether the current device is the one playing
+		* **position** - the position of the player in the current track, in seconds
+
+
+
+* **PlaybackTrack**
+
+	Contains information about a track in the playback queue
+	
+	* *Properties*
+		* **name** - The title of the track
+		* **uri** - The uri of the track
+		* **contextName** - The name of the playlist or album that the track is being played from
+		* **contextUri** - The  of the playlist or album that the track is being played from
+		* **artistName** - The name of the track's artist
+		* **artistUri** - The uri of the track's artist
+		* **albumName** - The name of the album that the track belongs to
+		* **albumUri** - The uri of the album that the track belongs to
+		* **albumCoverArtURL** - A URL for the album art image
+		* **indexInContext** - The track index in the playlist or album that the track is being played from
+
+
+
+* **PlaybackMetadata**
+
+	Contains information about the previous, current, and next tracks in the player
+	
+	* *Properties*
+		* **prevTrack** - A *PlaybackTrack* with information about the previous track
+		* **currentTrack** - A *PlaybackTrack* with information about the current track
+		* **nextTrack** - A *PlaybackTrack* with information about the next track
+
+
+
+* **Error**
+
+	Passed to callback functions to indicate something went wrong during the function call. Right now, there are some uniformity issues between iOS and Android on the errors that get returned, but for now, use the **message** attribute to display a message to the user.
+	
+	* *Properties*
+		* **domain** - A string indicating what part of the system the error belongs to
+		* **code** - An integer containing the actual error code of the error
+		* **message** - A string containing a user-readable description of the error
+
+
+
 ### Initialization/Authorization Methods
 
 * **initialize**( *options*, ( *loggedIn*, *error*? ) => {} )
@@ -207,7 +262,7 @@ import Spotify from 'react-native-spotify';
 
 
 
-### Player Methods
+### Playback Methods
 
 * **playURI**( *spotifyURI*, *startIndex*, *startPosition*, ( *error*? ) => {} )
 
@@ -255,15 +310,7 @@ import Spotify from 'react-native-spotify';
 	
 	* *Returns*
 	
-		An object with the current player state, or null if the player has not been initialized.
-		
-		The state properties are:
-		
-		* **playing** - boolean indicating whether the player is playing
-		* **repeating** - boolean indicating whether the player is repeating
-		* **shuffling** - boolean indicating whether the player is shuffling
-		* **activeDevice** - boolean indicating whether the current device is the one playing
-		* **position** - the position of the player in the current track, in seconds
+		A *PlaybackState* object, or *null* if the player has not been initialized
 
 
 
@@ -274,7 +321,27 @@ import Spotify from 'react-native-spotify';
 	
 	* *Parameters*
 	
-		* **playbackState** - An object with the current player state, or null if the player has not been initialized. See getPlaybackState for the object's properties
+		* **playbackState** - A *PlaybackState* object, or *null* if the player has not been initialized
+
+
+
+* **getPlaybackMetadata**()
+
+	Gives information about the previous, current, and next tracks in the player
+	
+	* *Returns*
+	
+		A *PlaybackMetadata* object, or *null* if the player has not been initialized
+
+
+
+* **getPlaybackMetadataAsync**( ( *playbackMetadata*? ) => {} )
+
+	Gives information about the previous, current, and next tracks in the player, but passes the result to a callback rather than returning it.
+	
+	* *Parameters*
+	
+		* **playbackMetadata** - A *PlaybackMetadata* object, or *null* if the player has not been initialized
 
 
 
@@ -601,16 +668,3 @@ import Spotify from 'react-native-spotify';
 		* **result** - The request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-several-audio-features/#example)
 		
 		* **error** - An error object if an error occurred, or *null* if no error occurred
-
-
-
-
-### Error Handling
-
-Error objects are passed to callback functions to indicate something went wrong during the function call. You can use these error objects to determine what to show to the user. Right now, there are some uniformity issues between iOS and Android on the errors that get returned, but for now, use the **message** attribute to display a message to the user. I, or someone else will eventually make constants for **domain** and **code**.
-
-#### The Error Object
-
-* **domain** - A string indicating what part of the system the error belongs to
-* **code** - An integer containing the actual error code of the error
-* **message** - A string containing a user-readable description of the error
