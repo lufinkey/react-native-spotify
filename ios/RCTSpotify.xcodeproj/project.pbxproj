@@ -9,6 +9,9 @@
 /* Begin PBXBuildFile section */
 		A00A83BE1FB5188A00394AF0 /* RCTSpotifyConvert.m in Sources */ = {isa = PBXBuildFile; fileRef = A00A83BC1FB5188A00394AF0 /* RCTSpotifyConvert.m */; };
 		A01F099F1FAED1DB002AA48C /* SpotifyWebViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A01F099E1FAED1DB002AA48C /* SpotifyWebViewController.m */; };
+		A071E33E1FEAF1620083FCFE /* RCTSpotify.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* RCTSpotify.m */; };
+		A071E33F1FEAF1620083FCFE /* RCTSpotifyConvert.m in Sources */ = {isa = PBXBuildFile; fileRef = A00A83BC1FB5188A00394AF0 /* RCTSpotifyConvert.m */; };
+		A071E3401FEAF1620083FCFE /* SpotifyWebViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A01F099E1FAED1DB002AA48C /* SpotifyWebViewController.m */; };
 		A0A4341D1FAE256D0073DAB9 /* SpotifyAudioPlayback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A0A4341B1FAE25690073DAB9 /* SpotifyAudioPlayback.framework */; };
 		A0A4341E1FAE256F0073DAB9 /* SpotifyAuthentication.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A0A4341C1FAE25690073DAB9 /* SpotifyAuthentication.framework */; };
 		A0A4341F1FAE25720073DAB9 /* SpotifyMetadata.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A0A4341A1FAE25690073DAB9 /* SpotifyMetadata.framework */; };
@@ -25,10 +28,20 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A071E32E1FEAF0210083FCFE /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/$(PRODUCT_NAME)";
+			dstSubfolderSpec = 16;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libRCTSpotify.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTSpotify.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		A071E3411FEAF19E0083FCFE /* libRCTSpotify-tvOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libRCTSpotify-tvOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A00A83BC1FB5188A00394AF0 /* RCTSpotifyConvert.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTSpotifyConvert.m; sourceTree = "<group>"; };
 		A00A83BD1FB5188A00394AF0 /* RCTSpotifyConvert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTSpotifyConvert.h; sourceTree = "<group>"; };
 		A01F099D1FAED1DB002AA48C /* SpotifyWebViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SpotifyWebViewController.h; sourceTree = "<group>"; };
@@ -52,6 +65,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A071E32D1FEAF0210083FCFE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -59,6 +79,7 @@
 			isa = PBXGroup;
 			children = (
 				134814201AA4EA6300B7C361 /* libRCTSpotify.a */,
+				A071E3411FEAF19E0083FCFE /* libRCTSpotify-tvOS.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -108,6 +129,23 @@
 			productReference = 134814201AA4EA6300B7C361 /* libRCTSpotify.a */;
 			productType = "com.apple.product-type.library.static";
 		};
+		A071E32F1FEAF0210083FCFE /* RCTSpotify-tvOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A071E3381FEAF0220083FCFE /* Build configuration list for PBXNativeTarget "RCTSpotify-tvOS" */;
+			buildPhases = (
+				A071E32C1FEAF0210083FCFE /* Sources */,
+				A071E32D1FEAF0210083FCFE /* Frameworks */,
+				A071E32E1FEAF0210083FCFE /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "RCTSpotify-tvOS";
+			productName = "RCTSpotify-tvOS";
+			productReference = A071E3411FEAF19E0083FCFE /* libRCTSpotify-tvOS.a */;
+			productType = "com.apple.product-type.library.static";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -119,6 +157,11 @@
 				TargetAttributes = {
 					58B511DA1A9E6C8500147676 = {
 						CreatedOnToolsVersion = 6.1.1;
+					};
+					A071E32F1FEAF0210083FCFE = {
+						CreatedOnToolsVersion = 9.1;
+						DevelopmentTeam = RL98QGQJCL;
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -135,6 +178,7 @@
 			projectRoot = "";
 			targets = (
 				58B511DA1A9E6C8500147676 /* RCTSpotify */,
+				A071E32F1FEAF0210083FCFE /* RCTSpotify-tvOS */,
 			);
 		};
 /* End PBXProject section */
@@ -147,6 +191,16 @@
 				A01F099F1FAED1DB002AA48C /* SpotifyWebViewController.m in Sources */,
 				A00A83BE1FB5188A00394AF0 /* RCTSpotifyConvert.m in Sources */,
 				B3E7B58A1CC2AC0600A0062D /* RCTSpotify.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A071E32C1FEAF0210083FCFE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A071E3401FEAF1620083FCFE /* SpotifyWebViewController.m in Sources */,
+				A071E33F1FEAF1620083FCFE /* RCTSpotifyConvert.m in Sources */,
+				A071E33E1FEAF1620083FCFE /* RCTSpotify.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -274,6 +328,61 @@
 			};
 			name = Release;
 		};
+		A071E3361FEAF0220083FCFE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = RL98QGQJCL;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = appletvos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 11.1;
+			};
+			name = Debug;
+		};
+		A071E3371FEAF0220083FCFE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = RL98QGQJCL;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = appletvos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 11.1;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -291,6 +400,15 @@
 			buildConfigurations = (
 				58B511F01A9E6C8500147676 /* Debug */,
 				58B511F11A9E6C8500147676 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A071E3381FEAF0220083FCFE /* Build configuration list for PBXNativeTarget "RCTSpotify-tvOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A071E3361FEAF0220083FCFE /* Debug */,
+				A071E3371FEAF0220083FCFE /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
