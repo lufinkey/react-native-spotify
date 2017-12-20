@@ -110,7 +110,7 @@ import Spotify from 'react-native-spotify';
 		* **name** - The title of the track
 		* **uri** - The uri of the track
 		* **contextName** - The name of the playlist or album that the track is being played from
-		* **contextUri** - The  of the playlist or album that the track is being played from
+		* **contextUri** - The uri of the playlist or album that the track is being played from
 		* **artistName** - The name of the track's artist
 		* **artistUri** - The uri of the track's artist
 		* **albumName** - The name of the album that the track belongs to
