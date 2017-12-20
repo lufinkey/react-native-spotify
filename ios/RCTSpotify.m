@@ -675,6 +675,10 @@ RCT_EXPORT_METHOD(skipToPrevious:(RCTResponseSenderBlock)completion)
 		{
 			NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
 			NSString* contentType = httpResponse.allHeaderFields[@"Content-Type"];
+			if(contentType!=nil)
+			{
+				contentType = [contentType componentsSeparatedByString:@";"][0];
+			}
 			if([contentType isEqualToString:@"application/json"])
 			{
 				isJSON = YES;
