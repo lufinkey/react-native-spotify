@@ -703,6 +703,24 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		callback.invoke(getPlaybackState());
 	}
 
+	@ReactMethod(isBlockingSynchronousMethod = true)
+	//getPlaybackMetadata()
+	public WritableMap getPlaybackMetadata()
+	{
+		if(player == null)
+		{
+			return null;
+		}
+		return Convert.fromPlaybackMetadata(player.getMetadata());
+	}
+
+	@ReactMethod
+	//getPlaybackMetadataAsync((playbackMetadata))
+	public void getPlaybackMetadataAsync(final Callback callback)
+	{
+		callback.invoke(getPlaybackMetadata());
+	}
+
 	@ReactMethod
 	//skipToNext((error?))
 	public void skipToNext(final Callback callback)

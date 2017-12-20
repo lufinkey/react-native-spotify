@@ -6,6 +6,7 @@ import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
+import com.spotify.sdk.android.player.Metadata;
 import com.spotify.sdk.android.player.PlaybackState;
 
 import org.json.JSONArray;
@@ -201,6 +202,40 @@ public class Convert
 		map.putBoolean("shuffling", playbackState.isShuffling);
 		map.putBoolean("activeDevice", playbackState.isActiveDevice);
 		map.putDouble("position", ((double)playbackState.positionMs)/1000.0);
+		return map;
+	}
+
+	public static WritableMap fromPlaybackTrack(Metadata.Track track, Metadata metadata)
+	{
+		if(track==null)
+		{
+			return null;
+		}
+		WritableMap map = Arguments.createMap();
+		map.putString("name", track.name);
+		map.putString("uri", track.uri);
+		map.putString("contextName", metadata.contextName);
+		map.putString("contextUri", metadata.contextUri);
+		map.putString("artistName", track.artistName);
+		map.putString("artistUri", track.artistUri);
+		map.putString("albumName", track.albumName);
+		map.putString("albumUri", track.albumUri);
+		map.putString("albumCoverArtURL", track.albumCoverWebUrl);
+		map.putDouble("duration", ((double)track.durationMs)/1000.0);
+		map.putInt("indexInContext", (int)track.indexInContext);
+		return map;
+	}
+
+	public static WritableMap fromPlaybackMetadata(Metadata metadata)
+	{
+		if(metadata==null)
+		{
+			return null;
+		}
+		WritableMap map = Arguments.createMap();
+		map.putMap("prevTrack", fromPlaybackTrack(metadata.prevTrack, metadata));
+		map.putMap("currentTrack", fromPlaybackTrack(metadata.currentTrack, metadata));
+		map.putMap("nextTrack", fromPlaybackTrack(metadata.nextTrack, metadata));
 		return map;
 	}
 }

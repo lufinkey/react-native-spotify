@@ -58,8 +58,8 @@
 	return @{
 		@"name":[[self class] ID:track.name],
 		@"uri":[[self class] ID:track.uri],
-		@"playbackSourceUri":[[self class] ID:track.playbackSourceUri],
-		@"playbackSourceName":[[self class] ID:track.playbackSourceName],
+		@"contextName":[[self class] ID:track.playbackSourceName],
+		@"contextUri":[[self class] ID:track.playbackSourceUri],
 		@"artistName":[[self class] ID:track.artistName],
 		@"artistUri":[[self class] ID:track.artistUri],
 		@"albumName":[[self class] ID:track.albumName],
