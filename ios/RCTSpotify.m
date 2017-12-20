@@ -604,6 +604,16 @@ RCT_EXPORT_METHOD(getPlaybackStateAsync:(RCTResponseSenderBlock)completion)
 	completion(@[ [RCTSpotifyConvert ID:[self getPlaybackState]] ]);
 }
 
+RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getPlaybackMetadata)
+{
+	return [RCTSpotifyConvert SPTPlaybackMetadata:_player.metadata];
+}
+
+RCT_EXPORT_METHOD(getPlaybackMetadataAsync:(RCTResponseSenderBlock)completion)
+{
+	completion(@[ [RCTSpotifyConvert ID:[self getPlaybackMetadata]] ]);
+}
+
 RCT_EXPORT_METHOD(skipToNext:(RCTResponseSenderBlock)completion)
 {
 	[self prepareForPlayer:^(NSError *error) {
