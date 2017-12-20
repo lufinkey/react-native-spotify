@@ -679,7 +679,7 @@ RCT_EXPORT_METHOD(skipToPrevious:(RCTResponseSenderBlock)completion)
 			{
 				contentType = [contentType componentsSeparatedByString:@";"][0];
 			}
-			if([contentType isEqualToString:@"application/json"])
+			if([contentType caseInsensitiveCompare:@"application/json"] == NSOrderedSame)
 			{
 				isJSON = YES;
 			}
