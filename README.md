@@ -417,7 +417,7 @@ import Spotify from 'react-native-spotify';
 
 
 
-* **getMe**( ( *result*?. *error*? ) => {} )
+* **getMe**( ( *result*?, *error*? ) => {} )
 
 	Retrieves information about the logged in Spotify user.
 	
