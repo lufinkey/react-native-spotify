@@ -69,6 +69,10 @@ typedef enum
 -(id)getPlaybackState;
 //getPlaybackStateAsync((playbackState))
 -(void)getPlaybackStateAsync:(RCTResponseSenderBlock)completion;
+//getPlaybackMetadata()
+-(id)getPlaybackMetadata;
+//getPlaybackMetadataAsync:((playbackMetadata))
+-(void)getPlaybackMetadataAsync:(RCTResponseSenderBlock)completion;
 //skipToNext((error?))
 -(void)skipToNext:(RCTResponseSenderBlock)completion;
 //skipToPrevious((error?))
