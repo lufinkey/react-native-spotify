@@ -6,6 +6,7 @@ A react native module for the Spotify SDK
 ## Install
 
 To add react-native-spotify to your project, cd into your project directory and run the following commands:
+
 ```bash
 npm install --save @lufinkey/react-native-spotify
 react-native link @lufinkey/react-native-spotify
@@ -53,7 +54,7 @@ allprojects {
 			url "$rootDir/../node_modules/react-native/android"
 		}
 		flatDir {
-			dirs project(':react-native-spotify').file('libs'), 'libs'
+			dirs project(':@lufinkey/react-native-spotify').file('libs'), 'libs'
 		}
 	}
 }
