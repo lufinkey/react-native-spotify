@@ -1,6 +1,5 @@
-
 {
-  "name": "react-native-spotify",
+  "name": "@lufinkey/react-native-spotify",
   "repository": {
     "type": "git",
     "url": "https://github.com/lufinkey/react-native-spotify.git"
