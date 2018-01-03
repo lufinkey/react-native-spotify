@@ -22,7 +22,7 @@ allprojects {
             url "$rootDir/../node_modules/react-native/android"
         }
         flatDir {
-            dirs project(':react-native-spotify').file('libs'), 'libs'
+            dirs project(':@lufinkey/react-native-spotify').file('libs'), 'libs'
         }
     }
 }

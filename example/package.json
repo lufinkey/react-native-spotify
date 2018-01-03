@@ -7,9 +7,9 @@
     "test": "jest"
   },
   "dependencies": {
+    "@lufinkey/react-native-spotify": "^1.0.1",
     "react": "^16.2.0",
     "react-native": "^0.50.4",
-    "react-native-spotify": "git+https://github.com/lufinkey/react-native-spotify.git",
     "react-navigation": "^1.0.0-beta.21"
   },
   "devDependencies": {
