@@ -34,7 +34,7 @@ project.xcworkspace
 
 # Android/IntelliJ
 #
-/android/gradle/
+android/gradle/
 gradlew
 gradlew.bat
 build/
