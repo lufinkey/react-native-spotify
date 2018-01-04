@@ -41,7 +41,7 @@ In order for your redirect URL to be recognized, you have to add your URL scheme
 
 #### Android
 
-Edit `android/build.grandle` and add `flatDir`
+Edit `android/build.gradle` and add `flatDir`
 
 ```gradle
 ...
@@ -54,16 +54,25 @@ allprojects {
 			url "$rootDir/../node_modules/react-native/android"
 		}
 		flatDir {
-			dirs project(':@lufinkey/react-native-spotify').file('libs'), 'libs'
+			dirs project(':@lufinkey_react-native-spotify').file('libs'), 'libs'
 		}
 	}
 }
 ...
 ```
 
-Edit `android/app/build.grandle` and add `packagingOptions`
+Edit `android/settings.gradle` and make sure that the project linkage looks correct. (ensure it says @lufinkey_ and not @lufinkey/. This is a bug with the `react-native link` command):
 
+```gradle
+...
+include ':@lufinkey_react-native-spotify'
+project(':@lufinkey_react-native-spotify').projectDir = new File(rootProject.projectDir, '../node_modules/@lufinkey/react-native-spotify/android')
+...
 ```
+
+Edit `android/app/build.gradle` and add `packagingOptions`
+
+```gradle
 ...
 buildTypes {
     release {
@@ -75,6 +84,15 @@ packagingOptions {
     pickFirst 'lib/armeabi-v7a/libgnustl_shared.so'
     pickFirst 'lib/x86/libgnustl_shared.so'
 }
+...
+```
+
+Also edit `android/app/build.gradle` and ensure that the project linkage looks correct. (ensure it says @lufinkey_ and not @lufinkey/. This is a bug with the `react-native link` command):
+
+```gradle
+...
+dependencies {
+    compile project(':@lufinkey_react-native-spotify')
 ...
 ```
 
