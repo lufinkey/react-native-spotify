@@ -1,5 +1,5 @@
 rootProject.name = 'ExampleSpotifyApp'
-include ':@lufinkey/react-native-spotify'
-project(':@lufinkey/react-native-spotify').projectDir = new File(rootProject.projectDir, '../node_modules/@lufinkey/react-native-spotify/android')
+include ':@lufinkey_react-native-spotify'
+project(':@lufinkey_react-native-spotify').projectDir = new File(rootProject.projectDir, '../node_modules/@lufinkey/react-native-spotify/android')
 
 include ':app'
