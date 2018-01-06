@@ -40,7 +40,7 @@ In order for your redirect URL to be recognized, you have to add your URL scheme
 
 #### Android
 
-Edit `android/build.grandle` and add `flatDir`
+Edit `android/build.gradle` and add `flatDir`
 
 ```gradle
 ...
@@ -60,7 +60,7 @@ allprojects {
 ...
 ```
 
-Edit `android/app/build.grandle` and add `packagingOptions`
+Edit `android/app/build.gradle` and add `packagingOptions`
 
 ```
 ...
