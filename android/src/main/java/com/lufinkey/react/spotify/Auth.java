@@ -115,6 +115,16 @@ public class Auth
 		return accessToken;
 	}
 
+	public String getRefreshToken()
+	{
+		return refreshToken;
+	}
+
+	public Date getExpireDate()
+	{
+		return expireDate;
+	}
+
 	public void clearSession()
 	{
 		//clearCookies("https://accounts.spotify.com");
