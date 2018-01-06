@@ -391,7 +391,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 				//initialize player
 				final ProgressDialog dialog = new ProgressDialog(getCurrentActivity());
 				dialog.setCancelable(false);
-				dialog.setMessage("initializing player");
+				dialog.setMessage("Initializing player");
 				dialog.show();
 				initializePlayerIfNeeded(auth.getAccessToken(), new CompletionBlock<Boolean>() {
 					@Override
