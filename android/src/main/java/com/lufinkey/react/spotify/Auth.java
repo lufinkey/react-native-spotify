@@ -1,6 +1,7 @@
 package com.lufinkey.react.spotify;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -192,34 +193,30 @@ public class Auth
 			{
 				if(error != null)
 				{
-					AuthActivity.currentActivity.onFinishCompletion = new CompletionBlock<Void>() {
+					destroyAuthActivity(new CompletionBlock<Void>() {
 						@Override
 						public void invoke(Void obj, SpotifyError unusedError)
 						{
 							completion.invoke(false, error);
 						}
-					};
-					AuthActivity.currentActivity.finish();
-					AuthActivity.currentActivity = null;
+					});
 					return;
 				}
 
 				switch(response.getType())
 				{
 					default:
-						AuthActivity.currentActivity.onFinishCompletion = new CompletionBlock<Void>() {
+						destroyAuthActivity(new CompletionBlock<Void>() {
 							@Override
 							public void invoke(Void obj, SpotifyError unusedError)
 							{
 								completion.invoke(false, null);
 							}
-						};
-						AuthActivity.currentActivity.finish();
-						AuthActivity.currentActivity = null;
+						});
 						break;
 
 					case ERROR:
-						AuthActivity.currentActivity.onFinishCompletion = new CompletionBlock<Void>() {
+						destroyAuthActivity(new CompletionBlock<Void>() {
 							@Override
 							public void invoke(Void obj, SpotifyError unusedError)
 							{
@@ -228,22 +225,31 @@ public class Auth
 										new SpotifyError(SpotifyError.Code.AUTHORIZATION_FAILED, response.getError())
 								);
 							}
-						};
-						AuthActivity.currentActivity.finish();
-						AuthActivity.currentActivity = null;
+						});
 						break;
 
 					case CODE:
+						final ProgressDialog dialog = new ProgressDialog(AuthActivity.currentActivity);
+						dialog.setMessage("Swapping auth code for token");
+						dialog.setCancelable(false);
+						dialog.show();
 						swapCodeForToken(response.getCode(), new CompletionBlock<String>() {
 							@Override
-							public void invoke(String accessToken, SpotifyError error)
+							public void invoke(String accessToken, final SpotifyError error)
 							{
-								if(error!=null)
-								{
-									completion.invoke(false, error);
-									return;
-								}
-								completion.invoke(true, null);
+								dialog.dismiss();
+								destroyAuthActivity(new CompletionBlock<Void>() {
+									@Override
+									public void invoke(Void obj, SpotifyError unusedError)
+									{
+										if(error!=null)
+										{
+											completion.invoke(false, error);
+											return;
+										}
+										completion.invoke(true, null);
+									}
+								});
 							}
 						});
 						break;
@@ -253,7 +259,13 @@ public class Auth
 						accessToken = response.getAccessToken();
 						expireDate = getExpireDate(response.getExpiresIn());
 						save();
-						completion.invoke(true, null);
+						destroyAuthActivity(new CompletionBlock<Void>() {
+							@Override
+							public void invoke(Void obj, SpotifyError unusedError)
+							{
+								completion.invoke(true, null);
+							}
+						});
 						break;
 				}
 			}
@@ -263,17 +275,29 @@ public class Auth
 		activity.startActivity(new Intent(activity, AuthActivity.class));
 	}
 
-	void destroyAuthActivity()
+	void destroyAuthActivity(final CompletionBlock<Void> completion)
 	{
 		AuthActivity activity = AuthActivity.currentActivity;
-		if(activity != null)
+		if(activity == null)
 		{
-			activity.onFinishCompletion = null;
-			AuthActivity.currentActivity = null;
-			AuthActivity.request = null;
-			AuthActivity.completion = null;
-			activity.finish();
+			completion.invoke(null, null);
+			return;
 		}
+		final CompletionBlock<Void> oldOnFinishCompletion = activity.onFinishCompletion;
+		activity.onFinishCompletion = new CompletionBlock<Void>() {
+			@Override
+			public void invoke(Void obj, SpotifyError unusedError)
+			{
+				if(oldOnFinishCompletion != null)
+				{
+					oldOnFinishCompletion.invoke(null, null);
+				}
+				AuthActivity.request = null;
+				AuthActivity.completion = null;
+				completion.invoke(null, null);
+			}
+		};
+		activity.finish();
 	}
 
 	private void swapCodeForToken(String code, final CompletionBlock<String> completion)
