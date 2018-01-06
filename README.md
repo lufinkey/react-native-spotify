@@ -20,7 +20,7 @@ Ensure you have enabled deep linking for react native in your Objective-C code. 
 
 In order for your redirect URL to be recognized, you have to add your URL scheme to your app's Info.plist file:
 
-```plist
+```
 ...
 <key>CFBundleURLTypes</key>
 <array>
@@ -42,7 +42,7 @@ In order for your redirect URL to be recognized, you have to add your URL scheme
 
 Edit `android/build.gradle` and add `flatDir`
 
-```gradle
+```
 ...
 allprojects {
 	repositories {
