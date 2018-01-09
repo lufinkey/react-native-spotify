@@ -5,7 +5,7 @@
     "type": "git",
     "url": "https://github.com/lufinkey/react-native-spotify.git"
   },
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "",
   "author": "lufinkey",
   "nativePackage":true,
