@@ -238,4 +238,17 @@ public class Convert
 		map.putMap("nextTrack", fromPlaybackTrack(metadata.nextTrack, metadata));
 		return map;
 	}
+
+	public static WritableMap fromAuth(Auth auth)
+	{
+		if(auth == null)
+		{
+			return null;
+		}
+		WritableMap map = Arguments.createMap();
+		map.putString("accessToken", auth.getAccessToken());
+		map.putString("refreshToken", auth.getRefreshToken());
+		map.putInt("expireTime", (int)auth.getExpireDate().getTime());
+		return map;
+	}
 }

@@ -1,5 +1,6 @@
 package com.lufinkey.react.spotify;
 
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -387,29 +388,20 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 					}
 					return;
 				}
-				//disable activity interaction
-				AuthActivity.currentActivity.getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
-						WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
 				//initialize player
+				final ProgressDialog dialog = new ProgressDialog(getCurrentActivity());
+				dialog.setCancelable(false);
+				dialog.setMessage("Initializing player");
+				dialog.show();
 				initializePlayerIfNeeded(auth.getAccessToken(), new CompletionBlock<Boolean>() {
 					@Override
 					public void invoke(final Boolean loggedIn, final SpotifyError error)
 					{
-						//re-enable activity interaction and dismiss
-						AuthActivity.currentActivity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-						AuthActivity.currentActivity.onFinishCompletion = new CompletionBlock<Void>() {
-							@Override
-							public void invoke(Void obj, SpotifyError unusedError)
-							{
-								//perform callback
-								if(callback!=null)
-								{
-									callback.invoke(loggedIn, Convert.fromRCTSpotifyError(error));
-								}
-							}
-						};
-						AuthActivity.currentActivity.finish();
-						AuthActivity.currentActivity = null;
+						dialog.dismiss();
+						if(callback!=null)
+						{
+							callback.invoke(loggedIn, Convert.fromRCTSpotifyError(error));
+						}
 					}
 				});
 			}
@@ -468,6 +460,27 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		System.out.println("Sent URL to handleAuthURL: "+url);
 		//TODO for some reason we don't use this on Android, despite having to give a redirectURL
 		return false;
+	}
+
+	@ReactMethod
+	//handleAuthURL(url, (handled))
+	public void handleAuthURLAsync(String url, final Callback callback)
+	{
+		callback.invoke(handleAuthURL(url));
+	}
+
+	@ReactMethod(isBlockingSynchronousMethod = true)
+	//getAuth()
+	public WritableMap getAuth()
+	{
+		return Convert.fromAuth(auth);
+	}
+
+	@ReactMethod
+	//getAuthAsync((auth))
+	public void getAuthAsync(final Callback callback)
+	{
+		callback.invoke(getAuth());
 	}
 
 

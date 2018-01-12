@@ -445,6 +445,11 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(handleAuthURL:(NSString*)urlString)
 	return @NO;
 }
 
+RCT_EXPORT_METHOD(handleAuthURLAsync:(NSString*)url completion:(RCTResponseSenderBlock)completion)
+{
+	return completion(@[ [self handleAuthURL:url] ]);
+}
+
 
 
 

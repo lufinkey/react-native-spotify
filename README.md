@@ -21,7 +21,7 @@ Ensure you have enabled deep linking for react native in your Objective-C code. 
 
 In order for your redirect URL to be recognized, you have to add your URL scheme to your app's Info.plist file:
 
-```plist
+```
 ...
 <key>CFBundleURLTypes</key>
 <array>
@@ -43,7 +43,7 @@ In order for your redirect URL to be recognized, you have to add your URL scheme
 
 Edit `android/build.gradle` and add `flatDir`
 
-```gradle
+```
 ...
 allprojects {
 	repositories {
@@ -108,11 +108,24 @@ import Spotify from '@lufinkey/react-native-spotify';
 
 ### Types
 
+* **Auth**
+
+	Contains information about authentication data
+	
+	* *Properties*
+	
+		* **accessToken** - A token used to communicate with the Spotify API
+		* **refreshToken** - An encrypted token used to get a new access token when it expires. This should be encrypted by your token swap service, as per OAuth standards.
+		* **expireTime** - The time that the access token expires, in milliseconds from January 1, 1970 00:00:00 UTC
+
+
+
 * **PlaybackState**
 
 	Contains information about the current state of the player
 	
 	* *Properties*
+	
 		* **playing** - boolean indicating whether the player is playing
 		* **repeating** - boolean indicating whether the player is repeating
 		* **shuffling** - boolean indicating whether the player is shuffling
@@ -121,11 +134,13 @@ import Spotify from '@lufinkey/react-native-spotify';
 
 
 
+
 * **PlaybackTrack**
 
 	Contains information about a track in the playback queue
 	
 	* *Properties*
+	
 		* **name** - The title of the track
 		* **uri** - The uri of the track
 		* **contextName** - The name of the playlist or album that the track is being played from
@@ -139,14 +154,17 @@ import Spotify from '@lufinkey/react-native-spotify';
 
 
 
+
 * **PlaybackMetadata**
 
 	Contains information about the previous, current, and next tracks in the player
 	
 	* *Properties*
+	
 		* **prevTrack** - A *PlaybackTrack* with information about the previous track
 		* **currentTrack** - A *PlaybackTrack* with information about the current track
 		* **nextTrack** - A *PlaybackTrack* with information about the next track
+
 
 
 
@@ -155,6 +173,7 @@ import Spotify from '@lufinkey/react-native-spotify';
 	Passed to callback functions to indicate something went wrong during the function call. Right now, there are some uniformity issues between iOS and Android on the errors that get returned, but for now, use the **message** attribute to display a message to the user.
 	
 	* *Properties*
+	
 		* **domain** - A string indicating what part of the system the error belongs to
 		* **code** - An integer containing the actual error code of the error
 		* **message** - A string containing a user-readable description of the error
@@ -277,6 +296,28 @@ import Spotify from '@lufinkey/react-native-spotify';
 		}
 		Linking.addEventListener('url', App.handleOpenURL);
 		```
+
+
+
+
+* **getAuth**()
+
+	Gives information about authentication data.
+	
+	* *Returns*
+	
+		* An *Auth* object
+
+
+
+
+* **getAuthAsync**( ( *auth* ) => {} )
+
+	Gives information about authentication data, but passes the result to a callback rather than returning it.
+	
+	* *Parameters*
+	
+		* **auth** - An *Auth* object
 
 
 

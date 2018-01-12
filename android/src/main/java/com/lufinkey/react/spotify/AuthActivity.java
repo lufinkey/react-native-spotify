@@ -54,6 +54,10 @@ public class AuthActivity extends Activity
 		super.onDestroy();
 		if(isFinishing())
 		{
+			if(currentActivity == this)
+			{
+				currentActivity = null;
+			}
 			if(onFinishCompletion!=null)
 			{
 				CompletionBlock<Void> completionTmp = onFinishCompletion;
