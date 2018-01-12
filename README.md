@@ -281,6 +281,18 @@ import Spotify from 'react-native-spotify';
 
 
 
+* **handleAuthURLAsync**( *url*, ( *handled* ) => {} )
+
+	Handles an authentication URL sent to the app through deep linking, but passes the result to a callback rather than returning it.
+	
+	* *Parameters*
+	
+		* **url** - A URL that was sent to the app
+		* **handled** - A boolean indicating if the URL was handled successfully as an authentication URL
+
+
+
+
 * **getAuth**()
 
 	Gives information about authentication data.
