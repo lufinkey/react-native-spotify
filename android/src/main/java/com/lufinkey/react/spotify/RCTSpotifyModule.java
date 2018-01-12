@@ -462,6 +462,13 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		return false;
 	}
 
+	@ReactMethod
+	//handleAuthURL(url, (handled))
+	public void handleAuthURLAsync(String url, final Callback callback)
+	{
+		callback.invoke(handleAuthURL(url));
+	}
+
 	@ReactMethod(isBlockingSynchronousMethod = true)
 	//getAuth()
 	public WritableMap getAuth()
