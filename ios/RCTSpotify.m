@@ -392,11 +392,13 @@ RCT_EXPORT_METHOD(isLoggedInAsync:(RCTResponseSenderBlock)completion)
 
 RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(handleAuthURL:(NSString*)urlString)
 {
+	// unused function
 	return @NO;
 }
 
 RCT_EXPORT_METHOD(handleAuthURLAsync:(NSString*)url completion:(RCTResponseSenderBlock)completion)
 {
+	// unused function
 	return completion(@[ [self handleAuthURL:url] ]);
 }
 

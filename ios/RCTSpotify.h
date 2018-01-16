@@ -50,10 +50,6 @@ typedef enum
 -(id)isLoggedIn;
 //isLoggedInAsync((loggedIn))
 -(void)isLoggedInAsync:(RCTResponseSenderBlock)completion;
-//handleAuthURL(url)
--(id)handleAuthURL:(NSString*)url;
-//handleAuthURLAsync(url, (handled))
--(void)handleAuthURLAsync:(NSString*)url completion:(RCTResponseSenderBlock)completion;
 
 //playURI(spotifyURI, startIndex, startPosition, (error?))
 -(void)playURI:(NSString*)uri startIndex:(NSUInteger)startIndex startPosition:(NSTimeInterval)startPosition completion:(RCTResponseSenderBlock)completion;
