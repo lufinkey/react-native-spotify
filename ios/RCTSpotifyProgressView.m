@@ -26,7 +26,7 @@
 		CGSize hudSize = CGSizeMake(100, 100);
 		
 		_hudView = [[UIView alloc] initWithFrame:CGRectMake(0,0,hudSize.width,hudSize.height)];
-		_hudView.backgroundColor = [UIColor colorWithWhite:0 alpha:0.4];
+		_hudView.backgroundColor = [UIColor colorWithWhite:0 alpha:0.6];
 		_hudView.layer.cornerRadius = 10;
 		
 		_activityIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
