@@ -10,8 +10,8 @@
 
 @interface RCTSpotifyProgressView : UIView
 
--(void)showInView:(UIView*)view animated:(BOOL)animated completion:(void(^)())completion;
--(void)dismissAnimated:(BOOL)animated completion:(void(^)())completion;
+-(void)showInView:(UIView*)view animated:(BOOL)animated completion:(void(^)(void))completion;
+-(void)dismissAnimated:(BOOL)animated completion:(void(^)(void))completion;
 
 @property (readonly) UIActivityIndicatorView* activityIndicator;
 

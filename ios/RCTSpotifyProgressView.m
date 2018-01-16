@@ -59,7 +59,7 @@
 	}
 }
 
--(void)showInView:(UIView*)view animated:(BOOL)animated completion:(void(^)())completion
+-(void)showInView:(UIView*)view animated:(BOOL)animated completion:(void(^)(void))completion
 {
 	CGSize viewSize = view.bounds.size;
 	self.frame = CGRectMake(0, 0, viewSize.width, viewSize.height);
@@ -90,7 +90,7 @@
 	}
 }
 
--(void)dismissAnimated:(BOOL)animated completion:(void(^)())completion
+-(void)dismissAnimated:(BOOL)animated completion:(void(^)(void))completion
 {
 	if(animated)
 	{
