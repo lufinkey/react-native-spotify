@@ -20,12 +20,3 @@ export default App = StackNavigator({
 },{
 	headerMode: 'screen',
 });
-
-App.handleOpenURL = (event) => {
-	if(Spotify.handleAuthURL(event.url))
-	{
-		return true;
-	}
-	return false;
-}
-Linking.addEventListener('url', App.handleOpenURL);
