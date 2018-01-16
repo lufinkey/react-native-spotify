@@ -555,8 +555,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	//handleAuthURL(url)
 	public Boolean handleAuthURL(String url)
 	{
-		System.out.println("Sent URL to handleAuthURL: "+url);
-		//TODO for some reason we don't use this on Android, despite having to give a redirectURL
+		// unused function
 		return false;
 	}
 
@@ -564,6 +563,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	//handleAuthURL(url, (handled))
 	public void handleAuthURLAsync(String url, final Callback callback)
 	{
+		// unused function
 		callback.invoke(handleAuthURL(url));
 	}
 
