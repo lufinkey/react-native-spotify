@@ -44,7 +44,7 @@
 		self.navigationBar.tintColor = [UIColor whiteColor];
 		self.navigationBar.titleTextAttributes = @{NSForegroundColorAttributeName : [UIColor whiteColor]};
 		self.view.backgroundColor = [UIColor whiteColor];
-		self.modalPresentationStyle = UIModalPresentationPageSheet;
+		self.modalPresentationStyle = UIModalPresentationFormSheet;
 		
 		_webController.webView.delegate = self;
 		//_webController.title = @"Log into Spotify";
