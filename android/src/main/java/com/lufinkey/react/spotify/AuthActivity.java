@@ -2,7 +2,9 @@ package com.lufinkey.react.spotify;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.view.Window;
 
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
@@ -12,17 +14,66 @@ public class AuthActivity extends Activity
 {
 	private static final int REQUEST_CODE = 6969;
 
-	static AuthActivity currentActivity;
-	static AuthenticationRequest request;
-	static CompletionBlock<AuthenticationResponse> completion;
+	private static Auth authFlow_auth;
+	private static AuthActivityListener authFlow_listener;
 
-	CompletionBlock<Void> onFinishCompletion;
+	private Auth auth;
+	private AuthActivityListener listener;
+	private CompletionBlock<Void> finishCompletion;
+
+	public static void performAuthFlow(Activity context, Auth auth, AuthActivityListener listener)
+	{
+		// check for missing options
+		if(auth.clientID == null)
+		{
+			SpotifyError error = new SpotifyError(SpotifyError.Code.MISSING_PARAMETERS, "missing option clientID");
+			listener.onAuthActivityFailure(null, error);
+			return;
+		}
+
+		// ensure no conflicting callbacks
+		if(authFlow_auth != null || authFlow_listener != null)
+		{
+			System.out.println("AuthActivity is already being shown");
+			SpotifyError error = new SpotifyError(SpotifyError.Code.CONFLICTING_CALLBACKS, "Cannot show another AuthActivity while one is already being shown");
+			listener.onAuthActivityFailure(null, error);
+			return;
+		}
+
+		// store temporary static variables
+		authFlow_auth = auth;
+		authFlow_listener = listener;
+
+		// start activity
+		context.startActivity(new Intent(context, AuthActivity.class));
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		currentActivity = this;
+		setFinishOnTouchOutside(false);
+
+		auth = authFlow_auth;
+		listener = authFlow_listener;
+
+		authFlow_auth = null;
+		authFlow_listener = null;
+
+		// decide response type
+		AuthenticationResponse.Type responseType = AuthenticationResponse.Type.TOKEN;
+		if(auth.tokenSwapURL!=null)
+		{
+			responseType = AuthenticationResponse.Type.CODE;
+		}
+
+		// create auth request
+		AuthenticationRequest.Builder requestBuilder = new AuthenticationRequest.Builder(auth.clientID, responseType, auth.redirectURL);
+		requestBuilder.setScopes(auth.requestedScopes);
+		requestBuilder.setShowDialog(true);
+		AuthenticationRequest request = requestBuilder.build();
+
+		// show auth activity
 		AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
 	}
 
@@ -31,14 +82,42 @@ public class AuthActivity extends Activity
 	{
 		super.onActivityResult(requestCode, resultCode, intent);
 
-		if(requestCode == REQUEST_CODE && completion != null)
+		if(requestCode == REQUEST_CODE)
 		{
 			AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
-			CompletionBlock<AuthenticationResponse> completionTmp = completion;
-			request = null;
-			completion = null;
-			completionTmp.invoke(response, null);
+
+			switch(response.getType())
+			{
+				default:
+					listener.onAuthActivityCancel(this);
+					break;
+
+				case ERROR:
+					if(response.getError().equals("access_denied"))
+					{
+						listener.onAuthActivityCancel(this);
+					}
+					else
+					{
+						listener.onAuthActivityFailure(this, new SpotifyError(SpotifyError.Code.AUTHORIZATION_FAILED, response.getError()));
+					}
+					break;
+
+				case CODE:
+					listener.onAuthActivityReceivedCode(this, response.getCode());
+					break;
+
+				case TOKEN:
+					listener.onAuthActivityReceivedToken(this, response.getAccessToken(), response.getExpiresIn());
+					break;
+			}
 		}
+	}
+
+	public void finish(CompletionBlock<Void> completion)
+	{
+		finishCompletion = completion;
+		this.finish();
 	}
 
 	@Override
@@ -54,14 +133,10 @@ public class AuthActivity extends Activity
 		super.onDestroy();
 		if(isFinishing())
 		{
-			if(currentActivity == this)
+			if(finishCompletion != null)
 			{
-				currentActivity = null;
-			}
-			if(onFinishCompletion!=null)
-			{
-				CompletionBlock<Void> completionTmp = onFinishCompletion;
-				onFinishCompletion = null;
+				CompletionBlock<Void> completionTmp = finishCompletion;
+				finishCompletion = null;
 				completionTmp.invoke(null, null);
 			}
 		}

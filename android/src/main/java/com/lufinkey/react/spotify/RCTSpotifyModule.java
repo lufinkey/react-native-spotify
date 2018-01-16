@@ -376,32 +376,130 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	//login((loggedIn, error?))
 	public void login(final Callback callback)
 	{
-		auth.showAuthActivity(new CompletionBlock<Boolean>() {
+		AuthActivity.performAuthFlow(reactContext.getCurrentActivity(), auth, new AuthActivityListener() {
 			@Override
-			public void invoke(Boolean loggedIn, SpotifyError error)
+			public void onAuthActivityCancel(AuthActivity activity)
 			{
-				if(!loggedIn || error!=null)
-				{
-					if(callback!=null)
+				// dismiss activity
+				activity.finish(new CompletionBlock<Void>() {
+					@Override
+					public void invoke(Void obj, SpotifyError unusedError)
 					{
-						callback.invoke(loggedIn, Convert.fromRCTSpotifyError(error));
+						if(callback != null)
+						{
+							callback.invoke(false, null);
+						}
+					}
+				});
+			}
+
+			@Override
+			public void onAuthActivityFailure(AuthActivity activity, final SpotifyError error)
+			{
+				// dismiss activity
+				if(activity == null)
+				{
+					if(callback != null)
+					{
+						callback.invoke(false, Convert.fromRCTSpotifyError(error));
 					}
 					return;
 				}
-				//initialize player
-				final ProgressDialog dialog = new ProgressDialog(getCurrentActivity());
+				activity.finish(new CompletionBlock<Void>() {
+					@Override
+					public void invoke(Void obj, SpotifyError unusedError)
+					{
+						if(callback != null)
+						{
+							callback.invoke(false, Convert.fromRCTSpotifyError(error));
+						}
+					}
+				});
+			}
+
+			@Override
+			public void onAuthActivityReceivedCode(final AuthActivity activity, String code)
+			{
+				final ProgressDialog dialog = new ProgressDialog(activity, android.R.style.Theme_Dialog);
+				dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+				dialog.setMessage("Loading...");
 				dialog.setCancelable(false);
-				dialog.setMessage("Initializing player");
+				dialog.setIndeterminate(true);
 				dialog.show();
+
+				// perform token swap
+				auth.swapCodeForToken(code, new CompletionBlock<String>() {
+					@Override
+					public void invoke(String accessToken, final SpotifyError error)
+					{
+						// dismiss activity if error
+						if(error != null)
+						{
+							dialog.dismiss();
+							// dismiss activity
+							activity.finish(new CompletionBlock<Void>() {
+								@Override
+								public void invoke(Void obj, SpotifyError unusedError)
+								{
+									if(callback != null)
+									{
+										callback.invoke(false, error);
+									}
+								}
+							});
+							return;
+						}
+
+						// initialize player
+						initializePlayerIfNeeded(auth.getAccessToken(), new CompletionBlock<Boolean>() {
+							@Override
+							public void invoke(final Boolean loggedIn, final SpotifyError error)
+							{
+								dialog.dismiss();
+								// dismiss activity
+								activity.finish(new CompletionBlock<Void>() {
+									@Override
+									public void invoke(Void obj, SpotifyError unusedError)
+									{
+										if(callback != null)
+										{
+											callback.invoke(loggedIn, Convert.fromRCTSpotifyError(error));
+										}
+									}
+								});
+							}
+						});
+					}
+				});
+			}
+
+			@Override
+			public void onAuthActivityReceivedToken(final AuthActivity activity, String accessToken, int expiresIn)
+			{
+				final ProgressDialog dialog = new ProgressDialog(activity, android.R.style.Theme_Black);
+				dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+				dialog.setMessage("Loading...");
+				dialog.setCancelable(false);
+				dialog.setIndeterminate(true);
+				dialog.show();
+
+				// apply access token
+				auth.applyAuthAccessToken(accessToken, expiresIn);
+
+				// initialize player
 				initializePlayerIfNeeded(auth.getAccessToken(), new CompletionBlock<Boolean>() {
 					@Override
 					public void invoke(final Boolean loggedIn, final SpotifyError error)
 					{
 						dialog.dismiss();
-						if(callback!=null)
-						{
-							callback.invoke(loggedIn, Convert.fromRCTSpotifyError(error));
-						}
+						// dismiss activity
+						activity.finish(new CompletionBlock<Void>() {
+							@Override
+							public void invoke(Void obj, SpotifyError unusedError)
+							{
+								callback.invoke(loggedIn, Convert.fromRCTSpotifyError(error));
+							}
+						});
 					}
 				});
 			}

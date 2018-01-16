@@ -6,7 +6,8 @@
 
 	<application>
 		<activity
-			android:name="com.lufinkey.react.spotify.AuthActivity">
+			android:name="com.lufinkey.react.spotify.AuthActivity"
+			android:theme="@style/Theme.AppCompat.Dialog">
 		</activity>
 	</application>
 
