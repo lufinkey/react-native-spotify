@@ -50,18 +50,5 @@
 			</dict>
 		</dict>
 	</dict>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Viewer</string>
-			<key>CFBundleURLName</key>
-			<string>com.lufinkey.examplespotifyapp-auth</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>examplespotifyapp</string>
-			</array>
-		</dict>
-	</array>
 </dict>
 </plist>
