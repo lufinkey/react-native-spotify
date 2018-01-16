@@ -1,0 +1,19 @@
+//
+//  RCTSpotifyProgressView.h
+//  RCTSpotify
+//
+//  Created by Luis Finke on 1/16/18.
+//  Copyright © 2018 Facebook. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface RCTSpotifyProgressView : UIView
+
+-(void)showInView:(UIView*)view animated:(BOOL)animated completion:(void(^)())completion;
+-(void)showAnimated:(BOOL)animated completion:(void(^)())completion;
+-(void)dismissAnimated:(BOOL)animated completion:(void(^)())completion;
+
+@property (readonly) UIActivityIndicatorView* activityIndicator;
+
+@end
