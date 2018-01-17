@@ -21,5 +21,8 @@
   },
   "peerDependencies": {
     "react-native": "^0.41.2"
+  },
+  "dependencies": {
+    "react-native-event-emitter": "git+https://github.com/lufinkey/react-native-event-emitter.git"
   }
 }
