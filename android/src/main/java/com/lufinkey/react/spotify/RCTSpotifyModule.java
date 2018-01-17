@@ -17,6 +17,8 @@ import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 
+import com.lufinkey.react.eventemitter.RNEventConformer;
+import com.lufinkey.react.eventemitter.RNEventEmitterModule;
 import com.spotify.sdk.android.player.*;
 import com.spotify.sdk.android.player.Error;
 
@@ -26,7 +28,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Player.NotificationCallback, ConnectionStateCallback
+public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Player.NotificationCallback, ConnectionStateCallback, RNEventConformer
 {
 	private final ReactApplicationContext reactContext;
 
@@ -1693,6 +1695,22 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	@Override
 	public void onPlaybackError(Error error)
+	{
+		//
+	}
+
+
+
+	//eventemitter.RNEventConformer
+
+	@Override
+	public void __registerAsJSEventEmitter(int moduleId)
+	{
+		RNEventEmitterModule.registerEventEmitterModule(reactContext, moduleId, this);
+	}
+
+	@Override
+	public void onModuleEvent(String eventName, Object... args)
 	{
 		//
 	}

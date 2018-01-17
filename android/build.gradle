@@ -39,5 +39,6 @@ dependencies {
 
 	compile(name: 'spotify-android-auth-1.0.0', ext: 'aar')
 	compile(name: 'spotify-player-24-noconnect-2.20b', ext: 'aar')
+	compile project(path: ':react-native-event-emitter')
 }
 
