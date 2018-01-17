@@ -91,10 +91,8 @@
 
 -(BOOL)webView:(UIWebView*)webView shouldStartLoadWithRequest:(NSURLRequest*)request navigationType:(UIWebViewNavigationType)navigationType
 {
-	NSLog(@"attempting to load URL: %@", request.URL);
 	if([_auth canHandleURL:request.URL])
 	{
-		NSLog(@"no");
 		[_progressView showInView:self.view animated:YES completion:nil];
 		[_auth handleAuthCallbackWithTriggeredAuthURL:request.URL callback:^(NSError* error, SPTSession* session){
 			if(session!=nil)
