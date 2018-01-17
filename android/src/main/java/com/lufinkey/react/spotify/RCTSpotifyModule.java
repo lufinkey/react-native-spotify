@@ -41,6 +41,8 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	private ReadableMap options;
 
+	private String loginLoadingText = "Loading...";
+
 	public RCTSpotifyModule(ReactApplicationContext reactContext)
 	{
 		super(reactContext);
@@ -118,6 +120,8 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			options = Arguments.createMap();
 		}
 		this.options = options;
+
+		// load auth options
 		auth = new Auth();
 		auth.reactContext = reactContext;
 		if(options.hasKey("clientID"))
@@ -155,6 +159,17 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			auth.tokenRefreshURL = options.getString("tokenRefreshURL");
 		}
 		auth.load();
+
+		// load android-specific options
+		ReadableMap androidOptions = Arguments.createMap();
+		if(options.hasKey("android"))
+		{
+			androidOptions = options.getMap("android");
+		}
+		if(androidOptions.hasKey("loginLoadingText"))
+		{
+			loginLoadingText = androidOptions.getString("loginLoadingText");
+		}
 
 		//try to log back in
 		logBackInIfNeeded(new CompletionBlock<Boolean>() {
@@ -420,7 +435,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 				final ProgressDialog dialog = new ProgressDialog(activity, android.R.style.Theme_Dialog);
 				dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 				dialog.getWindow().setGravity(Gravity.CENTER);
-				dialog.setMessage("Loading...");
+				dialog.setMessage(loginLoadingText);
 				dialog.setCancelable(false);
 				dialog.setIndeterminate(true);
 				dialog.show();
@@ -477,7 +492,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 				final ProgressDialog dialog = new ProgressDialog(activity, android.R.style.Theme_Black);
 				dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 				dialog.getWindow().setGravity(Gravity.CENTER);
-				dialog.setMessage("Loading...");
+				dialog.setMessage(loginLoadingText);
 				dialog.setCancelable(false);
 				dialog.setIndeterminate(true);
 				dialog.show();
