@@ -16,28 +16,6 @@ Next, do the manual setup for each platform:
 #### iOS
 Manually add the Frameworks from `node_modules/react-native-spotify/ios/external/SpotifySDK` to Embedded Binaries in your project settings. Then add `../node_modules/react-native-spotify/ios/external/SpotifySDK` to *Framework Search Paths* in your project settings.
 
-Ensure you have enabled deep linking for react native in your Objective-C code. You can follow the instructions for that [here](https://facebook.github.io/react-native/docs/linking.html)
-
-In order for your redirect URL to be recognized, you have to add your URL scheme to your app's Info.plist file:
-
-```
-...
-<key>CFBundleURLTypes</key>
-<array>
-	<dict>
-		<key>CFBundleTypeRole</key>
-		<string>Viewer</string>
-		<key>CFBundleURLName</key>
-		<string>com.example.examplespotifyapp-auth</string>
-		<key>CFBundleURLSchemes</key>
-		<array>
-			<string>examplespotifyapp</string>
-		</array>
-	</dict>
-</array>
-...
-```
-
 #### Android
 
 Edit `android/build.gradle` and add `flatDir`
@@ -249,46 +227,6 @@ import Spotify from 'react-native-spotify';
 	* *Parameters*
 	
 		* **error** - An error that occurred during logout, or *null* if no error occurred
-
-
-
-
-* **handleAuthURL**( *url* )
-
-	Handles an authentication URL sent to the app through deep linking. You are *required* to use this function in order for login to work correctly.
-	
-	* *Parameters*
-		
-		* **url** - A URL that was sent to the app
-		
-	* *Returns*
-		
-		* *true* if the url passed to it was successfully handled as an authentication URL
-		* *false* if the url was not an authentication URL
-
-	* *Example Implementation*
-		```javascript
-		App.handleOpenURL = (event) => {
-			if(Spotify.handleAuthURL(event.url))
-			{
-				return true;
-			}
-			return false;
-		}
-		Linking.addEventListener('url', App.handleOpenURL);
-		```
-
-
-
-
-* **handleAuthURLAsync**( *url*, ( *handled* ) => {} )
-
-	Handles an authentication URL sent to the app through deep linking, but passes the result to a callback rather than returning it.
-	
-	* *Parameters*
-	
-		* **url** - A URL that was sent to the app
-		* **handled** - A boolean indicating if the URL was handled successfully as an authentication URL
 
 
 
