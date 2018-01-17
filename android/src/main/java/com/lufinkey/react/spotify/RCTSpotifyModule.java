@@ -5,11 +5,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.telecom.Call;
-import android.view.WindowManager;
+import android.view.Gravity;
 
 import com.android.volley.NetworkResponse;
-import com.android.volley.toolbox.HttpHeaderParser;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -25,7 +23,6 @@ import com.spotify.sdk.android.player.Error;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -422,6 +419,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			{
 				final ProgressDialog dialog = new ProgressDialog(activity, android.R.style.Theme_Dialog);
 				dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+				dialog.getWindow().setGravity(Gravity.CENTER);
 				dialog.setMessage("Loading...");
 				dialog.setCancelable(false);
 				dialog.setIndeterminate(true);
@@ -478,6 +476,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			{
 				final ProgressDialog dialog = new ProgressDialog(activity, android.R.style.Theme_Black);
 				dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+				dialog.getWindow().setGravity(Gravity.CENTER);
 				dialog.setMessage("Loading...");
 				dialog.setCancelable(false);
 				dialog.setIndeterminate(true);
