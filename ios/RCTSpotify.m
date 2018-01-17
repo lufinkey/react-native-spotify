@@ -1,5 +1,6 @@
 
 #import "RCTSpotify.h"
+#import <AVFoundation/AVFoundation.h>
 #import <SpotifyAuthentication/SpotifyAuthentication.h>
 #import <SpotifyMetadata/SpotifyMetadata.h>
 #import <SpotifyAudioPlayback/SpotifyAudioPlayback.h>
@@ -26,6 +27,8 @@ NSString* const RCTSpotifyWebAPIDomain = @"com.spotify.web-api";
 	
 	NSMutableArray<void(^)(BOOL, NSError*)>* _loginPlayerResponses;
 	NSMutableArray<void(^)(NSError*)>* _logoutResponses;
+	
+	NSString* _audioSessionCategory;
 }
 +(NSError*)errorWithCode:(RCTSpotifyErrorCode)code description:(NSString*)description;
 +(NSError*)errorWithCode:(RCTSpotifyErrorCode)code description:(NSString*)description fields:(NSDictionary*)fields;
@@ -113,6 +116,37 @@ NSString* const RCTSpotifyWebAPIDomain = @"com.spotify.web-api";
 	return [scopes containsObject:@"streaming"];
 }
 
+-(void)activateAudioSession
+{
+	AVAudioSession* audioSession = [AVAudioSession sharedInstance];
+	NSError* error = nil;
+	if(![_audioSessionCategory isEqualToString:audioSession.category])
+	{
+		[audioSession setCategory:_audioSessionCategory error:&error];
+		if(error != nil)
+		{
+			NSLog(@"Error setting spotify audio session category: %@", error);
+		}
+	}
+	error = nil;
+	[audioSession setActive:YES error:&error];
+	if(error != nil)
+	{
+		NSLog(@"Error setting spotify audio session active: %@", error);
+	}
+}
+
+-(void)deactivateAudioSession
+{
+	AVAudioSession* audioSession = [AVAudioSession sharedInstance];
+	NSError* error = nil;
+	[audioSession setActive:NO error:&error];
+	if(error != nil)
+	{
+		NSLog(@"Error setting spotify audio session inactive: %@", error);
+	}
+}
+
 
 
 #pragma mark - React Native functions
@@ -156,6 +190,17 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSende
 	if(cacheSize!=nil)
 	{
 		_cacheSize = cacheSize;
+	}
+	
+	NSDictionary* iosOptions = options[@"ios"];
+	if(iosOptions == nil)
+	{
+		iosOptions = @{};
+	}
+	_audioSessionCategory = iosOptions[@"audioSessionCategory"];
+	if(_audioSessionCategory == nil)
+	{
+		_audioSessionCategory = AVAudioSessionCategoryPlayback;
 	}
 	
 	[self logBackInIfNeeded:^(BOOL loggedIn, NSError* error) {
@@ -986,6 +1031,22 @@ RCT_EXPORT_METHOD(getTracksAudioFeatures:(NSArray<NSString*>*)trackIDs options:(
 	for(void(^response)(NSError*) in logoutResponses)
 	{
 		response(nil);
+	}
+}
+
+
+
+#pragma mark - SPTAudioStreamingPlaybackDelegate
+
+-(void)audioStreaming:(SPTAudioStreamingController*)audioStreaming didChangePlaybackStatus:(BOOL)isPlaying
+{
+	if(isPlaying)
+	{
+		[self activateAudioSession];
+	}
+	else
+	{
+		[self deactivateAudioSession];
 	}
 }
 
