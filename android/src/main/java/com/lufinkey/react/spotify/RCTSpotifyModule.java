@@ -1704,13 +1704,26 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	//eventemitter.RNEventConformer
 
 	@Override
+	@ReactMethod
 	public void __registerAsJSEventEmitter(int moduleId)
 	{
 		RNEventEmitterModule.registerEventEmitterModule(reactContext, moduleId, this);
 	}
 
 	@Override
-	public void onModuleEvent(String eventName, Object... args)
+	public void onNativeEvent(String eventName, Object... args)
+	{
+		//
+	}
+
+	@Override
+	public void onJSEvent(String eventName, Object... args)
+	{
+		//
+	}
+
+	@Override
+	public void onEvent(String eventName, Object... args)
 	{
 		//
 	}
