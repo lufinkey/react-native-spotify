@@ -46,6 +46,13 @@ NSString* const RCTSpotifyWebAPIDomain = @"com.spotify.web-api";
 
 @implementation RCTSpotify
 
+@synthesize bridge = _bridge;
+
+RCT_EXPORT_METHOD(__registerAsJSEventEmitter:(int)moduleId)
+{
+	[RNEventEmitter registerEventEmitterModule:self withID:moduleId bridge:_bridge];
+}
+
 +(id)reactSafeArg:(id)arg
 {
 	if(arg==nil)

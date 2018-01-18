@@ -258,6 +258,16 @@
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					"$(SRCROOT)/../../../React/**",
 					"$(SRCROOT)/../../react-native/React/**",
+					"$(SRCROOT)/../../react-native-event-emitter/ios",
+					"$(SRCROOT)/../../../react-native-event-emitter/ios\nSpotify.on(\"loginHappened\",",
+					"(arg1,",
+					"arg2)",
+					"=>",
+					"{
+",
+					"console.log(\"CALLED THE EVENT\");\n",
+					"console.log(\"arg1: \"+arg1);\n",
+					"console.log(\"arg2: \"+arg2);\n});\n$(SRCROOT)/../../../react-native-event-emitter/ios",
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = "-ObjC";
@@ -278,6 +288,16 @@
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					"$(SRCROOT)/../../../React/**",
 					"$(SRCROOT)/../../react-native/React/**",
+					"$(SRCROOT)/../../react-native-event-emitter/ios",
+					"$(SRCROOT)/../../../react-native-event-emitter/ios\nSpotify.on(\"loginHappened\",",
+					"(arg1,",
+					"arg2)",
+					"=>",
+					"{
+",
+					"console.log(\"CALLED THE EVENT\");\n",
+					"console.log(\"arg1: \"+arg1);\n",
+					"console.log(\"arg2: \"+arg2);\n});\n$(SRCROOT)/../../../react-native-event-emitter/ios",
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = "-ObjC";

@@ -5,6 +5,12 @@
 #import <React/RCTBridgeModule.h>
 #endif
 
+#if __has_include("RNEventEmitter.h")
+#import "RNEventEmitter.h"
+#else
+#import <RNEventEmitter/RNEventEmitter.h>
+#endif
+
 extern NSString* const RCTSpotifyErrorDomain;
 extern NSString* const RCTSpotifyWebAPIDomain;
 
@@ -28,7 +34,7 @@ typedef enum
 
 
 
-@interface RCTSpotify : NSObject <RCTBridgeModule>
+@interface RCTSpotify : NSObject <RCTBridgeModule, RNEventConformer>
 
 +(NSError*)errorWithCode:(RCTSpotifyErrorCode)code description:(NSString*)description;
 
