@@ -151,7 +151,7 @@ import Spotify from 'react-native-spotify';
 			* **redirectURL** - The redirect URL to use when you've finished logging in. You NEED to set this URL for your application [here](https://developer.spotify.com/my-applications), otherwise the login screen will not close
 			* **sessionUserDefaultsKey** - The preference key to use to store session data for this module
 			* **scopes** - An array of scopes to use in the application. A list of scopes can be found [here](https://developer.spotify.com/web-api/using-scopes/)
-			* **tokenSwapURL** - The URL to use to swap an authentication code for an access token
+			* **tokenSwapURL** - The URL to use to swap an authentication code for an access token (see [Token swap and refresh](#token-swap-and-refresh) section for more info)
 			* **tokenRefreshURL** - The URL to use to get a new access token from a refresh token
   		
 		* **loggedIn** - A boolean indicating whether or not a session was automatically logged back in
@@ -659,3 +659,13 @@ import Spotify from 'react-native-spotify';
 		* **result** - The request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-several-audio-features/#example)
 		
 		* **error** - An error object if an error occurred, or *null* if no error occurred
+
+
+### Token swap and refresh
+
+Token swap URL is used to swap authentication code provided by Spotify API for access and refresh tokens.  
+Token refresh URL is used to get new access tokens for the user using existing refresh token.  
+Both URLs are queried using POST methods with parameters sent as `application/x-www-form-urlencoded`.  
+You can find the example server implementation in [`example-server`](./example-server) folder.
+
+Refresh tokens are part of [OAuth standard](https://tools.ietf.org/html/rfc6749#section-1.5). If you are not familiar with them, [Understanding Refresh Tokens](https://auth0.com/learn/refresh-tokens/) can give you a basic idea on how they work.  

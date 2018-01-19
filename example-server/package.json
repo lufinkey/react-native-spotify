@@ -1,0 +1,14 @@
+{
+  "name": "example-server",
+  "version": "1.0.0",
+  "description": "Example server that supports token swap and refresh",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2",
+    "node-fetch": "^1.7.3"
+  }
+}
