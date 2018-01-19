@@ -667,3 +667,5 @@ Token swap URL is used to swap authentication code provided by Spotify API for a
 Token refresh URL is used to get new access tokens for the user using existing refresh token.  
 Both URLs are queried using POST methods with parameters sent as `application/x-www-form-urlencoded`.  
 You can find the example server implementation in [`example-server`](./example-server) folder.
+
+Refresh tokens are part of [OAuth standard](https://tools.ietf.org/html/rfc6749#section-1.5). If you are not familiar with them, [Understanding Refresh Tokens](https://auth0.com/learn/refresh-tokens/) can give you a basic idea on how they work.  

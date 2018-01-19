@@ -3,6 +3,7 @@ const fetch = require('node-fetch');
 const express = require('express');
 const bodyParser = require('body-parser');
 const {URLSearchParams} = require('url');
+const crypto = require('crypto');
 
 // Require the framework and instantiate it
 const app = express();
@@ -14,6 +15,21 @@ const spClientCallback = process.env.SPOTIFY_CLIENT_CALLBACK;
 const authString = Buffer.from(`${spClientId}:${spClientSecret}`).toString('base64');
 const authorizationHeader = `Basic ${authString}`;
 const spotifyEndpoint = 'https://accounts.spotify.com/api/token';
+
+// encryption
+const encSecret = process.env.ENCRYPTION_SECRET;
+const encrypt = text => {
+  const aes = crypto.createCipher('aes-256-ctr', encSecret);
+  let encrypted = aes.update(text, 'utf8', 'hex');
+  encrypted += aes.final('hex');
+  return encrypted;
+};
+const decrypt = text => {
+  const aes = crypto.createDecipher('aes-256-ctr', encSecret);
+  let decrypted = aes.update(text, 'hex', 'utf8');
+  decrypted += aes.final('utf8');
+  return decrypted;
+};
 
 // support form body
 app.use(bodyParser.urlencoded({extended: true}));
@@ -28,6 +44,7 @@ app.post('/swap', async (req, res) => {
   data.append('redirect_uri', spClientCallback);
   data.append('code', req.body.code);
 
+  // get tokens from spotify api
   const result = await fetch(spotifyEndpoint, {
     method: 'POST',
     headers: {
@@ -37,6 +54,13 @@ app.post('/swap', async (req, res) => {
     body: data,
   });
   const replyBody = await result.json();
+
+  // encrypt refresh_token
+  if (replyBody.refresh_token) {
+    replyBody.refresh_token = encrypt(replyBody.refresh_token);
+  }
+
+  // send response
   res.send(replyBody);
 });
 
@@ -50,11 +74,13 @@ app.post('/refresh', async (req, res) => {
     return;
   }
 
-  const refreshToken = req.body.refresh_token;
+  // decrypt token
+  const refreshToken = decrypt(req.body.refresh_token);
+  // prepare data for request
   const data = new URLSearchParams();
   data.append('grant_type', 'refresh_token');
   data.append('refresh_token', refreshToken);
-
+  // get new token from Spotify API
   const result = await fetch(spotifyEndpoint, {
     method: 'POST',
     headers: {
@@ -65,6 +91,12 @@ app.post('/refresh', async (req, res) => {
   });
   const replyBody = await result.json();
 
+  // encrypt refresh_token
+  if (replyBody.refresh_token) {
+    replyBody.refresh_token = encrypt(replyBody.refresh_token);
+  }
+
+  // send response
   res.status(res.status).send(replyBody);
 });
 
