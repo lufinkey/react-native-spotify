@@ -1,9 +1,9 @@
 
 import { NativeModules } from 'react-native';
-import NativeEventEmitter from 'react-native-event-emitter';
+import NativeModuleEvents from 'react-native-events';
 
 const Spotify = NativeModules.Spotify;
 
-NativeEventEmitter.registerNativeModule(Spotify);
+NativeModuleEvents.registerNativeModule(Spotify);
 
 export default Spotify;
