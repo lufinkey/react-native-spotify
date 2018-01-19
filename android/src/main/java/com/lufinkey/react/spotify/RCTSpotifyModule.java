@@ -18,7 +18,7 @@ import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 
 import com.lufinkey.react.eventemitter.RNEventConformer;
-import com.lufinkey.react.eventemitter.RNEventEmitterModule;
+import com.lufinkey.react.eventemitter.RNEventEmitter;
 import com.spotify.sdk.android.player.*;
 import com.spotify.sdk.android.player.Error;
 
@@ -1707,7 +1707,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	@ReactMethod
 	public void __registerAsJSEventEmitter(int moduleId)
 	{
-		RNEventEmitterModule.registerEventEmitterModule(reactContext, moduleId, this);
+		RNEventEmitter.registerEventEmitterModule(reactContext, moduleId, this);
 	}
 
 	@Override
