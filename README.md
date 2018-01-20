@@ -143,7 +143,7 @@ import Spotify from 'react-native-spotify';
 
 * **initialize**( *options*, ( *loggedIn*, *error*? ) => {} )
 
-	Initializes the Spotify module and resumes a logged in session if there is one.
+	Initializes the Spotify module and resumes a logged in session if there is one. This must be the first method you call when using this module.
 	
 	* *Parameters*
 		* **options** - an object with options to pass to the Spotify Module
