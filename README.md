@@ -237,18 +237,18 @@ import Spotify from 'react-native-spotify';
 	
 	* *Returns*
 	
-		* An *Auth* object
+		* An *Auth* object, or *null* if not logged in
 
 
 
 
-* **getAuthAsync**( ( *auth* ) => {} )
+* **getAuthAsync**( ( *auth*? ) => {} )
 
 	Gives information about authentication data, but passes the result to a callback rather than returning it.
 	
 	* *Parameters*
 	
-		* **auth** - An *Auth* object
+		* **auth** - An *Auth* object, or *null* if not logged in
 
 
 
