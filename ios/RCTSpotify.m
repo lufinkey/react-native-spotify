@@ -435,6 +435,16 @@ RCT_EXPORT_METHOD(isLoggedInAsync:(RCTResponseSenderBlock)completion)
 	completion(@[ [RCTSpotifyConvert ID:[self isLoggedIn]] ]);
 }
 
+RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getAuth)
+{
+	return [RCTSpotifyConvert SPTAuth:_auth];
+}
+
+RCT_EXPORT_METHOD(getAuthAsync:(RCTResponseSenderBlock)completion)
+{
+	completion(@[ [RCTSpotifyConvert ID:[self getAuth]] ]);
+}
+
 RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(handleAuthURL:(NSString*)urlString)
 {
 	// unused function

@@ -11,5 +11,6 @@
 +(id)SPTPlaybackState:(SPTPlaybackState*)state;
 +(id)SPTPlaybackTrack:(SPTPlaybackTrack*)track;
 +(id)SPTPlaybackMetadata:(SPTPlaybackMetadata*)metadata;
++(id)SPTAuth:(SPTAuth*)auth;
 
 @end
