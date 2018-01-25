@@ -669,3 +669,12 @@ Both URLs are queried using POST methods with parameters sent as `application/x-
 You can find the example server implementation in [`example-server`](./example-server) folder.
 
 Refresh tokens are part of [OAuth standard](https://tools.ietf.org/html/rfc6749#section-1.5). If you are not familiar with them, [Understanding Refresh Tokens](https://auth0.com/learn/refresh-tokens/) can give you a basic idea on how they work.  
+
+
+
+## Contributing / Opening Issues
+
+If you would like to make a pull request, fork from and merge into the *dev* branch only.
+
+Please do not open issues about getting the module to work unless you have tried using both the example app and the example token swap server.
+
