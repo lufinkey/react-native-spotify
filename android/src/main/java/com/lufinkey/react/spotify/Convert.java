@@ -245,6 +245,10 @@ public class Convert
 		{
 			return null;
 		}
+		else if(auth.getAccessToken() == null)
+		{
+			return null;
+		}
 		WritableMap map = Arguments.createMap();
 		map.putString("accessToken", auth.getAccessToken());
 		map.putString("refreshToken", auth.getRefreshToken());
