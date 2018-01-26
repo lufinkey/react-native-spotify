@@ -904,7 +904,7 @@ RCT_EXPORT_METHOD(getArtistTopTracks:(NSString*)artistID country:(NSString*)coun
 	body[@"country"] = country;
 	
 	NSString* endpoint = NSString_concat(@"v1/artists/", artistID, @"/top-tracks");
-	[self doAPIRequest:endpoint method:@"GET" params:options jsonBody:NO completion:^(id resultObj, NSError* error) {
+	[self doAPIRequest:endpoint method:@"GET" params:body jsonBody:NO completion:^(id resultObj, NSError* error) {
 		if(completion)
 		{
 			completion(@[ [RCTSpotifyConvert ID:resultObj], [RCTSpotifyConvert NSError:error] ]);
