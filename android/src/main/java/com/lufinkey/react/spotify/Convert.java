@@ -245,7 +245,7 @@ public class Convert
 		{
 			return null;
 		}
-		else if(auth.getAccessToken() == null)
+		else if(auth.getAccessToken() == null && auth.getRefreshToken() == null)
 		{
 			return null;
 		}
