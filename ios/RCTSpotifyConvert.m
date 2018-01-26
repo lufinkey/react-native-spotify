@@ -95,9 +95,9 @@
 		return [NSNull null];
 	}
 	return @{
-		@"accessToken": session.accessToken,
-		@"refreshToken": session.encryptedRefreshToken,
-		@"expireTime": [NSNumber numberWithLongLong:((long long)session.expirationDate.timeIntervalSince1970*1000)]
+		@"accessToken": [RCTSpotifyConvert ID:session.accessToken],
+		@"refreshToken": [RCTSpotifyConvert ID:session.encryptedRefreshToken],
+		@"expireTime": session.expirationDate ? [NSNumber numberWithLongLong:((long long)session.expirationDate.timeIntervalSince1970*1000)] : [NSNull null]
 	};
 }
 
