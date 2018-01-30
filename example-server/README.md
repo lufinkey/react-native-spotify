@@ -10,7 +10,7 @@ An example server capable of swapping and refreshing tokens provided by Spotify 
 * `SPOTIFY_CLIENT_ID` - your spotify app id
 * `SPOTIFY_CLIENT_SECRET` - your spotify app secret
 * `SPOTIFY_CLIENT_CALLBACK` - your spotify app redirect URL
-* `ENCRYPTION_SECRET` - secret used to encrypt/decrypt tokens
+* `ENCRYPTION_SECRET` - any arbitrary string to use to encrypt/decrypt refresh tokens
 
 3. Run server using: `npm start`
 4. In your react-natvie app set `tokenSwapURL` to `http://your.server.com/swap` and `tokenRefreshURL` to `http://your.server.com/refresh`
