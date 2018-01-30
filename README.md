@@ -663,12 +663,17 @@ import Spotify from 'react-native-spotify';
 
 ### Token swap and refresh
 
-Token swap URL is used to swap authentication code provided by Spotify API for access and refresh tokens.  
-Token refresh URL is used to get new access tokens for the user using existing refresh token.  
-Both URLs are queried using POST methods with parameters sent as `application/x-www-form-urlencoded`.  
-You can find the example server implementation in [`example-server`](./example-server) folder.
+In order for your app to stay logged into Spotify for more than an hour, you must set up your own server with endpoints for token swap and refresh, and specify your `tokenSwapURL` and `tokenRefreshURL` parameters in the `Spotify.initialize` method
 
-Refresh tokens are part of [OAuth standard](https://tools.ietf.org/html/rfc6749#section-1.5). If you are not familiar with them, [Understanding Refresh Tokens](https://auth0.com/learn/refresh-tokens/) can give you a basic idea on how they work.  
+The `tokenSwapURL` parameter is used to swap the authentication code provided by the Spotify login process for an access token and a refresh token.
+
+The `tokenRefreshURL` parameter is used to retrieve new access tokens for the user using the refresh token received from the `tokenSwapURL`.
+
+Both URLs are queried using POST with a Content-Type of `application/x-www-form-urlencoded`.
+
+You can find an example server implementation [here](https://github.com/lufinkey/react-native-spotify/tree/master/example-server).
+
+Refresh tokens are part of [OAuth standard](https://tools.ietf.org/html/rfc6749#section-1.5). If you are not familiar with them, [Understanding Refresh Tokens](https://auth0.com/learn/refresh-tokens/) can give you a basic idea on how they work.
 
 
 
