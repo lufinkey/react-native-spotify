@@ -9,7 +9,7 @@ An example server capable of swapping and refreshing tokens provided by Spotify 
 
 * `SPOTIFY_CLIENT_ID` - your spotify app id
 * `SPOTIFY_CLIENT_SECRET` - your spotify app secret
-* `SPOTIFY_CLIENT_CALLBACK` - your spotify app callback
+* `SPOTIFY_CLIENT_CALLBACK` - your spotify app redirect URL
 * `ENCRYPTION_SECRET` - secret used to encrypt/decrypt tokens
 
 3. Run server using: `npm start`
