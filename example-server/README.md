@@ -13,4 +13,4 @@ An example server capable of swapping and refreshing tokens provided by Spotify 
 * `ENCRYPTION_SECRET` - any arbitrary string to use to encrypt/decrypt refresh tokens
 
 3. Run server using: `npm start`
-4. In your react-natvie app set `tokenSwapURL` to `http://your.server.com/swap` and `tokenRefreshURL` to `http://your.server.com/refresh`
+4. In your react-native app set `tokenSwapURL` to `http://your.server.com/swap` and `tokenRefreshURL` to `http://your.server.com/refresh`
