@@ -19,6 +19,7 @@ NSString* const RCTSpotifyWebAPIDomain = @"com.spotify.web-api";
 @interface RCTSpotify() <SPTAudioStreamingDelegate, SPTAudioStreamingPlaybackDelegate>
 {
 	BOOL _initialized;
+	BOOL _loggingIn;
 	SPTAuth* _auth;
 	SPTAudioStreamingController* _player;
 	
@@ -53,6 +54,7 @@ NSString* const RCTSpotifyWebAPIDomain = @"com.spotify.web-api";
 	if(self = [super init])
 	{
 		_initialized = NO;
+		_loggingIn = NO;
 		
 		_auth = nil;
 		_player = nil;
@@ -202,7 +204,7 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSende
 	{
 		if(completion)
 		{
-			completion(@[ [self isLoggedIn], [RCTSpotify errorWithCode:RCTSpotifyAlreadyInitialized description:@"Spotify has already been initialized"] ]);
+			completion(@[ [self isLoggedIn], [RCTSpotifyConvert NSError:[RCTSpotify errorWithCode:RCTSpotifyAlreadyInitialized description:@"Spotify has already been initialized"]] ]);
 		}
 		return;
 	}
@@ -377,7 +379,17 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTResponseSenderBlock)completion)
 
 RCT_EXPORT_METHOD(login:(RCTResponseSenderBlock)completion)
 {
-	//do UI logic on main thread
+	// ensure we're not already logging in
+	if(_loggingIn)
+	{
+		if(completion != nil)
+		{
+			completion(@[ @NO, [RCTSpotifyConvert NSError:[RCTSpotify errorWithCode:RCTSpotifyErrorCodeConflictingCallbacks description:@"Cannot call login multiple times before completing"]] ]);
+		}
+		return;
+	}
+	_loggingIn = YES;
+	// do UI logic on main thread
 	dispatch_async(dispatch_get_main_queue(), ^{
 		RCTSpotifyAuthController* authController = [[RCTSpotifyAuthController alloc] initWithAuth:_auth];
 		
@@ -388,6 +400,7 @@ RCT_EXPORT_METHOD(login:(RCTResponseSenderBlock)completion)
 			if(!authenticated)
 			{
 				[authController.presentingViewController dismissViewControllerAnimated:YES completion:^{
+					_loggingIn = NO;
 					if(completion != nil)
 					{
 						completion(@[ @NO, [NSNull null] ]);
@@ -399,6 +412,7 @@ RCT_EXPORT_METHOD(login:(RCTResponseSenderBlock)completion)
 			[self initializePlayerIfNeeded:^(BOOL loggedIn, NSError* error) {
 				dispatch_async(dispatch_get_main_queue(), ^{
 					[authController.presentingViewController dismissViewControllerAnimated:YES completion:^{
+						_loggingIn = NO;
 						if(loggedIn)
 						{
 							[self sendEvent:@"login" args:@[]];
