@@ -1136,12 +1136,12 @@ RCT_EXPORT_METHOD(getTracksAudioFeatures:(NSArray<NSString*>*)trackIDs options:(
 			
 		case SPPlaybackNotifyShuffleOn:
 		case SPPlaybackNotifyShuffleOff:
-			[self sendEvent:@"shuffleStatusChange" args:@[[self createPlaybackEvent]]];
+			// ignore in favor of delegate event
 			break;
 			
 		case SPPlaybackNotifyRepeatOn:
 		case SPPlaybackNotifyRepeatOff:
-			[self sendEvent:@"repeatStatusChange" args:@[[self createPlaybackEvent]]];
+			// ignore in favor of delegate event
 			break;
 			
 		case SPPlaybackNotifyBecameActive:
@@ -1185,6 +1185,16 @@ RCT_EXPORT_METHOD(getTracksAudioFeatures:(NSArray<NSString*>*)trackIDs options:(
 	{
 		[self deactivateAudioSession];
 	}
+}
+
+-(void)audioStreaming:(SPTAudioStreamingController *)audioStreaming didChangeShuffleStatus:(BOOL)enabled
+{
+	[self sendEvent:@"shuffleStatusChange" args:@[[self createPlaybackEvent]]];
+}
+
+-(void)audioStreaming:(SPTAudioStreamingController*)audioStreaming didChangeRepeatStatus:(SPTRepeatMode)repeateMode
+{
+	[self sendEvent:@"repeatStatusChange" args:@[[self createPlaybackEvent]]];
 }
 
 @end
