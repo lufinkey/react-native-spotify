@@ -1685,7 +1685,17 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 					@Override
 					public void invoke(Boolean renewed, SpotifyError error)
 					{
-						if(!renewed)
+						if(renewed)
+						{
+							loginPlayer(auth.getAccessToken(), new CompletionBlock<Boolean>() {
+								@Override
+								public void invoke(Boolean loggedIn, SpotifyError error)
+								{
+									// do nothing
+								}
+							});
+						}
+						else
 						{
 							// clear session
 							auth.clearSession();
