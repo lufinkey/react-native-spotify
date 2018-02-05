@@ -1774,11 +1774,11 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 				break;
 
 			case kSpPlaybackNotifyBecameActive:
-				this.sendEvent("becomeActive", createPlaybackEvent());
+				this.sendEvent("active", createPlaybackEvent());
 				break;
 
 			case kSpPlaybackNotifyBecameInactive:
-				this.sendEvent("becomeInactive", createPlaybackEvent());
+				this.sendEvent("inactive", createPlaybackEvent());
 				break;
 
 			case kSpPlaybackNotifyLostPermission:
