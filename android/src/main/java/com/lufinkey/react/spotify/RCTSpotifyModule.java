@@ -3,6 +3,7 @@ package com.lufinkey.react.spotify;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.view.Gravity;
@@ -75,10 +76,10 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		return null;
 	}
 
-	private Connectivity getNetworkConnectivity(Context context)
+	private Connectivity getNetworkConnectivity()
 	{
 		ConnectivityManager connectivityManager;
-		connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+		connectivityManager = (ConnectivityManager)this.reactContext.getBaseContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
 		if (activeNetwork != null && activeNetwork.isConnected())
 		{
@@ -107,6 +108,8 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	public void initialize(ReadableMap options, final Callback callback)
 	{
 		System.out.println("initializing Spotify module");
+
+		// ensure module is not already initialized
 		if(initialized)
 		{
 			System.out.println("already initialized. Finishing initialization");
@@ -122,6 +125,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			return;
 		}
 
+		// ensure options is not null
 		if(options==null)
 		{
 			options = Arguments.createMap();
@@ -178,7 +182,20 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			loginLoadingText = androidOptions.getString("loginLoadingText");
 		}
 
-		//try to log back in
+		// add connectivity state listener
+		networkStateReceiver = new BroadcastReceiver() {
+			@Override
+			public void onReceive(Context context, Intent intent) {
+				if (player != null)
+				{
+					// update the player with the connection state, because Android makes no sense
+					Connectivity connectivity = getNetworkConnectivity();
+					player.setConnectivityStatus(null, connectivity);
+				}
+			}
+		};
+
+		// try to log back in
 		logBackInIfNeeded(new CompletionBlock<Boolean>() {
 			@Override
 			public void invoke(Boolean loggedIn, SpotifyError error) {
@@ -296,7 +313,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 				player = newPlayer;
 
 				//setup player
-				player.setConnectivityStatus(connectivityStatusCallback, getNetworkConnectivity(reactContext.getCurrentActivity()));
+				player.setConnectivityStatus(null, getNetworkConnectivity());
 				player.addNotificationCallback(RCTSpotifyModule.this);
 				player.addConnectionStateCallback(RCTSpotifyModule.this);
 
@@ -1605,23 +1622,6 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			}
 		});
 	}
-
-
-
-	private final Player.OperationCallback connectivityStatusCallback = new Player.OperationCallback() {
-		@Override
-		public void onSuccess()
-		{
-			//TODO handle success
-		}
-
-		@Override
-		public void onError(com.spotify.sdk.android.player.Error error)
-		{
-			//TODO handle error
-			System.out.println("Spotify Connectivity Error: "+error.toString());
-		}
-	};
 
 
 
