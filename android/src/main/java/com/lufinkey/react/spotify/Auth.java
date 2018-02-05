@@ -258,7 +258,6 @@ public class Auth
 
 	public void renewSession(final CompletionBlock<Boolean> completion, boolean waitForResponse)
 	{
-		System.out.println("renewSession");
 		if(tokenRefreshURL==null)
 		{
 			completion.invoke(false, new SpotifyError(SpotifyError.Code.MISSING_PARAMETERS, "Cannot renew session without tokenRefreshURL option"));
