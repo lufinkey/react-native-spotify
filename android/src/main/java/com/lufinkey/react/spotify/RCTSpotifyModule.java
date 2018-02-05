@@ -539,7 +539,11 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 							@Override
 							public void invoke(Void obj, SpotifyError unusedError)
 							{
-								callback.invoke(loggedIn, Convert.fromRCTSpotifyError(error));
+								sendEvent("login");
+								if(callback != null)
+								{
+									callback.invoke(loggedIn, Convert.fromRCTSpotifyError(error));
+								}
 							}
 						});
 					}
