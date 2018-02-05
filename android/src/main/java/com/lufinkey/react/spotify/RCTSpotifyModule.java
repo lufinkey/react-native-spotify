@@ -1661,6 +1661,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			response.invoke(false, new SpotifyError(SpotifyError.Code.NOT_LOGGED_IN, "You have been logged out"));
 		}
 
+		// send event
 		sendEvent("logout");
 
 		//handle destroyPlayer callbacks
@@ -1695,29 +1696,110 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	@Override
 	public void onTemporaryError()
 	{
-		//TODO handle temporary connection error
+		sendEvent("temporaryConnectionError");
 	}
 
 	@Override
-	public void onConnectionMessage(String s)
+	public void onConnectionMessage(String message)
 	{
-		//
+		sendEvent("connectionMessage", message);
 	}
 
 
 
 	//Player.NotificationCallback
 
+	private WritableMap createPlaybackEvent()
+	{
+		WritableMap metadata = getPlaybackMetadata();
+		WritableMap state = getPlaybackState();
+
+		WritableMap event = Arguments.createMap();
+		if(state != null)
+		{
+			event.putMap("state", state);
+		}
+		else
+		{
+			event.putNull("state");
+		}
+		if(metadata != null)
+		{
+			event.putMap("metadata", metadata);
+		}
+		else
+		{
+			event.putNull("metadata");
+		}
+		event.putNull("error");
+		return event;
+	}
+
 	@Override
 	public void onPlaybackEvent(PlayerEvent playerEvent)
 	{
-		//
+		switch(playerEvent)
+		{
+			case kSpPlaybackNotifyPlay:
+				this.sendEvent("play", createPlaybackEvent());
+				break;
+
+			case kSpPlaybackNotifyPause:
+				this.sendEvent("pause", createPlaybackEvent());
+				break;
+
+			case kSpPlaybackNotifyTrackChanged:
+				this.sendEvent("trackChange", createPlaybackEvent());
+				break;
+
+			case kSpPlaybackNotifyMetadataChanged:
+				this.sendEvent("metadataChange", createPlaybackEvent());
+				break;
+
+			case kSpPlaybackNotifyContextChanged:
+				this.sendEvent("contextChange", createPlaybackEvent());
+				break;
+
+			case kSpPlaybackNotifyShuffleOn:
+			case kSpPlaybackNotifyShuffleOff:
+				this.sendEvent("shuffleStatusChange", createPlaybackEvent());
+				break;
+
+			case kSpPlaybackNotifyRepeatOn:
+			case kSpPlaybackNotifyRepeatOff:
+				this.sendEvent("repeatStatusChange", createPlaybackEvent());
+				break;
+
+			case kSpPlaybackNotifyBecameActive:
+				this.sendEvent("becomeActive", createPlaybackEvent());
+				break;
+
+			case kSpPlaybackNotifyBecameInactive:
+				this.sendEvent("becomeInactive", createPlaybackEvent());
+				break;
+
+			case kSpPlaybackNotifyLostPermission:
+				this.sendEvent("permissionLost", createPlaybackEvent());
+				break;
+
+			case kSpPlaybackEventAudioFlush:
+				this.sendEvent("audioFlush", createPlaybackEvent());
+				break;
+
+			case kSpPlaybackNotifyAudioDeliveryDone:
+				this.sendEvent("audioDeliveryDone", createPlaybackEvent());
+				break;
+
+			case kSpPlaybackNotifyTrackDelivered:
+				this.sendEvent("trackDelivered", createPlaybackEvent());
+				break;
+		}
 	}
 
 	@Override
 	public void onPlaybackError(Error error)
 	{
-		//
+		this.sendEvent("playbackError", Convert.fromRCTSpotifyError(new SpotifyError(error)));
 	}
 
 
