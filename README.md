@@ -127,6 +127,19 @@ import Spotify from 'react-native-spotify';
 
 
 
+* **PlaybackEvent**
+
+	Contains information about a playback event and the state of the player.
+	
+	* *Properties*
+	
+		* **state** - the player's current *PlaybackState*
+		* **metadata** - the player's current *PlaybackMetadata*
+		* **error** - an *Error* 
+
+
+
+
 * **Error**
 
 	Passed to callback functions to indicate something went wrong during the function call. Right now, there are some uniformity issues between iOS and Android on the errors that get returned, but for now, use the **message** attribute to display a message to the user.
@@ -136,6 +149,82 @@ import Spotify from 'react-native-spotify';
 		* **domain** - A string indicating what part of the system the error belongs to
 		* **code** - An integer containing the actual error code of the error
 		* **message** - A string containing a user-readable description of the error
+
+
+
+
+### Events
+
+This module uses [react-native-events](https://www.npmjs.com/package/react-native-events), so it has all of the same methods as an [EventEmitter](https://nodejs.org/api/events.html) object.
+
+* **'login'**
+
+	Emitted when the module has successfully logged in.
+
+* **'logout'**
+
+	Emitted when the module is logged out.
+
+* **'play'**
+
+	* `event` {PlaybackEvent}
+	
+	Emitted when playback has started or has resumed.
+
+* **'pause'**
+
+	* `event` {PlaybackEvent}
+	
+	Emitted when playback is paused.
+
+* **'trackChange'**
+
+	* `event` {PlaybackEvent}
+	
+	Emitted when playback of a new/different track starts.
+
+* **'metadataChange'**
+
+	* `event` {PlaybackEvent}
+	
+	Emitted when metadata has changed. This event occurs when playback starts or changes to a different context, when a track switch occurs, etc. This is an informational event that does not require action, but should be used to keep the UI display updated with the latest metadata information.
+
+* **'contextChange'**
+
+	* `event` {PlaybackEvent}
+	
+	Emitted when playback starts or changes to a different context than was playing before, such as a change in album or playlist.
+
+* **'shuffleStatusChange'**
+
+	* `event` {PlaybackEvent}
+	
+	Emitted when "shuffle" is switched on or off.
+
+* **'repeatStatusChange'**
+
+	* `event` {PlaybackEvent}
+	
+	Emitted when "repeat" is switched on or off.
+
+* **'active'**
+
+	* `event` {PlaybackEvent}
+	
+	Emitted when this device has become the active playback device. This event occurs when the users moves playback to this device using Spotify Connect.
+
+* **'inactive'**
+
+	* `event` {PlaybackEvent}
+	
+	Emitted when this device is no longer the active playback device. This event occurs when the user moves playback to a different device using Spotify Connect.
+
+* **'permissionLost'**
+
+	* `event` {PlaybackEvent}
+	
+	Emitted when this device has temporarily lost permission to stream audio from Spotify. A user can only stream audio on one of her devices at any given time. If playback is started on a different device, this event may occur.
+
 
 
 
