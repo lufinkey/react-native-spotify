@@ -501,7 +501,10 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 									@Override
 									public void invoke(Void obj, SpotifyError unusedError)
 									{
-										sendEvent("login");
+										if(loggedIn)
+										{
+											sendEvent("login");
+										}
 										if(callback != null)
 										{
 											callback.invoke(loggedIn, Convert.fromRCTSpotifyError(error));
@@ -539,7 +542,10 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 							@Override
 							public void invoke(Void obj, SpotifyError unusedError)
 							{
-								sendEvent("login");
+								if(loggedIn)
+								{
+									sendEvent("login");
+								}
 								if(callback != null)
 								{
 									callback.invoke(loggedIn, Convert.fromRCTSpotifyError(error));
