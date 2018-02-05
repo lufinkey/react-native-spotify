@@ -1135,33 +1135,21 @@ RCT_EXPORT_METHOD(getTracksAudioFeatures:(NSArray<NSString*>*)trackIDs options:(
 			break;
 			
 		case SPPlaybackNotifyShuffleOn:
-			[self sendEvent:@"shuffleOn" args:@[[self createPlaybackEvent]]];
-			[self sendEvent:@"shuffleStatusChange" args:@[[self createPlaybackEvent]]];
-			break;
-			
 		case SPPlaybackNotifyShuffleOff:
-			[self sendEvent:@"shuffleOff" args:@[[self createPlaybackEvent]]];
 			[self sendEvent:@"shuffleStatusChange" args:@[[self createPlaybackEvent]]];
 			break;
 			
 		case SPPlaybackNotifyRepeatOn:
-			[self sendEvent:@"repeatOn" args:@[[self createPlaybackEvent]]];
-			[self sendEvent:@"repeatStatusChange" args:@[[self createPlaybackEvent]]];
-			break;
-			
 		case SPPlaybackNotifyRepeatOff:
-			[self sendEvent:@"repeatOff" args:@[[self createPlaybackEvent]]];
 			[self sendEvent:@"repeatStatusChange" args:@[[self createPlaybackEvent]]];
 			break;
 			
 		case SPPlaybackNotifyBecameActive:
 			[self sendEvent:@"active" args:@[[self createPlaybackEvent]]];
-			[self sendEvent:@"activeStatusChange" args:@[[self createPlaybackEvent]]];
 			break;
 			
 		case SPPlaybackNotifyBecameInactive:
 			[self sendEvent:@"inactive" args:@[[self createPlaybackEvent]]];
-			[self sendEvent:@"activeStatusChange" args:@[[self createPlaybackEvent]]];
 			break;
 			
 		case SPPlaybackNotifyLostPermission:
