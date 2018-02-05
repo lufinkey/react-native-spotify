@@ -1785,33 +1785,21 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 				break;
 
 			case kSpPlaybackNotifyShuffleOn:
-				this.sendEvent("shuffleOn", createPlaybackEvent());
-				this.sendEvent("shuffleStatusChange", createPlaybackEvent());
-				break;
-
 			case kSpPlaybackNotifyShuffleOff:
-				this.sendEvent("shuffleOff", createPlaybackEvent());
 				this.sendEvent("shuffleStatusChange", createPlaybackEvent());
 				break;
 
 			case kSpPlaybackNotifyRepeatOn:
-				this.sendEvent("repeatOn", createPlaybackEvent());
-				this.sendEvent("repeatStatusChange", createPlaybackEvent());
-				break;
-
 			case kSpPlaybackNotifyRepeatOff:
-				this.sendEvent("repeatOff", createPlaybackEvent());
 				this.sendEvent("repeatStatusChange", createPlaybackEvent());
 				break;
 
 			case kSpPlaybackNotifyBecameActive:
 				this.sendEvent("active", createPlaybackEvent());
-				this.sendEvent("activeStatusChange", createPlaybackEvent());
 				break;
 
 			case kSpPlaybackNotifyBecameInactive:
 				this.sendEvent("inactive", createPlaybackEvent());
-				this.sendEvent("activeStatusChange", createPlaybackEvent());
 				break;
 
 			case kSpPlaybackNotifyLostPermission:
