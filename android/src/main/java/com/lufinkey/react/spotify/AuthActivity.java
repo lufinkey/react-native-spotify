@@ -36,7 +36,7 @@ public class AuthActivity extends Activity
 		if(authFlow_auth != null || authFlow_listener != null || currentAuthActivity != null)
 		{
 			System.out.println("AuthActivity is already being shown");
-			SpotifyError error = new SpotifyError(SpotifyError.Code.CONFLICTING_CALLBACKS, "Cannot show another AuthActivity while one is already being shown");
+			SpotifyError error = new SpotifyError(SpotifyError.Code.CONFLICTING_CALLBACKS, "Cannot call login multiple times before completing");
 			listener.onAuthActivityFailure(null, error);
 			return;
 		}
