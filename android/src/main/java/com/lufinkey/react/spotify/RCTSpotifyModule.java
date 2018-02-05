@@ -35,6 +35,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	private final ReactApplicationContext reactContext;
 
 	private boolean initialized;
+	private boolean loggingOut;
 
 	private BroadcastReceiver networkStateReceiver;
 
@@ -55,6 +56,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		Utils.reactContext = reactContext;
 
 		initialized = false;
+		loggingOut = false;
 
 		networkStateReceiver = null;
 
@@ -75,21 +77,6 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	private Object nullobj()
 	{
 		return null;
-	}
-
-	private Connectivity getNetworkConnectivity()
-	{
-		ConnectivityManager connectivityManager;
-		connectivityManager = (ConnectivityManager)reactContext.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-		NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
-		if (activeNetwork != null && activeNetwork.isConnected())
-		{
-			return Connectivity.fromNetworkType(activeNetwork.getType());
-		}
-		else
-		{
-			return Connectivity.OFFLINE;
-		}
 	}
 
 	void sendEvent(String event, Object... args)
@@ -190,7 +177,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 				if (player != null)
 				{
 					// update the player with the connection state, because Android makes no sense
-					Connectivity connectivity = getNetworkConnectivity();
+					Connectivity connectivity = Utils.getNetworkConnectivity();
 					player.setConnectivityStatus(null, connectivity);
 				}
 			}
@@ -316,7 +303,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 				player = newPlayer;
 
 				//setup player
-				player.setConnectivityStatus(null, getNetworkConnectivity());
+				player.setConnectivityStatus(null, Utils.getNetworkConnectivity());
 				player.addNotificationCallback(RCTSpotifyModule.this);
 				player.addConnectionStateCallback(RCTSpotifyModule.this);
 
@@ -365,7 +352,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		}
 	}
 
-	private void destroyPlayer(final CompletionBlock<Boolean> completion)
+	private void logoutPlayer(final CompletionBlock<Boolean> completion)
 	{
 		if(player == null)
 		{
@@ -383,16 +370,11 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			}
 			else
 			{
-				//wait for RCTSpotifyModule.onLoggedOut
+				// wait for RCTSpotifyModule.onLoggedOut
 				playerLogoutResponses.add(new CompletionBlock<Boolean>() {
 					@Override
 					public void invoke(Boolean loggedOut, SpotifyError error)
 					{
-						if(player != null)
-						{
-							Spotify.destroyPlayer(player);
-							player = null;
-						}
 						completion.invoke(loggedOut, error);
 					}
 				});
@@ -401,12 +383,11 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 		if(loggedOut)
 		{
-			Spotify.destroyPlayer(player);
-			player = null;
 			completion.invoke(true, null);
 		}
-		else
+		else if(!loggingOut)
 		{
+			loggingOut = true;
 			player.logout();
 		}
 	}
@@ -563,13 +544,13 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	public void logout(final Callback callback)
 	{
 		//destroy the player
-		destroyPlayer(new CompletionBlock<Boolean>() {
+		logoutPlayer(new CompletionBlock<Boolean>() {
 			@Override
 			public void invoke(Boolean loggedOut, SpotifyError error)
 			{
 				if(callback!=null)
 				{
-					callback.invoke(nullobj());
+					callback.invoke(Convert.fromRCTSpotifyError(error));
 				}
 			}
 		});
@@ -639,7 +620,6 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		logBackInIfNeeded(new CompletionBlock<Boolean>() {
 			@Override
 			public void invoke(Boolean loggedIn, SpotifyError error) {
-				error = null;
 				if(!initialized)
 				{
 					error = new SpotifyError(SpotifyError.Code.NOT_INITIALIZED, "Spotify has not been initiaized");
@@ -647,6 +627,10 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 				else if(player==null)
 				{
 					error = SpotifyError.fromSDKError(SpotifyError.getNativeCode(Error.kSpErrorUninitialized));
+				}
+				else if(player.isLoggedIn())
+				{
+					error = null;
 				}
 				completion.invoke(loggedIn, error);
 			}
@@ -1085,7 +1069,6 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		logBackInIfNeeded(new CompletionBlock<Boolean>() {
 			@Override
 			public void invoke(Boolean loggedIn, SpotifyError error) {
-				error = null;
 				if(!initialized)
 				{
 					error = new SpotifyError(SpotifyError.Code.NOT_INITIALIZED, "Spotify has not been initiaized");
@@ -1093,6 +1076,10 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 				else if(auth.getAccessToken()==null)
 				{
 					error = new SpotifyError(SpotifyError.Code.NOT_LOGGED_IN, "You are not logged in");
+				}
+				else if(auth.isSessionValid())
+				{
+					error = null;
 				}
 				completion.invoke(loggedIn, error);
 			}
@@ -1659,8 +1646,8 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	@Override
 	public void onLoggedOut()
 	{
-		//clear session
-		auth.clearSession();
+		boolean wasLoggingOut = loggingOut;
+		loggingOut = false;
 
 		//handle loginPlayer callbacks
 		ArrayList<CompletionBlock<Boolean>> loginResponses;
@@ -1674,10 +1661,34 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			response.invoke(false, new SpotifyError(SpotifyError.Code.NOT_LOGGED_IN, "You have been logged out"));
 		}
 
-		// send event
+		// if we didn't explicitly log out, try to renew the session
+		if(!wasLoggingOut)
+		{
+			if(auth.tokenRefreshURL != null && auth.getRefreshToken() != null)
+			{
+				auth.renewSession(new CompletionBlock<Boolean>() {
+					@Override
+					public void invoke(Boolean renewed, SpotifyError error)
+					{
+						if(!renewed)
+						{
+							// clear session
+							auth.clearSession();
+							// send logout event
+							sendEvent("logout");
+						}
+					}
+				}, true);
+				return;
+			}
+		}
+
+		//clear session
+		auth.clearSession();
+		// send logout event
 		sendEvent("logout");
 
-		//handle destroyPlayer callbacks
+		//handle logoutPlayer callbacks
 		ArrayList<CompletionBlock<Boolean>> logoutResponses;
 		synchronized(playerLogoutResponses)
 		{

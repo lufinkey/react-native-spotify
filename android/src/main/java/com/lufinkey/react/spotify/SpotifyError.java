@@ -217,6 +217,11 @@ public class SpotifyError
 		this.description = description;
 	}
 
+	public String getDomain()
+	{
+		return domain;
+	}
+
 	public int getCode()
 	{
 		return code;

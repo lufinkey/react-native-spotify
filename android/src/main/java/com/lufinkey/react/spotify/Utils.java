@@ -1,5 +1,9 @@
 package com.lufinkey.react.spotify;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+
 import com.android.volley.NetworkResponse;
 import com.android.volley.RequestQueue;
 import com.android.volley.VolleyError;
@@ -7,6 +11,7 @@ import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.Volley;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReadableMap;
+import com.spotify.sdk.android.player.Connectivity;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -93,5 +98,20 @@ public class Utils
 
 		//do request
 		requestQueue.add(request);
+	}
+
+	public static Connectivity getNetworkConnectivity()
+	{
+		ConnectivityManager connectivityManager;
+		connectivityManager = (ConnectivityManager)reactContext.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
+		if (activeNetwork != null && activeNetwork.isConnected())
+		{
+			return Connectivity.fromNetworkType(activeNetwork.getType());
+		}
+		else
+		{
+			return Connectivity.OFFLINE;
+		}
 	}
 }

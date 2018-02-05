@@ -1,24 +1,19 @@
 package com.lufinkey.react.spotify;
 
-import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.os.Handler;
 
-import com.android.volley.Network;
 import com.android.volley.NetworkResponse;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.WritableMap;
-import com.spotify.sdk.android.authentication.AuthenticationClient;
-import com.spotify.sdk.android.authentication.AuthenticationRequest;
-import com.spotify.sdk.android.authentication.AuthenticationResponse;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -33,10 +28,15 @@ public class Auth
 	public String tokenSwapURL = null;
 	public String tokenRefreshURL = null;
 
-
 	private String accessToken = null;
 	private Date expireDate = null;
 	private String refreshToken = null;
+
+	private boolean renewingSession = false;
+	private boolean retryRenewalUntilResponse = false;
+	private final ArrayList<CompletionBlock<Boolean>> renewCallbacks = new ArrayList<>();
+	private final ArrayList<CompletionBlock<Boolean>> renewUntilResponseCallbacks = new ArrayList<>();
+
 
 	public void load()
 	{
@@ -252,78 +252,143 @@ public class Auth
 				{
 					completion.invoke(success, error);
 				}
-			});
+			}, false);
 		}
 	}
 
-	private void renewSession(final CompletionBlock<Boolean> completion)
+	public void renewSession(final CompletionBlock<Boolean> completion, boolean waitForResponse)
 	{
+		System.out.println("renewSession");
 		if(tokenRefreshURL==null)
 		{
 			completion.invoke(false, new SpotifyError(SpotifyError.Code.MISSING_PARAMETERS, "Cannot renew session without tokenRefreshURL option"));
+			return;
 		}
 		else if(refreshToken==null)
 		{
 			completion.invoke(false, new SpotifyError(SpotifyError.Code.AUTHORIZATION_FAILED, "Can't refresh session without a refresh token"));
+			return;
 		}
-		else
+
+		// add completion to callbacks
+		if(completion != null)
 		{
-			WritableMap params = Arguments.createMap();
-			params.putString("refresh_token", refreshToken);
-
-			String url = tokenRefreshURL;
-			String body = Utils.makeQueryString(params);
-
-			Utils.doHTTPRequest(url, "POST", null, body.getBytes(), new CompletionBlock<NetworkResponse>() {
-				@Override
-				public void invoke(NetworkResponse response, SpotifyError error)
+			if(waitForResponse)
+			{
+				synchronized (renewUntilResponseCallbacks)
 				{
-					if(response==null)
+					renewUntilResponseCallbacks.add(completion);
+				}
+			}
+			else
+			{
+				synchronized (renewCallbacks)
+				{
+					renewCallbacks.add(completion);
+				}
+			}
+		}
+
+		// determine whether to retry renewal
+		if(waitForResponse)
+		{
+			retryRenewalUntilResponse = true;
+		}
+
+		// if we're already renewing the session, don't continue
+		if(renewingSession || retryRenewalUntilResponse)
+		{
+			return;
+		}
+		renewingSession = true;
+
+		WritableMap params = Arguments.createMap();
+		params.putString("refresh_token", refreshToken);
+
+		String url = tokenRefreshURL;
+		String body = Utils.makeQueryString(params);
+
+		Utils.doHTTPRequest(url, "POST", null, body.getBytes(), new CompletionBlock<NetworkResponse>() {
+			@Override
+			public void invoke(NetworkResponse response, SpotifyError error)
+			{
+				renewingSession = false;
+
+				// determine whether session was renewed
+				boolean renewed = false;
+				if(response != null)
+				{
+					String responseStr = Utils.getResponseString(response);
+
+					JSONObject responseObj;
+					try
 					{
-						completion.invoke(false, error);
-					}
-					else
-					{
-						String responseStr = Utils.getResponseString(response);
-
-						JSONObject responseObj;
-						try
+						responseObj = new JSONObject(responseStr);
+						if(responseObj.has("error"))
 						{
-							responseObj = new JSONObject(responseStr);
+							error = new SpotifyError(SpotifyError.SPOTIFY_AUTH_DOMAIN, response.statusCode, responseObj.getString("error_description"));
 						}
-						catch(JSONException e)
+						else
 						{
-							completion.invoke(false, new SpotifyError(SpotifyError.Code.REQUEST_ERROR, "Invalid response format"));
-							return;
-						}
-
-						try
-						{
-							if(responseObj.has("error"))
-							{
-								if(error!=null)
-								{
-									completion.invoke(false, new SpotifyError(SpotifyError.SPOTIFY_AUTH_DOMAIN, error.getCode(), responseObj.getString("error_description")));
-								}
-								else
-								{
-									completion.invoke(false, new SpotifyError(SpotifyError.Code.REQUEST_ERROR, responseObj.getString("error_description")));
-								}
-								return;
-							}
-
 							accessToken = responseObj.getString("access_token");
 							expireDate = getExpireDate(responseObj.getInt("expires_in"));
 							save();
+							renewed = true;
 						}
-						catch(JSONException e)
-						{
-							completion.invoke(false, new SpotifyError(SpotifyError.Code.REQUEST_ERROR, "Missing expected response parameters"));
-						}
-						completion.invoke(true, null);
+					}
+					catch(JSONException e)
+					{
+						error = new SpotifyError(SpotifyError.Code.REQUEST_ERROR, "Invalid response format");
 					}
 				}
-			});
-		}
+
+				// call renewal callbacks
+				ArrayList<CompletionBlock<Boolean>> tmpRenewCallbacks;
+				synchronized(renewCallbacks)
+				{
+					tmpRenewCallbacks = new ArrayList<>(renewCallbacks);
+					renewCallbacks.clear();
+				}
+				for(CompletionBlock<Boolean> callback : tmpRenewCallbacks)
+				{
+					callback.invoke(renewed, error);
+				}
+
+				// check if the session was renewed, or if a login error was given
+				if(renewed ||
+						(!renewed && error.getDomain().equals(SpotifyError.SPOTIFY_AUTH_DOMAIN)
+								// ensure error code is not a timeout
+								&& error.getCode() != 408 && error.getCode() != 504 && error.getCode() != 598 && error.getCode() != 599))
+				{
+					// renewal has reached a success or an error
+					retryRenewalUntilResponse = false;
+
+					// call renewal callbacks
+					ArrayList<CompletionBlock<Boolean>> tmpRenewUntilResponseCallbacks;
+					synchronized(renewUntilResponseCallbacks)
+					{
+						tmpRenewUntilResponseCallbacks = new ArrayList<>(renewUntilResponseCallbacks);
+						renewUntilResponseCallbacks.clear();
+					}
+					for(CompletionBlock<Boolean> callback : tmpRenewUntilResponseCallbacks)
+					{
+						callback.invoke(renewed, error);
+					}
+				}
+				else if(retryRenewalUntilResponse)
+				{
+					// retry session renewal in 500ms
+					Handler handler = new Handler();
+					handler.postDelayed(new Runnable() {
+						@Override
+						public void run()
+						{
+							// retry session renewal
+							renewSession(null, true);
+						}
+					}, 500);
+				}
+			}
+		});
 	}
 }
