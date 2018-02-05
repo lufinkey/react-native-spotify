@@ -38,7 +38,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	private boolean loggingOut;
 
 	private BroadcastReceiver networkStateReceiver;
-	private Connectivity lastConnectivity = Connectivity.OFFLINE;
+	private Connectivity currentConnectivity = Connectivity.OFFLINE;
 
 	private Auth auth;
 	private SpotifyPlayer player;
@@ -172,25 +172,27 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		}
 
 		// add connectivity state listener
-		lastConnectivity = Utils.getNetworkConnectivity();
+		currentConnectivity = Utils.getNetworkConnectivity();
 		networkStateReceiver = new BroadcastReceiver() {
 			@Override
 			public void onReceive(Context context, Intent intent) {
+				Connectivity prevConnectivity = currentConnectivity;
 				Connectivity connectivity = Utils.getNetworkConnectivity();
+				currentConnectivity = connectivity;
 				if (player != null)
 				{
 					// update the player with the connection state, because Android makes no sense
 					player.setConnectivityStatus(null, connectivity);
-				}
-				if(lastConnectivity==Connectivity.OFFLINE && connectivity!=Connectivity.OFFLINE)
-				{
-					lastConnectivity = connectivity;
-					sendEvent("connect");
-				}
-				else if(lastConnectivity!=Connectivity.OFFLINE && connectivity==Connectivity.OFFLINE)
-				{
-					lastConnectivity = connectivity;
-					sendEvent("disconnect");
+
+					// call events
+					if(prevConnectivity==Connectivity.OFFLINE && connectivity!=Connectivity.OFFLINE)
+					{
+						sendEvent("reconnect");
+					}
+					else if(prevConnectivity!=Connectivity.OFFLINE && connectivity==Connectivity.OFFLINE)
+					{
+						sendEvent("disconnect");
+					}
 				}
 			}
 		};
@@ -315,7 +317,8 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 				player = newPlayer;
 
 				//setup player
-				player.setConnectivityStatus(null, Utils.getNetworkConnectivity());
+				currentConnectivity = Utils.getNetworkConnectivity();
+				player.setConnectivityStatus(null, currentConnectivity);
 				player.addNotificationCallback(RCTSpotifyModule.this);
 				player.addConnectionStateCallback(RCTSpotifyModule.this);
 
@@ -323,6 +326,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 					@Override
 					public void invoke(Boolean loggedIn, SpotifyError error)
 					{
+						currentConnectivity = Utils.getNetworkConnectivity();
 						completion.invoke(loggedIn, error);
 					}
 				});
