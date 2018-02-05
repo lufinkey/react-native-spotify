@@ -83,4 +83,22 @@
 	};
 }
 
++(id)SPTAuth:(SPTAuth*)auth
+{
+	if(auth == nil)
+	{
+		return [NSNull null];
+	}
+	SPTSession* session = auth.session;
+	if(session == nil)
+	{
+		return [NSNull null];
+	}
+	return @{
+		@"accessToken": [RCTSpotifyConvert ID:session.accessToken],
+		@"refreshToken": [RCTSpotifyConvert ID:session.encryptedRefreshToken],
+		@"expireTime": session.expirationDate ? [NSNumber numberWithLongLong:((long long)session.expirationDate.timeIntervalSince1970*1000)] : [NSNull null]
+	};
+}
+
 @end

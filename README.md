@@ -143,7 +143,7 @@ import Spotify from 'react-native-spotify';
 
 * **initialize**( *options*, ( *loggedIn*, *error*? ) => {} )
 
-	Initializes the Spotify module and resumes a logged in session if there is one.
+	Initializes the Spotify module and resumes a logged in session if there is one. This must be the first method you call when using this module.
 	
 	* *Parameters*
 		* **options** - an object with options to pass to the Spotify Module
@@ -237,18 +237,18 @@ import Spotify from 'react-native-spotify';
 	
 	* *Returns*
 	
-		* An *Auth* object
+		* An *Auth* object, or *null* if not logged in
 
 
 
 
-* **getAuthAsync**( ( *auth* ) => {} )
+* **getAuthAsync**( ( *auth*? ) => {} )
 
 	Gives information about authentication data, but passes the result to a callback rather than returning it.
 	
 	* *Parameters*
 	
-		* **auth** - An *Auth* object
+		* **auth** - An *Auth* object, or *null* if not logged in
 
 
 
@@ -663,9 +663,23 @@ import Spotify from 'react-native-spotify';
 
 ### Token swap and refresh
 
-Token swap URL is used to swap authentication code provided by Spotify API for access and refresh tokens.  
-Token refresh URL is used to get new access tokens for the user using existing refresh token.  
-Both URLs are queried using POST methods with parameters sent as `application/x-www-form-urlencoded`.  
-You can find the example server implementation in [`example-server`](./example-server) folder.
+In order for your app to stay logged into Spotify for more than an hour, you must set up your own server with endpoints for token swap and refresh, and specify your `tokenSwapURL` and `tokenRefreshURL` parameters in the `Spotify.initialize` method
 
-Refresh tokens are part of [OAuth standard](https://tools.ietf.org/html/rfc6749#section-1.5). If you are not familiar with them, [Understanding Refresh Tokens](https://auth0.com/learn/refresh-tokens/) can give you a basic idea on how they work.  
+The `tokenSwapURL` parameter is used to swap the authentication code provided by the Spotify login process for an access token and a refresh token.
+
+The `tokenRefreshURL` parameter is used to retrieve new access tokens for the user using the refresh token received from the `tokenSwapURL`.
+
+Both URLs are queried using POST with a Content-Type of `application/x-www-form-urlencoded`.
+
+You can find an example server implementation [here](https://github.com/lufinkey/react-native-spotify/tree/master/example-server).
+
+Refresh tokens are part of [OAuth standard](https://tools.ietf.org/html/rfc6749#section-1.5). If you are not familiar with them, [Understanding Refresh Tokens](https://auth0.com/learn/refresh-tokens/) can give you a basic idea on how they work.
+
+
+
+## Contributing / Opening Issues
+
+If you would like to make a pull request, fork from and merge into the *dev* branch only.
+
+Please do not open issues about getting the module to work unless you have tried using both the example app and the example token swap server.
+

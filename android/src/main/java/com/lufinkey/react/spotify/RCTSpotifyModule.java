@@ -1420,7 +1420,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	@ReactMethod
 	//getArtistTopTracks(artistID, country, options?, (result?, error?))
-	public void getArtistTopTracks(String artistID, ReadableMap options, final Callback callback)
+	public void getArtistTopTracks(String artistID, String country, ReadableMap options, final Callback callback)
 	{
 		if(artistID==null)
 		{
@@ -1430,7 +1430,19 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			}
 			return;
 		}
-		doAPIRequest("v1/artists/"+artistID+"/top-tracks", "GET", options, false, new CompletionBlock<Object>() {
+		else if(country==null)
+		{
+			if(callback!=null)
+			{
+				callback.invoke(nullobj(), SpotifyError.getNullParameterError("country"));
+			}
+			return;
+		}
+
+		WritableMap body = Convert.toWritableMap(options);
+		body.putString("country", country);
+
+		doAPIRequest("v1/artists/"+artistID+"/top-tracks", "GET", body, false, new CompletionBlock<Object>() {
 			@Override
 			public void invoke(Object resultObj, SpotifyError error)
 			{

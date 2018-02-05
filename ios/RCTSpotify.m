@@ -442,6 +442,16 @@ RCT_EXPORT_METHOD(isLoggedInAsync:(RCTResponseSenderBlock)completion)
 	completion(@[ [RCTSpotifyConvert ID:[self isLoggedIn]] ]);
 }
 
+RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getAuth)
+{
+	return [RCTSpotifyConvert SPTAuth:_auth];
+}
+
+RCT_EXPORT_METHOD(getAuthAsync:(RCTResponseSenderBlock)completion)
+{
+	completion(@[ [RCTSpotifyConvert ID:[self getAuth]] ]);
+}
+
 RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(handleAuthURL:(NSString*)urlString)
 {
 	// unused function
@@ -901,7 +911,7 @@ RCT_EXPORT_METHOD(getArtistTopTracks:(NSString*)artistID country:(NSString*)coun
 	body[@"country"] = country;
 	
 	NSString* endpoint = NSString_concat(@"v1/artists/", artistID, @"/top-tracks");
-	[self doAPIRequest:endpoint method:@"GET" params:options jsonBody:NO completion:^(id resultObj, NSError* error) {
+	[self doAPIRequest:endpoint method:@"GET" params:body jsonBody:NO completion:^(id resultObj, NSError* error) {
 		if(completion)
 		{
 			completion(@[ [RCTSpotifyConvert ID:resultObj], [RCTSpotifyConvert NSError:error] ]);
