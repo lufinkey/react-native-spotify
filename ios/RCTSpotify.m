@@ -18,7 +18,7 @@ NSString* const RCTSpotifyWebAPIDomain = @"com.spotify.web-api";
 
 @interface RCTSpotify() <SPTAudioStreamingDelegate, SPTAudioStreamingPlaybackDelegate>
 {
-	BOOL initialized;
+	BOOL _initialized;
 	SPTAuth* _auth;
 	SPTAudioStreamingController* _player;
 	
@@ -176,7 +176,7 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSende
 		}
 		return;
 	}
-	initialized = NO;
+	_initialized = NO;
 	
 	//set default values
 	_options = options;
@@ -211,7 +211,7 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSende
 	}
 	
 	[self logBackInIfNeeded:^(BOOL loggedIn, NSError* error) {
-		initialized = YES;
+		_initialized = YES;
 		if(completion)
 		{
 			completion(@[ [NSNumber numberWithBool:loggedIn], [RCTSpotifyConvert NSError:error] ]);
@@ -225,7 +225,7 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(isInitialized)
 	{
 		return @NO;
 	}
-	return [NSNumber numberWithBool:initialized];
+	return [NSNumber numberWithBool:_initialized];
 }
 
 RCT_EXPORT_METHOD(isInitializedAsync:(RCTResponseSenderBlock)completion)
