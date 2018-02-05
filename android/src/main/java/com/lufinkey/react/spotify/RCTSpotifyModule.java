@@ -1808,6 +1808,11 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			case kSpPlaybackNotifyTrackDelivered:
 				this.sendEvent("trackDelivered", createPlaybackEvent());
 				break;
+
+			case kSpPlaybackNotifyNext:
+			case kSpPlaybackNotifyPrev:
+				// deprecated
+				break;
 		}
 	}
 
