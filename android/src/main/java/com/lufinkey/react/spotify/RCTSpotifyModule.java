@@ -1742,7 +1742,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	@Override
 	public void onConnectionMessage(String message)
 	{
-		sendEvent("connectionMessage", message);
+		sendEvent("playerMessage", message);
 	}
 
 
