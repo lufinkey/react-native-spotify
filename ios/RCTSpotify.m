@@ -78,6 +78,11 @@ RCT_EXPORT_METHOD(__registerAsJSEventEmitter:(int)moduleId)
 	[RNEventEmitter registerEventEmitterModule:self withID:moduleId bridge:_bridge];
 }
 
+-(void)sendEvent:(NSString*)event args:(NSArray*)args
+{
+	[RNEventEmitter emitEvent:event withParams:args module:self bridge:_bridge];
+}
+
 +(id)reactSafeArg:(id)arg
 {
 	if(arg==nil)
@@ -394,6 +399,10 @@ RCT_EXPORT_METHOD(login:(RCTResponseSenderBlock)completion)
 			[self initializePlayerIfNeeded:^(BOOL loggedIn, NSError* error) {
 				dispatch_async(dispatch_get_main_queue(), ^{
 					[authController.presentingViewController dismissViewControllerAnimated:YES completion:^{
+						if(loggedIn)
+						{
+							[self sendEvent:@"login" args:@[]];
+						}
 						if(completion)
 						{
 							completion(@[ [NSNumber numberWithBool:loggedIn], [RCTSpotifyConvert NSError:error] ]);
@@ -428,12 +437,7 @@ RCT_EXPORT_METHOD(logout:(RCTResponseSenderBlock)completion)
 			return;
 		}
 		
-		__weak RCTSpotify* _self = self;
 		[_logoutResponses addObject:^void(NSError* error) {
-			RCTSpotify* __self = _self;
-			[__self->_player stopWithError:&error];
-			__self->_auth.session = nil;
-			
 			if(completion!=nil)
 			{
 				completion(@[ [RCTSpotifyConvert NSError:error] ]);
@@ -1055,17 +1059,22 @@ RCT_EXPORT_METHOD(getTracksAudioFeatures:(NSArray<NSString*>*)trackIDs options:(
 
 -(void)audioStreamingDidLogout:(SPTAudioStreamingController*)audioStreaming
 {
-	NSError* error = [RCTSpotify errorWithCode:RCTSpotifyErrorCodeNotLoggedIn description:@"Spotify was logged out"];
+	// clear session and stop player
+	[_player stopWithError:nil];
+	_auth.session = nil;
 	
-	//do initializePlayerIfNeeded callbacks
+	// do initializePlayerIfNeeded callbacks
 	NSArray<void(^)(BOOL, NSError*)>* loginPlayerResponses = [NSArray arrayWithArray:_loginPlayerResponses];
 	[_loginPlayerResponses removeAllObjects];
 	for(void(^response)(BOOL,NSError*) in loginPlayerResponses)
 	{
-		response(NO, error);
+		response(NO, [RCTSpotify errorWithCode:RCTSpotifyErrorCodeNotLoggedIn description:@"Spotify was logged out"]);
 	}
 	
-	//do logout callbacks
+	// send event
+	[self sendEvent:@"logout" args:@[]];
+	
+	// do logout callbacks
 	NSArray<void(^)(NSError*)>* logoutResponses = [NSArray arrayWithArray:_logoutResponses];
 	[_logoutResponses removeAllObjects];
 	for(void(^response)(NSError*) in logoutResponses)
@@ -1077,6 +1086,92 @@ RCT_EXPORT_METHOD(getTracksAudioFeatures:(NSArray<NSString*>*)trackIDs options:(
 
 
 #pragma mark - SPTAudioStreamingPlaybackDelegate
+
+-(NSMutableDictionary*)createPlaybackEvent
+{
+	NSMutableDictionary* event = [NSMutableDictionary dictionary];
+	event[@"state"] = [self getPlaybackState];
+	event[@"metadata"] = [self getPlaybackMetadata];
+	event[@"error"] = [NSNull null];
+	return event;
+}
+
+-(void)audioStreaming:(SPTAudioStreamingController*)audioStreaming didReceivePlaybackEvent:(SpPlaybackEvent)event
+{
+	switch(event)
+	{
+		case SPPlaybackNotifyPlay:
+			[self sendEvent:@"play" args:@[[self createPlaybackEvent]]];
+			break;
+			
+		case SPPlaybackNotifyPause:
+			[self sendEvent:@"pause" args:@[[self createPlaybackEvent]]];
+			break;
+			
+		case SPPlaybackNotifyTrackChanged:
+			[self sendEvent:@"trackChange" args:@[[self createPlaybackEvent]]];
+			break;
+			
+		case SPPlaybackNotifyMetadataChanged:
+			[self sendEvent:@"metadataChange" args:@[[self createPlaybackEvent]]];
+			break;
+			
+		case SPPlaybackNotifyContextChanged:
+			[self sendEvent:@"contextChange" args:@[[self createPlaybackEvent]]];
+			break;
+			
+		case SPPlaybackNotifyShuffleOn:
+			[self sendEvent:@"shuffleOn" args:@[[self createPlaybackEvent]]];
+			[self sendEvent:@"shuffleStatusChange" args:@[[self createPlaybackEvent]]];
+			break;
+			
+		case SPPlaybackNotifyShuffleOff:
+			[self sendEvent:@"shuffleOff" args:@[[self createPlaybackEvent]]];
+			[self sendEvent:@"shuffleStatusChange" args:@[[self createPlaybackEvent]]];
+			break;
+			
+		case SPPlaybackNotifyRepeatOn:
+			[self sendEvent:@"repeatOn" args:@[[self createPlaybackEvent]]];
+			[self sendEvent:@"repeatStatusChange" args:@[[self createPlaybackEvent]]];
+			break;
+			
+		case SPPlaybackNotifyRepeatOff:
+			[self sendEvent:@"repeatOff" args:@[[self createPlaybackEvent]]];
+			[self sendEvent:@"repeatStatusChange" args:@[[self createPlaybackEvent]]];
+			break;
+			
+		case SPPlaybackNotifyBecameActive:
+			[self sendEvent:@"active" args:@[[self createPlaybackEvent]]];
+			[self sendEvent:@"activeStatusChange" args:@[[self createPlaybackEvent]]];
+			break;
+			
+		case SPPlaybackNotifyBecameInactive:
+			[self sendEvent:@"inactive" args:@[[self createPlaybackEvent]]];
+			[self sendEvent:@"activeStatusChange" args:@[[self createPlaybackEvent]]];
+			break;
+			
+		case SPPlaybackNotifyLostPermission:
+			[self sendEvent:@"permissionLost" args:@[[self createPlaybackEvent]]];
+			break;
+			
+		case SPPlaybackEventAudioFlush:
+			[self sendEvent:@"audioFlush" args:@[[self createPlaybackEvent]]];
+			break;
+			
+		case SPPlaybackNotifyAudioDeliveryDone:
+			[self sendEvent:@"audioDeliveryDone" args:@[[self createPlaybackEvent]]];
+			break;
+			
+		case SPPlaybackNotifyTrackDelivered:
+			[self sendEvent:@"trackDelivered" args:@[[self createPlaybackEvent]]];
+			break;
+			
+		case SPPlaybackNotifyNext:
+		case SPPlaybackNotifyPrev:
+			// deprecated
+			break;
+	}
+}
 
 -(void)audioStreaming:(SPTAudioStreamingController*)audioStreaming didChangePlaybackStatus:(BOOL)isPlaying
 {
