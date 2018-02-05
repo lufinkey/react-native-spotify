@@ -16,6 +16,7 @@ public class AuthActivity extends Activity
 
 	private static Auth authFlow_auth;
 	private static AuthActivityListener authFlow_listener;
+	private static AuthActivity currentAuthActivity;
 
 	private Auth auth;
 	private AuthActivityListener listener;
@@ -32,7 +33,7 @@ public class AuthActivity extends Activity
 		}
 
 		// ensure no conflicting callbacks
-		if(authFlow_auth != null || authFlow_listener != null)
+		if(authFlow_auth != null || authFlow_listener != null || currentAuthActivity != null)
 		{
 			System.out.println("AuthActivity is already being shown");
 			SpotifyError error = new SpotifyError(SpotifyError.Code.CONFLICTING_CALLBACKS, "Cannot show another AuthActivity while one is already being shown");
@@ -56,6 +57,7 @@ public class AuthActivity extends Activity
 
 		auth = authFlow_auth;
 		listener = authFlow_listener;
+		currentAuthActivity = this;
 
 		authFlow_auth = null;
 		authFlow_listener = null;
@@ -133,6 +135,7 @@ public class AuthActivity extends Activity
 		super.onDestroy();
 		if(isFinishing())
 		{
+			currentAuthActivity = null;
 			if(finishCompletion != null)
 			{
 				CompletionBlock<Void> completionTmp = finishCompletion;
