@@ -90,6 +90,11 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		}
 	}
 
+	void sendEvent(String event, Object... args)
+	{
+		RNEventEmitter.emitEvent(this.reactContext, this, event, args);
+	}
+
 	@ReactMethod
 	//test()
 	public void test()
@@ -476,6 +481,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 									@Override
 									public void invoke(Void obj, SpotifyError unusedError)
 									{
+										sendEvent("login");
 										if(callback != null)
 										{
 											callback.invoke(loggedIn, Convert.fromRCTSpotifyError(error));
@@ -531,8 +537,6 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			@Override
 			public void invoke(Boolean loggedOut, SpotifyError error)
 			{
-				//clear session
-				auth.clearSession();
 				if(callback!=null)
 				{
 					callback.invoke(nullobj());
@@ -1642,6 +1646,9 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	@Override
 	public void onLoggedOut()
 	{
+		//clear session
+		auth.clearSession();
+
 		//handle loginPlayer callbacks
 		ArrayList<CompletionBlock<Boolean>> loginResponses;
 		synchronized(playerLoginResponses)
@@ -1653,6 +1660,8 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		{
 			response.invoke(false, new SpotifyError(SpotifyError.Code.NOT_LOGGED_IN, "You have been logged out"));
 		}
+
+		sendEvent("logout");
 
 		//handle destroyPlayer callbacks
 		ArrayList<CompletionBlock<Boolean>> logoutResponses;
