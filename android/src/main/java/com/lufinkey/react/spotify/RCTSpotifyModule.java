@@ -326,7 +326,6 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 					@Override
 					public void invoke(Boolean loggedIn, SpotifyError error)
 					{
-						currentConnectivity = Utils.getNetworkConnectivity();
 						completion.invoke(loggedIn, error);
 					}
 				});
