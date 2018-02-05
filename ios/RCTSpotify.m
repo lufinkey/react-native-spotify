@@ -48,6 +48,31 @@ NSString* const RCTSpotifyWebAPIDomain = @"com.spotify.web-api";
 
 @synthesize bridge = _bridge;
 
+-(id)init
+{
+	if(self = [super init])
+	{
+		_initialized = NO;
+		
+		_auth = nil;
+		_player = nil;
+		
+		_options = nil;
+		_cacheSize = nil;
+		
+		_loginPlayerResponses = [NSMutableArray array];
+		_logoutResponses = [NSMutableArray array];
+		
+		_audioSessionCategory = nil;
+	}
+	return self;
+}
+
++(BOOL)requiresMainQueueSetup
+{
+	return YES;
+}
+
 RCT_EXPORT_METHOD(__registerAsJSEventEmitter:(int)moduleId)
 {
 	[RNEventEmitter registerEventEmitterModule:self withID:moduleId bridge:_bridge];
@@ -183,8 +208,6 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSende
 	_auth = [SPTAuth defaultInstance];
 	_player = [SPTAudioStreamingController sharedInstance];
 	_cacheSize = @(1024 * 1024 * 64);
-	_loginPlayerResponses = [NSMutableArray array];
-	_logoutResponses = [NSMutableArray array];
 	
 	//get options
 	_auth.clientID = options[@"clientID"];
