@@ -1097,6 +1097,26 @@ RCT_EXPORT_METHOD(getTracksAudioFeatures:(NSArray<NSString*>*)trackIDs options:(
 	}
 }
 
+-(void)audioStreamingDidDisconnect:(SPTAudioStreamingController *)audioStreaming
+{
+	[self sendEvent:@"disconnect" args:@[]];
+}
+
+-(void)audioStreamingDidReconnect:(SPTAudioStreamingController*)audioStreaming
+{
+	[self sendEvent:@"reconnect" args:@[]];
+}
+
+-(void)audioStreamingDidEncounterTemporaryConnectionError:(SPTAudioStreamingController*)audioStreaming
+{
+	[self sendEvent:@"temporaryConnectionError" args:@[]];
+}
+
+-(void)audioStreaming:(SPTAudioStreamingController*)audioStreaming didReceiveMessage:(NSString*)message
+{
+	[self sendEvent:@"playerMessage" args:@[message]];
+}
+
 
 
 #pragma mark - SPTAudioStreamingPlaybackDelegate
