@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.view.Gravity;
@@ -79,7 +80,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	private Connectivity getNetworkConnectivity()
 	{
 		ConnectivityManager connectivityManager;
-		connectivityManager = (ConnectivityManager)this.reactContext.getBaseContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+		connectivityManager = (ConnectivityManager)reactContext.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
 		if (activeNetwork != null && activeNetwork.isConnected())
 		{
@@ -194,6 +195,8 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 				}
 			}
 		};
+		IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+		reactContext.getApplicationContext().registerReceiver(networkStateReceiver, filter);
 
 		// try to log back in
 		logBackInIfNeeded(new CompletionBlock<Boolean>() {
