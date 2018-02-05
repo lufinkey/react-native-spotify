@@ -385,7 +385,7 @@ public class Auth
 							// retry session renewal
 							renewSession(null, true);
 						}
-					}, 500);
+					}, 2000);
 				}
 			}
 		});
