@@ -11,7 +11,7 @@ import java.lang.reflect.Field;
 public class SpotifyError
 {
 	public static final String DOMAIN = "RCTSpotifyErrorDomain";
-	public static final String SPOTIFY_SDK_DOMAIN = "com.spotify.ios-sdk.playback";
+	public static final String SPOTIFY_SDK_DOMAIN = "com.spotify.sdk.playback";
 	public static final String SPOTIFY_AUTH_DOMAIN = "com.spotify.auth";
 	public static final String SPOTIFY_WEB_DOMAIN = "com.spotify.web-api";
 
