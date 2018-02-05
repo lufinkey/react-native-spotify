@@ -376,7 +376,7 @@ public class Auth
 				}
 				else if(retryRenewalUntilResponse)
 				{
-					// retry session renewal in 500ms
+					// retry session renewal in 2000ms
 					Handler handler = new Handler();
 					handler.postDelayed(new Runnable() {
 						@Override
