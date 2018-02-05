@@ -643,7 +643,7 @@ RCT_EXPORT_METHOD(setRepeating:(BOOL)repeating completion:(RCTResponseSenderBloc
 		SPTRepeatMode repeatMode = SPTRepeatOff;
 		if(repeating)
 		{
-			repeatMode = SPTRepeatOne;
+			repeatMode = SPTRepeatContext;
 		}
 		[_player setRepeat:repeatMode callback:^(NSError* error) {
 			if(completion)
