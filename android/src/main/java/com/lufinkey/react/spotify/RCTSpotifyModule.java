@@ -1745,7 +1745,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	@Override
 	public void onTemporaryError()
 	{
-		sendEvent("temporaryConnectionError");
+		sendEvent("temporaryPlayerError");
 	}
 
 	@Override
