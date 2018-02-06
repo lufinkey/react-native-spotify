@@ -245,6 +245,10 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSende
 	
 	[self logBackInIfNeeded:^(BOOL loggedIn, NSError* error) {
 		_initialized = YES;
+		if(loggedIn)
+		{
+			[self sendEvent:@"login" args:@[]];
+		}
 		if(completion)
 		{
 			completion(@[ [NSNumber numberWithBool:loggedIn], [RCTSpotifyConvert NSError:error] ]);
