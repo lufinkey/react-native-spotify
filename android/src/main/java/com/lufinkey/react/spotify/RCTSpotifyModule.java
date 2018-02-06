@@ -583,10 +583,6 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		{
 			return false;
 		}
-		else if(auth.hasPlayerScope() && (player==null || !player.isLoggedIn()))
-		{
-			return false;
-		}
 		return true;
 	}
 
