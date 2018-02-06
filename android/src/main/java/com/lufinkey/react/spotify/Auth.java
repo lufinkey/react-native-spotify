@@ -355,9 +355,9 @@ public class Auth
 
 				// check if the session was renewed, or if a login error was given
 				if(renewed ||
-						(!renewed && error.getDomain().equals(SpotifyError.SPOTIFY_AUTH_DOMAIN)
+						(!renewed && (error == null || (error != null && error.getDomain().equals(SpotifyError.SPOTIFY_AUTH_DOMAIN)
 								// ensure error code is not a timeout
-								&& error.getCode() != 408 && error.getCode() != 504 && error.getCode() != 598 && error.getCode() != 599))
+								&& error.getCode() != 408 && error.getCode() != 504 && error.getCode() != 598 && error.getCode() != 599))))
 				{
 					// renewal has reached a success or an error
 					retryRenewalUntilResponse = false;
