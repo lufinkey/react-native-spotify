@@ -31,6 +31,9 @@ NSString* const RCTSpotifyWebAPIDomain = @"com.spotify.web-api";
 	NSMutableArray<void(^)(BOOL, NSError*)>* _loginPlayerResponses;
 	NSMutableArray<void(^)(NSError*)>* _logoutResponses;
 	
+	BOOL _renewingSession;
+	NSMutableArray<void(^)(BOOL, NSError*)>* _renewCallbacks;
+	
 	NSString* _audioSessionCategory;
 }
 +(NSError*)errorWithCode:(RCTSpotifyErrorCode)code description:(NSString*)description;
@@ -67,6 +70,9 @@ NSString* const RCTSpotifyWebAPIDomain = @"com.spotify.web-api";
 		
 		_loginPlayerResponses = [NSMutableArray array];
 		_logoutResponses = [NSMutableArray array];
+		
+		_renewingSession = NO;
+		_renewCallbacks = [NSMutableArray array];
 		
 		_audioSessionCategory = nil;
 	}
@@ -331,35 +337,58 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTResponseSenderBlock)completion)
 
 -(void)renewSession:(void(^)(BOOL, NSError*))completion wait:(BOOL)waitForResponse
 {
-	if(_auth.session == nil)
-	{
-		completion(NO, nil);
-	}
-	else if(!_auth.hasTokenRefreshService)
-	{
-		completion(NO, nil);
-	}
-	else if(_auth.session.encryptedRefreshToken == nil)
-	{
-		completion(NO, [RCTSpotify errorWithCode:RCTSpotifyErrorCodeAuthorizationFailed description:@"Can't refresh session without a refresh token"]);
-	}
-	else
-	{
+	dispatch_async(dispatch_get_main_queue(), ^{
+		if(_auth.session == nil)
+		{
+			completion(NO, [RCTSpotify errorWithCode:RCTSpotifyErrorCodeNotLoggedIn description:@"You are not logged in"]);
+			return;
+		}
+		else if(!_auth.hasTokenRefreshService)
+		{
+			completion(NO, nil);
+			return;
+		}
+		else if(_auth.session.encryptedRefreshToken == nil)
+		{
+			completion(NO, [RCTSpotify errorWithCode:RCTSpotifyErrorCodeAuthorizationFailed description:@"Can't refresh session without a refresh token"]);
+			return;
+		}
+		
+		if(completion != nil)
+		{
+			[_renewCallbacks addObject:completion];
+		}
+		
+		if(_renewingSession)
+		{
+			return;
+		}
+		_renewingSession = YES;
+		
 		[_auth renewSession:_auth.session callback:^(NSError* error, SPTSession* session){
-			if(_auth.session != nil)
-			{
-				_auth.session = session;
-			}
-			if(error != nil)
-			{
-				completion(NO, error);
-			}
-			else
-			{
-				completion(YES, nil);
-			}
+			dispatch_async(dispatch_get_main_queue(), ^{
+				_renewingSession = NO;
+				
+				if(_auth.session != nil)
+				{
+					_auth.session = session;
+				}
+				
+				BOOL renewed = YES;
+				if(error != nil)
+				{
+					renewed = NO;
+				}
+				
+				NSArray<void(^)(BOOL, NSError*)>* renewCallbacks = [NSArray arrayWithArray:_renewCallbacks];
+				[_renewCallbacks removeAllObjects];
+				for(void(^callback)(BOOL,NSError*) in renewCallbacks)
+				{
+					callback(NO, error);
+				}
+			});
 		}];
-	}
+	});
 }
 
 -(void)initializePlayerIfNeeded:(void(^)(BOOL,NSError*))completion
