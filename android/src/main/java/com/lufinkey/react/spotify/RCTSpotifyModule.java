@@ -209,6 +209,10 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 					errorObj = error.toReactObject();
 				}
 				initialized = true;
+				if(loggedIn)
+				{
+					sendEvent("login");
+				}
 				if(callback!=null)
 				{
 					callback.invoke(
