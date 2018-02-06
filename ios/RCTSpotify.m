@@ -20,6 +20,7 @@ NSString* const RCTSpotifyWebAPIDomain = @"com.spotify.web-api";
 {
 	BOOL _initialized;
 	BOOL _loggingIn;
+	BOOL _loggingOut;
 	
 	SPTAuth* _auth;
 	SPTAudioStreamingController* _player;
@@ -56,6 +57,7 @@ NSString* const RCTSpotifyWebAPIDomain = @"com.spotify.web-api";
 	{
 		_initialized = NO;
 		_loggingIn = NO;
+		_loggingOut = NO;
 		
 		_auth = nil;
 		_player = nil;
@@ -303,13 +305,13 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTResponseSenderBlock)completion)
 
 -(void)renewSessionIfNeeded:(void(^)(BOOL, NSError*))completion
 {
-	if(_auth.session != nil && _auth.session.isValid)
-	{
-		completion(YES, nil);
-	}
-	else if(_auth.session == nil)
+	if(_auth.session == nil)
 	{
 		completion(NO, nil);
+	}
+	else if(_auth.session.isValid)
+	{
+		completion(YES, nil);
 	}
 	else if(_auth.session.encryptedRefreshToken == nil)
 	{
@@ -340,7 +342,10 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTResponseSenderBlock)completion)
 	else
 	{
 		[_auth renewSession:_auth.session callback:^(NSError* error, SPTSession* session){
-			_auth.session = session;
+			if(_auth.session != nil)
+			{
+				_auth.session = session;
+			}
 			if(error != nil)
 			{
 				completion(NO, error);
@@ -481,8 +486,9 @@ RCT_EXPORT_METHOD(login:(RCTResponseSenderBlock)completion)
 
 RCT_EXPORT_METHOD(logout:(RCTResponseSenderBlock)completion)
 {
-	if(![[self isLoggedIn] boolValue])
+	if(_player == nil)
 	{
+		_auth.session = nil;
 		if(completion)
 		{
 			completion(@[ [NSNull null] ]);
@@ -490,22 +496,28 @@ RCT_EXPORT_METHOD(logout:(RCTResponseSenderBlock)completion)
 		return;
 	}
 	dispatch_async(dispatch_get_main_queue(), ^{
-		if(![[self isLoggedIn] boolValue])
+		if(!_player.loggedIn)
 		{
+			// if player is already logged out, clear session and finish
+			_auth.session = nil;
 			if(completion)
 			{
 				completion(@[ [NSNull null] ]);
 			}
 			return;
 		}
-		
-		[_logoutResponses addObject:^void(NSError* error) {
-			if(completion!=nil)
-			{
+		// log out player
+		if(completion!=nil)
+		{
+			[_logoutResponses addObject:^void(NSError* error) {
 				completion(@[ [RCTSpotifyConvert NSError:error] ]);
-			}
-		}];
-		[_player logout];
+			}];
+		}
+		if(!_loggingOut)
+		{
+			_loggingOut = YES;
+			[_player logout];
+		}
 	});
 }
 
@@ -1113,11 +1125,10 @@ RCT_EXPORT_METHOD(getTracksAudioFeatures:(NSArray<NSString*>*)trackIDs options:(
 
 -(void)audioStreamingDidLogout:(SPTAudioStreamingController*)audioStreaming
 {
-	// clear session and stop player
-	[_player stopWithError:nil];
-	_auth.session = nil;
+	BOOL wasLoggingOut = _loggingOut;
+	_loggingOut = NO;
 	
-	// do initializePlayerIfNeeded callbacks
+	// handle loginPlayer callbacks
 	NSArray<void(^)(BOOL, NSError*)>* loginPlayerResponses = [NSArray arrayWithArray:_loginPlayerResponses];
 	[_loginPlayerResponses removeAllObjects];
 	for(void(^response)(BOOL,NSError*) in loginPlayerResponses)
@@ -1125,10 +1136,37 @@ RCT_EXPORT_METHOD(getTracksAudioFeatures:(NSArray<NSString*>*)trackIDs options:(
 		response(NO, [RCTSpotify errorWithCode:RCTSpotifyErrorCodeNotLoggedIn description:@"Spotify was logged out"]);
 	}
 	
-	// send event
+	// if we didn't explicitly log out, try to renew the session
+	if(!wasLoggingOut)
+	{
+		if(_auth.hasTokenRefreshService && _auth.session != nil && _auth.session.encryptedRefreshToken != nil)
+		{
+			[self renewSession:^(BOOL renewed, NSError* error) {
+				if(renewed)
+				{
+					[self loginPlayer:_auth.session.accessToken completion:^(BOOL loggedIn, NSError* error) {
+						// do nothing
+					}];
+				}
+				else
+				{
+					// clear session
+					_auth.session = nil;
+					// send logout event
+					[self sendEvent:@"logout" args:@[]];
+				}
+			} wait:YES];
+			return;
+		}
+	}
+	
+	// clear session and stop player
+	_auth.session = nil;
+	[_player stopWithError:nil];
+	// send logout event
 	[self sendEvent:@"logout" args:@[]];
 	
-	// do logout callbacks
+	// handle logout callbacks
 	NSArray<void(^)(NSError*)>* logoutResponses = [NSArray arrayWithArray:_logoutResponses];
 	[_logoutResponses removeAllObjects];
 	for(void(^response)(NSError*) in logoutResponses)
