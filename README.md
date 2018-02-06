@@ -496,7 +496,7 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 
 * **sendRequest**( *endpoint*, *method*, *params*, *isJSONBody*, ( *result*?, *error*? ) => {} )
 
-	Sends a general request to the spotify api.
+	Sends a general request to the spotify api. A list of potential endpoints can be found [here](https://developer.spotify.com/web-api/endpoint-reference/).
 	
 	* *Parameters*
 	
