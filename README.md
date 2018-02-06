@@ -389,7 +389,7 @@ import Spotify from 'react-native-spotify';
 
 * **sendRequest**( *endpoint*, *method*, *params*, *isJSONBody*, ( *result*?, *error*? ) => {} )
 
-	Sends a general request to the spotify api.
+	Sends a general request to the spotify api. A list of potential endpoints can be found [here](https://developer.spotify.com/web-api/endpoint-reference/).
 	
 	* *Parameters*
 	
