@@ -1109,7 +1109,7 @@ RCT_EXPORT_METHOD(getTracksAudioFeatures:(NSArray<NSString*>*)trackIDs options:(
 
 -(void)audioStreamingDidEncounterTemporaryConnectionError:(SPTAudioStreamingController*)audioStreaming
 {
-	[self sendEvent:@"temporaryConnectionError" args:@[]];
+	[self sendEvent:@"temporaryPlayerError" args:@[]];
 }
 
 -(void)audioStreaming:(SPTAudioStreamingController*)audioStreaming didReceiveMessage:(NSString*)message
