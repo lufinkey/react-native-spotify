@@ -260,7 +260,7 @@ public class Auth
 	{
 		if(tokenRefreshURL==null)
 		{
-			completion.invoke(false, new SpotifyError(SpotifyError.Code.MISSING_PARAMETERS, "Cannot renew session without tokenRefreshURL option"));
+			completion.invoke(false, null);
 			return;
 		}
 		else if(refreshToken==null)
