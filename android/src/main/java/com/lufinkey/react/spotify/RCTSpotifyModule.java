@@ -35,7 +35,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	private final ReactApplicationContext reactContext;
 
 	private boolean initialized;
-	private boolean loggingOut;
+	private boolean loggingOutPlayer;
 
 	private BroadcastReceiver networkStateReceiver;
 	private Connectivity currentConnectivity = Connectivity.OFFLINE;
@@ -57,7 +57,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		Utils.reactContext = reactContext;
 
 		initialized = false;
-		loggingOut = false;
+		loggingOutPlayer = false;
 
 		networkStateReceiver = null;
 
@@ -404,9 +404,9 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		{
 			completion.invoke(true, null);
 		}
-		else if(!loggingOut)
+		else if(!loggingOutPlayer)
 		{
-			loggingOut = true;
+			loggingOutPlayer = true;
 			player.logout();
 		}
 	}
@@ -1661,8 +1661,8 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	@Override
 	public void onLoggedOut()
 	{
-		boolean wasLoggingOut = loggingOut;
-		loggingOut = false;
+		boolean wasLoggingOutPlayer = loggingOutPlayer;
+		loggingOutPlayer = false;
 
 		//handle loginPlayer callbacks
 		ArrayList<CompletionBlock<Boolean>> loginResponses;
@@ -1677,7 +1677,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		}
 
 		// if we didn't explicitly log out, try to renew the session
-		if(!wasLoggingOut)
+		if(!wasLoggingOutPlayer)
 		{
 			if(auth.tokenRefreshURL != null && auth.getRefreshToken() != null)
 			{
