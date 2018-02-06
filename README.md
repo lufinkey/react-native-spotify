@@ -225,6 +225,24 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	
 	Emitted when this device has temporarily lost permission to stream audio from Spotify. A user can only stream audio on one of her devices at any given time. If playback is started on a different device, this event may occur.
 
+* **'disconnect'**
+
+	Emitted when network connectivity is lost.
+
+* **'reconnect'**
+
+	Emitted when network connectivitiy returns after being lost.
+
+* **'temporaryPlayerError'**
+
+	Emitted when service has been interrupted, usually by lack of network access. However, it can also occur if there is a problem with Spotify's backend services, or also when the user switches from WiFi to 3G. These errors can occur in many non-critical situations, and thus it is not necessary to show toasts or alert dialogs when receiving this event, or else you will unnecessarily annoy or panic the user. However, it can be useful to know about these events if operations are consistently failing, in which case showing a toast or alert may be justified.
+
+* **'playerMessage'**
+
+	* `message` {String}
+	
+	Called when the player has recieved a message for the end user from the Spotify service.
+
 
 
 
