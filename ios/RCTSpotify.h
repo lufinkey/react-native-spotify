@@ -17,7 +17,9 @@ extern NSString* const RCTSpotifyWebAPIDomain;
 typedef enum
 {
 	//! RCTSpotify has already been initialized
-	RCTSpotifyAlreadyInitialized = 90,
+	RCTSpotifyErrorCodeAlreadyInitialized = 90,
+	//! Authorization (renewal or login) has failed
+	RCTSpotifyErrorCodeAuthorizationFailed = 92,
 	//! Multiple calls of an asynchronous function are conflicting
 	RCTSpotifyErrorCodeConflictingCallbacks = 100,
 	//! Missing parameters or options

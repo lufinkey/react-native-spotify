@@ -204,7 +204,7 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSende
 	{
 		if(completion)
 		{
-			completion(@[ [self isLoggedIn], [RCTSpotifyConvert NSError:[RCTSpotify errorWithCode:RCTSpotifyAlreadyInitialized description:@"Spotify has already been initialized"]] ]);
+			completion(@[ [self isLoggedIn], [RCTSpotifyConvert NSError:[RCTSpotify errorWithCode:RCTSpotifyErrorCodeAlreadyInitialized description:@"Spotify has already been initialized"]] ]);
 		}
 		return;
 	}
@@ -283,23 +283,70 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTResponseSenderBlock)completion)
 			completion(loggedIn, error);
 		}];
 	}
-	else if(!_auth.hasTokenRefreshService)
-	{
-		completion(NO, nil);
-	}
 	else
 	{
-		[_auth renewSession:_auth.session callback:^(NSError* error, SPTSession* session){
-			if(error!=nil)
+		[self renewSessionIfNeeded:^(BOOL renewed, NSError* error) {
+			if(error != nil)
 			{
 				completion(NO, error);
 			}
 			else
 			{
-				_auth.session = session;
 				[self initializePlayerIfNeeded:^(BOOL loggedIn, NSError* error) {
 					completion(loggedIn, error);
 				}];
+			}
+		}];
+	}
+}
+
+-(void)renewSessionIfNeeded:(void(^)(BOOL, NSError*))completion
+{
+	if(_auth.session != nil && _auth.session.isValid)
+	{
+		completion(YES, nil);
+	}
+	else if(_auth.session == nil)
+	{
+		completion(NO, nil);
+	}
+	else if(_auth.session.encryptedRefreshToken == nil)
+	{
+		completion(NO, nil);
+	}
+	else
+	{
+		[self renewSession:^(BOOL renewed, NSError* error) {
+			completion(renewed, error);
+		} wait:NO];
+	}
+}
+
+-(void)renewSession:(void(^)(BOOL, NSError*))completion wait:(BOOL)waitForResponse
+{
+	if(_auth.session == nil)
+	{
+		completion(NO, nil);
+	}
+	else if(!_auth.hasTokenRefreshService)
+	{
+		completion(NO, nil);
+	}
+	else if(_auth.session.encryptedRefreshToken == nil)
+	{
+		completion(NO, [RCTSpotify errorWithCode:RCTSpotifyErrorCodeAuthorizationFailed description:@"Can't refresh session without a refresh token"]);
+	}
+	else
+	{
+		[_auth renewSession:_auth.session callback:^(NSError* error, SPTSession* session){
+			_auth.session = session;
+			if(error != nil)
+			{
+				completion(NO, error);
+			}
+			else
+			{
+				completion(YES, nil);
 			}
 		}];
 	}
