@@ -515,10 +515,6 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(isLoggedIn)
 	{
 		return @NO;
 	}
-	else if([self hasPlayerScope] && !_player.loggedIn)
-	{
-		return @NO;
-	}
 	return @YES;
 }
 
