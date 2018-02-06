@@ -20,6 +20,7 @@ NSString* const RCTSpotifyWebAPIDomain = @"com.spotify.web-api";
 {
 	BOOL _initialized;
 	BOOL _loggingIn;
+	
 	SPTAuth* _auth;
 	SPTAudioStreamingController* _player;
 	
@@ -511,10 +512,6 @@ RCT_EXPORT_METHOD(logout:(RCTResponseSenderBlock)completion)
 RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(isLoggedIn)
 {
 	if(_auth.session == nil)
-	{
-		return @NO;
-	}
-	else if(![_auth.session isValid])
 	{
 		return @NO;
 	}
