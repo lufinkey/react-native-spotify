@@ -46,8 +46,16 @@ public class Auth
 		}
 		SharedPreferences prefs = reactContext.getCurrentActivity().getSharedPreferences(sessionUserDefaultsKey, Context.MODE_PRIVATE);
 		accessToken = prefs.getString("accessToken", null);
-		expireDate = new Date(prefs.getLong("expireTime", 0));
 		refreshToken = prefs.getString("refreshToken", null);
+		long expireTime = prefs.getLong("expireTime", 0);
+		if(expireTime == 0)
+		{
+			expireDate = null;
+		}
+		else
+		{
+			expireDate = new Date(expireTime);
+		}
 	}
 
 	public void save()
@@ -131,6 +139,7 @@ public class Auth
 
 		accessToken = null;
 		refreshToken = null;
+		expireDate = null;
 		save();
 	}
 
