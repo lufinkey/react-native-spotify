@@ -381,7 +381,7 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 
 * **queueURI**( *spotifyURI*, ( *error*? ) => {} )
 
-	Queue a Spotify URI. **NOTE: Do not use this function for production use. It has proven to be very inconsistent and buggy. Instead, try populating a secret playlist to manage your song queues.**
+	Queue a Spotify URI. **NOTE: Do not use this function in production code. It has proven to be very inconsistent and buggy. Instead, try populating a secret playlist to manage your song queues.**
 	
 	* *Parameters*
 	
