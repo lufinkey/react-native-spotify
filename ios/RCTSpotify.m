@@ -20,7 +20,7 @@ NSString* const RCTSpotifyWebAPIDomain = @"com.spotify.web-api";
 {
 	BOOL _initialized;
 	BOOL _loggingIn;
-	BOOL _loggingOut;
+	BOOL _loggingOutPlayer;
 	
 	SPTAuth* _auth;
 	SPTAudioStreamingController* _player;
@@ -57,7 +57,7 @@ NSString* const RCTSpotifyWebAPIDomain = @"com.spotify.web-api";
 	{
 		_initialized = NO;
 		_loggingIn = NO;
-		_loggingOut = NO;
+		_loggingOutPlayer = NO;
 		
 		_auth = nil;
 		_player = nil;
@@ -517,9 +517,9 @@ RCT_EXPORT_METHOD(logout:(RCTResponseSenderBlock)completion)
 				completion(@[ [RCTSpotifyConvert NSError:error] ]);
 			}];
 		}
-		if(!_loggingOut)
+		if(!_loggingOutPlayer)
 		{
-			_loggingOut = YES;
+			_loggingOutPlayer = YES;
 			[_player logout];
 		}
 	});
@@ -1129,8 +1129,8 @@ RCT_EXPORT_METHOD(getTracksAudioFeatures:(NSArray<NSString*>*)trackIDs options:(
 
 -(void)audioStreamingDidLogout:(SPTAudioStreamingController*)audioStreaming
 {
-	BOOL wasLoggingOut = _loggingOut;
-	_loggingOut = NO;
+	BOOL wasLoggingOutPlayer = _loggingOutPlayer;
+	_loggingOutPlayer = NO;
 	
 	// handle loginPlayer callbacks
 	NSArray<void(^)(BOOL, NSError*)>* loginPlayerResponses = [NSArray arrayWithArray:_loginPlayerResponses];
@@ -1141,7 +1141,7 @@ RCT_EXPORT_METHOD(getTracksAudioFeatures:(NSArray<NSString*>*)trackIDs options:(
 	}
 	
 	// if we didn't explicitly log out, try to renew the session
-	if(!wasLoggingOut)
+	if(!wasLoggingOutPlayer)
 	{
 		if(_auth.hasTokenRefreshService && _auth.session != nil && _auth.session.encryptedRefreshToken != nil)
 		{
