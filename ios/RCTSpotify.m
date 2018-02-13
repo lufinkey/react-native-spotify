@@ -251,13 +251,13 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSende
 	
 	[self logBackInIfNeeded:^(BOOL loggedIn, NSError* error) {
 		_initialized = YES;
-		if(loggedIn)
-		{
-			[self sendEvent:@"login" args:@[]];
-		}
 		if(completion)
 		{
 			completion(@[ [NSNumber numberWithBool:loggedIn], [RCTSpotifyConvert NSError:error] ]);
+		}
+		if(loggedIn)
+		{
+			[self sendEvent:@"login" args:@[]];
 		}
 	}];
 }
@@ -499,13 +499,13 @@ RCT_EXPORT_METHOD(login:(RCTResponseSenderBlock)completion)
 				dispatch_async(dispatch_get_main_queue(), ^{
 					[authController.presentingViewController dismissViewControllerAnimated:YES completion:^{
 						_loggingIn = NO;
-						if(loggedIn)
-						{
-							[self sendEvent:@"login" args:@[]];
-						}
 						if(completion)
 						{
 							completion(@[ [NSNumber numberWithBool:loggedIn], [RCTSpotifyConvert NSError:error] ]);
+						}
+						if(loggedIn)
+						{
+							[self sendEvent:@"login" args:@[]];
 						}
 					}];
 				});
@@ -1196,8 +1196,6 @@ RCT_EXPORT_METHOD(getTracksAudioFeatures:(NSArray<NSString*>*)trackIDs options:(
 	// clear session and stop player
 	_auth.session = nil;
 	[_player stopWithError:nil];
-	// send logout event
-	[self sendEvent:@"logout" args:@[]];
 	
 	// handle logout callbacks
 	NSArray<void(^)(NSError*)>* logoutResponses = [NSArray arrayWithArray:_logoutResponses];
@@ -1206,6 +1204,9 @@ RCT_EXPORT_METHOD(getTracksAudioFeatures:(NSArray<NSString*>*)trackIDs options:(
 	{
 		response(nil);
 	}
+	
+	// send logout event
+	[self sendEvent:@"logout" args:@[]];
 }
 
 -(void)audioStreamingDidDisconnect:(SPTAudioStreamingController *)audioStreaming

@@ -209,16 +209,16 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 					errorObj = error.toReactObject();
 				}
 				initialized = true;
-				if(loggedIn)
-				{
-					sendEvent("login");
-				}
 				if(callback!=null)
 				{
 					callback.invoke(
 							loggedIn,
 							errorObj
 					);
+				}
+				if(loggedIn)
+				{
+					sendEvent("login");
 				}
 			}
 		});
@@ -501,13 +501,13 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 									@Override
 									public void invoke(Void obj, SpotifyError unusedError)
 									{
-										if(loggedIn)
-										{
-											sendEvent("login");
-										}
 										if(callback != null)
 										{
 											callback.invoke(loggedIn, Convert.fromRCTSpotifyError(error));
+										}
+										if(loggedIn)
+										{
+											sendEvent("login");
 										}
 									}
 								});
@@ -542,13 +542,13 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 							@Override
 							public void invoke(Void obj, SpotifyError unusedError)
 							{
-								if(loggedIn)
-								{
-									sendEvent("login");
-								}
 								if(callback != null)
 								{
 									callback.invoke(loggedIn, Convert.fromRCTSpotifyError(error));
+								}
+								if(loggedIn)
+								{
+									sendEvent("login");
 								}
 							}
 						});
@@ -1710,8 +1710,6 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 		//clear session
 		auth.clearSession();
-		// send logout event
-		sendEvent("logout");
 
 		//handle logoutPlayer callbacks
 		ArrayList<CompletionBlock<Boolean>> logoutResponses;
@@ -1724,6 +1722,9 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		{
 			response.invoke(true, null);
 		}
+		
+		// send logout event
+		sendEvent("logout");
 	}
 
 	@Override
