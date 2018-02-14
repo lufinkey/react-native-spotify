@@ -1,7 +1,6 @@
 
 import EventEmitter from 'events';
 import Spotify from './Spotify';
-import SpotifyURI from 'spotify-uri';
 
 
 const Queue = new EventEmitter();
@@ -66,7 +65,7 @@ tryQueuePlayback = () => {
 	});
 };
 
-Spotify.on('trackDelivered', (event) => {
+Spotify.on("trackDelivered", (event) => {
 	if(uris.length > 0)
 	{
 		// play the next song in the queue
@@ -88,7 +87,7 @@ Queue.nextTrack = function()
 {
 	var nextURI = uris[0];
 	uris.splice(0, 1);
-	if(uris.length == 0)
+	if(nextURI == null)
 	{
 		currentURI = null;
 		return;
@@ -105,12 +104,6 @@ Queue.skipToTrack = function(index)
 
 Queue.addTrack = function(uri)
 {
-	const uriParts = SpotifyURI.parse(uri);
-	if(type !== 'track')
-	{
-		throw new Error("invalid URI: must be a track");
-	}
-	var wasEmpty = (uris.length == 0);
 	uris.push(uri);
 }
 

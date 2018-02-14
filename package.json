@@ -22,7 +22,6 @@
     "react-native": "^0.41.2"
   },
   "dependencies": {
-    "react-native-events": "^1.0.2",
-    "spotify-uri": "^1.0.0"
+    "react-native-events": "^1.0.2"
   }
 }
