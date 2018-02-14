@@ -25,9 +25,9 @@ typedef enum
 	//! Multiple calls of an asynchronous function are conflicting
 	RCTSpotifyErrorConflictingCallbacks = 100,
 	//! Missing parameters or options
-	RCTSpotifyErrorMissingParameters = 101,
+	RCTSpotifyErrorMissingParameter = 101,
 	//! Bad parameters or options
-	RCTSpotifyErrorBadParameters = 102,
+	RCTSpotifyErrorBadParameter = 102,
 	//! RCTSpotify is not initialized
 	RCTSpotifyErrorNotInitialized = 103,
 	//! RCTSpotify must be logged in to use this function
