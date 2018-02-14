@@ -213,7 +213,7 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSende
 	{
 		if(completion)
 		{
-			completion(@[ [self isLoggedIn], [RCTSpotifyConvert NSError:[RCTSpotify errorWithCode:RCTSpotifyErrorCodeAlreadyInitialized description:@"Spotify has already been initialized"]] ]);
+			completion(@[ [self isLoggedIn], [RCTSpotifyConvert NSError:[RCTSpotify errorWithCode:RCTSpotifyErrorAlreadyInitialized description:@"Spotify has already been initialized"]] ]);
 		}
 		return;
 	}
@@ -284,7 +284,7 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTResponseSenderBlock)completion)
 {
 	if(_auth==nil)
 	{
-		completion(NO, [RCTSpotify errorWithCode:RCTSpotifyErrorCodeNotInitialized description:@"Spotify has not been initialized"]);
+		completion(NO, [RCTSpotify errorWithCode:RCTSpotifyErrorNotInitialized description:@"Spotify has not been initialized"]);
 	}
 	else if(_auth.session == nil)
 	{
@@ -340,7 +340,7 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTResponseSenderBlock)completion)
 	dispatch_async(dispatch_get_main_queue(), ^{
 		if(_auth.session == nil)
 		{
-			completion(NO, [RCTSpotify errorWithCode:RCTSpotifyErrorCodeNotLoggedIn description:@"You are not logged in"]);
+			completion(NO, [RCTSpotify errorWithCode:RCTSpotifyErrorNotLoggedIn description:@"You are not logged in"]);
 			return;
 		}
 		else if(!_auth.hasTokenRefreshService)
@@ -350,7 +350,7 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTResponseSenderBlock)completion)
 		}
 		else if(_auth.session.encryptedRefreshToken == nil)
 		{
-			completion(NO, [RCTSpotify errorWithCode:RCTSpotifyErrorCodeAuthorizationFailed description:@"Can't refresh session without a refresh token"]);
+			completion(NO, [RCTSpotify errorWithCode:RCTSpotifyErrorAuthorizationFailed description:@"Can't refresh session without a refresh token"]);
 			return;
 		}
 		
@@ -436,7 +436,7 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTResponseSenderBlock)completion)
 {
 	if(accessToken==nil)
 	{
-		completion(NO, [RCTSpotify errorWithCode:RCTSpotifyErrorCodeNotLoggedIn description:@"No access token has been received"]);
+		completion(NO, [RCTSpotify errorWithCode:RCTSpotifyErrorNotLoggedIn description:@"No access token has been received"]);
 		return;
 	}
 	else if(_player.loggedIn)
@@ -470,7 +470,7 @@ RCT_EXPORT_METHOD(login:(RCTResponseSenderBlock)completion)
 	{
 		if(completion != nil)
 		{
-			completion(@[ @NO, [RCTSpotifyConvert NSError:[RCTSpotify errorWithCode:RCTSpotifyErrorCodeConflictingCallbacks description:@"Cannot call login multiple times before completing"]] ]);
+			completion(@[ @NO, [RCTSpotifyConvert NSError:[RCTSpotify errorWithCode:RCTSpotifyErrorConflictingCallbacks description:@"Cannot call login multiple times before completing"]] ]);
 		}
 		return;
 	}
@@ -602,7 +602,7 @@ RCT_EXPORT_METHOD(handleAuthURLAsync:(NSString*)url completion:(RCTResponseSende
 		error = nil;
 		if(_auth==nil)
 		{
-			error = [RCTSpotify errorWithCode:RCTSpotifyErrorCodeNotInitialized description:@"Spotify has not been initialized"];
+			error = [RCTSpotify errorWithCode:RCTSpotifyErrorNotInitialized description:@"Spotify has not been initialized"];
 		}
 		completion(error);
 	}];
@@ -809,11 +809,11 @@ RCT_EXPORT_METHOD(skipToPrevious:(RCTResponseSenderBlock)completion)
 		error = nil;
 		if(_auth==nil)
 		{
-			error = [RCTSpotify errorWithCode:RCTSpotifyErrorCodeNotInitialized description:@"Spotify has not been initialized"];
+			error = [RCTSpotify errorWithCode:RCTSpotifyErrorNotInitialized description:@"Spotify has not been initialized"];
 		}
 		else if(_auth.session==nil || _auth.session.accessToken==nil)
 		{
-			error = [RCTSpotify errorWithCode:RCTSpotifyErrorCodeNotLoggedIn description:@"You are not logged in"];
+			error = [RCTSpotify errorWithCode:RCTSpotifyErrorNotLoggedIn description:@"You are not logged in"];
 		}
 		completion(error);
 	}];
@@ -1166,7 +1166,7 @@ RCT_EXPORT_METHOD(getTracksAudioFeatures:(NSArray<NSString*>*)trackIDs options:(
 	[_loginPlayerResponses removeAllObjects];
 	for(void(^response)(BOOL,NSError*) in loginPlayerResponses)
 	{
-		response(NO, [RCTSpotify errorWithCode:RCTSpotifyErrorCodeNotLoggedIn description:@"Spotify was logged out"]);
+		response(NO, [RCTSpotify errorWithCode:RCTSpotifyErrorNotLoggedIn description:@"Spotify was logged out"]);
 	}
 	
 	// if we didn't explicitly log out, try to renew the session

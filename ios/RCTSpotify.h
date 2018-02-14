@@ -17,21 +17,23 @@ extern NSString* const RCTSpotifyWebAPIDomain;
 typedef enum
 {
 	//! RCTSpotify has already been initialized
-	RCTSpotifyErrorCodeAlreadyInitialized = 90,
+	RCTSpotifyErrorAlreadyInitialized = 90,
+	//! The initialize method failed
+	RCTSpotifyErrorInitializationFailed = 91,
 	//! Authorization (renewal or login) has failed
-	RCTSpotifyErrorCodeAuthorizationFailed = 92,
+	RCTSpotifyErrorAuthorizationFailed = 92,
 	//! Multiple calls of an asynchronous function are conflicting
-	RCTSpotifyErrorCodeConflictingCallbacks = 100,
+	RCTSpotifyErrorConflictingCallbacks = 100,
 	//! Missing parameters or options
-	RCTSpotifyErrorCodeMissingParameters = 101,
+	RCTSpotifyErrorMissingParameters = 101,
 	//! Bad parameters or options
-	RCTSpotifyErrorCodeBadParameters = 102,
+	RCTSpotifyErrorBadParameters = 102,
 	//! RCTSpotify is not initialized
-	RCTSpotifyErrorCodeNotInitialized = 103,
+	RCTSpotifyErrorNotInitialized = 103,
 	//! RCTSpotify must be logged in to use this function
-	RCTSpotifyErrorCodeNotLoggedIn = 104,
+	RCTSpotifyErrorNotLoggedIn = 104,
 	//! A sent request returned an error
-	RCTSpotifyErrorCodeRequestError = 105
+	RCTSpotifyErrorRequestError = 105
 } RCTSpotifyErrorCode;
 
 
