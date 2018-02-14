@@ -13,6 +13,7 @@ import com.facebook.react.bridge.WritableMap;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -143,6 +144,15 @@ public class Auth
 		save();
 	}
 
+	public boolean isLoggedIn()
+	{
+		if(accessToken != null)
+		{
+			return true;
+		}
+		return false;
+	}
+
 	public boolean isSessionValid()
 	{
 		if(expireDate==null || expireDate.before(new Date()))
@@ -176,69 +186,90 @@ public class Auth
 		save();
 	}
 
-	public void swapCodeForToken(String code, final CompletionBlock<String> completion)
+	public void performTokenURLRequest(String url, String body, final CompletionBlock<JSONObject> completion)
 	{
-		if(tokenSwapURL==null)
-		{
-			completion.invoke(null, new SpotifyError(SpotifyError.Code.MISSING_PARAMETERS, "cannot swap code for token without tokenSwapURL option"));
-			return;
-		}
-
-		WritableMap params = Arguments.createMap();
-		params.putString("code", code);
-
-		String url = tokenSwapURL;
-		String body = Utils.makeQueryString(params);
-
-		Utils.doHTTPRequest(url, "POST", null, body.getBytes(), new CompletionBlock<NetworkResponse>() {
+		Utils.doHTTPRequest(url, "POST", null, (body!=null ? body.getBytes() : null), new CompletionBlock<NetworkResponse>() {
 			@Override
 			public void invoke(NetworkResponse response, SpotifyError error)
 			{
 				if(response==null)
 				{
 					completion.invoke(null, error);
+					return;
 				}
-				else
-				{
-					String responseStr = Utils.getResponseString(response);
 
-					JSONObject responseObj;
-					try
+				try
+				{
+					JSONObject responseObj = new JSONObject(Utils.getResponseString(response));
+					if(responseObj.has("error"))
 					{
-						responseObj = new JSONObject(responseStr);
-					}
-					catch(JSONException e)
-					{
-						completion.invoke(null, new SpotifyError(SpotifyError.Code.REQUEST_ERROR, "Invalid response format"));
+						completion.invoke(null, new SpotifyError(responseObj.getString("error"), responseObj.getString("error_description")));
 						return;
 					}
 
-					try
-					{
-						if(responseObj.has("error"))
-						{
-							if(error!=null)
-							{
-								completion.invoke(null, new SpotifyError(SpotifyError.SPOTIFY_AUTH_DOMAIN, error.getCode(), responseObj.getString("error_description")));
-							}
-							else
-							{
-								completion.invoke(null, new SpotifyError(SpotifyError.Code.REQUEST_ERROR, responseObj.getString("error_description")));
-							}
-							return;
-						}
-
-						accessToken = responseObj.getString("access_token");
-						refreshToken = responseObj.getString("refresh_token");
-						expireDate = getExpireDate(responseObj.getInt("expires_in"));
-						save();
-					}
-					catch(JSONException e)
-					{
-						completion.invoke(null, new SpotifyError(SpotifyError.Code.REQUEST_ERROR, "Missing expected response parameters"));
-					}
-					completion.invoke(accessToken, null);
+					completion.invoke(responseObj, null);
 				}
+				catch(JSONException e)
+				{
+					if(error == null)
+					{
+						if(response.statusCode >= 200 && response.statusCode < 300)
+						{
+							completion.invoke(null, new SpotifyError(SpotifyError.Code.RCTSpotifyErrorBadResponse));
+						}
+						else
+						{
+							completion.invoke(null, SpotifyError.getHTTPError(response.statusCode));
+						}
+					}
+					else
+					{
+						completion.invoke(null, error);
+					}
+				}
+			}
+		});
+	}
+
+	public void swapCodeForToken(String code, final CompletionBlock<String> completion)
+	{
+		if(tokenSwapURL==null)
+		{
+
+			completion.invoke(null, new SpotifyError(SpotifyError.Code.RCTSpotifyErrorMissingParameter, "cannot swap code for token without tokenSwapURL option"));
+			return;
+		}
+
+		WritableMap params = Arguments.createMap();
+		params.putString("code", code);
+
+		performTokenURLRequest(tokenSwapURL, Utils.makeQueryString(params), new CompletionBlock<JSONObject>() {
+			@Override
+			public void invoke(JSONObject response, SpotifyError error)
+			{
+				if(error!=null)
+				{
+					completion.invoke(null, error);
+					return;
+				}
+
+				try
+				{
+					accessToken = response.getString("access_token");
+					refreshToken = response.getString("refresh_token");
+					expireDate = getExpireDate(response.getInt("expires_in"));
+				}
+				catch(JSONException e)
+				{
+					accessToken = null;
+					refreshToken = null;
+					expireDate = null;
+					completion.invoke(null, new SpotifyError(SpotifyError.Code.RCTSpotifyErrorBadResponse, "missing expected response parameters"));
+					return;
+				}
+
+				save();
+				completion.invoke(accessToken, null);
 			}
 		});
 	}
@@ -274,7 +305,7 @@ public class Auth
 		}
 		else if(refreshToken==null)
 		{
-			completion.invoke(false, new SpotifyError(SpotifyError.Code.AUTHORIZATION_FAILED, "Can't refresh session without a refresh token"));
+			completion.invoke(false, new SpotifyError(SpotifyError.Code.RCTSpotifyErrorAuthorizationFailed, "Can't refresh session without a refresh token"));
 			return;
 		}
 
@@ -313,40 +344,32 @@ public class Auth
 		WritableMap params = Arguments.createMap();
 		params.putString("refresh_token", refreshToken);
 
-		String url = tokenRefreshURL;
-		String body = Utils.makeQueryString(params);
-
-		Utils.doHTTPRequest(url, "POST", null, body.getBytes(), new CompletionBlock<NetworkResponse>() {
+		performTokenURLRequest(tokenRefreshURL, Utils.makeQueryString(params), new CompletionBlock<JSONObject>() {
 			@Override
-			public void invoke(NetworkResponse response, SpotifyError error)
+			public void invoke(JSONObject response, SpotifyError error)
 			{
 				renewingSession = false;
 
-				// determine whether session was renewed
+				// determine if session was renewed
 				boolean renewed = false;
-				if(response != null)
+				if(error != null)
 				{
-					String responseStr = Utils.getResponseString(response);
-
-					JSONObject responseObj;
 					try
 					{
-						responseObj = new JSONObject(responseStr);
-						if(responseObj.has("error"))
+						String newAccessToken = response.getString("access_token");
+						int newExpireTime = response.getInt("expires_in");
+						if(accessToken != null)
 						{
-							error = new SpotifyError(SpotifyError.SPOTIFY_AUTH_DOMAIN, response.statusCode, responseObj.getString("error_description"));
-						}
-						else
-						{
-							accessToken = responseObj.getString("access_token");
-							expireDate = getExpireDate(responseObj.getInt("expires_in"));
+							accessToken = newAccessToken;
+							expireDate = getExpireDate(newExpireTime);
 							save();
 							renewed = true;
 						}
 					}
 					catch(JSONException e)
 					{
-						error = new SpotifyError(SpotifyError.Code.REQUEST_ERROR, "Invalid response format");
+						// was not renewed
+						error = new SpotifyError(SpotifyError.Code.RCTSpotifyErrorBadResponse, "Missing expected response parameters");
 					}
 				}
 
@@ -363,10 +386,13 @@ public class Auth
 				}
 
 				// check if the session was renewed, or if a login error was given
-				if(renewed ||
-						(!renewed && (error == null || (error != null && error.getDomain().equals(SpotifyError.SPOTIFY_AUTH_DOMAIN)
-								// ensure error code is not a timeout
-								&& error.getCode() != 408 && error.getCode() != 504 && error.getCode() != 598 && error.getCode() != 599))))
+				if(renewed || (error != null
+							// ensure error code is not a timeout or lack of connection
+							&& !error.getCode().equals(SpotifyError.getHTTPError(0).getCode())
+							&& !error.getCode().equals(SpotifyError.getHTTPError(408).getCode())
+							&& !error.getCode().equals(SpotifyError.getHTTPError(504).getCode())
+							&& !error.getCode().equals(SpotifyError.getHTTPError(598).getCode())
+							&& !error.getCode().equals(SpotifyError.getHTTPError(599).getCode())))
 				{
 					// renewal has reached a success or an error
 					retryRenewalUntilResponse = false;

@@ -16,7 +16,6 @@ import com.spotify.sdk.android.player.Connectivity;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
-import java.util.Map;
 
 public class Utils
 {
@@ -86,7 +85,7 @@ public class Utils
 			@Override
 			public void onError(VolleyError error)
 			{
-				completion.invoke(null, new SpotifyError(SpotifyError.Code.REQUEST_ERROR, "Could not communicate with server"));
+				completion.invoke(null, SpotifyError.getHTTPError(0));
 			}
 
 			@Override

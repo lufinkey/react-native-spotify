@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.view.Gravity;
 
 import com.android.volley.NetworkResponse;
@@ -96,38 +95,31 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	//initialize(options, (loggedIn, error?))
 	public void initialize(ReadableMap options, final Callback callback)
 	{
-		System.out.println("initializing Spotify module");
-
 		// ensure module is not already initialized
 		if(initialized)
 		{
-			System.out.println("already initialized. Finishing initialization");
-			if(callback!=null)
-			{
-				callback.invoke(
-						false,
-						new SpotifyError(
-								SpotifyError.Code.ALREADY_INITIALIZED,
-								"Spotify has already been initialized").toReactObject()
-				);
-			}
+			callback.invoke(isLoggedIn(), new SpotifyError(Error.kSpErrorAlreadyInitialized).toReactObject());
 			return;
 		}
 
-		// ensure options is not null
+		// ensure options is not null or missing fields
 		if(options==null)
 		{
-			options = Arguments.createMap();
+			callback.invoke(false, SpotifyError.getNullParameterError("options").toReactObject());
+			return;
 		}
+		else if(!options.hasKey("clientID"))
+		{
+			callback.invoke(false, SpotifyError.getMissingOptionError("clientId").toReactObject());
+			return;
+		}
+
 		this.options = options;
 
 		// load auth options
 		auth = new Auth();
 		auth.reactContext = reactContext;
-		if(options.hasKey("clientID"))
-		{
-			auth.clientID = options.getString("clientID");
-		}
+		auth.clientID = options.getString("clientID");
 		if(options.hasKey("redirectURL"))
 		{
 			auth.redirectURL = options.getString("redirectURL");
@@ -203,18 +195,10 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		logBackInIfNeeded(new CompletionBlock<Boolean>() {
 			@Override
 			public void invoke(Boolean loggedIn, SpotifyError error) {
-				ReadableMap errorObj = null;
-				if(error!=null)
-				{
-					errorObj = error.toReactObject();
-				}
 				initialized = true;
 				if(callback!=null)
 				{
-					callback.invoke(
-							loggedIn,
-							errorObj
-					);
+					callback.invoke(loggedIn, Convert.fromRCTSpotifyError(error));
 				}
 				if(loggedIn)
 				{
@@ -279,20 +263,8 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			return;
 		}
 
-		//check for clientID
-		if(auth.clientID == null)
-		{
-			completion.invoke(
-					false,
-					new SpotifyError(
-							SpotifyError.Code.MISSING_PARAMETERS,
-							"missing option clientID")
-			);
-			return;
-		}
-
 		//check if player already exists
-		if(player != null)
+		if(player != null && player.isInitialized())
 		{
 			loginPlayer(auth.getAccessToken(), new CompletionBlock<Boolean>() {
 				@Override
@@ -305,14 +277,18 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		}
 
 		//initialize player
-		Config playerConfig = new Config(reactContext.getCurrentActivity().getApplicationContext(), accessToken, auth.clientID);
-		player = Spotify.getPlayer(playerConfig, this, new SpotifyPlayer.InitializationObserver(){
+		final Object reference = this;
+		Config playerConfig = new Config(reactContext.getApplicationContext(), accessToken, auth.clientID);
+		player = Spotify.getPlayer(playerConfig, reference, new SpotifyPlayer.InitializationObserver(){
 			@Override
 			public void onError(Throwable error)
 			{
-				Spotify.destroyPlayer(player);
-				player = null;
-				completion.invoke(false, new SpotifyError(SpotifyError.Code.INITIALIZATION_FAILED, error.getLocalizedMessage()));
+				if(player != null)
+				{
+					Spotify.destroyPlayer(reference);
+					player = null;
+				}
+				completion.invoke(false, new SpotifyError(Error.kSpErrorInitFailed, error.getLocalizedMessage()));
 			}
 
 			@Override
@@ -340,6 +316,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	private void loginPlayer(final String accessToken, final CompletionBlock<Boolean> completion)
 	{
 		boolean loggedIn = false;
+		boolean firstLoginAttempt = false;
 
 		synchronized(playerLoginResponses)
 		{
@@ -349,6 +326,10 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			}
 			else
 			{
+				if(playerLoginResponses.size()==0)
+				{
+					firstLoginAttempt = true;
+				}
 				//wait for RCTSpotifyModule.onLoggedIn
 				// or RCTSpotifyModule.onLoginFailed
 				playerLoginResponses.add(new CompletionBlock<Boolean>() {
@@ -365,7 +346,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		{
 			completion.invoke(true, null);
 		}
-		else
+		else if(firstLoginAttempt)
 		{
 			player.login(accessToken);
 		}
@@ -637,11 +618,11 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			public void invoke(Boolean loggedIn, SpotifyError error) {
 				if(!initialized)
 				{
-					error = new SpotifyError(SpotifyError.Code.NOT_INITIALIZED, "Spotify has not been initiaized");
+					error = new SpotifyError(SpotifyError.Code.RCTSpotifyErrorNotInitialized, "Spotify has not been initiaized");
 				}
 				else if(player==null)
 				{
-					error = SpotifyError.fromSDKError(SpotifyError.getNativeCode(Error.kSpErrorUninitialized));
+					error = new SpotifyError(Error.kSpErrorUninitialized);
 				}
 				else if(player.isLoggedIn())
 				{
@@ -753,7 +734,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	public void setVolume(double volume, final Callback callback)
 	{
 		//TODO implement this with a custom AudioController
-		callback.invoke(new SpotifyError(SpotifyError.Code.NOT_IMPLEMENTED, "setVolume does not work on android"));
+		callback.invoke(new SpotifyError(SpotifyError.Code.RCTSpotifyErrorNotImplemented, "setVolume does not work on android"));
 	}
 
 	@ReactMethod(isBlockingSynchronousMethod = true)
@@ -1086,11 +1067,11 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			public void invoke(Boolean loggedIn, SpotifyError error) {
 				if(!initialized)
 				{
-					error = new SpotifyError(SpotifyError.Code.NOT_INITIALIZED, "Spotify has not been initiaized");
+					error = new SpotifyError(SpotifyError.Code.RCTSpotifyErrorNotInitialized, "Spotify has not been initiaized");
 				}
 				else if(auth.getAccessToken()==null)
 				{
-					error = new SpotifyError(SpotifyError.Code.NOT_LOGGED_IN, "You are not logged in");
+					error = new SpotifyError(SpotifyError.Code.RCTSpotifyErrorNotLoggedIn, "You are not logged in");
 				}
 				else if(auth.isSessionValid())
 				{
@@ -1167,36 +1148,32 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 							try
 							{
 								resultObj = new JSONObject(responseStr);
+								if(resultObj.has("error"))
+								{
+									if(resultObj.has("error_description"))
+									{
+										String errorCode = resultObj.getString("error");
+										String errorDescription = resultObj.getString("error_description");
+										completion.invoke(null, new SpotifyError(errorCode, errorDescription));
+									}
+									else
+									{
+										JSONObject errorObj = resultObj.getJSONObject("error");
+										int statusCode = errorObj.getInt("status");
+										String errorMessage = resultObj.getString("message");
+										completion.invoke(null, SpotifyError.getHTTPError(statusCode, errorMessage));
+									}
+									return;
+								}
 							}
 							catch (JSONException e)
 							{
-								completion.invoke(null, new SpotifyError(SpotifyError.Code.REQUEST_ERROR, "Invalid response format"));
+								completion.invoke(null, new SpotifyError(SpotifyError.Code.RCTSpotifyErrorBadResponse));
 								return;
 							}
 						}
 
-						if(resultObj != null)
-						{
-							try
-							{
-								String errorDescription = resultObj.getString("error_description");
-								error = new SpotifyError(SpotifyError.SPOTIFY_WEB_DOMAIN, response.statusCode, errorDescription);
-							}
-							catch(JSONException e1)
-							{
-								try
-								{
-									JSONObject errorObj = resultObj.getJSONObject("error");
-									error = new SpotifyError(SpotifyError.SPOTIFY_WEB_DOMAIN, errorObj.getInt("status"), errorObj.getString("message"));
-								}
-								catch(JSONException e2)
-								{
-									//do nothing. this means we don't have an error
-								}
-							}
-						}
-
-						Object result = null;
+						Object result;
 						if(resultObj != null)
 						{
 							result = Convert.fromJSONObject(resultObj);
@@ -1205,7 +1182,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 						{
 							result = responseStr;
 						}
-						completion.invoke(result, error);
+						completion.invoke(result, null);
 					}
 				});
 			}
@@ -1673,7 +1650,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		}
 		for(CompletionBlock<Boolean> response : loginResponses)
 		{
-			response.invoke(false, new SpotifyError(SpotifyError.Code.NOT_LOGGED_IN, "You have been logged out"));
+			response.invoke(false, new SpotifyError(SpotifyError.Code.RCTSpotifyErrorNotLoggedIn, "You have been logged out"));
 		}
 
 		// if we didn't explicitly log out, try to renew the session

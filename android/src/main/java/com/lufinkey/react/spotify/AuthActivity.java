@@ -2,9 +2,7 @@ package com.lufinkey.react.spotify;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.view.Window;
 
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
@@ -27,7 +25,7 @@ public class AuthActivity extends Activity
 		// check for missing options
 		if(auth.clientID == null)
 		{
-			SpotifyError error = new SpotifyError(SpotifyError.Code.MISSING_PARAMETERS, "missing option clientID");
+			SpotifyError error = new SpotifyError(SpotifyError.Code.RCTSpotifyErrorMissingParameter, "missing option clientID");
 			listener.onAuthActivityFailure(null, error);
 			return;
 		}
@@ -36,7 +34,7 @@ public class AuthActivity extends Activity
 		if(authFlow_auth != null || authFlow_listener != null || currentAuthActivity != null)
 		{
 			System.out.println("AuthActivity is already being shown");
-			SpotifyError error = new SpotifyError(SpotifyError.Code.CONFLICTING_CALLBACKS, "Cannot call login multiple times before completing");
+			SpotifyError error = new SpotifyError(SpotifyError.Code.RCTSpotifyErrorConflictingCallbacks, "Cannot call login multiple times before completing");
 			listener.onAuthActivityFailure(null, error);
 			return;
 		}
@@ -101,7 +99,7 @@ public class AuthActivity extends Activity
 					}
 					else
 					{
-						listener.onAuthActivityFailure(this, new SpotifyError(SpotifyError.Code.AUTHORIZATION_FAILED, response.getError()));
+						listener.onAuthActivityFailure(this, new SpotifyError(SpotifyError.Code.RCTSpotifyErrorAuthorizationFailed, response.getError()));
 					}
 					break;
 
