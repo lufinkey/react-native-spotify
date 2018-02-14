@@ -1,9 +1,7 @@
 
-import { NativeModules } from 'react-native';
-import NativeModuleEvents from 'react-native-events';
+import Queue from './src/Queue';
+import Spotify from './src/Spotify';
 
-const Spotify = NativeModules.Spotify;
-
-NativeModuleEvents.registerNativeModule(Spotify);
+Spotify.queue = Queue;
 
 export default Spotify;

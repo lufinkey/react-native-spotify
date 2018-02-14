@@ -81,7 +81,7 @@ NSString* const RCTSpotifyWebAPIDomain = @"com.spotify.web-api";
 
 +(BOOL)requiresMainQueueSetup
 {
-	return YES;
+	return NO;
 }
 
 RCT_EXPORT_METHOD(__registerAsJSEventEmitter:(int)moduleId)
