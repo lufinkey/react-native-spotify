@@ -33,7 +33,7 @@ typedef enum
 	//! RCTSpotify must be logged in to use this function
 	RCTSpotifyErrorNotLoggedIn = 104,
 	//! A sent request returned an error
-	RCTSpotifyErrorRequestError = 105
+	RCTSpotifyErrorRequestFailed = 105
 } RCTSpotifyErrorCode;
 
 
