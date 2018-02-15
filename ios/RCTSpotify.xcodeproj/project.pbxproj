@@ -14,6 +14,7 @@
 		A0A4341F1FAE25720073DAB9 /* SpotifyMetadata.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A0A4341A1FAE25690073DAB9 /* SpotifyMetadata.framework */; };
 		A0AD6943200E5B00003EC7D8 /* RCTSpotifyProgressView.m in Sources */ = {isa = PBXBuildFile; fileRef = A0AD6942200E5B00003EC7D8 /* RCTSpotifyProgressView.m */; };
 		A0AD6946200E7277003EC7D8 /* RCTSpotifyWebViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A0AD6945200E7277003EC7D8 /* RCTSpotifyWebViewController.m */; };
+		A0C233722036800A0063A745 /* RCTSpotifyCompletion.m in Sources */ = {isa = PBXBuildFile; fileRef = A0C233712036800A0063A745 /* RCTSpotifyCompletion.m */; };
 		B3E7B58A1CC2AC0600A0062D /* RCTSpotify.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* RCTSpotify.m */; };
 /* End PBXBuildFile section */
 
@@ -42,6 +43,8 @@
 		A0AD6942200E5B00003EC7D8 /* RCTSpotifyProgressView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RCTSpotifyProgressView.m; sourceTree = "<group>"; };
 		A0AD6944200E7277003EC7D8 /* RCTSpotifyWebViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RCTSpotifyWebViewController.h; sourceTree = "<group>"; };
 		A0AD6945200E7277003EC7D8 /* RCTSpotifyWebViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RCTSpotifyWebViewController.m; sourceTree = "<group>"; };
+		A0C233702036800A0063A745 /* RCTSpotifyCompletion.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RCTSpotifyCompletion.h; sourceTree = "<group>"; };
+		A0C233712036800A0063A745 /* RCTSpotifyCompletion.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RCTSpotifyCompletion.m; sourceTree = "<group>"; };
 		A0CB1CFF1FB4D718009989EA /* HelperMacros.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HelperMacros.h; sourceTree = "<group>"; };
 		B3E7B5881CC2AC0600A0062D /* RCTSpotify.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTSpotify.h; sourceTree = "<group>"; };
 		B3E7B5891CC2AC0600A0062D /* RCTSpotify.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTSpotify.m; sourceTree = "<group>"; };
@@ -77,6 +80,8 @@
 				B3E7B5891CC2AC0600A0062D /* RCTSpotify.m */,
 				A00A83BD1FB5188A00394AF0 /* RCTSpotifyConvert.h */,
 				A00A83BC1FB5188A00394AF0 /* RCTSpotifyConvert.m */,
+				A0C233702036800A0063A745 /* RCTSpotifyCompletion.h */,
+				A0C233712036800A0063A745 /* RCTSpotifyCompletion.m */,
 				A0AD6941200E5B00003EC7D8 /* RCTSpotifyProgressView.h */,
 				A0AD6942200E5B00003EC7D8 /* RCTSpotifyProgressView.m */,
 				A0AD6944200E7277003EC7D8 /* RCTSpotifyWebViewController.h */,
@@ -158,6 +163,7 @@
 				A00A83BE1FB5188A00394AF0 /* RCTSpotifyConvert.m in Sources */,
 				A0AD6943200E5B00003EC7D8 /* RCTSpotifyProgressView.m in Sources */,
 				B3E7B58A1CC2AC0600A0062D /* RCTSpotify.m in Sources */,
+				A0C233722036800A0063A745 /* RCTSpotifyCompletion.m in Sources */,
 				A0AD6946200E7277003EC7D8 /* RCTSpotifyWebViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

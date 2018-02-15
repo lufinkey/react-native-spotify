@@ -97,39 +97,4 @@ typedef enum
 //sendRequest(endpoint, method, params, isJSONBody, (result?, error?))
 -(void)sendRequest:(NSString*)endpoint method:(NSString*)method params:(NSDictionary*)params isJSONBody:(BOOL)jsonBody completion:(RCTResponseSenderBlock)completion;
 
-//getMe((result?, error?))
--(void)getMe:(RCTResponseSenderBlock)completion;
-
-//search(query, types, options?, (result?, error?))
--(void)search:(NSString*)query types:(NSArray<NSString*>*)types options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion;
-
-//getAlbum(albumID, options?, (result?, error?))
--(void)getAlbum:(NSString*)albumID options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion;
-//getAlbums(albumIDs, options?, (result?, error?))
--(void)getAlbums:(NSArray<NSString*>*)albumIDs options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion;
-//getAlbumTracks(albumID, options?, (result?, error?))
--(void)getAlbumTracks:(NSString*)albumID options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion;
-
-//getArtist(artistID, options?, (result?, error?))
--(void)getArtist:(NSString*)artistID options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion;
-//getArtists(artistIDs, options?, (result?, error?))
--(void)getArtists:(NSArray<NSString*>*)artistIDs options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion;
-//getArtistAlbums(artistID, options?, (result?, error?))
--(void)getArtistAlbums:(NSString*)artistID options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion;
-//getArtistTopTracks(artistID, country, options?, (result?, error?))
--(void)getArtistTopTracks:(NSString*)artistID country:(NSString*)country options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion;
-//getArtistRelatedArtists(artistID, options?, (result?, error?))
--(void)getArtistRelatedArtists:(NSString*)artistID options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion;
-
-//getTrack(trackID, options?, (result?, error?))
--(void)getTrack:(NSString*)trackID options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion;
-//getTracks(trackIDs, options?, (result?, error?))
--(void)getTracks:(NSArray<NSString*>*)trackIDs options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion;
-//getTrackAudioAnalysis(trackID, options?, (result?, error?))
--(void)getTrackAudioAnalysis:(NSString*)trackID options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion;
-//getTrackAudioFeatures(trackID, options?, (result?, error?))
--(void)getTrackAudioFeatures:(NSString*)trackID options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion;
-//getTracksAudioFeatures(trackIDs, options?, (result?, error?))
--(void)getTracksAudioFeatures:(NSArray<NSString*>*)trackIDs options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion;
-
 @end
