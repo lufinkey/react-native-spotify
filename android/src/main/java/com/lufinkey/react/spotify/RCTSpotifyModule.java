@@ -78,6 +78,16 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		return "RCTSpotify";
 	}
 
+	@Override
+	public void onCatalystInstanceDestroy()
+	{
+		if(player != null)
+		{
+			Spotify.destroyPlayer(this);
+			player = null;
+		}
+	}
+
 	private Object nullobj()
 	{
 		return null;
