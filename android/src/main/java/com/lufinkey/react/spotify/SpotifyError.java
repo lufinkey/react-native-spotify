@@ -19,7 +19,8 @@ public class SpotifyError
 		NullParameter("Null parameter"),
 		ConflictingCallbacks("You cannot call this function while it is already executing"),
 		BadResponse("Invalid response format"),
-		PlayerNotReady("Player is not ready");
+		PlayerNotReady("Player is not ready"),
+		SessionExpired("Your login session has expired");
 
 		public final String description;
 

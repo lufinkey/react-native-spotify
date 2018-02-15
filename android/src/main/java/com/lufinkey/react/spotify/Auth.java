@@ -9,6 +9,7 @@ import com.android.volley.NetworkResponse;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.WritableMap;
+import com.spotify.sdk.android.player.Connectivity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -65,7 +66,14 @@ public class Auth
 			SharedPreferences prefs = reactContext.getCurrentActivity().getSharedPreferences(sessionUserDefaultsKey, Context.MODE_PRIVATE);
 			SharedPreferences.Editor prefsEditor = prefs.edit();
 			prefsEditor.putString("accessToken", accessToken);
-			prefsEditor.putLong("expireTime", expireDate.getTime());
+			if(expireDate != null)
+			{
+				prefsEditor.putLong("expireTime", expireDate.getTime());
+			}
+			else
+			{
+				prefsEditor.putLong("expireTime", 0);
+			}
 			prefsEditor.putString("refreshToken", refreshToken);
 			prefsEditor.apply();
 		}
@@ -187,13 +195,14 @@ public class Auth
 
 	public void performTokenURLRequest(String url, String body, final CompletionBlock<JSONObject> completion)
 	{
+		System.out.println("performTokenURLRequest");
 		Utils.doHTTPRequest(url, "POST", null, (body!=null ? body.getBytes() : null), new CompletionBlock<NetworkResponse>() {
 			@Override
-			public void invoke(NetworkResponse response, SpotifyError error)
+			public void onComplete(NetworkResponse response, SpotifyError error)
 			{
 				if(response==null)
 				{
-					completion.invoke(null, error);
+					completion.reject(error);
 					return;
 				}
 
@@ -202,11 +211,11 @@ public class Auth
 					JSONObject responseObj = new JSONObject(Utils.getResponseString(response));
 					if(responseObj.has("error"))
 					{
-						completion.invoke(null, new SpotifyError(responseObj.getString("error"), responseObj.getString("error_description")));
+						completion.reject(new SpotifyError(responseObj.getString("error"), responseObj.getString("error_description")));
 						return;
 					}
 
-					completion.invoke(responseObj, null);
+					completion.resolve(responseObj);
 				}
 				catch(JSONException e)
 				{
@@ -214,16 +223,16 @@ public class Auth
 					{
 						if(response.statusCode >= 200 && response.statusCode < 300)
 						{
-							completion.invoke(null, new SpotifyError(SpotifyError.Code.BadResponse));
+							completion.reject(new SpotifyError(SpotifyError.Code.BadResponse));
 						}
 						else
 						{
-							completion.invoke(null, SpotifyError.getHTTPError(response.statusCode));
+							completion.reject(SpotifyError.getHTTPError(response.statusCode));
 						}
 					}
 					else
 					{
-						completion.invoke(null, error);
+						completion.reject(error);
 					}
 				}
 			}
@@ -235,7 +244,7 @@ public class Auth
 		if(tokenSwapURL==null)
 		{
 
-			completion.invoke(null, SpotifyError.getMissingOptionError("tokenSwapURL"));
+			completion.reject(SpotifyError.getMissingOptionError("tokenSwapURL"));
 			return;
 		}
 
@@ -244,14 +253,14 @@ public class Auth
 
 		performTokenURLRequest(tokenSwapURL, Utils.makeQueryString(params), new CompletionBlock<JSONObject>() {
 			@Override
-			public void invoke(JSONObject response, SpotifyError error)
+			public void onReject(SpotifyError error)
 			{
-				if(error!=null)
-				{
-					completion.invoke(null, error);
-					return;
-				}
+				completion.reject(error);
+			}
 
+			@Override
+			public void onResolve(JSONObject response)
+			{
 				try
 				{
 					accessToken = response.getString("access_token");
@@ -263,55 +272,73 @@ public class Auth
 					accessToken = null;
 					refreshToken = null;
 					expireDate = null;
-					completion.invoke(null, new SpotifyError(SpotifyError.Code.BadResponse, "Missing expected response parameters"));
+					completion.reject(new SpotifyError(SpotifyError.Code.BadResponse, "Missing expected response parameters"));
 					return;
 				}
 
 				save();
-				completion.invoke(accessToken, null);
+				completion.resolve(accessToken);
 			}
 		});
 	}
 
-	public void renewSessionIfNeeded(final CompletionBlock<Boolean> completion)
+	public void renewSessionIfNeeded(final CompletionBlock<Boolean> completion, boolean waitForDefinitiveResponse)
 	{
-		if(isSessionValid())
+		System.out.println("renewSessionIfNeeded");
+		if(accessToken == null)
 		{
-			completion.invoke(true, null);
+			// not logged in
+			completion.resolve(false);
+		}
+		else if(isSessionValid())
+		{
+			// session does not need renewal
+			completion.resolve(true);
 		}
 		else if(refreshToken==null)
 		{
-			completion.invoke(false, null);
+			// no refresh token to renew session with, so the session has expired
+			completion.reject(new SpotifyError(SpotifyError.Code.SessionExpired));
 		}
 		else
 		{
+			// renew the session
 			renewSession(new CompletionBlock<Boolean>() {
 				@Override
-				public void invoke(Boolean success, SpotifyError error)
+				public void onReject(SpotifyError error)
 				{
-					completion.invoke(success, error);
+					completion.reject(error);
 				}
-			}, false);
+
+				@Override
+				public void onResolve(Boolean renewed)
+				{
+					completion.resolve(renewed);
+				}
+			}, waitForDefinitiveResponse);
 		}
 	}
 
-	public void renewSession(final CompletionBlock<Boolean> completion, boolean waitForResponse)
+	public void renewSession(final CompletionBlock<Boolean> completion, boolean waitForDefinitiveResponse)
 	{
+		System.out.println("renewSession");
 		if(tokenRefreshURL==null)
 		{
-			completion.invoke(false, null);
+			System.out.println("no token refresh");
+			completion.resolve(false);
 			return;
 		}
 		else if(refreshToken==null)
 		{
-			completion.invoke(false, null);
+			System.out.println("no refresh token");
+			completion.resolve(false);
 			return;
 		}
 
-		// add completion to callbacks
+		// add completion to be called when the renewal finishes with a definitive answer
 		if(completion != null)
 		{
-			if(waitForResponse)
+			if(waitForDefinitiveResponse)
 			{
 				synchronized (renewUntilResponseCallbacks)
 				{
@@ -327,25 +354,28 @@ public class Auth
 			}
 		}
 
-		// determine whether to retry renewal
-		if(waitForResponse)
+		// determine whether to retry renewal if a definitive response isn't given
+		if(waitForDefinitiveResponse)
 		{
 			retryRenewalUntilResponse = true;
 		}
 
-		// if we're already renewing the session, don't continue
-		if(renewingSession || retryRenewalUntilResponse)
+		// if we're already in the process of renewing the session, don't continue
+		if(renewingSession)
 		{
+			System.out.println("renewing session already or retrying renewal until response");
 			return;
 		}
 		renewingSession = true;
 
+		// create request body
 		WritableMap params = Arguments.createMap();
 		params.putString("refresh_token", refreshToken);
 
+		// perform token refresh
 		performTokenURLRequest(tokenRefreshURL, Utils.makeQueryString(params), new CompletionBlock<JSONObject>() {
 			@Override
-			public void invoke(JSONObject response, SpotifyError error)
+			public void onComplete(JSONObject response, SpotifyError error)
 			{
 				renewingSession = false;
 
@@ -372,6 +402,19 @@ public class Auth
 					}
 				}
 
+				// ensure an actual session renewal error (a reason to be logged out)
+				if(error != null
+					// make sure error code is not a timeout or lack of connection
+					&& (error.getCode().equals(SpotifyError.getHTTPError(0).getCode())
+					|| error.getCode().equals(SpotifyError.getHTTPError(408).getCode())
+					|| error.getCode().equals(SpotifyError.getHTTPError(504).getCode())
+					|| error.getCode().equals(SpotifyError.getHTTPError(598).getCode())
+					|| error.getCode().equals(SpotifyError.getHTTPError(599).getCode())
+					|| Utils.getNetworkConnectivity() == Connectivity.OFFLINE))
+				{
+					error = null;
+				}
+
 				// call renewal callbacks
 				ArrayList<CompletionBlock<Boolean>> tmpRenewCallbacks;
 				synchronized(renewCallbacks)
@@ -379,19 +422,20 @@ public class Auth
 					tmpRenewCallbacks = new ArrayList<>(renewCallbacks);
 					renewCallbacks.clear();
 				}
-				for(CompletionBlock<Boolean> callback : tmpRenewCallbacks)
+				for(CompletionBlock<Boolean> completion : tmpRenewCallbacks)
 				{
-					callback.invoke(renewed, error);
+					if(error != null)
+					{
+						completion.reject(error);
+					}
+					else
+					{
+						completion.resolve(renewed);
+					}
 				}
 
-				// check if the session was renewed, or if a login error was given
-				if(renewed || (error != null
-							// ensure error code is not a timeout or lack of connection
-							&& !error.getCode().equals(SpotifyError.getHTTPError(0).getCode())
-							&& !error.getCode().equals(SpotifyError.getHTTPError(408).getCode())
-							&& !error.getCode().equals(SpotifyError.getHTTPError(504).getCode())
-							&& !error.getCode().equals(SpotifyError.getHTTPError(598).getCode())
-							&& !error.getCode().equals(SpotifyError.getHTTPError(599).getCode())))
+				// check if the session was renewed, or if it got a failure error
+				if(renewed || error != null)
 				{
 					// renewal has reached a success or an error
 					retryRenewalUntilResponse = false;
@@ -403,9 +447,16 @@ public class Auth
 						tmpRenewUntilResponseCallbacks = new ArrayList<>(renewUntilResponseCallbacks);
 						renewUntilResponseCallbacks.clear();
 					}
-					for(CompletionBlock<Boolean> callback : tmpRenewUntilResponseCallbacks)
+					for(CompletionBlock<Boolean> completion : tmpRenewUntilResponseCallbacks)
 					{
-						callback.invoke(renewed, error);
+						if(error != null)
+						{
+							completion.reject(error);
+						}
+						else
+						{
+							completion.resolve(renewed);
+						}
 					}
 				}
 				else if(retryRenewalUntilResponse)

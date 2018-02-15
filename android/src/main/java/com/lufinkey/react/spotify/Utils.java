@@ -75,6 +75,7 @@ public class Utils
 
 	public static void doHTTPRequest(String url, String method, final HashMap<String,String> headers, final byte[] body, final CompletionBlock<NetworkResponse> completion)
 	{
+		System.out.println("doHTTPRequest");
 		if(requestQueue == null)
 		{
 			requestQueue = Volley.newRequestQueue(reactContext.getCurrentActivity());
@@ -85,13 +86,13 @@ public class Utils
 			@Override
 			public void onError(VolleyError error)
 			{
-				completion.invoke(null, SpotifyError.getHTTPError(0));
+				completion.reject(SpotifyError.getHTTPError(0));
 			}
 
 			@Override
 			public void onResponse(NetworkResponse response)
 			{
-				completion.invoke(response, null);
+				completion.resolve(response);
 			}
 		};
 

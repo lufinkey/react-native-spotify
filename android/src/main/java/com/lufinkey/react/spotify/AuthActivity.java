@@ -129,7 +129,7 @@ public class AuthActivity extends Activity
 			{
 				CompletionBlock<Void> completionTmp = finishCompletion;
 				finishCompletion = null;
-				completionTmp.invoke(null, null);
+				completionTmp.resolve(null);
 			}
 		}
 	}
