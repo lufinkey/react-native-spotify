@@ -26,6 +26,7 @@ import com.spotify.sdk.android.player.Error;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -41,6 +42,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	private Auth auth;
 	private SpotifyPlayer player;
+	private final ArrayList<CompletionBlock<Boolean>> playerInitResponses;
 	private final ArrayList<CompletionBlock<Boolean>> playerLoginResponses;
 	private final ArrayList<CompletionBlock<Boolean>> playerLogoutResponses;
 
@@ -62,6 +64,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 		auth = null;
 		player = null;
+		playerInitResponses = new ArrayList<>();
 		playerLoginResponses = new ArrayList<>();
 		playerLogoutResponses = new ArrayList<>();
 
@@ -276,41 +279,76 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			return;
 		}
 
-		//initialize player
-		final Object reference = this;
-		Config playerConfig = new Config(reactContext.getApplicationContext(), accessToken, auth.clientID);
-		player = Spotify.getPlayer(playerConfig, reference, new SpotifyPlayer.InitializationObserver(){
-			@Override
-			public void onError(Throwable error)
+		//ensure only one thread actually invokes the initialization, and the others just wait
+		boolean firstInitAttempt = false;
+		synchronized (playerInitResponses)
+		{
+			if(playerInitResponses.size() == 0)
 			{
-				if(player != null)
+				firstInitAttempt = true;
+			}
+			playerInitResponses.add(completion);
+		}
+
+		if(firstInitAttempt)
+		{
+			//initialize player
+			final Object reference = this;
+			Config playerConfig = new Config(reactContext.getApplicationContext(), accessToken, auth.clientID);
+			player = Spotify.getPlayer(playerConfig, reference, new SpotifyPlayer.InitializationObserver(){
+				@Override
+				public void onError(Throwable error)
 				{
-					Spotify.destroyPlayer(reference);
-					player = null;
-				}
-				completion.invoke(false, new SpotifyError(Error.kSpErrorInitFailed, error.getLocalizedMessage()));
-			}
-
-			@Override
-			public void onInitialized(SpotifyPlayer newPlayer)
-			{
-				player = newPlayer;
-
-				//setup player
-				currentConnectivity = Utils.getNetworkConnectivity();
-				player.setConnectivityStatus(null, currentConnectivity);
-				player.addNotificationCallback(RCTSpotifyModule.this);
-				player.addConnectionStateCallback(RCTSpotifyModule.this);
-
-				loginPlayer(accessToken, new CompletionBlock<Boolean>() {
-					@Override
-					public void invoke(Boolean loggedIn, SpotifyError error)
+					if(player != null)
 					{
-						completion.invoke(loggedIn, error);
+						Spotify.destroyPlayer(reference);
+						player = null;
 					}
-				});
-			}
-		});
+
+					// call init responses
+					ArrayList<CompletionBlock<Boolean>> initResponses = null;
+					synchronized (playerInitResponses)
+					{
+						initResponses = new ArrayList<>(playerInitResponses);
+						playerInitResponses.clear();
+					}
+					for(CompletionBlock<Boolean> completion : initResponses)
+					{
+						completion.invoke(false, new SpotifyError(Error.kSpErrorInitFailed, error.getLocalizedMessage()));
+					}
+				}
+
+				@Override
+				public void onInitialized(SpotifyPlayer newPlayer)
+				{
+					player = newPlayer;
+
+					//setup player
+					currentConnectivity = Utils.getNetworkConnectivity();
+					player.setConnectivityStatus(null, currentConnectivity);
+					player.addNotificationCallback(RCTSpotifyModule.this);
+					player.addConnectionStateCallback(RCTSpotifyModule.this);
+
+					loginPlayer(accessToken, new CompletionBlock<Boolean>() {
+						@Override
+						public void invoke(Boolean loggedIn, SpotifyError error)
+						{
+							// call init responses
+							ArrayList<CompletionBlock<Boolean>> initResponses = null;
+							synchronized (playerInitResponses)
+							{
+								initResponses = new ArrayList<>(playerInitResponses);
+								playerInitResponses.clear();
+							}
+							for(CompletionBlock<Boolean> completion : initResponses)
+							{
+								completion.invoke(loggedIn, error);
+							}
+						}
+					});
+				}
+			});
+		}
 	}
 
 	private void loginPlayer(final String accessToken, final CompletionBlock<Boolean> completion)
