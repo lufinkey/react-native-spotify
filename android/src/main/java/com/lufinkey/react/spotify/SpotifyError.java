@@ -7,30 +7,30 @@ import com.facebook.react.bridge.WritableMap;
 
 import com.spotify.sdk.android.player.Error;
 
-import java.net.HttpURLConnection;
-
 public class SpotifyError
 {
 	public enum Code
 	{
-		RCTSpotifyErrorAlreadyInitialized(90, "Spotify has already been initialized"),
-		RCTSpotifyErrorInitializationFailed(91, "Initialization failed"),
-		RCTSpotifyErrorAuthorizationFailed(92, "Authorization failed"),
-		RCTSpotifyErrorNotImplemented(94, "This method has not yet been implemented yet"),
-		RCTSpotifyErrorConflictingCallbacks(100, "You cannot call this method while it is already executing"),
-		RCTSpotifyErrorMissingParameter(101, "Missing parameter(s)"),
-		RCTSpotifyErrorBadParameter(102, "Bad parameter(s)"),
-		RCTSpotifyErrorNotInitialized(103, "Spotify has not been initialized yet"),
-		RCTSpotifyErrorNotLoggedIn(104, "You are not logged in"),
-		RCTSpotifyErrorBadResponse(105, "Invalid response format");
+		AlreadyInitialized("Spotify has already been initialized"),
+		NotInitialized("Spotify has not been initialized"),
+		NotImplemented("This feature has not been implemented"),
+		NotLoggedIn("You are not logged in"),
+		MissingOption("Missing required option"),
+		NullParameter("Null parameter"),
+		ConflictingCallbacks("You cannot call this function while it is already executing"),
+		BadResponse("Invalid response format"),
+		PlayerNotReady("Player is not ready");
 
-		public final int value;
 		public final String description;
 
-		private Code(int value, String description)
+		private Code(String description)
 		{
-			this.value = value;
 			this.description = description;
+		}
+
+		public String getCodeName()
+		{
+			return "RNS"+name();
 		}
 
 		public void reject(Promise promise)
@@ -180,12 +180,12 @@ public class SpotifyError
 
 	public static SpotifyError getNullParameterError(String parameterName)
 	{
-		return new SpotifyError(Code.RCTSpotifyErrorBadParameter, parameterName+" parameter cannot be null");
+		return new SpotifyError(Code.NullParameter, parameterName+" cannot be null");
 	}
 
 	public static SpotifyError getMissingOptionError(String optionName)
 	{
-		return new SpotifyError(Code.RCTSpotifyErrorMissingParameter, "missing required option "+optionName);
+		return new SpotifyError(Code.MissingOption, "missing required option "+optionName);
 	}
 
 	public static SpotifyError getHTTPError(int statusCode)

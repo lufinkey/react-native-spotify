@@ -22,19 +22,10 @@ public class AuthActivity extends Activity
 
 	public static void performAuthFlow(Activity context, Auth auth, AuthActivityListener listener)
 	{
-		// check for missing options
-		if(auth.clientID == null)
-		{
-			SpotifyError error = new SpotifyError(SpotifyError.Code.RCTSpotifyErrorMissingParameter, "missing option clientID");
-			listener.onAuthActivityFailure(null, error);
-			return;
-		}
-
 		// ensure no conflicting callbacks
 		if(authFlow_auth != null || authFlow_listener != null || currentAuthActivity != null)
 		{
-			System.out.println("AuthActivity is already being shown");
-			SpotifyError error = new SpotifyError(SpotifyError.Code.RCTSpotifyErrorConflictingCallbacks, "Cannot call login multiple times before completing");
+			SpotifyError error = new SpotifyError(SpotifyError.Code.ConflictingCallbacks, "Cannot call login multiple times before completing");
 			listener.onAuthActivityFailure(null, error);
 			return;
 		}
@@ -99,7 +90,7 @@ public class AuthActivity extends Activity
 					}
 					else
 					{
-						listener.onAuthActivityFailure(this, new SpotifyError(SpotifyError.Code.RCTSpotifyErrorAuthorizationFailed, response.getError()));
+						listener.onAuthActivityFailure(this, new SpotifyError(response.getError(), response.getError()));
 					}
 					break;
 

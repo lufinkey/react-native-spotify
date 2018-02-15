@@ -98,7 +98,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		// ensure module is not already initialized
 		if(initialized)
 		{
-			callback.invoke(isLoggedIn(), new SpotifyError(Error.kSpErrorAlreadyInitialized).toReactObject());
+			callback.invoke(isLoggedIn(), new SpotifyError(SpotifyError.Code.AlreadyInitialized).toReactObject());
 			return;
 		}
 
@@ -618,11 +618,11 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			public void invoke(Boolean loggedIn, SpotifyError error) {
 				if(!initialized)
 				{
-					error = new SpotifyError(SpotifyError.Code.RCTSpotifyErrorNotInitialized, "Spotify has not been initiaized");
+					error = new SpotifyError(SpotifyError.Code.NotInitialized);
 				}
-				else if(player==null)
+				else if(player==null && auth.hasPlayerScope())
 				{
-					error = new SpotifyError(Error.kSpErrorUninitialized);
+					error = new SpotifyError(SpotifyError.Code.PlayerNotReady);
 				}
 				else if(player.isLoggedIn())
 				{
@@ -734,7 +734,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	public void setVolume(double volume, final Callback callback)
 	{
 		//TODO implement this with a custom AudioController
-		callback.invoke(new SpotifyError(SpotifyError.Code.RCTSpotifyErrorNotImplemented, "setVolume does not work on android"));
+		callback.invoke(new SpotifyError(SpotifyError.Code.NotImplemented, "setVolume does not work on android"));
 	}
 
 	@ReactMethod(isBlockingSynchronousMethod = true)
@@ -1067,11 +1067,11 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			public void invoke(Boolean loggedIn, SpotifyError error) {
 				if(!initialized)
 				{
-					error = new SpotifyError(SpotifyError.Code.RCTSpotifyErrorNotInitialized, "Spotify has not been initiaized");
+					error = new SpotifyError(SpotifyError.Code.NotInitialized);
 				}
 				else if(auth.getAccessToken()==null)
 				{
-					error = new SpotifyError(SpotifyError.Code.RCTSpotifyErrorNotLoggedIn, "You are not logged in");
+					error = new SpotifyError(SpotifyError.Code.NotLoggedIn);
 				}
 				else if(auth.isSessionValid())
 				{
@@ -1168,7 +1168,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 							}
 							catch (JSONException e)
 							{
-								completion.invoke(null, new SpotifyError(SpotifyError.Code.RCTSpotifyErrorBadResponse));
+								completion.invoke(null, new SpotifyError(SpotifyError.Code.BadResponse));
 								return;
 							}
 						}
@@ -1650,7 +1650,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		}
 		for(CompletionBlock<Boolean> response : loginResponses)
 		{
-			response.invoke(false, new SpotifyError(SpotifyError.Code.RCTSpotifyErrorNotLoggedIn, "You have been logged out"));
+			response.invoke(false, new SpotifyError(SpotifyError.Code.NotLoggedIn, "You have been logged out"));
 		}
 
 		// if we didn't explicitly log out, try to renew the session

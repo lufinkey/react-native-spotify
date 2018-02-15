@@ -13,7 +13,6 @@ import com.facebook.react.bridge.WritableMap;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -215,7 +214,7 @@ public class Auth
 					{
 						if(response.statusCode >= 200 && response.statusCode < 300)
 						{
-							completion.invoke(null, new SpotifyError(SpotifyError.Code.RCTSpotifyErrorBadResponse));
+							completion.invoke(null, new SpotifyError(SpotifyError.Code.BadResponse));
 						}
 						else
 						{
@@ -236,7 +235,7 @@ public class Auth
 		if(tokenSwapURL==null)
 		{
 
-			completion.invoke(null, new SpotifyError(SpotifyError.Code.RCTSpotifyErrorMissingParameter, "cannot swap code for token without tokenSwapURL option"));
+			completion.invoke(null, SpotifyError.getMissingOptionError("tokenSwapURL"));
 			return;
 		}
 
@@ -264,7 +263,7 @@ public class Auth
 					accessToken = null;
 					refreshToken = null;
 					expireDate = null;
-					completion.invoke(null, new SpotifyError(SpotifyError.Code.RCTSpotifyErrorBadResponse, "missing expected response parameters"));
+					completion.invoke(null, new SpotifyError(SpotifyError.Code.BadResponse, "Missing expected response parameters"));
 					return;
 				}
 
@@ -305,7 +304,7 @@ public class Auth
 		}
 		else if(refreshToken==null)
 		{
-			completion.invoke(false, new SpotifyError(SpotifyError.Code.RCTSpotifyErrorAuthorizationFailed, "Can't refresh session without a refresh token"));
+			completion.invoke(false, null);
 			return;
 		}
 
@@ -369,7 +368,7 @@ public class Auth
 					catch(JSONException e)
 					{
 						// was not renewed
-						error = new SpotifyError(SpotifyError.Code.RCTSpotifyErrorBadResponse, "Missing expected response parameters");
+						error = new SpotifyError(SpotifyError.Code.BadResponse, "Missing expected response parameters");
 					}
 				}
 
