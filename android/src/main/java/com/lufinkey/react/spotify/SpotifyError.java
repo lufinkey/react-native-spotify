@@ -35,7 +35,7 @@ public class SpotifyError
 
 		public void reject(Promise promise)
 		{
-			promise.reject(name(), description);
+			promise.reject(getCodeName(), description);
 		}
 	};
 

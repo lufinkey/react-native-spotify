@@ -351,7 +351,7 @@ public class Auth
 
 				// determine if session was renewed
 				boolean renewed = false;
-				if(error != null)
+				if(error == null)
 				{
 					try
 					{

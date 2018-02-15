@@ -11,6 +11,7 @@ import android.view.Gravity;
 import com.android.volley.NetworkResponse;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
+import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
@@ -26,7 +27,6 @@ import com.spotify.sdk.android.player.Error;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -96,24 +96,24 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	@ReactMethod
 	//initialize(options, (loggedIn, error?))
-	public void initialize(ReadableMap options, final Callback callback)
+	public void initialize(ReadableMap options, final Promise promise)
 	{
 		// ensure module is not already initialized
 		if(initialized)
 		{
-			callback.invoke(isLoggedIn(), new SpotifyError(SpotifyError.Code.AlreadyInitialized).toReactObject());
+			SpotifyError.Code.AlreadyInitialized.reject(promise);
 			return;
 		}
 
 		// ensure options is not null or missing fields
 		if(options==null)
 		{
-			callback.invoke(false, SpotifyError.getNullParameterError("options").toReactObject());
+			SpotifyError.getNullParameterError("options").reject(promise);
 			return;
 		}
 		else if(!options.hasKey("clientID"))
 		{
-			callback.invoke(false, SpotifyError.getMissingOptionError("clientId").toReactObject());
+			SpotifyError.getMissingOptionError("clientId").reject(promise);
 			return;
 		}
 
@@ -174,7 +174,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 				Connectivity prevConnectivity = currentConnectivity;
 				Connectivity connectivity = Utils.getNetworkConnectivity();
 				currentConnectivity = connectivity;
-				if (player != null)
+				if (player != null && player.isInitialized())
 				{
 					// update the player with the connection state, because Android makes no sense
 					player.setConnectivityStatus(null, connectivity);
@@ -194,18 +194,21 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
 		reactContext.getApplicationContext().registerReceiver(networkStateReceiver, filter);
 
+		initialized = true;
+		boolean loggedIn = isLoggedIn();
+		promise.resolve(loggedIn);
+		if(loggedIn)
+		{
+			sendEvent("login");
+		}
+
 		// try to log back in
 		logBackInIfNeeded(new CompletionBlock<Boolean>() {
 			@Override
 			public void invoke(Boolean loggedIn, SpotifyError error) {
-				initialized = true;
-				if(callback!=null)
+				if(!loggedIn)
 				{
-					callback.invoke(loggedIn, Convert.fromRCTSpotifyError(error));
-				}
-				if(loggedIn)
-				{
-					sendEvent("login");
+
 				}
 			}
 		});
@@ -231,17 +234,9 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			@Override
 			public void invoke(Boolean success, SpotifyError error)
 			{
-				if(error!=null)
+				if(!isLoggedIn())
 				{
 					completion.invoke(false, error);
-				}
-				else if(!success)
-				{
-					completion.invoke(false, null);
-				}
-				else if(auth.getAccessToken()==null)
-				{
-					completion.invoke(false, null);
 				}
 				else
 				{
