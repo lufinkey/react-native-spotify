@@ -186,7 +186,7 @@ public class SpotifyError
 
 	public static SpotifyError getMissingOptionError(String optionName)
 	{
-		return new SpotifyError(Code.MissingOption, "missing required option "+optionName);
+		return new SpotifyError(Code.MissingOption, "Missing required option "+optionName);
 	}
 
 	public static SpotifyError getHTTPError(int statusCode)
