@@ -656,7 +656,16 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			@Override
 			public void onResolve(Void unused)
 			{
+				boolean loggedIn = auth.isLoggedIn();
+				if(loggedIn)
+				{
+					auth.clearSession();
+				}
 				promise.resolve(null);
+				if(loggedIn)
+				{
+					sendEvent("logout");
+				}
 			}
 		});
 	}
