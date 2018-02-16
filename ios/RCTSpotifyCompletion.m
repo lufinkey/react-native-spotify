@@ -77,4 +77,14 @@
 	}
 }
 
++(RCTSpotifyCompletion*)onResolve:(void(^)(id))onResolve onReject:(void(^)(RCTSpotifyError*))onReject
+{
+	return [[self alloc] initWithOnResolve:onResolve onReject:onReject];
+}
+
++(RCTSpotifyCompletion*)onComplete:(void(^)(id,RCTSpotifyError*))onComplete
+{
+	return [[self alloc] initWithOnComplete:onComplete];
+}
+
 @end
