@@ -207,7 +207,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		initialized = true;
 
 		// call promise
-		boolean loggedIn = auth.isLoggedIn();
+		boolean loggedIn = isLoggedIn();
 		promise.resolve(loggedIn);
 		if(loggedIn)
 		{
@@ -251,7 +251,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			public void onReject(SpotifyError error)
 			{
 				// session renewal failed (we should log out)
-				if(auth.isLoggedIn())
+				if(isLoggedIn())
 				{
 					// session renewal returned a failure, but we're still logged in
 					// log out player
@@ -260,8 +260,8 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 						public void onComplete(Void unused, SpotifyError error)
 						{
 							// clear session
-							boolean authLoggedIn = auth.isLoggedIn();
-							if(authLoggedIn)
+							boolean loggedIn = isLoggedIn();
+							if(loggedIn)
 							{
 								auth.clearSession();
 							}
@@ -271,7 +271,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 								completion.resolve(false);
 							}
 							// send logout event
-							if(authLoggedIn)
+							if(loggedIn)
 							{
 								sendEvent("logout");
 							}
@@ -592,7 +592,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 									@Override
 									public void onComplete(Void unused, SpotifyError unusedError)
 									{
-										boolean loggedIn = auth.isLoggedIn();
+										boolean loggedIn = isLoggedIn();
 										promise.resolve(loggedIn);
 										if(loggedIn)
 										{
@@ -631,7 +631,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 							@Override
 							public void onComplete(Void unused, SpotifyError unusedError)
 							{
-								boolean loggedIn = auth.isLoggedIn();
+								boolean loggedIn = isLoggedIn();
 								promise.resolve(loggedIn);
 								if(loggedIn)
 								{
@@ -650,7 +650,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	public void logout(final Promise promise)
 	{
 		// make sure we're not already logged out
-		if(!auth.isLoggedIn())
+		if(!isLoggedIn())
 		{
 			promise.resolve(null);
 			return;
@@ -1297,7 +1297,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 					public void onReject(SpotifyError error)
 					{
 						// we couldn't renew the session
-						if(auth.isLoggedIn())
+						if(isLoggedIn())
 						{
 							// clear session and destroy player
 							auth.clearSession();
@@ -1353,7 +1353,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		if(error==Error.kSpErrorApplicationBanned || error==Error.kSpErrorLoginBadCredentials
 			|| error==Error.kSpErrorNeedsPremium)
 		{
-			if(auth.isLoggedIn())
+			if(isLoggedIn())
 			{
 				// clear session and destroy player
 				auth.clearSession();
