@@ -139,13 +139,13 @@ public class SpotifyError
 
 	public SpotifyError(Code code)
 	{
-		this.code = code.name();
+		this.code = code.getCodeName();
 		this.message = code.description;
 	}
 
 	public SpotifyError(Code code, String message)
 	{
-		this.code = code.name();
+		this.code = code.getCodeName();
 		this.message = message;
 	}
 
