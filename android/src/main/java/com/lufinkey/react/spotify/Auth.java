@@ -330,7 +330,7 @@ public class Auth
 			return;
 		}
 
-		// add completion to be called when the renewal finishes with a definitive answer
+		// add completion to be called when the renewal finishes
 		if(completion != null)
 		{
 			if(waitForDefinitiveResponse)
