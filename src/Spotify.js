@@ -6,6 +6,8 @@ const Spotify = NativeModules.Spotify;
 NativeModuleEvents.registerNativeModule(Spotify);
 
 
+const sendRequest = Spotify.sendRequest;
+
 
 Spotify.getMe = () => {
 	return sendRequest('v1/me', 'GET', null, false);
