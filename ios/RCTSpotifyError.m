@@ -31,6 +31,25 @@
 	return self;
 }
 
+-(id)initWithCode:(NSString*)code error:(NSError*)error
+{
+	if(code == nil || code.length == 0)
+	{
+		return [self initWithError:error];
+	}
+	if(self = [super init])
+	{
+		if(error == nil)
+		{
+			@throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Cannot provide a nil error to RCTSpotifyError" userInfo:nil];
+		}
+		_error = error;
+		_code = [NSString stringWithString:code];
+		_message = _error.localizedDescription;
+	}
+	return self;
+}
+
 -(id)initWithError:(NSError*)error
 {
 	if(self = [super init])
@@ -57,6 +76,11 @@
 +(instancetype)errorWithCode:(NSString*)code message:(NSString*)message
 {
 	return [[self alloc] initWithCode:code message:message];
+}
+
++(instancetype)errorWithCode:(NSString *)code error:(NSError *)error
+{
+	return [[self alloc] initWithCode:code error:error];
 }
 
 +(instancetype)errorWithError:(NSError*)error
