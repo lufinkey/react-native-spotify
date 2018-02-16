@@ -34,7 +34,6 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	private final ReactApplicationContext reactContext;
 
 	private boolean initialized;
-	private boolean loggedIn;
 	private boolean loggingOutPlayer;
 
 	private BroadcastReceiver networkStateReceiver;
@@ -208,7 +207,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		initialized = true;
 
 		// call promise
-		loggedIn = auth.isLoggedIn();
+		boolean loggedIn = auth.isLoggedIn();
 		promise.resolve(loggedIn);
 		if(loggedIn)
 		{
@@ -593,7 +592,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 									@Override
 									public void onComplete(Void unused, SpotifyError unusedError)
 									{
-										loggedIn = auth.isLoggedIn();
+										boolean loggedIn = auth.isLoggedIn();
 										promise.resolve(loggedIn);
 										if(loggedIn)
 										{
@@ -632,7 +631,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 							@Override
 							public void onComplete(Void unused, SpotifyError unusedError)
 							{
-								loggedIn = auth.isLoggedIn();
+								boolean loggedIn = auth.isLoggedIn();
 								promise.resolve(loggedIn);
 								if(loggedIn)
 								{
@@ -651,7 +650,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	public void logout(final Promise promise)
 	{
 		// make sure we're not already logged out
-		if(!loggedIn)
+		if(!auth.isLoggedIn())
 		{
 			promise.resolve(null);
 			return;
