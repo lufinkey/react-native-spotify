@@ -82,6 +82,11 @@
 	return [[self alloc] initWithOnResolve:onResolve onReject:onReject];
 }
 
++(RCTSpotifyCompletion*)onReject:(void(^)(RCTSpotifyError*))onReject onResolve:(void(^)(id))onResolve
+{
+	return [[self alloc] initWithOnResolve:onResolve onReject:onReject];
+}
+
 +(RCTSpotifyCompletion*)onComplete:(void(^)(id,RCTSpotifyError*))onComplete
 {
 	return [[self alloc] initWithOnComplete:onComplete];

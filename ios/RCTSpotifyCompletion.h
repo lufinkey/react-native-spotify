@@ -18,5 +18,7 @@
 -(void)reject:(RCTSpotifyError*)error;
 
 +(RCTSpotifyCompletion*)onResolve:(void(^)(ObjectType result))onResolve onReject:(void(^)(RCTSpotifyError* error))onReject;
++(RCTSpotifyCompletion*)onReject:(void(^)(RCTSpotifyError*))onReject onResolve:(void(^)(ObjectType result))onResolve;
++(RCTSpotifyCompletion*)onComplete:(void(^)(ObjectType result, RCTSpotifyError* error))onComplete;
 
 @end
