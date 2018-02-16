@@ -1493,7 +1493,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	@Override
 	public void onPlaybackError(Error error)
 	{
-		//
+		sendEvent("playbackError", Convert.fromRCTSpotifyError(new SpotifyError(error)));
 	}
 
 
