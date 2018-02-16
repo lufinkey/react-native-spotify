@@ -12,26 +12,25 @@
 	return obj;
 }
 
++(id)RCTSpotifyError:(RCTSpotifyError*)error
+{
+	if(error==nil)
+	{
+		return [NSNull null];
+	}
+	NSMutableDictionary* obj = [NSMutableDictionary dictionary];
+	obj[@"code"] = error.code;
+	obj[@"message"] = error.message;
+	return obj;
+}
+
 +(id)NSError:(NSError*)error
 {
 	if(error==nil)
 	{
 		return [NSNull null];
 	}
-	NSDictionary* fields = error.userInfo[@"jsFields"];
-	NSMutableDictionary* obj = nil;
-	if(fields!=nil)
-	{
-		obj = fields.mutableCopy;
-	}
-	else
-	{
-		obj = [NSMutableDictionary dictionary];
-	}
-	obj[@"domain"] = error.domain;
-	obj[@"code"] = @(error.code);
-	obj[@"message"] = error.localizedDescription;
-	return obj;
+	return [self RCTSpotifyError:[RCTSpotifyError errorWithError:error]];
 }
 
 +(id)SPTPlaybackState:(SPTPlaybackState*)state
