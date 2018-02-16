@@ -7,7 +7,14 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "RCTSpotifyError.h"
 
-@interface RCTSpotifyCompletion : NSObject
+@interface RCTSpotifyCompletion<__covariant ObjectType> : NSObject
+
+-(id)initWithOnResolve:(void(^)(ObjectType result))resolver onReject:(void(^)(RCTSpotifyError* error))rejector;
+-(id)initWithOnComplete:(void(^)(ObjectType result, RCTSpotifyError* error))completion;
+
+-(void)resolve:(ObjectType)result;
+-(void)reject:(RCTSpotifyError*)error;
 
 @end
