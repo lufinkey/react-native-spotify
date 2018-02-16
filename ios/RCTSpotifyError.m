@@ -9,6 +9,63 @@
 #import "RCTSpotifyError.h"
 #import <SpotifyAudioPlayback/SpotifyAudioPlayback.h>
 
+
+@interface RCTSpotifyErrorCode()
+-(id)initWithName:(NSString*)name message:(NSString*)message;
++(instancetype)codeWithName:(NSString*)name message:(NSString*)message;
+@end
+
+
+#define DEFINE_SPOTIFY_ERROR_CODE(errorName, messageStr) \
+	static RCTSpotifyErrorCode* _RCTSpotifyErrorCode##errorName = nil; \
+	RCTSpotifyErrorCode* RCTSpotifyErrorCode##errorName() { \
+		if(_RCTSpotifyErrorCode##errorName == nil) { \
+			_RCTSpotifyErrorCode##errorName = [RCTSpotifyErrorCode codeWithName:@#errorName message:messageStr]; } \
+		return _RCTSpotifyErrorCode##errorName; } \
+
+DEFINE_SPOTIFY_ERROR_CODE(AlreadyInitialized, @"Spotify has already been initialized")
+DEFINE_SPOTIFY_ERROR_CODE(NotInitialized, @"Spotify has not been initialized")
+DEFINE_SPOTIFY_ERROR_CODE(NotImplemented, @"This feature has not been implemented")
+DEFINE_SPOTIFY_ERROR_CODE(NotLoggedIn, @"You are not logged in")
+DEFINE_SPOTIFY_ERROR_CODE(MissingOption, @"Missing required option")
+DEFINE_SPOTIFY_ERROR_CODE(NullParameter, @"Null parameter")
+DEFINE_SPOTIFY_ERROR_CODE(ConflictingCallbacks, @"You cannot call this function while it is already executing")
+DEFINE_SPOTIFY_ERROR_CODE(BadResponse, @"Invalid response format")
+DEFINE_SPOTIFY_ERROR_CODE(PlayerNotReady, @"Player is not ready")
+DEFINE_SPOTIFY_ERROR_CODE(SessionExpired, @"Your login session has expired")
+
+#undef DEFINE_SPOTIFY_ERROR_CODE
+
+
+@implementation RCTSpotifyErrorCode
+
+@synthesize name = _name;
+@synthesize message = _message;
+
+-(id)initWithName:(NSString*)name message:(NSString*)message
+{
+	if(self = [super init])
+	{
+		_name = [NSString stringWithString:name];
+		_message = [NSString stringWithString:message];
+	}
+	return self;
+}
+
++(instancetype)codeWithName:(NSString*)name message:(NSString*)message
+{
+	return [[self alloc] initWithName:name message:message];
+}
+
+-(NSString*)code
+{
+	return [NSString stringWithFormat:@"RNS%@", _name];
+}
+
+@end
+
+
+
 @interface RCTSpotifyError()
 {
 	NSError* _error;
