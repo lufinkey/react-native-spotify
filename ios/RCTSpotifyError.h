@@ -14,6 +14,8 @@
 @property (readonly) NSString* code;
 @property (readonly) NSString* message;
 
+-(void)reject:(void(^)(NSString*,NSString*,NSError*))promiseRejector;
+
 @end
 
 #define DECLARE_SPOTIFY_ERROR_CODE(errorName) \
@@ -47,6 +49,8 @@ DECLARE_SPOTIFY_ERROR_CODE(SessionExpired)
 +(instancetype)errorWithCodeObj:(RCTSpotifyErrorCode*)code;
 +(instancetype)errorWithCodeObj:(RCTSpotifyErrorCode*)code message:(NSString*)message;
 +(instancetype)errorWithError:(NSError*)error;
+
+-(void)reject:(void(^)(NSString*,NSString*,NSError*))promiseRejector;
 
 @property (readonly) NSString* code;
 @property (readonly) NSString* message;
