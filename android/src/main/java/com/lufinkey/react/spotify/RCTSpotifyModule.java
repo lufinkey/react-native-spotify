@@ -449,13 +449,10 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 				{
 					firstLoginAttempt = true;
 				}
-				if(completion != null)
-				{
-					//wait for RCTSpotifyModule.onLoggedIn
-					// or RCTSpotifyModule.onLoginFailed
-					// or RCTSpotifyModule.onLoggedOut
-					playerLoginResponses.add(completion);
-				}
+				//wait for RCTSpotifyModule.onLoggedIn
+				// or RCTSpotifyModule.onLoginFailed
+				// or RCTSpotifyModule.onLoggedOut
+				playerLoginResponses.add(completion);
 			}
 		}
 
