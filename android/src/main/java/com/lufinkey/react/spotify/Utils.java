@@ -73,7 +73,7 @@ public class Utils
 		}
 	}
 
-	public static void doHTTPRequest(String url, String method, final HashMap<String,String> headers, final byte[] body, final CompletionBlock<NetworkResponse> completion)
+	public static void doHTTPRequest(String url, String method, final HashMap<String,String> headers, final byte[] body, final Completion<NetworkResponse> completion)
 	{
 		System.out.println("doHTTPRequest");
 		if(requestQueue == null)

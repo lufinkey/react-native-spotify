@@ -1,6 +1,6 @@
 package com.lufinkey.react.spotify;
 
-public abstract class CompletionBlock<T>
+public abstract class Completion<T>
 {
 	public void resolve(T result)
 	{

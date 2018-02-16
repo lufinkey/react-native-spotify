@@ -10,7 +10,6 @@ import android.view.Gravity;
 
 import com.android.volley.NetworkResponse;
 import com.facebook.react.bridge.Arguments;
-import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
@@ -43,9 +42,9 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	private Auth auth;
 	private SpotifyPlayer player;
-	private final ArrayList<CompletionBlock<Void>> playerInitResponses;
-	private final ArrayList<CompletionBlock<Void>> playerLoginResponses;
-	private final ArrayList<CompletionBlock<Void>> playerLogoutResponses;
+	private final ArrayList<Completion<Void>> playerInitResponses;
+	private final ArrayList<Completion<Void>> playerLoginResponses;
+	private final ArrayList<Completion<Void>> playerLogoutResponses;
 
 	private ReadableMap options;
 
@@ -232,7 +231,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		promise.resolve(isInitialized());
 	}
 
-	private void logBackInIfNeeded(final CompletionBlock<Boolean> completion, final boolean waitForDefinitiveResponse)
+	private void logBackInIfNeeded(final Completion<Boolean> completion, final boolean waitForDefinitiveResponse)
 	{
 		System.out.println("logBackInIfNeeded");
 		// ensure auth is actually logged in
@@ -246,7 +245,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			return;
 		}
 		// attempt to renew auth session
-		auth.renewSessionIfNeeded(new CompletionBlock<Boolean>() {
+		auth.renewSessionIfNeeded(new Completion<Boolean>() {
 			@Override
 			public void onReject(SpotifyError error)
 			{
@@ -255,7 +254,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 				{
 					// session renewal returned a failure, but we're still logged in
 					// log out player
-					logoutPlayer(new CompletionBlock<Void>() {
+					logoutPlayer(new Completion<Void>() {
 						@Override
 						public void onComplete(Void unused, SpotifyError error)
 						{
@@ -299,7 +298,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			public void onResolve(Boolean renewed)
 			{
 				// session renewal didn't fail, so initialize the player if necessary
-				initializePlayerIfNeeded(auth.getAccessToken(), new CompletionBlock<Void>() {
+				initializePlayerIfNeeded(auth.getAccessToken(), new Completion<Void>() {
 					@Override
 					public void onReject(SpotifyError error)
 					{
@@ -331,7 +330,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		}, waitForDefinitiveResponse);
 	}
 
-	private void initializePlayerIfNeeded(final String accessToken, final CompletionBlock<Void> completion)
+	private void initializePlayerIfNeeded(final String accessToken, final Completion<Void> completion)
 	{
 		// make sure we have the player scope
 		if(!auth.hasPlayerScope())
@@ -377,13 +376,13 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 					}
 
 					// call init responses
-					ArrayList<CompletionBlock<Void>> initResponses = null;
+					ArrayList<Completion<Void>> initResponses = null;
 					synchronized (playerInitResponses)
 					{
 						initResponses = new ArrayList<>(playerInitResponses);
 						playerInitResponses.clear();
 					}
-					for(CompletionBlock<Void> completion : initResponses)
+					for(Completion<Void> completion : initResponses)
 					{
 						completion.reject(new SpotifyError(Error.kSpErrorInitFailed, error.getLocalizedMessage()));
 					}
@@ -402,18 +401,18 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 					player.addConnectionStateCallback(RCTSpotifyModule.this);
 
 					// attempt to log in the player
-					loginPlayer(accessToken, new CompletionBlock<Void>() {
+					loginPlayer(accessToken, new Completion<Void>() {
 						@Override
 						public void onComplete(Void unused, SpotifyError error)
 						{
 							// call init responses
-							ArrayList<CompletionBlock<Void>> initResponses = null;
+							ArrayList<Completion<Void>> initResponses = null;
 							synchronized (playerInitResponses)
 							{
 								initResponses = new ArrayList<>(playerInitResponses);
 								playerInitResponses.clear();
 							}
-							for(CompletionBlock<Void> completion : initResponses)
+							for(Completion<Void> completion : initResponses)
 							{
 								if(error == null)
 								{
@@ -431,7 +430,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		}
 	}
 
-	private void loginPlayer(final String accessToken, final CompletionBlock<Void> completion)
+	private void loginPlayer(final String accessToken, final Completion<Void> completion)
 	{
 		boolean loggedIn = false;
 		boolean firstLoginAttempt = false;
@@ -472,7 +471,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		}
 	}
 
-	private void logoutPlayer(final CompletionBlock<Void> completion)
+	private void logoutPlayer(final Completion<Void> completion)
 	{
 		if(player == null)
 		{
@@ -523,7 +522,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			public void onAuthActivityCancel(AuthActivity activity)
 			{
 				// dismiss activity
-				activity.finish(new CompletionBlock<Void>() {
+				activity.finish(new Completion<Void>() {
 					@Override
 					public void onComplete(Void unused, SpotifyError unusedError)
 					{
@@ -541,7 +540,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 					return;
 				}
 				// dismiss activity
-				activity.finish(new CompletionBlock<Void>() {
+				activity.finish(new Completion<Void>() {
 					@Override
 					public void onComplete(Void unused, SpotifyError unusedError)
 					{
@@ -562,14 +561,14 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 				dialog.show();
 
 				// perform token swap
-				auth.swapCodeForToken(code, new CompletionBlock<String>() {
+				auth.swapCodeForToken(code, new Completion<String>() {
 					@Override
 					public void onReject(final SpotifyError error)
 					{
 						// failed to get valid auth token
 						dialog.dismiss();
 						// dismiss activity
-						activity.finish(new CompletionBlock<Void>() {
+						activity.finish(new Completion<Void>() {
 							@Override
 							public void onComplete(Void unused, SpotifyError unusedError)
 							{
@@ -582,13 +581,13 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 					public void onResolve(String accessToken)
 					{
 						// initialize player
-						initializePlayerIfNeeded(auth.getAccessToken(), new CompletionBlock<Void>() {
+						initializePlayerIfNeeded(auth.getAccessToken(), new Completion<Void>() {
 							@Override
 							public void onComplete(Void unused, final SpotifyError unusedError)
 							{
 								dialog.dismiss();
 								// dismiss activity
-								activity.finish(new CompletionBlock<Void>() {
+								activity.finish(new Completion<Void>() {
 									@Override
 									public void onComplete(Void unused, SpotifyError unusedError)
 									{
@@ -621,13 +620,13 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 				auth.applyAuthAccessToken(accessToken, expiresIn);
 
 				// initialize player
-				initializePlayerIfNeeded(auth.getAccessToken(), new CompletionBlock<Void>() {
+				initializePlayerIfNeeded(auth.getAccessToken(), new Completion<Void>() {
 					@Override
 					public void onComplete(Void unused, SpotifyError unusedError)
 					{
 						dialog.dismiss();
 						// dismiss activity
-						activity.finish(new CompletionBlock<Void>() {
+						activity.finish(new Completion<Void>() {
 							@Override
 							public void onComplete(Void unused, SpotifyError unusedError)
 							{
@@ -656,7 +655,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			return;
 		}
 		// log out and destroy the player
-		logoutPlayer(new CompletionBlock<Void>() {
+		logoutPlayer(new Completion<Void>() {
 			@Override
 			public void onReject(SpotifyError error)
 			{
@@ -726,14 +725,14 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 
 
-	private void prepareForPlayer(final CompletionBlock<Void> completion)
+	private void prepareForPlayer(final Completion<Void> completion)
 	{
 		if(!initialized)
 		{
 			completion.reject(new SpotifyError(SpotifyError.Code.NotInitialized));
 			return;
 		}
-		logBackInIfNeeded(new CompletionBlock<Boolean>() {
+		logBackInIfNeeded(new Completion<Boolean>() {
 			@Override
 			public void onReject(SpotifyError error)
 			{
@@ -771,7 +770,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			SpotifyError.getNullParameterError("spotifyURI").reject(promise);
 			return;
 		}
-		prepareForPlayer(new CompletionBlock<Void>() {
+		prepareForPlayer(new Completion<Void>() {
 			@Override
 			public void onReject(SpotifyError error)
 			{
@@ -807,7 +806,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			SpotifyError.getNullParameterError("spotifyURI").reject(promise);
 			return;
 		}
-		prepareForPlayer(new CompletionBlock<Void>() {
+		prepareForPlayer(new Completion<Void>() {
 			@Override
 			public void onReject(SpotifyError error)
 			{
@@ -861,7 +860,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	//setPlaying(playing, (error?))
 	public void setPlaying(final boolean playing, final Promise promise)
 	{
-		prepareForPlayer(new CompletionBlock<Void>() {
+		prepareForPlayer(new Completion<Void>() {
 			@Override
 			public void onReject(SpotifyError error)
 			{
@@ -947,7 +946,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	//skipToNext((error?))
 	public void skipToNext(final Promise promise)
 	{
-		prepareForPlayer(new CompletionBlock<Void>() {
+		prepareForPlayer(new Completion<Void>() {
 			@Override
 			public void onReject(SpotifyError error)
 			{
@@ -978,7 +977,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	//skipToPrevious((error?))
 	public void skipToPrevious(final Promise promise)
 	{
-		prepareForPlayer(new CompletionBlock<Void>() {
+		prepareForPlayer(new Completion<Void>() {
 			@Override
 			public void onReject(SpotifyError error)
 			{
@@ -1009,7 +1008,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	//seekToPosition(position, (error?))
 	public void seekToPosition(final double position, final Promise promise)
 	{
-		prepareForPlayer(new CompletionBlock<Void>() {
+		prepareForPlayer(new Completion<Void>() {
 			@Override
 			public void onReject(SpotifyError error)
 			{
@@ -1040,7 +1039,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	//setShuffling(shuffling, (error?))
 	public void setShuffling(final boolean shuffling, final Promise promise)
 	{
-		prepareForPlayer(new CompletionBlock<Void>() {
+		prepareForPlayer(new Completion<Void>() {
 			@Override
 			public void onReject(SpotifyError error)
 			{
@@ -1071,7 +1070,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	//setRepeating(repeating, (error?))
 	public void setRepeating(final boolean repeating, final Promise promise)
 	{
-		prepareForPlayer(new CompletionBlock<Void>() {
+		prepareForPlayer(new Completion<Void>() {
 			@Override
 			public void onReject(SpotifyError error)
 			{
@@ -1101,14 +1100,14 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 
 
-	private void prepareForRequest(final CompletionBlock<Void> completion)
+	private void prepareForRequest(final Completion<Void> completion)
 	{
 		if(!initialized)
 		{
 			completion.reject(new SpotifyError(SpotifyError.Code.NotInitialized));
 			return;
 		}
-		logBackInIfNeeded(new CompletionBlock<Boolean>() {
+		logBackInIfNeeded(new Completion<Boolean>() {
 			@Override
 			public void onComplete(Boolean loggedIn, SpotifyError error) {
 				completion.resolve(null);
@@ -1116,9 +1115,9 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		}, false);
 	}
 
-	private void doAPIRequest(final String endpoint, final String method, final ReadableMap params, final boolean jsonBody, final CompletionBlock<Object> completion)
+	private void doAPIRequest(final String endpoint, final String method, final ReadableMap params, final boolean jsonBody, final Completion<Object> completion)
 	{
-		prepareForRequest(new CompletionBlock<Void>() {
+		prepareForRequest(new Completion<Void>() {
 			@Override
 			public void onReject(SpotifyError error)
 			{
@@ -1166,7 +1165,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 					headers.put("Content-Type", "application/json; charset=utf-8");
 				}
 
-				Utils.doHTTPRequest(url, method, headers, body, new CompletionBlock<NetworkResponse>() {
+				Utils.doHTTPRequest(url, method, headers, body, new Completion<NetworkResponse>() {
 					@Override
 					public void onReject(SpotifyError error)
 					{
@@ -1233,7 +1232,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	//sendRequest(endpoint, method, params, isJSONBody, (result?, error?))
 	public void sendRequest(String endpoint, String method, ReadableMap params, boolean jsonBody, final Promise promise)
 	{
-		doAPIRequest(endpoint, method, params, jsonBody, new CompletionBlock<Object>() {
+		doAPIRequest(endpoint, method, params, jsonBody, new Completion<Object>() {
 			@Override
 			public void onReject(SpotifyError error)
 			{
@@ -1256,13 +1255,13 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	public void onLoggedIn()
 	{
 		//handle loginPlayer callbacks
-		ArrayList<CompletionBlock<Void>> loginResponses;
+		ArrayList<Completion<Void>> loginResponses;
 		synchronized(playerLoginResponses)
 		{
 			loginResponses = new ArrayList<>(playerLoginResponses);
 			playerLoginResponses.clear();
 		}
-		for(CompletionBlock<Void> response : loginResponses)
+		for(Completion<Void> response : loginResponses)
 		{
 			response.resolve(null);
 		}
@@ -1275,13 +1274,13 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		loggingOutPlayer = false;
 
 		//handle loginPlayer callbacks
-		ArrayList<CompletionBlock<Void>> loginResponses;
+		ArrayList<Completion<Void>> loginResponses;
 		synchronized(playerLoginResponses)
 		{
 			loginResponses = new ArrayList<>(playerLoginResponses);
 			playerLoginResponses.clear();
 		}
-		for(CompletionBlock<Void> response : loginResponses)
+		for(Completion<Void> response : loginResponses)
 		{
 			response.reject(new SpotifyError(SpotifyError.Code.NotLoggedIn, "You have been logged out"));
 		}
@@ -1292,7 +1291,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			if(auth.tokenRefreshURL != null && auth.getRefreshToken() != null)
 			{
 				final Object reference = this;
-				auth.renewSession(new CompletionBlock<Boolean>() {
+				auth.renewSession(new Completion<Boolean>() {
 					@Override
 					public void onReject(SpotifyError error)
 					{
@@ -1311,7 +1310,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 					@Override
 					public void onResolve(Boolean renewed)
 					{
-						initializePlayerIfNeeded(auth.getAccessToken(), new CompletionBlock<Void>() {
+						initializePlayerIfNeeded(auth.getAccessToken(), new Completion<Void>() {
 							@Override
 							public void onComplete(Void result, SpotifyError error)
 							{
@@ -1330,13 +1329,13 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		player = null;
 
 		//handle logoutPlayer callbacks
-		ArrayList<CompletionBlock<Void>> logoutResponses;
+		ArrayList<Completion<Void>> logoutResponses;
 		synchronized(playerLogoutResponses)
 		{
 			logoutResponses = new ArrayList<>(playerLogoutResponses);
 			playerLogoutResponses.clear();
 		}
-		for(CompletionBlock<Void> response : logoutResponses)
+		for(Completion<Void> response : logoutResponses)
 		{
 			response.resolve(null);
 		}
@@ -1364,13 +1363,13 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		}
 
 		//handle loginPlayer callbacks
-		ArrayList<CompletionBlock<Void>> loginResponses;
+		ArrayList<Completion<Void>> loginResponses;
 		synchronized(playerLoginResponses)
 		{
 			loginResponses = new ArrayList<>(playerLoginResponses);
 			playerLoginResponses.clear();
 		}
-		for(CompletionBlock<Void> response : loginResponses)
+		for(Completion<Void> response : loginResponses)
 		{
 			response.reject(new SpotifyError(error));
 		}

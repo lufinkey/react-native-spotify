@@ -35,8 +35,8 @@ public class Auth
 
 	private boolean renewingSession = false;
 	private boolean retryRenewalUntilResponse = false;
-	private final ArrayList<CompletionBlock<Boolean>> renewCallbacks = new ArrayList<>();
-	private final ArrayList<CompletionBlock<Boolean>> renewUntilResponseCallbacks = new ArrayList<>();
+	private final ArrayList<Completion<Boolean>> renewCallbacks = new ArrayList<>();
+	private final ArrayList<Completion<Boolean>> renewUntilResponseCallbacks = new ArrayList<>();
 
 
 	public void load()
@@ -193,10 +193,10 @@ public class Auth
 		save();
 	}
 
-	public void performTokenURLRequest(String url, String body, final CompletionBlock<JSONObject> completion)
+	public void performTokenURLRequest(String url, String body, final Completion<JSONObject> completion)
 	{
 		System.out.println("performTokenURLRequest");
-		Utils.doHTTPRequest(url, "POST", null, (body!=null ? body.getBytes() : null), new CompletionBlock<NetworkResponse>() {
+		Utils.doHTTPRequest(url, "POST", null, (body!=null ? body.getBytes() : null), new Completion<NetworkResponse>() {
 			@Override
 			public void onComplete(NetworkResponse response, SpotifyError error)
 			{
@@ -239,7 +239,7 @@ public class Auth
 		});
 	}
 
-	public void swapCodeForToken(String code, final CompletionBlock<String> completion)
+	public void swapCodeForToken(String code, final Completion<String> completion)
 	{
 		if(tokenSwapURL==null)
 		{
@@ -251,7 +251,7 @@ public class Auth
 		WritableMap params = Arguments.createMap();
 		params.putString("code", code);
 
-		performTokenURLRequest(tokenSwapURL, Utils.makeQueryString(params), new CompletionBlock<JSONObject>() {
+		performTokenURLRequest(tokenSwapURL, Utils.makeQueryString(params), new Completion<JSONObject>() {
 			@Override
 			public void onReject(SpotifyError error)
 			{
@@ -282,7 +282,7 @@ public class Auth
 		});
 	}
 
-	public void renewSessionIfNeeded(final CompletionBlock<Boolean> completion, boolean waitForDefinitiveResponse)
+	public void renewSessionIfNeeded(final Completion<Boolean> completion, boolean waitForDefinitiveResponse)
 	{
 		System.out.println("renewSessionIfNeeded");
 		if(accessToken == null)
@@ -303,7 +303,7 @@ public class Auth
 		else
 		{
 			// renew the session
-			renewSession(new CompletionBlock<Boolean>() {
+			renewSession(new Completion<Boolean>() {
 				@Override
 				public void onReject(SpotifyError error)
 				{
@@ -319,7 +319,7 @@ public class Auth
 		}
 	}
 
-	public void renewSession(final CompletionBlock<Boolean> completion, boolean waitForDefinitiveResponse)
+	public void renewSession(final Completion<Boolean> completion, boolean waitForDefinitiveResponse)
 	{
 		System.out.println("renewSession");
 		if(tokenRefreshURL==null)
@@ -373,7 +373,7 @@ public class Auth
 		params.putString("refresh_token", refreshToken);
 
 		// perform token refresh
-		performTokenURLRequest(tokenRefreshURL, Utils.makeQueryString(params), new CompletionBlock<JSONObject>() {
+		performTokenURLRequest(tokenRefreshURL, Utils.makeQueryString(params), new Completion<JSONObject>() {
 			@Override
 			public void onComplete(JSONObject response, SpotifyError error)
 			{
@@ -416,13 +416,13 @@ public class Auth
 				}
 
 				// call renewal callbacks
-				ArrayList<CompletionBlock<Boolean>> tmpRenewCallbacks;
+				ArrayList<Completion<Boolean>> tmpRenewCallbacks;
 				synchronized(renewCallbacks)
 				{
 					tmpRenewCallbacks = new ArrayList<>(renewCallbacks);
 					renewCallbacks.clear();
 				}
-				for(CompletionBlock<Boolean> completion : tmpRenewCallbacks)
+				for(Completion<Boolean> completion : tmpRenewCallbacks)
 				{
 					if(error != null)
 					{
@@ -441,13 +441,13 @@ public class Auth
 					retryRenewalUntilResponse = false;
 
 					// call renewal callbacks
-					ArrayList<CompletionBlock<Boolean>> tmpRenewUntilResponseCallbacks;
+					ArrayList<Completion<Boolean>> tmpRenewUntilResponseCallbacks;
 					synchronized(renewUntilResponseCallbacks)
 					{
 						tmpRenewUntilResponseCallbacks = new ArrayList<>(renewUntilResponseCallbacks);
 						renewUntilResponseCallbacks.clear();
 					}
-					for(CompletionBlock<Boolean> completion : tmpRenewUntilResponseCallbacks)
+					for(Completion<Boolean> completion : tmpRenewUntilResponseCallbacks)
 					{
 						if(error != null)
 						{

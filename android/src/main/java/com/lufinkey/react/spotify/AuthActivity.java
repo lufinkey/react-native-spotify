@@ -18,7 +18,7 @@ public class AuthActivity extends Activity
 
 	private Auth auth;
 	private AuthActivityListener listener;
-	private CompletionBlock<Void> finishCompletion;
+	private Completion<Void> finishCompletion;
 
 	public static void performAuthFlow(Activity context, Auth auth, AuthActivityListener listener)
 	{
@@ -105,7 +105,7 @@ public class AuthActivity extends Activity
 		}
 	}
 
-	public void finish(CompletionBlock<Void> completion)
+	public void finish(Completion<Void> completion)
 	{
 		finishCompletion = completion;
 		this.finish();
@@ -127,7 +127,7 @@ public class AuthActivity extends Activity
 			currentAuthActivity = null;
 			if(finishCompletion != null)
 			{
-				CompletionBlock<Void> completionTmp = finishCompletion;
+				Completion<Void> completionTmp = finishCompletion;
 				finishCompletion = null;
 				completionTmp.resolve(null);
 			}
