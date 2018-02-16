@@ -13,6 +13,7 @@
 @property (readonly) NSString* name;
 @property (readonly) NSString* code;
 @property (readonly) NSString* message;
+@property (readonly) NSDictionary* reactObject;
 
 -(void)reject:(void(^)(NSString*,NSString*,NSError*))promiseRejector;
 

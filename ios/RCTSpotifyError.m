@@ -62,6 +62,11 @@ DEFINE_SPOTIFY_ERROR_CODE(SessionExpired, @"Your login session has expired")
 	return [NSString stringWithFormat:@"RNS%@", _name];
 }
 
+-(NSDictionary*)reactObject
+{
+	return @{ @"code":self.code, @"message":self.message };
+}
+
 -(void)reject:(void(^)(NSString*,NSString*,NSError*))promiseRejector
 {
 	promiseRejector(self.code, self.message, nil);
