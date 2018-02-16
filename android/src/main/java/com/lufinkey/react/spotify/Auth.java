@@ -293,7 +293,7 @@ public class Auth
 		else if(isSessionValid())
 		{
 			// session does not need renewal
-			completion.resolve(true);
+			completion.resolve(false);
 		}
 		else if(refreshToken==null)
 		{
