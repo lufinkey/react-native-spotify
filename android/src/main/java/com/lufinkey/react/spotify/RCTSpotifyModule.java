@@ -234,7 +234,6 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	private void logBackInIfNeeded(final Completion<Boolean> completion, final boolean waitForDefinitiveResponse)
 	{
-		System.out.println("logBackInIfNeeded");
 		// ensure auth is actually logged in
 		if(!auth.isLoggedIn())
 		{

@@ -195,7 +195,6 @@ public class Auth
 
 	public void performTokenURLRequest(String url, String body, final Completion<JSONObject> completion)
 	{
-		System.out.println("performTokenURLRequest");
 		Utils.doHTTPRequest(url, "POST", null, (body!=null ? body.getBytes() : null), new Completion<NetworkResponse>() {
 			@Override
 			public void onComplete(NetworkResponse response, SpotifyError error)
@@ -284,7 +283,6 @@ public class Auth
 
 	public void renewSessionIfNeeded(final Completion<Boolean> completion, boolean waitForDefinitiveResponse)
 	{
-		System.out.println("renewSessionIfNeeded");
 		if(accessToken == null)
 		{
 			// not logged in
@@ -321,16 +319,13 @@ public class Auth
 
 	public void renewSession(final Completion<Boolean> completion, boolean waitForDefinitiveResponse)
 	{
-		System.out.println("renewSession");
 		if(tokenRefreshURL==null)
 		{
-			System.out.println("no token refresh");
 			completion.resolve(false);
 			return;
 		}
 		else if(refreshToken==null)
 		{
-			System.out.println("no refresh token");
 			completion.resolve(false);
 			return;
 		}
@@ -363,7 +358,6 @@ public class Auth
 		// if we're already in the process of renewing the session, don't continue
 		if(renewingSession)
 		{
-			System.out.println("renewing session already or retrying renewal until response");
 			return;
 		}
 		renewingSession = true;
