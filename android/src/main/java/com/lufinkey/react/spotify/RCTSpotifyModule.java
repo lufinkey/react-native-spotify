@@ -114,7 +114,6 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			SpotifyError.Code.AlreadyInitialized.reject(promise);
 			return;
 		}
-		initialized = true;
 
 		// ensure options is not null or missing fields
 		if(options==null)
@@ -204,6 +203,9 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		};
 		IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
 		reactContext.getApplicationContext().registerReceiver(networkStateReceiver, filter);
+
+		// done initializing
+		initialized = true;
 
 		// call promise
 		loggedIn = auth.isLoggedIn();
