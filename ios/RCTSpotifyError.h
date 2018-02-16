@@ -57,4 +57,9 @@ DECLARE_SPOTIFY_ERROR_CODE(SessionExpired)
 @property (readonly) NSString* message;
 @property (readonly) NSDictionary* reactObject;
 
++(RCTSpotifyError*)nullParameterErrorForName:(NSString*)paramName;
++(RCTSpotifyError*)missingOptionErrorForName:(NSString*)optionName;
++(RCTSpotifyError*)httpErrorForStatusCode:(NSInteger)statusCode;
++(RCTSpotifyError*)httpErrorForStatusCode:(NSInteger)statusCode message:(NSString*)message;
+
 @end

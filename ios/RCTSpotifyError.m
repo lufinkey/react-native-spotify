@@ -191,6 +191,41 @@ DEFINE_SPOTIFY_ERROR_CODE(SessionExpired, @"Your login session has expired")
 }
 
 
+
++(RCTSpotifyError*)nullParameterErrorForName:(NSString*)paramName
+{
+	return [RCTSpotifyError errorWithCodeObj:RCTSpotifyErrorCode.NullParameter
+									 message:[NSString stringWithFormat:@"%@ cannot be null", paramName]];
+}
+
++(RCTSpotifyError*)missingOptionErrorForName:(NSString*)optionName
+{
+	return [RCTSpotifyError errorWithCodeObj:RCTSpotifyErrorCode.MissingOption
+									 message:[NSString stringWithFormat:@"Missing required option %@", optionName]];
+}
+
++(RCTSpotifyError*)httpErrorForStatusCode:(NSInteger)statusCode
+{
+	if(statusCode <= 0)
+	{
+		return [RCTSpotifyError errorWithCode:@"HTTPRequestFailed" message:@"Unable to send request"];
+	}
+	return [RCTSpotifyError errorWithCode:[NSString stringWithFormat:@"HTTP%ld", statusCode]
+								  message:[NSHTTPURLResponse localizedStringForStatusCode:statusCode]];
+}
+
++(RCTSpotifyError*)httpErrorForStatusCode:(NSInteger)statusCode message:(NSString*)message
+{
+	NSString* code = [NSString stringWithFormat:@"HTTP%ld", statusCode];
+	if(statusCode <= 0)
+	{
+		code = @"HTTPRequestFailed";
+	}
+	return [RCTSpotifyError errorWithCode:code message:message];
+}
+
+
+
 #define SDK_ERROR_CASE(error) case error: return @#error;
 
 +(NSString*)getSDKErrorCode:(SpErrorCode)enumVal
