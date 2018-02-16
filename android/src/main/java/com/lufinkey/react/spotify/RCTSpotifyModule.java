@@ -693,22 +693,6 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	}
 
 	@ReactMethod(isBlockingSynchronousMethod = true)
-	//handleAuthURL(url)
-	public Boolean handleAuthURL(String url)
-	{
-		// unused function
-		return false;
-	}
-
-	@ReactMethod
-	//handleAuthURL(url, (handled))
-	public void handleAuthURLAsync(String url, final Promise promise)
-	{
-		// unused function
-		promise.resolve(handleAuthURL(url));
-	}
-
-	@ReactMethod(isBlockingSynchronousMethod = true)
 	//getAuth()
 	public WritableMap getAuth()
 	{
