@@ -299,7 +299,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			public void onResolve(Boolean renewed)
 			{
 				// session renewal didn't fail, so initialize the player if necessary
-				initializePlayerIfNeeded(auth.getAccessToken(), new Completion<Void>() {
+				initializePlayerIfNeeded(new Completion<Void>() {
 					@Override
 					public void onReject(SpotifyError error)
 					{
@@ -331,7 +331,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		}, waitForDefinitiveResponse);
 	}
 
-	private void initializePlayerIfNeeded(final String accessToken, final Completion<Void> completion)
+	private void initializePlayerIfNeeded(final Completion<Void> completion)
 	{
 		// make sure we have the player scope
 		if(!auth.hasPlayerScope())
@@ -343,7 +343,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		// check if player already exists and is initialized
 		if(player != null && player.isInitialized())
 		{
-			loginPlayer(auth.getAccessToken(), completion);
+			loginPlayer(completion);
 			return;
 		}
 
@@ -363,7 +363,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		{
 			//initialize player
 			final Object reference = this;
-			Config playerConfig = new Config(reactContext.getApplicationContext(), accessToken, auth.clientID);
+			Config playerConfig = new Config(reactContext.getApplicationContext(), auth.getAccessToken(), auth.clientID);
 			player = Spotify.getPlayer(playerConfig, reference, new SpotifyPlayer.InitializationObserver(){
 				@Override
 				public void onError(Throwable error)
@@ -402,7 +402,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 					player.addConnectionStateCallback(RCTSpotifyModule.this);
 
 					// attempt to log in the player
-					loginPlayer(accessToken, new Completion<Void>() {
+					loginPlayer(new Completion<Void>() {
 						@Override
 						public void onComplete(Void unused, SpotifyError error)
 						{
@@ -431,7 +431,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		}
 	}
 
-	private void loginPlayer(final String accessToken, final Completion<Void> completion)
+	private void loginPlayer(final Completion<Void> completion)
 	{
 		boolean loggedIn = false;
 		boolean firstLoginAttempt = false;
@@ -468,7 +468,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		else if(firstLoginAttempt)
 		{
 			// only the first thread to call loginPlayer should actually attempt to log the player in
-			player.login(accessToken);
+			player.login(auth.getAccessToken());
 		}
 	}
 
@@ -582,7 +582,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 					public void onResolve(String accessToken)
 					{
 						// initialize player
-						initializePlayerIfNeeded(auth.getAccessToken(), new Completion<Void>() {
+						initializePlayerIfNeeded(new Completion<Void>() {
 							@Override
 							public void onComplete(Void unused, final SpotifyError unusedError)
 							{
@@ -621,7 +621,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 				auth.applyAuthAccessToken(accessToken, expiresIn);
 
 				// initialize player
-				initializePlayerIfNeeded(auth.getAccessToken(), new Completion<Void>() {
+				initializePlayerIfNeeded(new Completion<Void>() {
 					@Override
 					public void onComplete(Void unused, SpotifyError unusedError)
 					{
@@ -1311,7 +1311,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 					@Override
 					public void onResolve(Boolean renewed)
 					{
-						initializePlayerIfNeeded(auth.getAccessToken(), new Completion<Void>() {
+						initializePlayerIfNeeded(new Completion<Void>() {
 							@Override
 							public void onComplete(Void result, SpotifyError error)
 							{
