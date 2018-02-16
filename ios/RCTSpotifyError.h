@@ -15,12 +15,8 @@
 @property (readonly) NSString* message;
 @property (readonly) NSDictionary* reactObject;
 
--(void)reject:(void(^)(NSString*,NSString*,NSError*))promiseRejector;
-
-@end
-
 #define DECLARE_SPOTIFY_ERROR_CODE(errorName) \
-	RCTSpotifyErrorCode* RCTSpotifyErrorCode##errorName();
+	@property (class, readonly) RCTSpotifyErrorCode* errorName;
 
 DECLARE_SPOTIFY_ERROR_CODE(AlreadyInitialized)
 DECLARE_SPOTIFY_ERROR_CODE(NotInitialized)
@@ -34,6 +30,10 @@ DECLARE_SPOTIFY_ERROR_CODE(PlayerNotReady)
 DECLARE_SPOTIFY_ERROR_CODE(SessionExpired)
 
 #undef DECLARE_SPOTIFY_ERROR_CODE
+
+-(void)reject:(void(^)(NSString*,NSString*,NSError*))promiseRejector;
+
+@end
 
 
 

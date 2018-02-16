@@ -15,10 +15,11 @@
 +(instancetype)codeWithName:(NSString*)name message:(NSString*)message;
 @end
 
+@implementation RCTSpotifyErrorCode
 
 #define DEFINE_SPOTIFY_ERROR_CODE(errorName, messageStr) \
 	static RCTSpotifyErrorCode* _RCTSpotifyErrorCode##errorName = nil; \
-	RCTSpotifyErrorCode* RCTSpotifyErrorCode##errorName() { \
+	+(RCTSpotifyErrorCode*)errorName { \
 		if(_RCTSpotifyErrorCode##errorName == nil) { \
 			_RCTSpotifyErrorCode##errorName = [RCTSpotifyErrorCode codeWithName:@#errorName message:messageStr]; } \
 		return _RCTSpotifyErrorCode##errorName; } \
@@ -35,9 +36,6 @@ DEFINE_SPOTIFY_ERROR_CODE(PlayerNotReady, @"Player is not ready")
 DEFINE_SPOTIFY_ERROR_CODE(SessionExpired, @"Your login session has expired")
 
 #undef DEFINE_SPOTIFY_ERROR_CODE
-
-
-@implementation RCTSpotifyErrorCode
 
 @synthesize name = _name;
 @synthesize message = _message;
