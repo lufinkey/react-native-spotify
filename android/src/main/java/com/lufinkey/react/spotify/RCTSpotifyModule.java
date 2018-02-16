@@ -472,10 +472,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	{
 		if(player == null)
 		{
-			if(completion != null)
-			{
-				completion.resolve(null);
-			}
+			completion.resolve(null);
 			return;
 		}
 
@@ -489,11 +486,8 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			}
 			else
 			{
-				if(completion != null)
-				{
-					// wait for RCTSpotifyModule.onLoggedOut
-					playerLogoutResponses.add(completion);
-				}
+				// wait for RCTSpotifyModule.onLoggedOut
+				playerLogoutResponses.add(completion);
 			}
 		}
 
