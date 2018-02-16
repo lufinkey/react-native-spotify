@@ -18,10 +18,7 @@
 	{
 		return [NSNull null];
 	}
-	NSMutableDictionary* obj = [NSMutableDictionary dictionary];
-	obj[@"code"] = error.code;
-	obj[@"message"] = error.message;
-	return obj;
+	return error.reactObject;
 }
 
 +(id)NSError:(NSError*)error

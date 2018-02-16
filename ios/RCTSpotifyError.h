@@ -54,5 +54,6 @@ DECLARE_SPOTIFY_ERROR_CODE(SessionExpired)
 
 @property (readonly) NSString* code;
 @property (readonly) NSString* message;
+@property (readonly) NSDictionary* reactObject;
 
 @end

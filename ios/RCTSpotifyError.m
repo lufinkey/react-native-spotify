@@ -182,6 +182,11 @@ DEFINE_SPOTIFY_ERROR_CODE(SessionExpired, @"Your login session has expired")
 	promiseRejector(_code, _message, _error);
 }
 
+-(NSDictionary*)reactObject
+{
+	return @{ @"code":_code, @"message":_message };
+}
+
 
 #define SDK_ERROR_CASE(error) case error: return @#error;
 
