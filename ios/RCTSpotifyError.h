@@ -10,8 +10,11 @@
 
 @interface RCTSpotifyError : NSObject
 
--(id)initWithError:(NSError*)error;
 -(id)initWithCode:(NSString*)code message:(NSString*)message;
+-(id)initWithError:(NSError*)error;
+
++(instancetype)errorWithCode:(NSString*)code message:(NSString*)message;
++(instancetype)errorWithError:(NSError*)error;
 
 @property (nonatomic, readonly) NSString* code;
 @property (nonatomic, readonly) NSString* message;
