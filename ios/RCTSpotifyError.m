@@ -132,7 +132,7 @@ DEFINE_SPOTIFY_ERROR_CODE(SessionExpired, @"Your login session has expired")
 	return self;
 }
 
--(id)initWithError:(NSError*)error
+-(id)initWithNSError:(NSError*)error
 {
 	if(self = [super init])
 	{
@@ -175,9 +175,9 @@ DEFINE_SPOTIFY_ERROR_CODE(SessionExpired, @"Your login session has expired")
 	return [[self alloc] initWithCodeObj:code message:message];
 }
 
-+(instancetype)errorWithError:(NSError*)error
++(instancetype)errorWithNSError:(NSError*)error
 {
-	return [[self alloc] initWithError:error];
+	return [[self alloc] initWithNSError:error];
 }
 
 -(void)reject:(void(^)(NSString*,NSString*,NSError*))promiseRejector
