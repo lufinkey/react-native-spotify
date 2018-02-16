@@ -82,6 +82,7 @@ DEFINE_SPOTIFY_ERROR_CODE(SessionExpired, @"Your login session has expired")
 {
 	if(self = [super init])
 	{
+		_error = nil;
 		_code = [NSString stringWithString:code];
 		_message = [NSString stringWithString:message];
 	}
@@ -103,6 +104,22 @@ DEFINE_SPOTIFY_ERROR_CODE(SessionExpired, @"Your login session has expired")
 		_error = error;
 		_code = [NSString stringWithString:code];
 		_message = _error.localizedDescription;
+	}
+	return self;
+}
+
+-(id)initWithCodeObj:(RCTSpotifyErrorCode*)code
+{
+	return [self initWithCodeObj:code message:code.message];
+}
+
+-(id)initWithCodeObj:(RCTSpotifyErrorCode*)code message:(NSString*)message
+{
+	if(self = [super init])
+	{
+		_error = nil;
+		_code = [NSString stringWithString:code.code];
+		_message = [NSString stringWithString:message];
 	}
 	return self;
 }
@@ -138,6 +155,16 @@ DEFINE_SPOTIFY_ERROR_CODE(SessionExpired, @"Your login session has expired")
 +(instancetype)errorWithCode:(NSString *)code error:(NSError *)error
 {
 	return [[self alloc] initWithCode:code error:error];
+}
+
++(instancetype)errorWithCodeObj:(RCTSpotifyErrorCode*)code
+{
+	return [[self alloc] initWithCodeObj:code];
+}
+
++(instancetype)errorWithCodeObj:(RCTSpotifyErrorCode*)code message:(NSString*)message
+{
+	return [[self alloc] initWithCodeObj:code message:message];
 }
 
 +(instancetype)errorWithError:(NSError*)error

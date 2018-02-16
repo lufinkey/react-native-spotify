@@ -38,10 +38,14 @@ DECLARE_SPOTIFY_ERROR_CODE(SessionExpired)
 
 -(id)initWithCode:(NSString*)code message:(NSString*)message;
 -(id)initWithCode:(NSString*)code error:(NSError*)error;
+-(id)initWithCodeObj:(RCTSpotifyErrorCode*)code;
+-(id)initWithCodeObj:(RCTSpotifyErrorCode*)code message:(NSString*)message;
 -(id)initWithError:(NSError*)error;
 
 +(instancetype)errorWithCode:(NSString*)code message:(NSString*)message;
 +(instancetype)errorWithCode:(NSString*)code error:(NSError*)error;
++(instancetype)errorWithCodeObj:(RCTSpotifyErrorCode*)code;
++(instancetype)errorWithCodeObj:(RCTSpotifyErrorCode*)code message:(NSString*)message;
 +(instancetype)errorWithError:(NSError*)error;
 
 @property (readonly) NSString* code;
