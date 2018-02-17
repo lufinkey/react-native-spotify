@@ -228,7 +228,18 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options resolve:(RCTPromiseResolveBl
 		[self sendEvent:@"login" args:@[]];
 	}
 	
-	[self logBackInIfNeeded:nil waitForDefinitiveResponse:YES];
+	[self logBackInIfNeeded:[RCTSpotifyCompletion<NSNumber*> onReject:^(RCTSpotifyError* error) {
+		// failure
+	} onResolve:^(NSNumber* loggedIn) {
+		// success
+		if(loggedIn.boolValue)
+		{
+			// initialize player
+			[self initializePlayerIfNeeded:[RCTSpotifyCompletion onComplete:^(id unused, RCTSpotifyError* unusedError) {
+				// done
+			}]];
+		}
+	}] waitForDefinitiveResponse:YES];
 }
 
 RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(isInitialized)
@@ -254,10 +265,7 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 	// ensure auth is actually logged in
 	if(_auth.session == nil)
 	{
-		if(completion != nil)
-		{
-			[completion resolve:@NO];
-		}
+		[completion resolve:@NO];
 		return;
 	}
 	// attempt to renew auth session
@@ -275,10 +283,7 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 					_auth.session = nil;
 				}
 				// call completion
-				if(completion != nil)
-				{
-					[completion resolve:@NO];
-				}
+				[completion resolve:@NO];
 				// send logout event
 				if(loggedIn)
 				{
@@ -289,40 +294,18 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 		else
 		{
 			// auth wasn't logged in during the renewal failure, so just fail
-			if(completion != nil)
+			if (waitForDefinitiveResponse)
 			{
-				if (waitForDefinitiveResponse)
-				{
-					[completion resolve:@NO];
-				}
-				else
-				{
-					[completion reject:error];
-				}
+				[completion resolve:@NO];
+			}
+			else
+			{
+				[completion reject:error];
 			}
 		}
-	} onResolve:^(id result) {
-		// session renewal didn't fail, so initialize the player if necessary
-		[self initializePlayerIfNeeded:[RCTSpotifyCompletion onReject:^(RCTSpotifyError* error) {
-			// failed to initialize the player
-			if(completion != nil)
-			{
-				if(waitForDefinitiveResponse)
-				{
-					[completion resolve:@YES];
-				}
-				else
-				{
-					[completion reject:error];
-				}
-			}
-		} onResolve:^(id result) {
-			// success
-			if(completion != nil)
-			{
-				[completion resolve:@YES];
-			}
-		}]];
+	} onResolve:^(id unused) {
+		// success
+		[completion resolve:@YES];
 	}] waitForDefinitiveResponse:waitForDefinitiveResponse];
 }
 
@@ -658,13 +641,31 @@ RCT_EXPORT_METHOD(getAuthAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromis
 			[completion resolve:nil];
 		}
 	} onResolve:^(id unused) {
-		if(!_player.loggedIn && [self hasPlayerScope])
+		if([[self isLoggedIn] boolValue])
 		{
-			[completion reject:[RCTSpotifyError errorWithCodeObj:RCTSpotifyErrorCode.PlayerNotReady]];
+			[self initializePlayerIfNeeded:[RCTSpotifyCompletion onReject:^(RCTSpotifyError* error) {
+				if(!_player.loggedIn)
+				{
+					[completion reject:error];
+				}
+				else
+				{
+					[completion resolve:nil];
+				}
+			} onResolve:^(id result) {
+				if(!_player.loggedIn && [self hasPlayerScope])
+				{
+					[completion reject:[RCTSpotifyError errorWithCodeObj:RCTSpotifyErrorCode.PlayerNotReady]];
+				}
+				else
+				{
+					[completion resolve:nil];
+				}
+			}]];
 		}
 		else
 		{
-			[completion resolve:nil];
+			[completion reject:[RCTSpotifyError errorWithCodeObj:RCTSpotifyErrorCode.NotLoggedIn]];
 		}
 	}] waitForDefinitiveResponse:NO];
 }
