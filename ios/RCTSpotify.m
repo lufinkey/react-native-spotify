@@ -630,9 +630,9 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getAuth)
 	return [RCTSpotifyConvert SPTAuth:_auth];
 }
 
-RCT_EXPORT_METHOD(getAuthAsync:(RCTResponseSenderBlock)completion)
+RCT_EXPORT_METHOD(getAuthAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
-	completion(@[ [RCTSpotifyConvert ID:[self getAuth]] ]);
+	resolve(@[ [RCTSpotifyConvert ID:[self getAuth]] ]);
 }
 
 

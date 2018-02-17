@@ -41,7 +41,7 @@
 //queueURI(spotifyURI)
 -(void)queueURI:(NSString*)uri resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 //setVolume(volume)
--(void)setVolume:(double)volume completion:(RCTResponseSenderBlock)completion;
+-(void)setVolume:(double)volume resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 //getVolume()
 -(id)getVolume;
 //getVolumeAsync()
