@@ -142,7 +142,7 @@ import Spotify from 'react-native-spotify';
 
 ### Events
 
-This module uses [react-native-events](https://www.npmjs.com/package/react-native-events), so it has all of the same methods as an [EventEmitter](https://nodejs.org/api/events.html) object. All of the events, excluding the **'login'** and **'logout'** events, come from Spotify's native SDK and are simply forwarded to javascript. If one of these events occurs at a weird time, please open an issue on Spotify's [ios-sdk](https://github.com/spotify/ios-sdk) or [android-sdk](https://github.com/spotify/android-sdk) repo, and not here.
+This module uses [react-native-events](https://www.npmjs.com/package/react-native-events), so it has all of the same methods as an [EventEmitter](https://nodejs.org/api/events.html) object. All of the events, excluding the **'login'** and **'logout'** events, come from Spotify's native SDK and are simply forwarded to javascript. If one of these events occurs at a weird time or has strange data, please open an issue on Spotify's [ios-sdk](https://github.com/spotify/ios-sdk) or [android-sdk](https://github.com/spotify/android-sdk) repo, and not here.
 
 * **'login'**
 
@@ -253,22 +253,22 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 
 ### Initialization/Authorization Methods
 
-* **initialize**( *options*, ( *loggedIn*, *error*? ) => {} )
+* **initialize**( *options* )
 
 	Initializes the Spotify module and resumes a logged in session if there is one. This must be the first method you call when using this module.
 	
 	* *Parameters*
 		* **options** - an object with options to pass to the Spotify Module
-			* **clientID** - Your spotify application's ClientID that you registered with spotify [here](https://developer.spotify.com/my-applications)
+			* **clientID** - (*Required*) Your spotify application's ClientID that you registered with spotify [here](https://developer.spotify.com/my-applications)
 			* **redirectURL** - The redirect URL to use when you've finished logging in. You NEED to set this URL for your application [here](https://developer.spotify.com/my-applications), otherwise the login screen will not close
 			* **sessionUserDefaultsKey** - The preference key to use to store session data for this module
 			* **scopes** - An array of scopes to use in the application. A list of scopes can be found [here](https://developer.spotify.com/web-api/using-scopes/)
 			* **tokenSwapURL** - The URL to use to swap an authentication code for an access token (see [Token swap and refresh](#token-swap-and-refresh) section for more info)
 			* **tokenRefreshURL** - The URL to use to get a new access token from a refresh token
-  		
-		* **loggedIn** - A boolean indicating whether or not a session was automatically logged back in
-  	
-		* **error** - An error that occurred during initialization, or *null* if no error occurred
+	
+	* *Returns*
+	
+		* A *Promise* that resolves to a boolean when the module finishes initialization, indicating whether or not a session was automatically logged back in
 
 
 
@@ -285,26 +285,24 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 
 
 
-* **isInitializedAsync**( ( *initialized* ) => {} )
+* **isInitializedAsync**()
 
-	Checks if the Spotify module has been initialized yet, but passes the result to a callback rather than returning it.
+	Checks if the Spotify module has been initialized yet, but returns a *Promise* that resolves to the result.
 	
-	* *Parameters*
+	* *Returns*
 	
-		* **initialized** - A boolean indicating whether or not the Spotify module has been initialized
+		* A *Promise* that resolves to a boolean, indicating whether or not the Spotify module has been initialized
 
 
 
 
-* **login**( ( *loggedIn*, *error*? ) => {} )
+* **login**()
 
 	Opens a UI to log into Spotify.
 	
-	* *Parameters*
+	* *Returns*
 	
-		* **loggedIn** - A boolean indicating whether or not the client was logged in
-	
-		* **error** - An error that occurred during login, or *null* if no error occurred
+		* A *Promise* that resolves to a boolean, indicating whether or not the user was logged in
 
 
 
@@ -321,24 +319,24 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 
 
 
-* **isLoggedInAsync**( ( *loggedIn* ) => {} )
+* **isLoggedInAsync**()
 
-	Checks if the client is logged in, but passes the result to a callback rather than returning it.
+	Checks if the client is logged in, but returns a *Promise* that resolves to the result.
 	
-	* *Parameters*
+	* *Returns*
 	
-		* **loggedIn** - A boolean indicating whether or not the client is logged in
+		* A *Promise* that resolves to a boolean, indicating whether or not a user is currently logged in
 
 
 
 
-* **logout**( ( *error*? ) => {} )
+* **logout**()
 
 	Logs out of Spotify.
 	
-	* *Parameters*
+	* *Returns*
 	
-		* **error** - An error that occurred during logout, or *null* if no error occurred
+		* A *Promise* that resolves when the logout completes
 
 
 
@@ -354,20 +352,20 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 
 
 
-* **getAuthAsync**( ( *auth*? ) => {} )
+* **getAuthAsync**()
 
-	Gives information about authentication data, but passes the result to a callback rather than returning it.
+	Gives information about authentication data, but returns a *Promise* that resolves to the result.
 	
-	* *Parameters*
+	* *Returns*
 	
-		* **auth** - An *Auth* object, or *null* if not logged in
+		* A *Promise* that resolves to an *Auth* object, or *null* if not logged in
 
 
 
 
 ### Playback Methods
 
-* **playURI**( *spotifyURI*, *startIndex*, *startPosition*, ( *error*? ) => {} )
+* **playURI**( *spotifyURI*, *startIndex*, *startPosition* )
 
 	Play a Spotify URI.
 	
@@ -378,34 +376,40 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 		* **startIndex** - The index of an item that should be played first, e.g. 0 - for the very first track in the playlist or a single track
 		
 		* **startPosition** - starting position for playback in seconds
-		
-		* **error** - An error object if an error occurred, or *null* if no error occurred
+	
+	* *Returns*
+	
+		* A *Promise* that resolves or rejects when the operation is complete
 
 
 
 
-* **queueURI**( *spotifyURI*, ( *error*? ) => {} )
+* **queueURI**( *spotifyURI* )
 
-	Queue a Spotify URI. **NOTE: Do not use this function in production code. It has proven to be very inconsistent and buggy. Instead, try populating a secret playlist to manage your song queues.**
+	Queue a Spotify URI. **WARNING: This function has proven to be very [inconsistent and buggy](https://github.com/spotify/ios-sdk/issues/717).**
 	
 	* *Parameters*
 	
 		* **spotifyURI** - The Spotify URI to queue
-		
-		* **error** - An error object if an error occurred, or *null* if no error occurred
+	
+	* *Returns*
+	
+		* A *Promise* that resolves or rejects when the operation is complete
 
 
 
 
-* **setPlaying**( *playing*, ( *error*? ) => {} )
+* **setPlaying**( *playing* )
 
 	Set the “playing” status of the player.
 	
 	* *Parameters*
 	
-		* **playing** - pass *true* to resume playback, or *false* to pause it
-		
-		* **error** - An error object if an error occurred, or *null* if no error occurred
+		* **playing** - *true* to resume playback, or *false* to pause it
+	
+	* *Returns*
+	
+		* A *Promise* that resolves or rejects when the operation is complete
 
 * **getPlaybackState**()
 
@@ -413,93 +417,97 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	
 	* *Returns*
 	
-		* A *PlaybackState* object, or *null* if the player has not been initialized
+		* A *PlaybackState* object, or *null* if the player has not yet initialized
 
 
 
 
-* **getPlaybackStateAsync**( ( *playbackState*? ) => {} )
+* **getPlaybackStateAsync**()
 
-	Gives the player's current state, but passes the result to a callback rather than returning it.
+	Gives the player's current state, but returns a *Promise* that resolves to the result.
 	
-	* *Parameters*
+	* *Returns*
 	
-		* **playbackState** - A *PlaybackState* object, or *null* if the player has not been initialized
+		* A *Promise* that resolves to a *PlaybackState* object or *null* if the player has not yet initialized
 
 
 
 * **getPlaybackMetadata**()
 
-	Gives information about the previous, current, and next tracks in the player
+	Gives information about the previous, current, and next track in the player.
 	
 	* *Returns*
 	
-		* A *PlaybackMetadata* object, or *null* if the player has not been initialized
+		* A *PlaybackMetadata* object, or *null* if the player has yet initialized
 
 
 
-* **getPlaybackMetadataAsync**( ( *playbackMetadata*? ) => {} )
+* **getPlaybackMetadataAsync**()
 
-	Gives information about the previous, current, and next tracks in the player, but passes the result to a callback rather than returning it.
+	Gives information about the previous, current, and next track in the player, but returns a *Promise* that resolves to the result.
 	
-	* *Parameters*
+	* *Returns*
 	
-		* **playbackMetadata** - A *PlaybackMetadata* object, or *null* if the player has not been initialized
+		* A *Promise* that resolves to a *PlaybackMetadata* object or *null* if the player has not yet initialized
 
 
 
 
-* **skipToNext**( ( *error*? ) => {} )
+* **skipToNext**()
 
 	Skips to the next track.
 	
-	* *Parameters*
+	* *Returns*
 	
-		* **error** - An error object if an error occurred, or *null* if no error occurred
+		* A *Promise* that resolves or rejects when the operation is complete
 
 
 
 
-* **skipToPrevious**( ( *error*? ) => {} )
+* **skipToPrevious**()
 
 	Skips to the previous track.
 	
-	* *Parameters*
+	* *Returns*
 	
-		* **error** - An error object if an error occurred, or *null* if no error occurred
+		* A *Promise* that resolves or rejects when the operation is complete
 
 
 
 
-* **setShuffling**( *shuffling*, ( *error*? ) => {] )
+* **setShuffling**( *shuffling* )
 
 	Enables or disables shuffling on the player.
 	
 	* *Parameters*
 	
 		* **shuffling** - *true* to enable shuffle, *false* to disable it
-		
-		* **error** - An error object if an error occurred, or *null* if no error occurred
+	
+	* *Returns*
+	
+		* A *Promise* that resolves or rejects when the operation is complete
 
 
 
 
-* **setRepeating**( *repeating*, ( *error*? ) => {} )
+* **setRepeating**( *repeating* )
 
 	Enables or disables repeating on the player.
 	
 	* *Parameters*
 	
 		* **repeating** - *true* to enable repeat, *false* to disable it
-		
-		* **error** - An error object if an error occurred, or *null* if no error occurred
+	
+	* *Returns*
+	
+		* A *Promise* that resolves or rejects when the operation is complete
 
 
 
 
 ### Metadata Methods
 
-* **sendRequest**( *endpoint*, *method*, *params*, *isJSONBody*, ( *result*?, *error*? ) => {} )
+* **sendRequest**( *endpoint*, *method*, *params*, *isJSONBody* )
 
 	Sends a general request to the spotify api. A list of potential endpoints can be found [here](https://developer.spotify.com/web-api/endpoint-reference/).
 	
@@ -512,28 +520,26 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 		* **params** - the request parameters
 		
 		* **isJSONBody** - whether or not to send the parameters as json in the body of the request
-		
-		* **result** - the request result object
-		
-		* **error** - An error object if an error occurred, or *null* if no error occurred
+	
+	* *Returns*
+	
+		* A *Promise* that resolves to the result of the API request
 
 
 
 
-* **getMe**( ( *result*?, *error*? ) => {} )
+* **getMe**()
 
 	Retrieves information about the logged in Spotify user.
 	
-	* *Parameters*
+	* *Returns*
 	
-		* **result** - The request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-current-users-profile/#example)
-		
-		* **error** - An error object if an error occurred, or *null* if no error occurred
+		* A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-current-users-profile/#example)
 
 
 
 
-* **search**( *query*, *types*, *options*?, ( *result*?, *error*? ) => {} )
+* **search**( *query*, *types*, *options*? )
 
 	Sends a [search](https://developer.spotify.com/web-api/search-item/) request to spotify.
 	
@@ -544,15 +550,15 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 		* **types** - An array of item types to search for. Valid types are: `album`, `artist`, `playlist`, and `track`.
 		
 		* **options** - A map of other optional parameters to specify for the query
-		
-		* **result** - The search result object. An example response can be seen [here](https://developer.spotify.com/web-api/search-item/#example)
-		
-		* **error** - An error object if an error occurred, or *null* if no error occurred
+	
+	* *Returns*
+	
+		* A *Promise* that resolves to the search result object. An example response can be seen [here](https://developer.spotify.com/web-api/search-item/#example)
 
 
 
 
-* **getAlbum**( *albumID*, *options*?, ( *result*?. *error*? ) => {} )
+* **getAlbum**( *albumID*, *options*? )
 
 	Gets Spotify catalog information for a single album.
 	
@@ -561,15 +567,15 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 		* **albumID** - The Spotify ID for the album
 		
 		* **options** - A map of other optional parameters to specify for the query
-		
-		* **result** - The request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-album/#example)
-		
-		* **error** - An error object if an error occurred, or *null* if no error occurred
+	
+	* *Returns*
+	
+		* A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-album/#example)
 
 
 
 
-* **getAlbums**( *albumIDs*, *options*?, ( *result*?, *error*? ) => {} )
+* **getAlbums**( *albumIDs*, *options*? )
 
 	Gets Spotify catalog information for multiple albums identified by their Spotify IDs.
 	
@@ -578,15 +584,15 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 		* **albumIDs** - An array of the Spotify IDs for the albums
 		
 		* **options** - A map of other optional parameters to specify for the query
-		
-		* **result** - The request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-several-albums/#example)
-		
-		* **error** - An error object if an error occurred, or *null* if no error occurred
+	
+	* *Returns*
+	
+		* A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-several-albums/#example)
 
 
 
 
-* **getAlbumTracks**( *albumID*, *options*?, ( *result*?, *error*? ) => {} )
+* **getAlbumTracks**( *albumID*, *options*? )
 
 	Gets Spotify catalog information about an album’s tracks.
 
@@ -595,15 +601,15 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 		* **albumID** - The Spotify ID for the album
 		
 		* **options** - A map of other optional parameters to specify for the query
-		
-		* **result** - The request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-albums-tracks/#example)
-		
-		* **error** - An error object if an error occurred, or *null* if no error occurred
+	
+	* *Returns*
+	
+		* A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-albums-tracks/#example)
 
 
 
 
-* **getArtist**( *artistID*, *options*?, ( *result*?, *error*? ) => {} )
+* **getArtist**( *artistID*, *options*? )
 
 	Gets Spotify catalog information for a single artist.
 	
@@ -612,15 +618,15 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 		* **artistID** - The Spotify ID for the artist
 		
 		* **options** - A map of other optional parameters to specify for the query
-		
-		* **result** - The request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-artist/#example)
-		
-		* **error** - An error object if an error occurred, or *null* if no error occurred
+	
+	* *Returns*
+	
+		* A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-artist/#example)
 
 
 
 
-* **getArtists**( *artistIDs*, *options*?, ( *result*?, *error*? ) => {} )
+* **getArtists**( *artistIDs*, *options*? )
 
 	Gets Spotify catalog information for several artists based on their Spotify IDs.
 	
@@ -629,15 +635,15 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 		* **artistIDs** - An array of the Spotify IDs for the artists
 		
 		* **options** - A map of other optional parameters to specify for the query
-		
-		* **result** - The request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-several-artists/#example)
-		
-		* **error** - An error object if an error occurred, or *null* if no error occurred
+	
+	* *Returns*
+	
+		* A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-several-artists/#example)
 
 
 
 
-* **getArtistAlbums**( *artistID*, *options*?, ( *result*?, *error*? ) => {} )
+* **getArtistAlbums**( *artistID*, *options*? )
 
 	Gets Spotify catalog information about an artist’s albums.
 	
@@ -646,15 +652,15 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 		* **artistID** - The Spotify ID for the artist
 		
 		* **options** - A map of other optional parameters to specify for the query
-		
-		* **result** - The request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-artists-albums/#example)
-		
-		* **error** - An error object if an error occurred, or *null* if no error occurred
+	
+	* *Returns*
+	
+		* A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-artists-albums/#example)
 
 
 
 
-* **getArtistTopTracks**( *artistID*, *country*, *options*?, ( *result*?, *error*? ) => {} )
+* **getArtistTopTracks**( *artistID*, *country*, *options*? )
 
 	Gets Spotify catalog information about an artist’s top tracks by country.
 	
@@ -665,15 +671,15 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 		* **country** - The country: an [ISO 3166-1 alpha-2 country code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2).
 		
 		* **options** - A map of other optional parameters to specify for the query
-		
-		* **result** - The request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-artists-top-tracks/#example)
-		
-		* **error** - An error object if an error occurred, or *null* if no error occurred
+	
+	* *Returns*
+	
+		* A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-artists-top-tracks/#example)
 
 
 
 
-* **getArtistRelatedArtists**( *artistID*, *options*?, ( *result*?, *error*? ) => {} )
+* **getArtistRelatedArtists**( *artistID*, *options*? )
 
 	Gets Spotify catalog information about artists similar to a given artist.
 	
@@ -682,15 +688,15 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 		* **artistID** - The Spotify ID for the artist
 		
 		* **options** - A map of other optional parameters to specify for the query
-		
-		* **result** - The request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-related-artists/#example)
-		
-		* **error** - An error object if an error occurred, or *null* if no error occurred
+	
+	* *Returns*
+	
+		* A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-related-artists/#example)
 
 
 
 
-* **getTrack**( *trackID*, *options*?, ( *result*?, *error*? ) => {} )
+* **getTrack**( *trackID*, *options*? )
 
 	Gets Spotify catalog information for a single track identified by its unique Spotify ID.
 	
@@ -699,15 +705,15 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 		* **trackID** - The Spotify ID for the track
 		
 		* **options** - A map of other optional parameters to specify for the query
-		
-		* **result** - The request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-track/#example)
-		
-		* **error** - An error object if an error occurred, or *null* if no error occurred
+	
+	* *Returns*
+	
+		* A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-track/#example)
 
 
 
 
-* **getTracks**( *trackIDs*, *options*?, ( *result*?, *error*? ) => {} )
+* **getTracks**( *trackIDs*, *options*? )
 
 	Gets Spotify catalog information for multiple tracks based on their Spotify IDs.
 	
@@ -716,15 +722,15 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 		* **trackIDs** - An array of the Spotify IDs for the tracks
 		
 		* **options** - A map of other optional parameters to specify for the query
-		
-		* **result** - The request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-several-tracks/#example)
-		
-		* **error** - An error object if an error occurred, or *null* if no error occurred
+	
+	* *Returns*
+	
+		* A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-several-tracks/#example)
 
 
 
 
-* **getTrackAudioAnalysis**( *trackID*, *options*?, ( *result*?, *error*? ) => {} )
+* **getTrackAudioAnalysis**( *trackID*, *options*? )
 
 	Gets a detailed audio analysis for a single track identified by its unique Spotify ID.
 	
@@ -733,15 +739,15 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 		* **trackID** - The Spotify ID for the track
 		
 		* **options** - A map of other optional parameters to specify for the query
-		
-		* **result** - The request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-audio-analysis/#example)
-		
-		* **error** - An error object if an error occurred, or *null* if no error occurred
+	
+	* *Returns*
+	
+		* A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-audio-analysis/#example)
 
 
 
 
-* **getTrackAudioFeatures**( *trackID*, *options*?, ( *result*?, *error*? ) => {} )
+* **getTrackAudioFeatures**( *trackID*, *options*? )
 
 	Gets audio feature information for a single track identified by its unique Spotify ID.
 	
@@ -750,15 +756,15 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 		* **trackID** - The Spotify ID for the track
 		
 		* **options** - A map of other optional parameters to specify for the query
-		
-		* **result** - The request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-audio-features/#example)
-		
-		* **error** - An error object if an error occurred, or *null* if no error occurred
+	
+	* *Returns*
+	
+		* A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-audio-features/#example)
 
 
 
 
-* **getTracksAudioFeatures**( *trackIDs*, *options*?, ( *result*?, *error*? ) => {} )
+* **getTracksAudioFeatures**( *trackIDs*, *options*? )
 
 	Gets audio features for multiple tracks based on their Spotify IDs.
 	
@@ -767,10 +773,12 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 		* **trackIDs** - An array of the Spotify IDs for the tracks
 		
 		* **options** - A map of other optional parameters to specify for the query
-		
-		* **result** - The request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-several-audio-features/#example)
-		
-		* **error** - An error object if an error occurred, or *null* if no error occurred
+	
+	* *Returns*
+	
+		* A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-several-audio-features/#example)
+
+
 
 
 ### Token swap and refresh
