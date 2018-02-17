@@ -1311,7 +1311,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 							@Override
 							public void onComplete(Void result, SpotifyError error)
 							{
-								// done
+								// we've logged back in
 							}
 						});
 					}
