@@ -1331,10 +1331,10 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	@Override
 	public void onLoginFailed(Error error)
 	{
-		//if the error is one that requires logging out, log out
 		boolean sendLogoutEvent = false;
 		if(isLoggedIn())
 		{
+			//if the error is one that requires logging out, log out
 			if(error==Error.kSpErrorApplicationBanned || error==Error.kSpErrorLoginBadCredentials
 				|| error==Error.kSpErrorNeedsPremium || error==Error.kSpErrorGeneralLoginError)
 			{
