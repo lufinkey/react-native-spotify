@@ -104,7 +104,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	}
 
 	@ReactMethod
-	//initialize(options, (loggedIn, error?))
+	//initialize(options)
 	public void initialize(ReadableMap options, final Promise promise)
 	{
 		// ensure module is not already initialized
@@ -226,7 +226,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	}
 
 	@ReactMethod
-	//isInitializedAsync((initialized))
+	//isInitializedAsync()
 	public void isInitializedAsync(final Promise promise)
 	{
 		promise.resolve(isInitialized());
@@ -505,7 +505,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	}
 
 	@ReactMethod
-	//login((loggedIn, error?))
+	//login()
 	public void login(final Promise promise)
 	{
 		AuthActivity.performAuthFlow(reactContext.getCurrentActivity(), auth, new AuthActivityListener() {
@@ -636,7 +636,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	}
 
 	@ReactMethod
-	//logout((error?))
+	//logout()
 	public void logout(final Promise promise)
 	{
 		// make sure we're not already logged out
@@ -686,7 +686,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	}
 
 	@ReactMethod
-	//isLoggedInAsync((loggedIn))
+	//isLoggedInAsync()
 	public void isLoggedInAsync(final Promise promise)
 	{
 		promise.resolve(isLoggedIn());
@@ -700,7 +700,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	}
 
 	@ReactMethod
-	//getAuthAsync((auth))
+	//getAuthAsync()
 	public void getAuthAsync(final Promise promise)
 	{
 		promise.resolve(getAuth());
@@ -746,7 +746,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	}
 
 	@ReactMethod
-	//playURI(spotifyURI, startIndex, startPosition, (error?))
+	//playURI(spotifyURI, startIndex, startPosition)
 	public void playURI(final String spotifyURI, final int startIndex, final double startPosition, final Promise promise)
 	{
 		if(spotifyURI==null)
@@ -782,7 +782,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	}
 
 	@ReactMethod
-	//queueURI(spotifyURI, (error?))
+	//queueURI(spotifyURI)
 	public void queueURI(final String spotifyURI, final Promise promise)
 	{
 		if(spotifyURI==null)
@@ -818,7 +818,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	}
 
 	@ReactMethod
-	//setVolume(volume, (error?))
+	//setVolume(volume)
 	public void setVolume(double volume, final Promise promise)
 	{
 		//TODO implement this with a custom AudioController
@@ -834,14 +834,14 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	}
 
 	@ReactMethod
-	//getVolumeAsync((volume))
+	//getVolumeAsync()
 	public void getVolumeAsync(final Promise promise)
 	{
 		promise.resolve(getVolume());
 	}
 
 	@ReactMethod
-	//setPlaying(playing, (error?))
+	//setPlaying(playing)
 	public void setPlaying(final boolean playing, final Promise promise)
 	{
 		prepareForPlayer(new Completion<Void>() {
@@ -902,7 +902,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	}
 
 	@ReactMethod
-	//getPlaybackStateAsync((playbackState))
+	//getPlaybackStateAsync()
 	public void getPlaybackStateAsync(final Promise promise)
 	{
 		promise.resolve(getPlaybackState());
@@ -920,14 +920,14 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	}
 
 	@ReactMethod
-	//getPlaybackMetadataAsync((playbackMetadata))
+	//getPlaybackMetadataAsync()
 	public void getPlaybackMetadataAsync(final Promise promise)
 	{
 		promise.resolve(getPlaybackMetadata());
 	}
 
 	@ReactMethod
-	//skipToNext((error?))
+	//skipToNext()
 	public void skipToNext(final Promise promise)
 	{
 		prepareForPlayer(new Completion<Void>() {
@@ -958,7 +958,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	}
 
 	@ReactMethod
-	//skipToPrevious((error?))
+	//skipToPrevious()
 	public void skipToPrevious(final Promise promise)
 	{
 		prepareForPlayer(new Completion<Void>() {
@@ -989,7 +989,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	}
 
 	@ReactMethod
-	//seekToPosition(position, (error?))
+	//seekToPosition(position)
 	public void seekToPosition(final double position, final Promise promise)
 	{
 		prepareForPlayer(new Completion<Void>() {
@@ -1020,7 +1020,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	}
 
 	@ReactMethod
-	//setShuffling(shuffling, (error?))
+	//setShuffling(shuffling)
 	public void setShuffling(final boolean shuffling, final Promise promise)
 	{
 		prepareForPlayer(new Completion<Void>() {
@@ -1051,7 +1051,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	}
 
 	@ReactMethod
-	//setRepeating(repeating, (error?))
+	//setRepeating(repeating)
 	public void setRepeating(final boolean repeating, final Promise promise)
 	{
 		prepareForPlayer(new Completion<Void>() {
@@ -1213,7 +1213,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	}
 
 	@ReactMethod
-	//sendRequest(endpoint, method, params, isJSONBody, (result?, error?))
+	//sendRequest(endpoint, method, params, isJSONBody)
 	public void sendRequest(String endpoint, String method, ReadableMap params, boolean jsonBody, final Promise promise)
 	{
 		doAPIRequest(endpoint, method, params, jsonBody, new Completion<Object>() {
