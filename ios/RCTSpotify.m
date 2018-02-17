@@ -632,7 +632,7 @@ RCT_EXPORT_METHOD(getAuthAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromis
 		return;
 	}
 	[self logBackInIfNeeded:[RCTSpotifyCompletion onReject:^(RCTSpotifyError* error) {
-		if(!_player.loggedIn)
+		if(!_player.loggedIn && [self hasPlayerScope])
 		{
 			[completion reject:error];
 		}
@@ -644,7 +644,7 @@ RCT_EXPORT_METHOD(getAuthAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromis
 		if([[self isLoggedIn] boolValue])
 		{
 			[self initializePlayerIfNeeded:[RCTSpotifyCompletion onReject:^(RCTSpotifyError* error) {
-				if(!_player.loggedIn)
+				if(!_player.loggedIn && [self hasPlayerScope])
 				{
 					[completion reject:error];
 				}
