@@ -101,7 +101,7 @@ DEFINE_SPOTIFY_ERROR_CODE(SessionExpired, @"Your login session has expired")
 {
 	if(code == nil || code.length == 0)
 	{
-		return [self initWithError:error];
+		return [self initWithNSError:error];
 	}
 	if(self = [super init])
 	{

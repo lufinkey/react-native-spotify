@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import <SpotifyAuthentication/SpotifyAuthentication.h>
+#import "RCTSpotifyCompletion.h"
 
 typedef void(^RCTSpotifyAuthCallback)(BOOL authenticated, NSError* error);
 
@@ -19,6 +20,6 @@ typedef void(^RCTSpotifyAuthCallback)(BOOL authenticated, NSError* error);
 
 +(UIViewController*)topViewController;
 
-@property (strong) RCTSpotifyAuthCallback completion;
+@property (strong) RCTSpotifyCompletion<NSNumber*>* completion;
 
 @end
