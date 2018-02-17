@@ -1238,7 +1238,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	@Override
 	public void onLoggedIn()
 	{
-		//handle loginPlayer callbacks
+		// handle loginPlayer callbacks
 		ArrayList<Completion<Void>> loginResponses;
 		synchronized(playerLoginResponses)
 		{
@@ -1257,7 +1257,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		boolean wasLoggingOutPlayer = loggingOutPlayer;
 		loggingOutPlayer = false;
 
-		//handle loginPlayer callbacks
+		// handle loginPlayer callbacks
 		ArrayList<Completion<Void>> loginResponses;
 		synchronized(playerLoginResponses)
 		{
@@ -1307,12 +1307,12 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			}
 		}
 
-		//clear session and destroy player
+		// clear session and destroy player
 		auth.clearSession();
 		Spotify.destroyPlayer(this);
 		player = null;
 
-		//handle logoutPlayer callbacks
+		// handle logoutPlayer callbacks
 		ArrayList<Completion<Void>> logoutResponses;
 		synchronized(playerLogoutResponses)
 		{
@@ -1334,7 +1334,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		boolean sendLogoutEvent = false;
 		if(isLoggedIn())
 		{
-			//if the error is one that requires logging out, log out
+			// if the error is one that requires logging out, log out
 			if(error==Error.kSpErrorApplicationBanned || error==Error.kSpErrorLoginBadCredentials
 				|| error==Error.kSpErrorNeedsPremium || error==Error.kSpErrorGeneralLoginError)
 			{
@@ -1346,7 +1346,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			}
 		}
 
-		//handle loginPlayer callbacks
+		// handle loginPlayer callbacks
 		ArrayList<Completion<Void>> loginResponses;
 		synchronized(playerLoginResponses)
 		{
