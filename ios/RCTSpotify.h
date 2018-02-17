@@ -16,56 +16,56 @@
 //test()
 -(id)test;
 
-//initialize(options, (loggedIn, error?))
--(void)initialize:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion;
+//initialize(options)
+-(void)initialize:(NSDictionary*)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 //isInitialized()
 -(id)isInitialized;
-//isInitializedAsync((initialized))
--(void)isInitializedAsync:(RCTResponseSenderBlock)completion;
+//isInitializedAsync()
+-(void)isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 
-//login((loggedIn, error?))
--(void)login:(RCTResponseSenderBlock)completion;
-//logout((error?))
--(void)logout:(RCTResponseSenderBlock)completion;
+//login()
+-(void)login:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
+//logout()
+-(void)logout:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 //isLoggedIn()
 -(id)isLoggedIn;
-//isLoggedInAsync((loggedIn))
--(void)isLoggedInAsync:(RCTResponseSenderBlock)completion;
+//isLoggedInAsync()
+-(void)isLoggedInAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 //getAuth()
 -(id)getAuth;
-//getAuthAsync((auth))
--(void)getAuthAsync:(RCTResponseSenderBlock)completion;
+//getAuthAsync()
+-(void)getAuthAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 
-//playURI(spotifyURI, startIndex, startPosition, (error?))
--(void)playURI:(NSString*)uri startIndex:(NSUInteger)startIndex startPosition:(NSTimeInterval)startPosition completion:(RCTResponseSenderBlock)completion;
-//queueURI(spotifyURI, (error?))
--(void)queueURI:(NSString*)uri completion:(RCTResponseSenderBlock)completion;
-//setVolume(volume, (error?))
+//playURI(spotifyURI, startIndex, startPosition)
+-(void)playURI:(NSString*)uri startIndex:(NSUInteger)startIndex startPosition:(NSTimeInterval)startPosition (RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
+//queueURI(spotifyURI)
+-(void)queueURI:(NSString*)uri resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
+//setVolume(volume)
 -(void)setVolume:(double)volume completion:(RCTResponseSenderBlock)completion;
 //getVolume()
 -(id)getVolume;
-//getVolumeAsync((volume))
--(void)getVolumeAsync:(RCTResponseSenderBlock)completion;
-//setPlaying(playing, (error?))
--(void)setPlaying:(BOOL)playing completion:(RCTResponseSenderBlock)completion;
+//getVolumeAsync()
+-(void)getVolumeAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
+//setPlaying(playing)
+-(void)setPlaying:(BOOL)playing resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 //getPlaybackState()
 -(id)getPlaybackState;
-//getPlaybackStateAsync((playbackState))
--(void)getPlaybackStateAsync:(RCTResponseSenderBlock)completion;
+//getPlaybackStateAsync()
+-(void)getPlaybackStateAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 //getPlaybackMetadata()
 -(id)getPlaybackMetadata;
-//getPlaybackMetadataAsync:((playbackMetadata))
--(void)getPlaybackMetadataAsync:(RCTResponseSenderBlock)completion;
-//skipToNext((error?))
--(void)skipToNext:(RCTResponseSenderBlock)completion;
-//skipToPrevious((error?))
--(void)skipToPrevious:(RCTResponseSenderBlock)completion;
-//setShuffling(shuffling, (error?))
--(void)setShuffling:(BOOL)shuffling completion:(RCTResponseSenderBlock)completion;
-//setRepeating(repeating, (error?))
--(void)setRepeating:(BOOL)repeating completion:(RCTResponseSenderBlock)completion;
+//getPlaybackMetadataAsync:()
+-(void)getPlaybackMetadataAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
+//skipToNext()
+-(void)skipToNext:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
+//skipToPrevious()
+-(void)skipToPrevious:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
+//setShuffling(shuffling)
+-(void)setShuffling:(BOOL)shuffling resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
+//setRepeating(repeating)
+-(void)setRepeating:(BOOL)repeating resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 
-//sendRequest(endpoint, method, params, isJSONBody, (result?, error?))
--(void)sendRequest:(NSString*)endpoint method:(NSString*)method params:(NSDictionary*)params isJSONBody:(BOOL)jsonBody completion:(RCTResponseSenderBlock)completion;
+//sendRequest(endpoint, method, params, isJSONBody)
+-(void)sendRequest:(NSString*)endpoint method:(NSString*)method params:(NSDictionary*)params isJSONBody:(BOOL)jsonBody resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 
 @end

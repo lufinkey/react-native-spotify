@@ -167,23 +167,23 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(test)
 	return [NSNull null];
 }
 
-RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion)
+RCT_EXPORT_METHOD(initialize:(NSDictionary*)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
 	if(_initialized)
 	{
-		completion(@[ [self isLoggedIn], RCTSpotifyErrorCode.AlreadyInitialized.reactObject ]);
+		[RCTSpotifyErrorCode.AlreadyInitialized reject:reject];
 		return;
 	}
 	
 	// ensure options is not null or missing fields
 	if(_options == nil)
 	{
-		completion(@[ [self isLoggedIn], [RCTSpotifyError nullParameterErrorForName:@"options"] ]);
+		[[RCTSpotifyError nullParameterErrorForName:@"options"] reject:reject];
 		return;
 	}
 	else if(_options[@"clientID"] == nil)
 	{
-		completion(@[ [self isLoggedIn], [RCTSpotifyError missingOptionErrorForName:@"clientID"] ]);
+		[[RCTSpotifyError missingOptionErrorForName:@"clientID"] reject:reject];
 		return;
 	}
 	
@@ -223,7 +223,7 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSende
 	
 	// call callback
 	NSNumber* loggedIn = [self isLoggedIn];
-	completion(@[ loggedIn, [NSNull null] ]);
+	resolve(loggedIn);
 	if(loggedIn.boolValue)
 	{
 		[self sendEvent:@"login" args:@[]];
@@ -241,9 +241,9 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(isInitialized)
 	return [NSNumber numberWithBool:_initialized];
 }
 
-RCT_EXPORT_METHOD(isInitializedAsync:(RCTResponseSenderBlock)completion)
+RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
-	completion(@[ [RCTSpotifyConvert ID:[self isInitialized]] ]);
+	resolve([self isInitialized]);
 }
 
 
@@ -268,7 +268,7 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTResponseSenderBlock)completion)
 		{
 			// session renewal returned a failure, but we're still logged in
 			// log out player
-			[self logoutPlayer:[RCTSpotifyCompletion onComplete:^(id result, RCTSpotifyError *error) {
+			[self logoutPlayer:[RCTSpotifyCompletion onComplete:^(id result, RCTSpotifyError* error) {
 				// clear session
 				BOOL loggedIn = [[self isLoggedIn] boolValue];
 				if(loggedIn)
@@ -528,12 +528,12 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTResponseSenderBlock)completion)
 	}
 }
 
-RCT_EXPORT_METHOD(login:(RCTResponseSenderBlock)completion)
+RCT_EXPORT_METHOD(login:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
 	// ensure we're not already logging in
 	if(_loggingIn)
 	{
-		completion(@[ @NO, [RCTSpotifyError errorWithCodeObj:RCTSpotifyErrorCode.ConflictingCallbacks message:@"Cannot call login multiple times before completing"].reactObject ]);
+		[[RCTSpotifyError errorWithCodeObj:RCTSpotifyErrorCode.ConflictingCallbacks message:@"Cannot call login multiple times before completing"] reject:reject];
 		return;
 	}
 	_loggingIn = YES;
@@ -542,12 +542,12 @@ RCT_EXPORT_METHOD(login:(RCTResponseSenderBlock)completion)
 		RCTSpotifyAuthController* authController = [[RCTSpotifyAuthController alloc] initWithAuth:_auth];
 		
 		__weak RCTSpotifyAuthController* weakAuthController = authController;
-		authController.completion = [RCTSpotifyCompletion<NSNumber*> onReject:^(RCTSpotifyError *error) {
+		authController.completion = [RCTSpotifyCompletion<NSNumber*> onReject:^(RCTSpotifyError* error) {
 			// login failed
 			RCTSpotifyAuthController* authController = weakAuthController;
 			[authController.presentingViewController dismissViewControllerAnimated:YES completion:^{
 				_loggingIn = NO;
-				completion(@[ @NO, error.reactObject ]);
+				[error reject:reject];
 			}];
 		} onResolve:^(NSNumber* authenticated) {
 			RCTSpotifyAuthController* authController = weakAuthController;
@@ -556,19 +556,19 @@ RCT_EXPORT_METHOD(login:(RCTResponseSenderBlock)completion)
 				// login cancelled
 				[authController.presentingViewController dismissViewControllerAnimated:YES completion:^{
 					_loggingIn = NO;
-					completion(@[ @NO, [NSNull null] ]);
+					resolve(@NO);
 				}];
 			}
 			else
 			{
 				// login successful
-				[self initializePlayerIfNeeded:[RCTSpotifyCompletion onComplete:^(id result, RCTSpotifyError *error) {
+				[self initializePlayerIfNeeded:[RCTSpotifyCompletion onComplete:^(id unused, RCTSpotifyError* unusedError) {
 					// do UI logic on main thread
 					dispatch_async(dispatch_get_main_queue(), ^{
 						[authController.presentingViewController dismissViewControllerAnimated:YES completion:^{
 							_loggingIn = NO;
 							NSNumber* loggedIn = [self isLoggedIn];
-							completion(@[ loggedIn, [NSNull null] ]);
+							resolve(loggedIn);
 							if(loggedIn.boolValue)
 							{
 								[self sendEvent:@"login" args:@[]];
@@ -585,22 +585,22 @@ RCT_EXPORT_METHOD(login:(RCTResponseSenderBlock)completion)
 	});
 }
 
-RCT_EXPORT_METHOD(logout:(RCTResponseSenderBlock)completion)
+RCT_EXPORT_METHOD(logout:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
 	if(![[self isLoggedIn] boolValue])
 	{
-		completion(@[ [NSNull null] ]);
+		resolve(nil);
 		return;
 	}
-	[self logoutPlayer:[RCTSpotifyCompletion onReject:^(RCTSpotifyError *error) {
-		completion(@[ error.reactObject ]);
-	} onResolve:^(id result) {
+	[self logoutPlayer:[RCTSpotifyCompletion onReject:^(RCTSpotifyError* error) {
+		[error reject:reject];
+	} onResolve:^(id unused) {
 		BOOL loggedIn = [[self isLoggedIn] boolValue];
 		if(loggedIn)
 		{
 			_auth.session = nil;
 		}
-		completion(@[ [NSNull null] ]);
+		resolve(nil);
 		if(loggedIn)
 		{
 			[self sendEvent:@"logout" args:@[]];
@@ -610,16 +610,20 @@ RCT_EXPORT_METHOD(logout:(RCTResponseSenderBlock)completion)
 
 RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(isLoggedIn)
 {
-	if(_auth.session == nil)
+	if(!_initialized)
+	{
+		return @NO;
+	}
+	else if(_auth.session == nil)
 	{
 		return @NO;
 	}
 	return @YES;
 }
 
-RCT_EXPORT_METHOD(isLoggedInAsync:(RCTResponseSenderBlock)completion)
+RCT_EXPORT_METHOD(isLoggedInAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
-	completion(@[ [RCTSpotifyConvert ID:[self isLoggedIn]] ]);
+	resolve([self isLoggedIn]);
 }
 
 RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getAuth)
@@ -645,7 +649,7 @@ RCT_EXPORT_METHOD(getAuthAsync:(RCTResponseSenderBlock)completion)
 		[completion reject:[RCTSpotifyError errorWithCodeObj:RCTSpotifyErrorCode.NotInitialized]];
 		return;
 	}
-	[self logBackInIfNeeded:[RCTSpotifyCompletion onReject:^(RCTSpotifyError *error) {
+	[self logBackInIfNeeded:[RCTSpotifyCompletion onReject:^(RCTSpotifyError* error) {
 		if(!_player.loggedIn)
 		{
 			[completion reject:error];
@@ -666,34 +670,57 @@ RCT_EXPORT_METHOD(getAuthAsync:(RCTResponseSenderBlock)completion)
 	}] waitForDefinitiveResponse:NO];
 }
 
-RCT_EXPORT_METHOD(playURI:(NSString*)uri startIndex:(NSUInteger)startIndex startPosition:(NSTimeInterval)startPosition completion:(RCTResponseSenderBlock)completion)
+RCT_EXPORT_METHOD(playURI:(NSString*)uri startIndex:(NSUInteger)startIndex startPosition:(NSTimeInterval)startPosition resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
-	[self prepareForPlayer:[RCTSpotifyCompletion onReject:^(RCTSpotifyError *error) {
-		completion(@[ error.reactObject ]);
+	[self prepareForPlayer:[RCTSpotifyCompletion onReject:^(RCTSpotifyError* error) {
+		[error reject:reject];
 	} onResolve:^(id unused) {
 		[_player playSpotifyURI:uri startingWithIndex:startIndex startingWithPosition:startPosition callback:^(NSError* error) {
-			completion(@[ [RCTSpotifyConvert NSError:error] ]);
+			if(error != nil)
+			{
+				[[RCTSpotifyError errorWithNSError:error] reject:reject];
+			}
+			else
+			{
+				resolve(nil);
+			}
 		}];
 	}]];
 }
 
-RCT_EXPORT_METHOD(queueURI:(NSString*)uri completion:(RCTResponseSenderBlock)completion)
+RCT_EXPORT_METHOD(queueURI:(NSString*)uri resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
-	[self prepareForPlayer:[RCTSpotifyCompletion onReject:^(RCTSpotifyError *error) {
-		completion(@[ error.reactObject ]);
+	[self prepareForPlayer:[RCTSpotifyCompletion onReject:^(RCTSpotifyError* error) {
+		[error reject:reject];
 	} onResolve:^(id result) {
 		[_player queueSpotifyURI:uri callback:^(NSError* error) {
-			completion(@[ [RCTSpotifyConvert NSError:error] ]);
+			if(error != nil)
+			{
+				[[RCTSpotifyError errorWithNSError:error] reject:reject];
+			}
+			else
+			{
+				resolve(nil);
+			}
 		}];
 	}]];
 }
 
-RCT_EXPORT_METHOD(setVolume:(double)volume completion:(RCTResponseSenderBlock)completion)
+RCT_EXPORT_METHOD(setVolume:(double)volume resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
-	[_player setVolume:(SPTVolume)volume callback:^(NSError *error){
-		if(completion)
+	if(!_initialized)
+	{
+		[[RCTSpotifyError errorWithCodeObj:RCTSpotifyErrorCode.NotInitialized] reject:reject];
+		return;
+	}
+	[_player setVolume:(SPTVolume)volume callback:^(NSError* error){
+		if(error != nil)
 		{
-			completion(@[ [RCTSpotifyConvert NSError:error] ]);
+			[[RCTSpotifyError errorWithNSError:error] reject:reject];
+		}
+		else
+		{
+			resolve(nil);
 		}
 	}];
 }
@@ -707,37 +734,51 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getVolume)
 	return @(_player.volume);
 }
 
-RCT_EXPORT_METHOD(getVolumeAsync:(RCTResponseSenderBlock)completion)
+RCT_EXPORT_METHOD(getVolumeAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
-	completion(@[ [RCTSpotifyConvert ID:[self getVolume]] ]);
+	resolve([RCTSpotifyConvert ID:[self getVolume]]);
 }
 
-RCT_EXPORT_METHOD(setPlaying:(BOOL)playing completion:(RCTResponseSenderBlock)completion)
+RCT_EXPORT_METHOD(setPlaying:(BOOL)playing resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
-	[self prepareForPlayer:[RCTSpotifyCompletion onReject:^(RCTSpotifyError *error) {
-		completion(@[ error.reactObject ]);
+	[self prepareForPlayer:[RCTSpotifyCompletion onReject:^(RCTSpotifyError* error) {
+		[error reject:reject];
 	} onResolve:^(id unused) {
 		[_player setIsPlaying:playing callback:^(NSError* error) {
-			completion(@[ [RCTSpotifyConvert NSError:error] ]);
+			if(error != nil)
+			{
+				[[RCTSpotifyError errorWithNSError:error] reject:reject];
+			}
+			else
+			{
+				resolve(nil);
+			}
 		}];
 	}]];
 }
 
-RCT_EXPORT_METHOD(setShuffling:(BOOL)shuffling completion:(RCTResponseSenderBlock)completion)
+RCT_EXPORT_METHOD(setShuffling:(BOOL)shuffling resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
-	[self prepareForPlayer:[RCTSpotifyCompletion onReject:^(RCTSpotifyError *error) {
-		completion(@[ error.reactObject ]);
+	[self prepareForPlayer:[RCTSpotifyCompletion onReject:^(RCTSpotifyError* error) {
+		[error reject:reject];
 	} onResolve:^(id unused) {
 		[_player setShuffle:shuffling callback:^(NSError* error) {
-			completion(@[ [RCTSpotifyConvert NSError:error] ]);
+			if(error != nil)
+			{
+				[[RCTSpotifyError errorWithNSError:error] reject:reject];
+			}
+			else
+			{
+				resolve(nil);
+			}
 		}];
 	}]];
 }
 
-RCT_EXPORT_METHOD(setRepeating:(BOOL)repeating completion:(RCTResponseSenderBlock)completion)
+RCT_EXPORT_METHOD(setRepeating:(BOOL)repeating resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
-	[self prepareForPlayer:[RCTSpotifyCompletion onReject:^(RCTSpotifyError *error) {
-		completion(@[ error.reactObject ]);
+	[self prepareForPlayer:[RCTSpotifyCompletion onReject:^(RCTSpotifyError* error) {
+		[error reject:reject];
 	} onResolve:^(id unused) {
 		SPTRepeatMode repeatMode = SPTRepeatOff;
 		if(repeating)
@@ -745,7 +786,14 @@ RCT_EXPORT_METHOD(setRepeating:(BOOL)repeating completion:(RCTResponseSenderBloc
 			repeatMode = SPTRepeatContext;
 		}
 		[_player setRepeat:repeatMode callback:^(NSError* error) {
-			completion(@[ [RCTSpotifyConvert NSError:error] ]);
+			if(error != nil)
+			{
+				[[RCTSpotifyError errorWithNSError:error] reject:reject];
+			}
+			else
+			{
+				resolve(nil);
+			}
 		}];
 	}]];
 }
@@ -755,9 +803,9 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getPlaybackState)
 	return [RCTSpotifyConvert SPTPlaybackState:_player.playbackState];
 }
 
-RCT_EXPORT_METHOD(getPlaybackStateAsync:(RCTResponseSenderBlock)completion)
+RCT_EXPORT_METHOD(getPlaybackStateAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
-	completion(@[ [RCTSpotifyConvert ID:[self getPlaybackState]] ]);
+	resolve([RCTSpotifyConvert ID:[self getPlaybackState]]);
 }
 
 RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getPlaybackMetadata)
@@ -770,24 +818,38 @@ RCT_EXPORT_METHOD(getPlaybackMetadataAsync:(RCTResponseSenderBlock)completion)
 	completion(@[ [RCTSpotifyConvert ID:[self getPlaybackMetadata]] ]);
 }
 
-RCT_EXPORT_METHOD(skipToNext:(RCTResponseSenderBlock)completion)
+RCT_EXPORT_METHOD(skipToNext:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
-	[self prepareForPlayer:[RCTSpotifyCompletion onReject:^(RCTSpotifyError *error) {
-		completion(@[ error.reactObject ]);
+	[self prepareForPlayer:[RCTSpotifyCompletion onReject:^(RCTSpotifyError* error) {
+		[error reject:reject];
 	} onResolve:^(id unused) {
-		[_player skipNext:^(NSError *error) {
-			completion(@[ [RCTSpotifyConvert NSError:error] ]);
+		[_player skipNext:^(NSError* error) {
+			if(error != nil)
+			{
+				[[RCTSpotifyError errorWithNSError:error] reject:reject];
+			}
+			else
+			{
+				resolve(nil);
+			}
 		}];
 	}]];
 }
 
-RCT_EXPORT_METHOD(skipToPrevious:(RCTResponseSenderBlock)completion)
+RCT_EXPORT_METHOD(skipToPrevious:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
-	[self prepareForPlayer:[RCTSpotifyCompletion onReject:^(RCTSpotifyError *error) {
-		completion(@[ error.reactObject ]);
+	[self prepareForPlayer:[RCTSpotifyCompletion onReject:^(RCTSpotifyError* error) {
+		[error reject:reject];
 	} onResolve:^(id unused) {
 		[_player skipPrevious:^(NSError *error) {
-			completion(@[ [RCTSpotifyConvert NSError:error] ]);
+			if(error != nil)
+			{
+				[[RCTSpotifyError errorWithNSError:error] reject:reject];
+			}
+			else
+			{
+				resolve(nil);
+			}
 		}];
 	}]];
 }
@@ -897,24 +959,27 @@ RCT_EXPORT_METHOD(skipToPrevious:(RCTResponseSenderBlock)completion)
 			}
 			else
 			{
-				NSStringEncoding encoding = NSUTF8StringEncoding;
-				if(response.textEncodingName != nil)
+				if(data.length > 0)
 				{
-					encoding = CFStringConvertEncodingToNSStringEncoding(CFStringConvertIANACharSetNameToEncoding((__bridge CFStringRef)response.textEncodingName));
+					NSStringEncoding encoding = NSUTF8StringEncoding;
+					if(response.textEncodingName != nil)
+					{
+						encoding = CFStringConvertEncodingToNSStringEncoding(CFStringConvertIANACharSetNameToEncoding((__bridge CFStringRef)response.textEncodingName));
+					}
+					result = [[NSString alloc] initWithData:data encoding:encoding];
 				}
-				result = [[NSString alloc] initWithData:data encoding:encoding];
 			}
 			[completion resolve:result];
 		}];
 	}]];
 }
 
-RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method params:(NSDictionary*)params isJSONBody:(BOOL)jsonBody completion:(RCTResponseSenderBlock)completion)
+RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method params:(NSDictionary*)params isJSONBody:(BOOL)jsonBody resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
-	[self doAPIRequest:endpoint method:method params:params jsonBody:jsonBody completion:[RCTSpotifyCompletion onReject:^(RCTSpotifyError *error) {
-		completion(@[ [NSNull null], error.reactObject ]);
+	[self doAPIRequest:endpoint method:method params:params jsonBody:jsonBody completion:[RCTSpotifyCompletion onReject:^(RCTSpotifyError* error) {
+		[error reject:reject];
 	} onResolve:^(id result) {
-		completion(@[ [RCTSpotifyConvert ID:result], [NSNull null] ]);
+		resolve(result);
 	}]];
 }
 
@@ -989,7 +1054,7 @@ RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method param
 	{
 		if(_auth.hasTokenRefreshService && _auth.session != nil && _auth.session.encryptedRefreshToken != nil)
 		{
-			[self renewSession:[RCTSpotifyCompletion onReject:^(RCTSpotifyError *error) {
+			[self renewSession:[RCTSpotifyCompletion onReject:^(RCTSpotifyError* error) {
 				if([[self isLoggedIn] boolValue])
 				{
 					// clear session and stop player
@@ -998,8 +1063,8 @@ RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method param
 					[self sendEvent:@"logout" args:@[]];
 				}
 			} onResolve:^(id result) {
-				[self initializePlayerIfNeeded:[RCTSpotifyCompletion onComplete:^(id result, RCTSpotifyError *error) {
-					// done
+				[self initializePlayerIfNeeded:[RCTSpotifyCompletion onComplete:^(id unused, RCTSpotifyError* unusedError) {
+					// we've logged back in
 				}]];
 			}] waitForDefinitiveResponse:YES];
 			return;
@@ -1022,7 +1087,7 @@ RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method param
 	[self sendEvent:@"logout" args:@[]];
 }
 
--(void)audioStreamingDidDisconnect:(SPTAudioStreamingController *)audioStreaming
+-(void)audioStreamingDidDisconnect:(SPTAudioStreamingController*)audioStreaming
 {
 	[self sendEvent:@"disconnect" args:@[]];
 }
