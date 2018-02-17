@@ -43,24 +43,23 @@ tryQueuePlayback = () => {
 	{
 		return;
 	}
-	Spotify.playURI(currentURI, 0, 0, (error) => {
-		if(error)
+	Spotify.playURI(currentURI, 0, 0).then(() => {
+		// done
+	}).catch((error) => {
+		// error
+		// ensure we're logged in and we have uris
+		if(connected !== null && uris.length > 0)
 		{
-			// ensure we're logged in and we have uris
-			if(connected !== null && uris.length > 0)
+			if(!connected)
 			{
-				if(!connected)
-				{
-					// we must have failed because we weren't connected, so wait until we are
-					Spotify.once('reconnect', tryQueuePlayback);
-				}
-				else
-				{
-					// unknown error
-					Queue.emit('queueError', error);
-				}
+				// we must have failed because we weren't connected, so wait until we are
+				Spotify.once('reconnect', tryQueuePlayback);
 			}
-			return;
+			else
+			{
+				// unknown error
+				Queue.emit('queueError', error);
+			}
 		}
 	});
 };
