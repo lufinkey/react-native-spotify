@@ -1209,14 +1209,17 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 							}
 						}
 
-						Object result;
+						Object result = null;
 						if(resultObj != null)
 						{
 							result = Convert.fromJSONObject(resultObj);
 						}
 						else
 						{
-							result = responseStr;
+							if(responseStr.length() > 0)
+							{
+								result = responseStr;
+							}
 						}
 						completion.resolve(result);
 					}
