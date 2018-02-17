@@ -37,7 +37,7 @@
 -(void)getAuthAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 
 //playURI(spotifyURI, startIndex, startPosition)
--(void)playURI:(NSString*)uri startIndex:(NSUInteger)startIndex startPosition:(NSTimeInterval)startPosition (RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
+-(void)playURI:(NSString*)uri startIndex:(NSUInteger)startIndex startPosition:(NSTimeInterval)startPosition resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 //queueURI(spotifyURI)
 -(void)queueURI:(NSString*)uri resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 //setVolume(volume)

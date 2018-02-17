@@ -43,7 +43,6 @@
 -(void)logoutPlayer:(RCTSpotifyCompletion*)completion;
 -(void)prepareForPlayer:(RCTSpotifyCompletion*)completion;
 -(void)prepareForRequest:(RCTSpotifyCompletion*)completion;
--(void)performRequest:(NSURLRequest*)request completion:(RCTSpotifyCompletion*)completion;
 -(void)doAPIRequest:(NSString*)endpoint method:(NSString*)method params:(NSDictionary*)params jsonBody:(BOOL)jsonBody completion:(RCTSpotifyCompletion*)completion;
 @end
 
@@ -813,9 +812,9 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getPlaybackMetadata)
 	return [RCTSpotifyConvert SPTPlaybackMetadata:_player.metadata];
 }
 
-RCT_EXPORT_METHOD(getPlaybackMetadataAsync:(RCTResponseSenderBlock)completion)
+RCT_EXPORT_METHOD(getPlaybackMetadataAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
-	completion(@[ [RCTSpotifyConvert ID:[self getPlaybackMetadata]] ]);
+	resolve([RCTSpotifyConvert ID:[self getPlaybackMetadata]]);
 }
 
 RCT_EXPORT_METHOD(skipToNext:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
