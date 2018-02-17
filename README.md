@@ -140,19 +140,6 @@ import Spotify from 'react-native-spotify';
 
 
 
-* **Error**
-
-	Passed to callback functions to indicate something went wrong during the function call. Right now, there are some uniformity issues between iOS and Android on the errors that get returned, but for now, use the **message** attribute to display a message to the user.
-	
-	* *Properties*
-	
-		* **domain** - A string indicating what part of the system the error belongs to
-		* **code** - An integer containing the actual error code of the error
-		* **message** - A string containing a user-readable description of the error
-
-
-
-
 ### Events
 
 This module uses [react-native-events](https://www.npmjs.com/package/react-native-events), so it has all of the same methods as an [EventEmitter](https://nodejs.org/api/events.html) object. All of the events, excluding the **'login'** and **'logout'** events, come from Spotify's native SDK and are simply forwarded to javascript. If one of these events occurs at a weird time, please open an issue on Spotify's [ios-sdk](https://github.com/spotify/ios-sdk) or [android-sdk](https://github.com/spotify/android-sdk) repo, and not here.
@@ -224,6 +211,24 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	* `event` {PlaybackEvent}
 	
 	Emitted when this device has temporarily lost permission to stream audio from Spotify. A user can only stream audio on one of her devices at any given time. If playback is started on a different device, this event may occur.
+
+* **'audioFlush'**
+
+	* `event` {PlaybackEvent}
+	
+	Emitted when the application should flush its audio buffers (you don't need to deal with this since that's handled by the native code). For example, this event occurs when seeking to a different position within a track.
+
+* **audioDeliveryDone**
+
+	* `event` {PlaybackEvent}
+	
+	Emitted when the library reaches the end of a playback context and has no more audio to deliver.
+
+* **trackDelivered**
+
+	* `event` {PlaybackEvent}
+	
+	Emitted when the application accepted all samples from the current track. This is an informative event that indicates that all samples from the current track have been delivered to and accepted by the application. The track has not finished yet.
 
 * **'disconnect'**
 
