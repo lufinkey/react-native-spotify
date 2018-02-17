@@ -508,6 +508,13 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	//login()
 	public void login(final Promise promise)
 	{
+		// ensure we're initialized
+		if(!initialized)
+		{
+			SpotifyError.Code.NotInitialized.reject(promise);
+			return;
+		}
+		// perform login flow
 		AuthActivity.performAuthFlow(reactContext.getCurrentActivity(), auth, new AuthActivityListener() {
 			@Override
 			public void onAuthActivityCancel(AuthActivity activity)
@@ -639,6 +646,12 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	//logout()
 	public void logout(final Promise promise)
 	{
+		// ensure we've been initialized
+		if(!initialized)
+		{
+			SpotifyError.Code.NotInitialized.reject(promise);
+			return;
+		}
 		// make sure we're not already logged out
 		if(!isLoggedIn())
 		{
