@@ -1,9 +1,10 @@
 
 import { NativeModules } from 'react-native';
-import NativeModuleEvents from 'react-native-events';
+import RNEvents from 'react-native-events';
 
 const Spotify = NativeModules.Spotify;
-NativeModuleEvents.registerNativeModule(Spotify);
+RNEvents.register(Spotify);
+RNEvents.conform(Spotify);
 
 
 const sendRequest = Spotify.sendRequest;
