@@ -1333,10 +1333,10 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	{
 		//if the error is one that requires logging out, log out
 		boolean sendLogoutEvent = false;
-		if(error==Error.kSpErrorApplicationBanned || error==Error.kSpErrorLoginBadCredentials
-			|| error==Error.kSpErrorNeedsPremium)
+		if(isLoggedIn())
 		{
-			if(isLoggedIn())
+			if(error==Error.kSpErrorApplicationBanned || error==Error.kSpErrorLoginBadCredentials
+				|| error==Error.kSpErrorNeedsPremium || error==Error.kSpErrorGeneralLoginError)
 			{
 				// clear session and destroy player
 				auth.clearSession();
