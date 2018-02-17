@@ -175,12 +175,12 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options resolve:(RCTPromiseResolveBl
 	}
 	
 	// ensure options is not null or missing fields
-	if(_options == nil)
+	if(options == nil)
 	{
 		[[RCTSpotifyError nullParameterErrorForName:@"options"] reject:reject];
 		return;
 	}
-	else if(_options[@"clientID"] == nil)
+	else if(options[@"clientID"] == nil)
 	{
 		[[RCTSpotifyError missingOptionErrorForName:@"clientID"] reject:reject];
 		return;
