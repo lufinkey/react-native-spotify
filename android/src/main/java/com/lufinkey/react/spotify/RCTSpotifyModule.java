@@ -215,7 +215,28 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		}
 
 		// try to log back in if necessary
-		logBackInIfNeeded(null, true);
+		logBackInIfNeeded(new Completion<Boolean>() {
+			@Override
+			public void onReject(SpotifyError error)
+			{
+				// failure
+			}
+
+			@Override
+			public void onResolve(Boolean loggedIn)
+			{
+				if(loggedIn)
+				{
+					// initialize player
+					initializePlayerIfNeeded(new Completion<Void>() {
+						@Override
+						public void onComplete(Void unused, SpotifyError unusedError) {
+							// done
+						}
+					});
+				}
+			}
+		}, true);
 	}
 
 	@ReactMethod(isBlockingSynchronousMethod = true)
@@ -297,35 +318,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			@Override
 			public void onResolve(Boolean renewed)
 			{
-				// session renewal didn't fail, so initialize the player if necessary
-				initializePlayerIfNeeded(new Completion<Void>() {
-					@Override
-					public void onReject(SpotifyError error)
-					{
-						// failed to initialize the player
-						if(completion != null)
-						{
-							if(waitForDefinitiveResponse)
-							{
-								completion.resolve(true);
-							}
-							else
-							{
-								completion.reject(error);
-							}
-						}
-					}
-
-					@Override
-					public void onResolve(Void unused)
-					{
-						// success
-						if(completion != null)
-						{
-							completion.resolve(true);
-						}
-					}
-				});
+				completion.resolve(true);
 			}
 		}, waitForDefinitiveResponse);
 	}
@@ -733,7 +726,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			@Override
 			public void onReject(SpotifyError error)
 			{
-				if(player == null)
+				if(player == null && auth.hasPlayerScope())
 				{
 					completion.reject(error);
 				}
@@ -746,13 +739,39 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			@Override
 			public void onResolve(Boolean loggedIn)
 			{
-				if(player == null && auth.hasPlayerScope())
+				if(isLoggedIn())
 				{
-					completion.reject(new SpotifyError(SpotifyError.Code.PlayerNotReady));
+					initializePlayerIfNeeded(new Completion<Void>() {
+						@Override
+						public void onReject(SpotifyError error)
+						{
+							if(player == null && auth.hasPlayerScope())
+							{
+								completion.reject(error);
+							}
+							else
+							{
+								completion.resolve(null);
+							}
+						}
+
+						@Override
+						public void onResolve(Void unused)
+						{
+							if(player == null && auth.hasPlayerScope())
+							{
+								completion.reject(new SpotifyError(SpotifyError.Code.PlayerNotReady));
+							}
+							else
+							{
+								completion.resolve(null);
+							}
+						}
+					});
 				}
 				else
 				{
-					completion.resolve(null);
+					completion.reject(new SpotifyError(SpotifyError.Code.NotLoggedIn));
 				}
 			}
 		}, false);
