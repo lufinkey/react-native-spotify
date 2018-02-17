@@ -27,7 +27,7 @@
 	{
 		return [NSNull null];
 	}
-	return [self RCTSpotifyError:[RCTSpotifyError errorWithError:error]];
+	return [self RCTSpotifyError:[RCTSpotifyError errorWithNSError:error]];
 }
 
 +(id)SPTPlaybackState:(SPTPlaybackState*)state

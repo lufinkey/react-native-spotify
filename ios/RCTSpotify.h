@@ -11,36 +11,7 @@
 #import <RNEventEmitter/RNEventEmitter.h>
 #endif
 
-extern NSString* const RCTSpotifyErrorDomain;
-extern NSString* const RCTSpotifyWebAPIDomain;
-
-typedef enum
-{
-	//! RCTSpotify has already been initialized
-	RCTSpotifyErrorAlreadyInitialized = 90,
-	//! The initialize method failed
-	RCTSpotifyErrorInitializationFailed = 91,
-	//! Authorization (renewal or login) has failed
-	RCTSpotifyErrorAuthorizationFailed = 92,
-	//! Multiple calls of an asynchronous function are conflicting
-	RCTSpotifyErrorConflictingCallbacks = 100,
-	//! Missing parameters or options
-	RCTSpotifyErrorMissingParameter = 101,
-	//! Bad parameters or options
-	RCTSpotifyErrorBadParameter = 102,
-	//! RCTSpotify is not initialized
-	RCTSpotifyErrorNotInitialized = 103,
-	//! RCTSpotify must be logged in to use this function
-	RCTSpotifyErrorNotLoggedIn = 104,
-	//! A sent request returned an error
-	RCTSpotifyErrorRequestFailed = 105
-} RCTSpotifyErrorCode;
-
-
-
 @interface RCTSpotify : NSObject <RCTBridgeModule, RNEventConformer>
-
-+(NSError*)errorWithCode:(RCTSpotifyErrorCode)code description:(NSString*)description;
 
 //test()
 -(id)test;
