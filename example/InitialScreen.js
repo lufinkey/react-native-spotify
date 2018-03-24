@@ -38,40 +38,36 @@ export class InitialScreen extends Component
 
 	componentDidMount()
 	{
+		// initialize Spotify if it hasn't been initialized yet
 		if(!Spotify.isInitialized())
 		{
-			//initialize spotify
+			// initialize spotify
 			var spotifyOptions = {
 				"clientID":"<INSERT-YOUR-CLIENT-ID-HERE>",
 				"sessionUserDefaultsKey":"SpotifySession",
 				"redirectURL":"examplespotifyapp://auth",
 				"scopes":["user-read-private", "playlist-read", "playlist-read-private", "streaming"],
 			};
-			Spotify.initialize(spotifyOptions, (loggedIn, error) => {
-				if(error != null)
-				{
-					Alert.alert("Error", error.message);
-				}
-				//update UI state
-				this.setState((state) => {
-					state.spotifyInitialized = true;
-					return state;
-				});
-				//handle initialization
+			Spotify.initialize(spotifyOptions).then((loggedIn) => {
+				// update UI state
+				this.setState({spotifyInitialized: true});
+				// handle initialization
 				if(loggedIn)
 				{
 					this.goToPlayer();
 				}
+			}).catch((error) => {
+				Alert.alert("Error", error.message);
 			});
 		}
 		else
 		{
-			//update UI state
+			// update UI state
 			this.setState((state) => {
 				state.spotifyInitialized = true;
 				return state;
 			});
-			//handle logged in
+			// handle logged in
 			if(Spotify.isLoggedIn())
 			{
 				this.goToPlayer();
@@ -81,15 +77,20 @@ export class InitialScreen extends Component
 
 	spotifyLoginButtonWasPressed()
 	{
-		Spotify.login((loggedIn, error) => {
-			if(error)
-			{
-				Alert.alert("Error", error.message);
-			}
+		// log into Spotify
+		Spotify.login().then((loggedIn) => {
 			if(loggedIn)
 			{
+				// logged in
 				this.goToPlayer();
 			}
+			else
+			{
+				// cancelled
+			}
+		}).catch((error) => {
+			// error
+			Alert.alert("Error", error.message);
 		});
 	}
 
