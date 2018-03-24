@@ -19,7 +19,7 @@
     "prepublish": "git submodule update --init --recursive"
   },
   "peerDependencies": {
-    "react-native": "^0.41.2"
+    "react-native": "^0.54.2"
   },
   "dependencies": {
     "react-native-events": "^1.0.7"
