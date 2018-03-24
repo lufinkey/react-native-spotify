@@ -8,7 +8,7 @@
   "description": "",
   "author": "lufinkey",
   "nativePackage": true,
-  "license": "",
+  "license": "ISC",
   "keywords": [
     "react-native",
     "spotify"
