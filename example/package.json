@@ -10,7 +10,7 @@
     "react": "^16.2.0",
     "react-native": "^0.54.2",
     "react-native-spotify": "git+https://github.com/lufinkey/react-native-spotify.git",
-    "react-navigation": "^1.0.0-beta.21"
+    "react-navigation": "^1.5.8"
   },
   "devDependencies": {
     "babel-jest": "21.2.0",
