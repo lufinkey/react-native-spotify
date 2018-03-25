@@ -802,5 +802,5 @@ Refresh tokens are part of [OAuth standard](https://tools.ietf.org/html/rfc6749#
 
 If you would like to make a pull request, fork from and merge into the *dev* branch only.
 
-Please do not open issues about getting the module to work unless you have tried using both the example app and the example token swap server.
+Please do not open issues about getting the module to work unless you have tried using both the example app and the example token swap server. Please make sure you have tried running on the latest react-native version before submitting a bug.
 
