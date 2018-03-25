@@ -12,7 +12,6 @@ const app = express();
 const spClientId = process.env.SPOTIFY_CLIENT_ID;
 const spClientSecret = process.env.SPOTIFY_CLIENT_SECRET;
 const spClientCallback = process.env.SPOTIFY_CLIENT_CALLBACK;
-const spServerPort = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 const authString = Buffer.from(spClientId+':'+spClientSecret).toString('base64');
 const authHeader = `Basic ${authString}`;
 const spotifyEndpoint = 'https://accounts.spotify.com/api/token';
@@ -167,4 +166,6 @@ app.post('/refresh', async (req, res) => {
 	res.status(res.status).send(result);
 });
 
+// start server
+const spServerPort = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 app.listen(spServerPort, () => console.log('Example app listening on port '+spServerPort+'!'));
