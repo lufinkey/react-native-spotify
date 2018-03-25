@@ -513,7 +513,7 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	
 	* *Parameters*
 	
-		* **endpoint** - the api endpoint, without a leading slash, e.g. `v1/browse/new-releases`
+		* **endpoint** - the api endpoint, without a leading slash, e.g. `'v1/browse/new-releases'`
 		
 		* **method** - the HTTP method to use
 		
@@ -547,7 +547,7 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	
 		* **query** - The search query string. Same as the *q* parameter on the [search](https://developer.spotify.com/web-api/search-item/) endpoint
 		
-		* **types** - An array of item types to search for. Valid types are: `album`, `artist`, `playlist`, and `track`.
+		* **types** - An array of item types to search for. Valid types are: `'album'`, `'artist'`, `'playlist'`, and `'track'`.
 		
 		* **options** - A map of other optional parameters to specify for the query
 	
