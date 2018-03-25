@@ -16,10 +16,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepublish": "git submodule update --init --recursive"
+    "prepublishOnly": "git submodule update --init --recursive"
   },
   "peerDependencies": {
-    "react-native": "^0.54.2"
+    "react-native": "^0.53.3"
   },
   "dependencies": {
     "react-native-events": "^1.0.7"
