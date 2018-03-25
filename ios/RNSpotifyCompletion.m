@@ -1,25 +1,25 @@
 //
-//  RCTSpotifyCompletion.m
-//  RCTSpotify
+//  RNSpotifyCompletion.m
+//  RNSpotify
 //
 //  Created by Luis Finke on 2/15/18.
 //  Copyright © 2018 Facebook. All rights reserved.
 //
 
-#import "RCTSpotifyCompletion.h"
+#import "RNSpotifyCompletion.h"
 
-@interface RCTSpotifyCompletion()
+@interface RNSpotifyCompletion()
 {
 	BOOL _responded;
 	void(^_resolver)(id);
-	void(^_rejector)(RCTSpotifyError*);
-	void(^_completion)(id, RCTSpotifyError*);
+	void(^_rejector)(RNSpotifyError*);
+	void(^_completion)(id, RNSpotifyError*);
 }
 @end
 
-@implementation RCTSpotifyCompletion
+@implementation RNSpotifyCompletion
 
--(id)initWithOnResolve:(void(^)(id))resolver onReject:(void(^)(RCTSpotifyError*))rejector
+-(id)initWithOnResolve:(void(^)(id))resolver onReject:(void(^)(RNSpotifyError*))rejector
 {
 	if(self = [super init])
 	{
@@ -31,7 +31,7 @@
 	return self;
 }
 
--(id)initWithOnComplete:(void(^)(id,RCTSpotifyError*))completion
+-(id)initWithOnComplete:(void(^)(id,RNSpotifyError*))completion
 {
 	if(self = [super init])
 	{
@@ -60,7 +60,7 @@
 	}
 }
 
--(void)reject:(RCTSpotifyError*)error
+-(void)reject:(RNSpotifyError*)error
 {
 	if(_responded)
 	{
@@ -77,17 +77,17 @@
 	}
 }
 
-+(RCTSpotifyCompletion*)onResolve:(void(^)(id))onResolve onReject:(void(^)(RCTSpotifyError*))onReject
++(RNSpotifyCompletion*)onResolve:(void(^)(id))onResolve onReject:(void(^)(RNSpotifyError*))onReject
 {
 	return [[self alloc] initWithOnResolve:onResolve onReject:onReject];
 }
 
-+(RCTSpotifyCompletion*)onReject:(void(^)(RCTSpotifyError*))onReject onResolve:(void(^)(id))onResolve
++(RNSpotifyCompletion*)onReject:(void(^)(RNSpotifyError*))onReject onResolve:(void(^)(id))onResolve
 {
 	return [[self alloc] initWithOnResolve:onResolve onReject:onReject];
 }
 
-+(RCTSpotifyCompletion*)onComplete:(void(^)(id,RCTSpotifyError*))onComplete
++(RNSpotifyCompletion*)onComplete:(void(^)(id,RNSpotifyError*))onComplete
 {
 	return [[self alloc] initWithOnComplete:onComplete];
 }

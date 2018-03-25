@@ -7,16 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A00A83BE1FB5188A00394AF0 /* RCTSpotifyConvert.m in Sources */ = {isa = PBXBuildFile; fileRef = A00A83BC1FB5188A00394AF0 /* RCTSpotifyConvert.m */; };
-		A01F099F1FAED1DB002AA48C /* RCTSpotifyAuthController.m in Sources */ = {isa = PBXBuildFile; fileRef = A01F099E1FAED1DB002AA48C /* RCTSpotifyAuthController.m */; };
+		A00A83BE1FB5188A00394AF0 /* RNSpotifyConvert.m in Sources */ = {isa = PBXBuildFile; fileRef = A00A83BC1FB5188A00394AF0 /* RNSpotifyConvert.m */; };
+		A01F099F1FAED1DB002AA48C /* RNSpotifyAuthController.m in Sources */ = {isa = PBXBuildFile; fileRef = A01F099E1FAED1DB002AA48C /* RNSpotifyAuthController.m */; };
 		A0A4341D1FAE256D0073DAB9 /* SpotifyAudioPlayback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A0A4341B1FAE25690073DAB9 /* SpotifyAudioPlayback.framework */; };
 		A0A4341E1FAE256F0073DAB9 /* SpotifyAuthentication.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A0A4341C1FAE25690073DAB9 /* SpotifyAuthentication.framework */; };
 		A0A4341F1FAE25720073DAB9 /* SpotifyMetadata.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A0A4341A1FAE25690073DAB9 /* SpotifyMetadata.framework */; };
-		A0AD6943200E5B00003EC7D8 /* RCTSpotifyProgressView.m in Sources */ = {isa = PBXBuildFile; fileRef = A0AD6942200E5B00003EC7D8 /* RCTSpotifyProgressView.m */; };
-		A0AD6946200E7277003EC7D8 /* RCTSpotifyWebViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A0AD6945200E7277003EC7D8 /* RCTSpotifyWebViewController.m */; };
-		A0C233722036800A0063A745 /* RCTSpotifyCompletion.m in Sources */ = {isa = PBXBuildFile; fileRef = A0C233712036800A0063A745 /* RCTSpotifyCompletion.m */; };
-		A0C233752036800A0063A745 /* RCTSpotifyError.m in Sources */ = {isa = PBXBuildFile; fileRef = A0C233742036800A0063A745 /* RCTSpotifyError.m */; };
-		B3E7B58A1CC2AC0600A0062D /* RCTSpotify.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* RCTSpotify.m */; };
+		A0AD6943200E5B00003EC7D8 /* RNSpotifyProgressView.m in Sources */ = {isa = PBXBuildFile; fileRef = A0AD6942200E5B00003EC7D8 /* RNSpotifyProgressView.m */; };
+		A0AD6946200E7277003EC7D8 /* RNSpotifyWebViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A0AD6945200E7277003EC7D8 /* RNSpotifyWebViewController.m */; };
+		A0C233722036800A0063A745 /* RNSpotifyCompletion.m in Sources */ = {isa = PBXBuildFile; fileRef = A0C233712036800A0063A745 /* RNSpotifyCompletion.m */; };
+		A0C233752036800A0063A745 /* RNSpotifyError.m in Sources */ = {isa = PBXBuildFile; fileRef = A0C233742036800A0063A745 /* RNSpotifyError.m */; };
+		B3E7B58A1CC2AC0600A0062D /* RNSpotify.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* RNSpotify.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -32,25 +32,25 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		134814201AA4EA6300B7C361 /* libRCTSpotify.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTSpotify.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		A00A83BC1FB5188A00394AF0 /* RCTSpotifyConvert.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTSpotifyConvert.m; sourceTree = "<group>"; };
-		A00A83BD1FB5188A00394AF0 /* RCTSpotifyConvert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTSpotifyConvert.h; sourceTree = "<group>"; };
-		A01F099D1FAED1DB002AA48C /* RCTSpotifyAuthController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RCTSpotifyAuthController.h; sourceTree = "<group>"; };
-		A01F099E1FAED1DB002AA48C /* RCTSpotifyAuthController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RCTSpotifyAuthController.m; sourceTree = "<group>"; };
+		134814201AA4EA6300B7C361 /* libRNSpotify.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRNSpotify.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		A00A83BC1FB5188A00394AF0 /* RNSpotifyConvert.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNSpotifyConvert.m; sourceTree = "<group>"; };
+		A00A83BD1FB5188A00394AF0 /* RNSpotifyConvert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNSpotifyConvert.h; sourceTree = "<group>"; };
+		A01F099D1FAED1DB002AA48C /* RNSpotifyAuthController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RNSpotifyAuthController.h; sourceTree = "<group>"; };
+		A01F099E1FAED1DB002AA48C /* RNSpotifyAuthController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNSpotifyAuthController.m; sourceTree = "<group>"; };
 		A0A4341A1FAE25690073DAB9 /* SpotifyMetadata.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SpotifyMetadata.framework; path = external/SpotifySDK/SpotifyMetadata.framework; sourceTree = "<group>"; };
 		A0A4341B1FAE25690073DAB9 /* SpotifyAudioPlayback.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SpotifyAudioPlayback.framework; path = external/SpotifySDK/SpotifyAudioPlayback.framework; sourceTree = "<group>"; };
 		A0A4341C1FAE25690073DAB9 /* SpotifyAuthentication.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SpotifyAuthentication.framework; path = external/SpotifySDK/SpotifyAuthentication.framework; sourceTree = "<group>"; };
-		A0AD6941200E5B00003EC7D8 /* RCTSpotifyProgressView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RCTSpotifyProgressView.h; sourceTree = "<group>"; };
-		A0AD6942200E5B00003EC7D8 /* RCTSpotifyProgressView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RCTSpotifyProgressView.m; sourceTree = "<group>"; };
-		A0AD6944200E7277003EC7D8 /* RCTSpotifyWebViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RCTSpotifyWebViewController.h; sourceTree = "<group>"; };
-		A0AD6945200E7277003EC7D8 /* RCTSpotifyWebViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RCTSpotifyWebViewController.m; sourceTree = "<group>"; };
-		A0C233702036800A0063A745 /* RCTSpotifyCompletion.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RCTSpotifyCompletion.h; sourceTree = "<group>"; };
-		A0C233712036800A0063A745 /* RCTSpotifyCompletion.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RCTSpotifyCompletion.m; sourceTree = "<group>"; };
-		A0C233732036800A0063A745 /* RCTSpotifyError.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RCTSpotifyError.h; sourceTree = "<group>"; };
-		A0C233742036800A0063A745 /* RCTSpotifyError.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RCTSpotifyError.m; sourceTree = "<group>"; };
+		A0AD6941200E5B00003EC7D8 /* RNSpotifyProgressView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RNSpotifyProgressView.h; sourceTree = "<group>"; };
+		A0AD6942200E5B00003EC7D8 /* RNSpotifyProgressView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNSpotifyProgressView.m; sourceTree = "<group>"; };
+		A0AD6944200E7277003EC7D8 /* RNSpotifyWebViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RNSpotifyWebViewController.h; sourceTree = "<group>"; };
+		A0AD6945200E7277003EC7D8 /* RNSpotifyWebViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNSpotifyWebViewController.m; sourceTree = "<group>"; };
+		A0C233702036800A0063A745 /* RNSpotifyCompletion.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RNSpotifyCompletion.h; sourceTree = "<group>"; };
+		A0C233712036800A0063A745 /* RNSpotifyCompletion.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNSpotifyCompletion.m; sourceTree = "<group>"; };
+		A0C233732036800A0063A745 /* RNSpotifyError.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RNSpotifyError.h; sourceTree = "<group>"; };
+		A0C233742036800A0063A745 /* RNSpotifyError.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNSpotifyError.m; sourceTree = "<group>"; };
 		A0CB1CFF1FB4D718009989EA /* HelperMacros.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HelperMacros.h; sourceTree = "<group>"; };
-		B3E7B5881CC2AC0600A0062D /* RCTSpotify.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTSpotify.h; sourceTree = "<group>"; };
-		B3E7B5891CC2AC0600A0062D /* RCTSpotify.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTSpotify.m; sourceTree = "<group>"; };
+		B3E7B5881CC2AC0600A0062D /* RNSpotify.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNSpotify.h; sourceTree = "<group>"; };
+		B3E7B5891CC2AC0600A0062D /* RNSpotify.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNSpotify.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -70,7 +70,7 @@
 		134814211AA4EA7D00B7C361 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				134814201AA4EA6300B7C361 /* libRCTSpotify.a */,
+				134814201AA4EA6300B7C361 /* libRNSpotify.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -79,20 +79,20 @@
 			isa = PBXGroup;
 			children = (
 				A0CB1CFF1FB4D718009989EA /* HelperMacros.h */,
-				B3E7B5881CC2AC0600A0062D /* RCTSpotify.h */,
-				B3E7B5891CC2AC0600A0062D /* RCTSpotify.m */,
-				A00A83BD1FB5188A00394AF0 /* RCTSpotifyConvert.h */,
-				A00A83BC1FB5188A00394AF0 /* RCTSpotifyConvert.m */,
-				A0C233702036800A0063A745 /* RCTSpotifyCompletion.h */,
-				A0C233712036800A0063A745 /* RCTSpotifyCompletion.m */,
-				A0C233732036800A0063A745 /* RCTSpotifyError.h */,
-				A0C233742036800A0063A745 /* RCTSpotifyError.m */,
-				A0AD6941200E5B00003EC7D8 /* RCTSpotifyProgressView.h */,
-				A0AD6942200E5B00003EC7D8 /* RCTSpotifyProgressView.m */,
-				A0AD6944200E7277003EC7D8 /* RCTSpotifyWebViewController.h */,
-				A0AD6945200E7277003EC7D8 /* RCTSpotifyWebViewController.m */,
-				A01F099D1FAED1DB002AA48C /* RCTSpotifyAuthController.h */,
-				A01F099E1FAED1DB002AA48C /* RCTSpotifyAuthController.m */,
+				B3E7B5881CC2AC0600A0062D /* RNSpotify.h */,
+				B3E7B5891CC2AC0600A0062D /* RNSpotify.m */,
+				A00A83BD1FB5188A00394AF0 /* RNSpotifyConvert.h */,
+				A00A83BC1FB5188A00394AF0 /* RNSpotifyConvert.m */,
+				A0C233702036800A0063A745 /* RNSpotifyCompletion.h */,
+				A0C233712036800A0063A745 /* RNSpotifyCompletion.m */,
+				A0C233732036800A0063A745 /* RNSpotifyError.h */,
+				A0C233742036800A0063A745 /* RNSpotifyError.m */,
+				A0AD6941200E5B00003EC7D8 /* RNSpotifyProgressView.h */,
+				A0AD6942200E5B00003EC7D8 /* RNSpotifyProgressView.m */,
+				A0AD6944200E7277003EC7D8 /* RNSpotifyWebViewController.h */,
+				A0AD6945200E7277003EC7D8 /* RNSpotifyWebViewController.m */,
+				A01F099D1FAED1DB002AA48C /* RNSpotifyAuthController.h */,
+				A01F099E1FAED1DB002AA48C /* RNSpotifyAuthController.m */,
 				A0A434191FAE254F0073DAB9 /* Frameworks */,
 				134814211AA4EA7D00B7C361 /* Products */,
 			);
@@ -111,9 +111,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		58B511DA1A9E6C8500147676 /* RCTSpotify */ = {
+		58B511DA1A9E6C8500147676 /* RNSpotify */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "RCTSpotify" */;
+			buildConfigurationList = 58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "RNSpotify" */;
 			buildPhases = (
 				58B511D71A9E6C8500147676 /* Sources */,
 				58B511D81A9E6C8500147676 /* Frameworks */,
@@ -123,9 +123,9 @@
 			);
 			dependencies = (
 			);
-			name = RCTSpotify;
+			name = RNSpotify;
 			productName = RCTDataManager;
-			productReference = 134814201AA4EA6300B7C361 /* libRCTSpotify.a */;
+			productReference = 134814201AA4EA6300B7C361 /* libRNSpotify.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -142,7 +142,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 58B511D61A9E6C8500147676 /* Build configuration list for PBXProject "RCTSpotify" */;
+			buildConfigurationList = 58B511D61A9E6C8500147676 /* Build configuration list for PBXProject "RNSpotify" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -154,7 +154,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				58B511DA1A9E6C8500147676 /* RCTSpotify */,
+				58B511DA1A9E6C8500147676 /* RNSpotify */,
 			);
 		};
 /* End PBXProject section */
@@ -164,13 +164,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A01F099F1FAED1DB002AA48C /* RCTSpotifyAuthController.m in Sources */,
-				A00A83BE1FB5188A00394AF0 /* RCTSpotifyConvert.m in Sources */,
-				A0AD6943200E5B00003EC7D8 /* RCTSpotifyProgressView.m in Sources */,
-				B3E7B58A1CC2AC0600A0062D /* RCTSpotify.m in Sources */,
-				A0C233722036800A0063A745 /* RCTSpotifyCompletion.m in Sources */,
-				A0C233752036800A0063A745 /* RCTSpotifyError.m in Sources */,
-				A0AD6946200E7277003EC7D8 /* RCTSpotifyWebViewController.m in Sources */,
+				A01F099F1FAED1DB002AA48C /* RNSpotifyAuthController.m in Sources */,
+				A00A83BE1FB5188A00394AF0 /* RNSpotifyConvert.m in Sources */,
+				A0AD6943200E5B00003EC7D8 /* RNSpotifyProgressView.m in Sources */,
+				B3E7B58A1CC2AC0600A0062D /* RNSpotify.m in Sources */,
+				A0C233722036800A0063A745 /* RNSpotifyCompletion.m in Sources */,
+				A0C233752036800A0063A745 /* RNSpotifyError.m in Sources */,
+				A0AD6946200E7277003EC7D8 /* RNSpotifyWebViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -275,7 +275,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = "-ObjC";
-				PRODUCT_NAME = RCTSpotify;
+				PRODUCT_NAME = RNSpotify;
 				SKIP_INSTALL = YES;
 			};
 			name = Debug;
@@ -297,7 +297,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = "-ObjC";
-				PRODUCT_NAME = RCTSpotify;
+				PRODUCT_NAME = RNSpotify;
 				SKIP_INSTALL = YES;
 			};
 			name = Release;
@@ -305,7 +305,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		58B511D61A9E6C8500147676 /* Build configuration list for PBXProject "RCTSpotify" */ = {
+		58B511D61A9E6C8500147676 /* Build configuration list for PBXProject "RNSpotify" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				58B511ED1A9E6C8500147676 /* Debug */,
@@ -314,7 +314,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "RCTSpotify" */ = {
+		58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "RNSpotify" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				58B511F01A9E6C8500147676 /* Debug */,

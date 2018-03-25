@@ -158,7 +158,7 @@ public class Convert
 		}
 	}
 
-	public static ReadableMap fromRCTSpotifyError(SpotifyError error)
+	public static ReadableMap fromRNSpotifyError(SpotifyError error)
 	{
 		if(error==null)
 		{

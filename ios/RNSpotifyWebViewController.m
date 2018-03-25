@@ -1,14 +1,14 @@
 //
-//  RCTSpotifyWebViewController.m
-//  RCTSpotify
+//  RNSpotifyWebViewController.m
+//  RNSpotify
 //
 //  Created by Luis Finke on 1/16/18.
 //  Copyright © 2018 Facebook. All rights reserved.
 //
 
-#import "RCTSpotifyWebViewController.h"
+#import "RNSpotifyWebViewController.h"
 
-@implementation RCTSpotifyWebViewController
+@implementation RNSpotifyWebViewController
 
 -(id)init
 {

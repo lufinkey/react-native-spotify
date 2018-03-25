@@ -36,7 +36,7 @@
 		2DCD954D1E0B4F2C00145EB5 /* ExampleSpotifyAppTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* ExampleSpotifyAppTests.m */; };
 		5E9157361DD0AC6A00FF2AA8 /* libRCTAnimation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E9157331DD0AC6500FF2AA8 /* libRCTAnimation.a */; };
 		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
-		83B16B02A257422CA10FF43D /* libRCTSpotify.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9134A12D684749FCAA7157C3 /* libRCTSpotify.a */; };
+		83B16B02A257422CA10FF43D /* libRNSpotify.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9134A12D684749FCAA7157C3 /* libRNSpotify.a */; };
 		A07514921FCA96D4001CBEE0 /* SpotifyAudioPlayback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A075148F1FCA96D4001CBEE0 /* SpotifyAudioPlayback.framework */; };
 		A07514931FCA96D4001CBEE0 /* SpotifyAudioPlayback.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A075148F1FCA96D4001CBEE0 /* SpotifyAudioPlayback.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		A07514941FCA96D5001CBEE0 /* SpotifyAuthentication.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A07514901FCA96D4001CBEE0 /* SpotifyAuthentication.framework */; };
@@ -262,10 +262,10 @@
 		};
 		A075148C1FCA9584001CBEE0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 5199946A9D0346BC8B76F922 /* RCTSpotify.xcodeproj */;
+			containerPortal = 5199946A9D0346BC8B76F922 /* RNSpotify.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 134814201AA4EA6300B7C361;
-			remoteInfo = RCTSpotify;
+			remoteInfo = RNSpotify;
 		};
 		ADBDB9261DFEBF0700ED6528 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -314,11 +314,11 @@
 		146833FF1AC3E56700842450 /* React.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = React.xcodeproj; path = "../node_modules/react-native/React/React.xcodeproj"; sourceTree = "<group>"; };
 		2D02E47B1E0B4A5D006451C7 /* ExampleSpotifyApp-tvOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ExampleSpotifyApp-tvOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D02E4901E0B4A5D006451C7 /* ExampleSpotifyApp-tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "ExampleSpotifyApp-tvOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		5199946A9D0346BC8B76F922 /* RCTSpotify.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RCTSpotify.xcodeproj; path = "../node_modules/react-native-spotify/ios/RCTSpotify.xcodeproj"; sourceTree = "<group>"; };
+		5199946A9D0346BC8B76F922 /* RNSpotify.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNSpotify.xcodeproj; path = "../node_modules/react-native-spotify/ios/RNSpotify.xcodeproj"; sourceTree = "<group>"; };
 		5E91572D1DD0AC6500FF2AA8 /* RCTAnimation.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTAnimation.xcodeproj; path = "../node_modules/react-native/Libraries/NativeAnimation/RCTAnimation.xcodeproj"; sourceTree = "<group>"; };
 		78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTLinking.xcodeproj; path = "../node_modules/react-native/Libraries/LinkingIOS/RCTLinking.xcodeproj"; sourceTree = "<group>"; };
 		832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTText.xcodeproj; path = "../node_modules/react-native/Libraries/Text/RCTText.xcodeproj"; sourceTree = "<group>"; };
-		9134A12D684749FCAA7157C3 /* libRCTSpotify.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRCTSpotify.a; sourceTree = "<group>"; };
+		9134A12D684749FCAA7157C3 /* libRNSpotify.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNSpotify.a; sourceTree = "<group>"; };
 		A075148F1FCA96D4001CBEE0 /* SpotifyAudioPlayback.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SpotifyAudioPlayback.framework; path = "../node_modules/react-native-spotify/ios/external/SpotifySDK/SpotifyAudioPlayback.framework"; sourceTree = "<group>"; };
 		A07514901FCA96D4001CBEE0 /* SpotifyAuthentication.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SpotifyAuthentication.framework; path = "../node_modules/react-native-spotify/ios/external/SpotifySDK/SpotifyAuthentication.framework"; sourceTree = "<group>"; };
 		A07514911FCA96D4001CBEE0 /* SpotifyMetadata.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SpotifyMetadata.framework; path = "../node_modules/react-native-spotify/ios/external/SpotifySDK/SpotifyMetadata.framework"; sourceTree = "<group>"; };
@@ -352,7 +352,7 @@
 				832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */,
 				00C302EA1ABCBA2D00DB3ED1 /* libRCTVibration.a in Frameworks */,
 				139FDEF61B0652A700C62182 /* libRCTWebSocket.a in Frameworks */,
-				83B16B02A257422CA10FF43D /* libRCTSpotify.a in Frameworks */,
+				83B16B02A257422CA10FF43D /* libRNSpotify.a in Frameworks */,
 				A07514921FCA96D4001CBEE0 /* SpotifyAudioPlayback.framework in Frameworks */,
 				A07514961FCA96D5001CBEE0 /* SpotifyMetadata.framework in Frameworks */,
 			);
@@ -527,7 +527,7 @@
 				832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */,
 				00C302DF1ABCB9EE00DB3ED1 /* RCTVibration.xcodeproj */,
 				139FDEE61B06529A00C62182 /* RCTWebSocket.xcodeproj */,
-				5199946A9D0346BC8B76F922 /* RCTSpotify.xcodeproj */,
+				5199946A9D0346BC8B76F922 /* RNSpotify.xcodeproj */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
@@ -570,7 +570,7 @@
 		A075146D1FCA9580001CBEE0 /* Recovered References */ = {
 			isa = PBXGroup;
 			children = (
-				9134A12D684749FCAA7157C3 /* libRCTSpotify.a */,
+				9134A12D684749FCAA7157C3 /* libRNSpotify.a */,
 			);
 			name = "Recovered References";
 			sourceTree = "<group>";
@@ -578,7 +578,7 @@
 		A07514891FCA9583001CBEE0 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A075148D1FCA9584001CBEE0 /* libRCTSpotify.a */,
+				A075148D1FCA9584001CBEE0 /* libRNSpotify.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -748,7 +748,7 @@
 				},
 				{
 					ProductGroup = A07514891FCA9583001CBEE0 /* Products */;
-					ProjectRef = 5199946A9D0346BC8B76F922 /* RCTSpotify.xcodeproj */;
+					ProjectRef = 5199946A9D0346BC8B76F922 /* RNSpotify.xcodeproj */;
 				},
 				{
 					ProductGroup = 832341B11AAA6A8300B99B32 /* Products */;
@@ -974,10 +974,10 @@
 			remoteRef = A07514871FCA9581001CBEE0 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		A075148D1FCA9584001CBEE0 /* libRCTSpotify.a */ = {
+		A075148D1FCA9584001CBEE0 /* libRNSpotify.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
-			path = libRCTSpotify.a;
+			path = libRNSpotify.a;
 			remoteRef = A075148C1FCA9584001CBEE0 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};

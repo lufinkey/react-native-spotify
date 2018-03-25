@@ -29,7 +29,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Player.NotificationCallback, ConnectionStateCallback, RNEventConformer
+public class RNSpotifyModule extends ReactContextBaseJavaModule implements Player.NotificationCallback, ConnectionStateCallback, RNEventConformer
 {
 	private final ReactApplicationContext reactContext;
 
@@ -49,7 +49,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 
 	private String loginLoadingText = "Loading...";
 
-	RCTSpotifyModule(ReactApplicationContext reactContext)
+	RNSpotifyModule(ReactApplicationContext reactContext)
 	{
 		super(reactContext);
 
@@ -73,7 +73,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	@Override
 	public String getName()
 	{
-		return "RCTSpotify";
+		return "RNSpotify";
 	}
 
 	@Override
@@ -390,8 +390,8 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 					// setup player
 					currentConnectivity = Utils.getNetworkConnectivity();
 					player.setConnectivityStatus(null, currentConnectivity);
-					player.addNotificationCallback(RCTSpotifyModule.this);
-					player.addConnectionStateCallback(RCTSpotifyModule.this);
+					player.addNotificationCallback(RNSpotifyModule.this);
+					player.addConnectionStateCallback(RNSpotifyModule.this);
 
 					// attempt to log in the player
 					loginPlayer(new Completion<Void>() {
@@ -442,9 +442,9 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 				{
 					firstLoginAttempt = true;
 				}
-				//wait for RCTSpotifyModule.onLoggedIn
-				// or RCTSpotifyModule.onLoginFailed
-				// or RCTSpotifyModule.onLoggedOut
+				//wait for RNSpotifyModule.onLoggedIn
+				// or RNSpotifyModule.onLoginFailed
+				// or RNSpotifyModule.onLoggedOut
 				playerLoginResponses.add(completion);
 			}
 		}
@@ -479,7 +479,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 			}
 			else
 			{
-				// wait for RCTSpotifyModule.onLoggedOut
+				// wait for RNSpotifyModule.onLoggedOut
 				playerLogoutResponses.add(completion);
 			}
 		}

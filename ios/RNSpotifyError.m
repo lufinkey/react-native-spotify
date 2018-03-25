@@ -1,28 +1,28 @@
 //
-//  RCTSpotifyError.m
-//  RCTSpotify
+//  RNSpotifyError.m
+//  RNSpotify
 //
 //  Created by Luis Finke on 2/15/18.
 //  Copyright © 2018 Facebook. All rights reserved.
 //
 
-#import "RCTSpotifyError.h"
+#import "RNSpotifyError.h"
 #import <SpotifyAudioPlayback/SpotifyAudioPlayback.h>
 
 
-@interface RCTSpotifyErrorCode()
+@interface RNSpotifyErrorCode()
 -(id)initWithName:(NSString*)name message:(NSString*)message;
 +(instancetype)codeWithName:(NSString*)name message:(NSString*)message;
 @end
 
-@implementation RCTSpotifyErrorCode
+@implementation RNSpotifyErrorCode
 
 #define DEFINE_SPOTIFY_ERROR_CODE(errorName, messageStr) \
-	static RCTSpotifyErrorCode* _RCTSpotifyErrorCode##errorName = nil; \
-	+(RCTSpotifyErrorCode*)errorName { \
-		if(_RCTSpotifyErrorCode##errorName == nil) { \
-			_RCTSpotifyErrorCode##errorName = [RCTSpotifyErrorCode codeWithName:@#errorName message:messageStr]; } \
-		return _RCTSpotifyErrorCode##errorName; } \
+	static RNSpotifyErrorCode* _RNSpotifyErrorCode##errorName = nil; \
+	+(RNSpotifyErrorCode*)errorName { \
+		if(_RNSpotifyErrorCode##errorName == nil) { \
+			_RNSpotifyErrorCode##errorName = [RNSpotifyErrorCode codeWithName:@#errorName message:messageStr]; } \
+		return _RNSpotifyErrorCode##errorName; } \
 
 DEFINE_SPOTIFY_ERROR_CODE(AlreadyInitialized, @"Spotify has already been initialized")
 DEFINE_SPOTIFY_ERROR_CODE(NotInitialized, @"Spotify has not been initialized")
@@ -74,14 +74,14 @@ DEFINE_SPOTIFY_ERROR_CODE(SessionExpired, @"Your login session has expired")
 
 
 
-@interface RCTSpotifyError()
+@interface RNSpotifyError()
 {
 	NSError* _error;
 }
 +(NSString*)getSDKErrorCode:(SpErrorCode)enumVal;
 @end
 
-@implementation RCTSpotifyError
+@implementation RNSpotifyError
 
 @synthesize code = _code;
 @synthesize message = _message;
@@ -107,7 +107,7 @@ DEFINE_SPOTIFY_ERROR_CODE(SessionExpired, @"Your login session has expired")
 	{
 		if(error == nil)
 		{
-			@throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Cannot provide a nil error to RCTSpotifyError" userInfo:nil];
+			@throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Cannot provide a nil error to RNSpotifyError" userInfo:nil];
 		}
 		_error = error;
 		_code = [NSString stringWithString:code];
@@ -116,12 +116,12 @@ DEFINE_SPOTIFY_ERROR_CODE(SessionExpired, @"Your login session has expired")
 	return self;
 }
 
--(id)initWithCodeObj:(RCTSpotifyErrorCode*)code
+-(id)initWithCodeObj:(RNSpotifyErrorCode*)code
 {
 	return [self initWithCodeObj:code message:code.message];
 }
 
--(id)initWithCodeObj:(RCTSpotifyErrorCode*)code message:(NSString*)message
+-(id)initWithCodeObj:(RNSpotifyErrorCode*)code message:(NSString*)message
 {
 	if(self = [super init])
 	{
@@ -138,7 +138,7 @@ DEFINE_SPOTIFY_ERROR_CODE(SessionExpired, @"Your login session has expired")
 	{
 		if(error == nil)
 		{
-			@throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Cannot provide a nil error to RCTSpotifyError" userInfo:nil];
+			@throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Cannot provide a nil error to RNSpotifyError" userInfo:nil];
 		}
 		_error = error;
 		if([_error.domain isEqualToString:@"com.spotify.ios-sdk.playback"])
@@ -165,12 +165,12 @@ DEFINE_SPOTIFY_ERROR_CODE(SessionExpired, @"Your login session has expired")
 	return [[self alloc] initWithCode:code error:error];
 }
 
-+(instancetype)errorWithCodeObj:(RCTSpotifyErrorCode*)code
++(instancetype)errorWithCodeObj:(RNSpotifyErrorCode*)code
 {
 	return [[self alloc] initWithCodeObj:code];
 }
 
-+(instancetype)errorWithCodeObj:(RCTSpotifyErrorCode*)code message:(NSString*)message
++(instancetype)errorWithCodeObj:(RNSpotifyErrorCode*)code message:(NSString*)message
 {
 	return [[self alloc] initWithCodeObj:code message:message];
 }
@@ -192,36 +192,36 @@ DEFINE_SPOTIFY_ERROR_CODE(SessionExpired, @"Your login session has expired")
 
 
 
-+(RCTSpotifyError*)nullParameterErrorForName:(NSString*)paramName
++(RNSpotifyError*)nullParameterErrorForName:(NSString*)paramName
 {
-	return [RCTSpotifyError errorWithCodeObj:RCTSpotifyErrorCode.NullParameter
+	return [RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.NullParameter
 									 message:[NSString stringWithFormat:@"%@ cannot be null", paramName]];
 }
 
-+(RCTSpotifyError*)missingOptionErrorForName:(NSString*)optionName
++(RNSpotifyError*)missingOptionErrorForName:(NSString*)optionName
 {
-	return [RCTSpotifyError errorWithCodeObj:RCTSpotifyErrorCode.MissingOption
+	return [RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.MissingOption
 									 message:[NSString stringWithFormat:@"Missing required option %@", optionName]];
 }
 
-+(RCTSpotifyError*)httpErrorForStatusCode:(NSInteger)statusCode
++(RNSpotifyError*)httpErrorForStatusCode:(NSInteger)statusCode
 {
 	if(statusCode <= 0)
 	{
-		return [RCTSpotifyError errorWithCode:@"HTTPRequestFailed" message:@"Unable to send request"];
+		return [RNSpotifyError errorWithCode:@"HTTPRequestFailed" message:@"Unable to send request"];
 	}
-	return [RCTSpotifyError errorWithCode:[NSString stringWithFormat:@"HTTP%ld", statusCode]
+	return [RNSpotifyError errorWithCode:[NSString stringWithFormat:@"HTTP%ld", statusCode]
 								  message:[NSHTTPURLResponse localizedStringForStatusCode:statusCode]];
 }
 
-+(RCTSpotifyError*)httpErrorForStatusCode:(NSInteger)statusCode message:(NSString*)message
++(RNSpotifyError*)httpErrorForStatusCode:(NSInteger)statusCode message:(NSString*)message
 {
 	NSString* code = [NSString stringWithFormat:@"HTTP%ld", statusCode];
 	if(statusCode <= 0)
 	{
 		code = @"HTTPRequestFailed";
 	}
-	return [RCTSpotifyError errorWithCode:code message:message];
+	return [RNSpotifyError errorWithCode:code message:message];
 }
 
 

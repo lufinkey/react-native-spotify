@@ -11,7 +11,7 @@
 #import <RNEventEmitter/RNEventEmitter.h>
 #endif
 
-@interface RCTSpotify : NSObject <RCTBridgeModule, RNEventConformer>
+@interface RNSpotify : NSObject <RCTBridgeModule, RNEventConformer>
 
 //test()
 -(id)test;

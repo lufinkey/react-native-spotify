@@ -3,12 +3,12 @@
 #import <SpotifyAuthentication/SpotifyAuthentication.h>
 #import <SpotifyMetadata/SpotifyMetadata.h>
 #import <SpotifyAudioPlayback/SpotifyAudioPlayback.h>
-#import "RCTSpotifyError.h"
+#import "RNSpotifyError.h"
 
-@interface RCTSpotifyConvert : NSObject
+@interface RNSpotifyConvert : NSObject
 
 +(id)ID:(id)obj;
-+(id)RCTSpotifyError:(RCTSpotifyError*)error;
++(id)RNSpotifyError:(RNSpotifyError*)error;
 +(id)NSError:(NSError*)error;
 +(id)SPTPlaybackState:(SPTPlaybackState*)state;
 +(id)SPTPlaybackTrack:(SPTPlaybackTrack*)track;

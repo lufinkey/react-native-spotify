@@ -1,7 +1,7 @@
 
-#import "RCTSpotifyConvert.h"
+#import "RNSpotifyConvert.h"
 
-@implementation RCTSpotifyConvert
+@implementation RNSpotifyConvert
 
 +(id)ID:(id)obj
 {
@@ -12,7 +12,7 @@
 	return obj;
 }
 
-+(id)RCTSpotifyError:(RCTSpotifyError*)error
++(id)RNSpotifyError:(RNSpotifyError*)error
 {
 	if(error==nil)
 	{
@@ -27,7 +27,7 @@
 	{
 		return [NSNull null];
 	}
-	return [self RCTSpotifyError:[RCTSpotifyError errorWithNSError:error]];
+	return [self RNSpotifyError:[RNSpotifyError errorWithNSError:error]];
 }
 
 +(id)SPTPlaybackState:(SPTPlaybackState*)state
@@ -91,8 +91,8 @@
 		return [NSNull null];
 	}
 	return @{
-		@"accessToken": [RCTSpotifyConvert ID:session.accessToken],
-		@"refreshToken": [RCTSpotifyConvert ID:session.encryptedRefreshToken],
+		@"accessToken": [RNSpotifyConvert ID:session.accessToken],
+		@"refreshToken": [RNSpotifyConvert ID:session.encryptedRefreshToken],
 		@"expireTime": session.expirationDate ? [NSNumber numberWithLongLong:((long long)session.expirationDate.timeIntervalSince1970*1000)] : [NSNull null]
 	};
 }

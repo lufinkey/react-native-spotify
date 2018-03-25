@@ -1,19 +1,19 @@
 
-#import "RCTSpotify.h"
+#import "RNSpotify.h"
 #import <AVFoundation/AVFoundation.h>
 #import <SpotifyAuthentication/SpotifyAuthentication.h>
 #import <SpotifyMetadata/SpotifyMetadata.h>
 #import <SpotifyAudioPlayback/SpotifyAudioPlayback.h>
-#import "RCTSpotifyAuthController.h"
-#import "RCTSpotifyProgressView.h"
-#import "RCTSpotifyConvert.h"
-#import "RCTSpotifyCompletion.h"
+#import "RNSpotifyAuthController.h"
+#import "RNSpotifyProgressView.h"
+#import "RNSpotifyConvert.h"
+#import "RNSpotifyCompletion.h"
 #import "HelperMacros.h"
 
 #define SPOTIFY_API_BASE_URL @"https://api.spotify.com/"
 #define SPOTIFY_API_URL(endpoint) [NSURL URLWithString:NSString_concat(SPOTIFY_API_BASE_URL, endpoint)]
 
-@interface RCTSpotify() <SPTAudioStreamingDelegate, SPTAudioStreamingPlaybackDelegate>
+@interface RNSpotify() <SPTAudioStreamingDelegate, SPTAudioStreamingPlaybackDelegate>
 {
 	BOOL _initialized;
 	BOOL _loggingIn;
@@ -26,27 +26,27 @@
 	NSDictionary* _options;
 	NSNumber* _cacheSize;
 	
-	NSMutableArray<RCTSpotifyCompletion*>* _loginPlayerResponses;
-	NSMutableArray<RCTSpotifyCompletion*>* _logoutPlayerResponses;
+	NSMutableArray<RNSpotifyCompletion*>* _loginPlayerResponses;
+	NSMutableArray<RNSpotifyCompletion*>* _logoutPlayerResponses;
 	
 	BOOL _renewingSession;
-	NSMutableArray<RCTSpotifyCompletion*>* _renewCallbacks;
+	NSMutableArray<RNSpotifyCompletion*>* _renewCallbacks;
 	
 	NSString* _audioSessionCategory;
 }
 +(NSMutableDictionary*)mutableDictFromDict:(NSDictionary*)dict;
 -(BOOL)hasPlayerScope;
 
--(void)logBackInIfNeeded:(RCTSpotifyCompletion*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse;
--(void)initializePlayerIfNeeded:(RCTSpotifyCompletion*)completion;
--(void)loginPlayer:(RCTSpotifyCompletion*)completion;
--(void)logoutPlayer:(RCTSpotifyCompletion*)completion;
--(void)prepareForPlayer:(RCTSpotifyCompletion*)completion;
--(void)prepareForRequest:(RCTSpotifyCompletion*)completion;
--(void)doAPIRequest:(NSString*)endpoint method:(NSString*)method params:(NSDictionary*)params jsonBody:(BOOL)jsonBody completion:(RCTSpotifyCompletion*)completion;
+-(void)logBackInIfNeeded:(RNSpotifyCompletion*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse;
+-(void)initializePlayerIfNeeded:(RNSpotifyCompletion*)completion;
+-(void)loginPlayer:(RNSpotifyCompletion*)completion;
+-(void)logoutPlayer:(RNSpotifyCompletion*)completion;
+-(void)prepareForPlayer:(RNSpotifyCompletion*)completion;
+-(void)prepareForRequest:(RNSpotifyCompletion*)completion;
+-(void)doAPIRequest:(NSString*)endpoint method:(NSString*)method params:(NSDictionary*)params jsonBody:(BOOL)jsonBody completion:(RNSpotifyCompletion*)completion;
 @end
 
-@implementation RCTSpotify
+@implementation RNSpotify
 
 @synthesize bridge = _bridge;
 
@@ -170,19 +170,19 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options resolve:(RCTPromiseResolveBl
 {
 	if(_initialized)
 	{
-		[RCTSpotifyErrorCode.AlreadyInitialized reject:reject];
+		[RNSpotifyErrorCode.AlreadyInitialized reject:reject];
 		return;
 	}
 	
 	// ensure options is not null or missing fields
 	if(options == nil)
 	{
-		[[RCTSpotifyError nullParameterErrorForName:@"options"] reject:reject];
+		[[RNSpotifyError nullParameterErrorForName:@"options"] reject:reject];
 		return;
 	}
 	else if(options[@"clientID"] == nil)
 	{
-		[[RCTSpotifyError missingOptionErrorForName:@"clientID"] reject:reject];
+		[[RNSpotifyError missingOptionErrorForName:@"clientID"] reject:reject];
 		return;
 	}
 	
@@ -228,14 +228,14 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options resolve:(RCTPromiseResolveBl
 		[self sendEvent:@"login" args:@[]];
 	}
 	
-	[self logBackInIfNeeded:[RCTSpotifyCompletion<NSNumber*> onReject:^(RCTSpotifyError* error) {
+	[self logBackInIfNeeded:[RNSpotifyCompletion<NSNumber*> onReject:^(RNSpotifyError* error) {
 		// failure
 	} onResolve:^(NSNumber* loggedIn) {
 		// success
 		if(loggedIn.boolValue)
 		{
 			// initialize player
-			[self initializePlayerIfNeeded:[RCTSpotifyCompletion onComplete:^(id unused, RCTSpotifyError* unusedError) {
+			[self initializePlayerIfNeeded:[RNSpotifyCompletion onComplete:^(id unused, RNSpotifyError* unusedError) {
 				// done
 			}]];
 		}
@@ -260,7 +260,7 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 
 #pragma mark - React Native functions - Session Handling
 
--(void)logBackInIfNeeded:(RCTSpotifyCompletion*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse
+-(void)logBackInIfNeeded:(RNSpotifyCompletion*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse
 {
 	// ensure auth is actually logged in
 	if(_auth.session == nil)
@@ -269,13 +269,13 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 		return;
 	}
 	// attempt to renew auth session
-	[self renewSessionIfNeeded:[RCTSpotifyCompletion onReject:^(RCTSpotifyError* error) {
+	[self renewSessionIfNeeded:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
 		// session renewal failed (we should log out)
 		if([[self isLoggedIn] boolValue])
 		{
 			// session renewal returned a failure, but we're still logged in
 			// log out player
-			[self logoutPlayer:[RCTSpotifyCompletion onComplete:^(id result, RCTSpotifyError* error) {
+			[self logoutPlayer:[RNSpotifyCompletion onComplete:^(id result, RNSpotifyError* error) {
 				// clear session
 				BOOL loggedIn = [[self isLoggedIn] boolValue];
 				if(loggedIn)
@@ -309,7 +309,7 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 	}] waitForDefinitiveResponse:waitForDefinitiveResponse];
 }
 
--(void)renewSessionIfNeeded:(RCTSpotifyCompletion*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse
+-(void)renewSessionIfNeeded:(RNSpotifyCompletion*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse
 {
 	if(_auth.session == nil)
 	{
@@ -324,11 +324,11 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 	else if(_auth.session.encryptedRefreshToken == nil)
 	{
 		// no refresh token to renew session with, so the session has expired
-		[completion reject:[RCTSpotifyError errorWithCodeObj:RCTSpotifyErrorCode.SessionExpired]];
+		[completion reject:[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.SessionExpired]];
 	}
 	else
 	{
-		[self renewSession:[RCTSpotifyCompletion onReject:^(RCTSpotifyError* error) {
+		[self renewSession:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
 			[completion reject:error];
 		} onResolve:^(id result) {
 			[completion resolve:result];
@@ -336,12 +336,12 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 	}
 }
 
--(void)renewSession:(RCTSpotifyCompletion*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse
+-(void)renewSession:(RNSpotifyCompletion*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse
 {
 	dispatch_async(dispatch_get_main_queue(), ^{
 		if(_auth.session == nil)
 		{
-			[completion reject:[RCTSpotifyError errorWithCodeObj:RCTSpotifyErrorCode.NotLoggedIn]];
+			[completion reject:[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.NotLoggedIn]];
 			return;
 		}
 		else if(!_auth.hasTokenRefreshService)
@@ -386,13 +386,13 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 				
 				//TODO figure out what SPTAuth.renewSession does if the internet is not connected (probably throws an error)
 				
-				NSArray<RCTSpotifyCompletion*>* renewCallbacks = [NSArray arrayWithArray:_renewCallbacks];
+				NSArray<RNSpotifyCompletion*>* renewCallbacks = [NSArray arrayWithArray:_renewCallbacks];
 				[_renewCallbacks removeAllObjects];
-				for(RCTSpotifyCompletion* completion in renewCallbacks)
+				for(RNSpotifyCompletion* completion in renewCallbacks)
 				{
 					if(error != nil)
 					{
-						[completion reject:[RCTSpotifyError errorWithNSError:error]];
+						[completion reject:[RNSpotifyError errorWithNSError:error]];
 					}
 					else
 					{
@@ -404,7 +404,7 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 	});
 }
 
--(void)initializePlayerIfNeeded:(RCTSpotifyCompletion*)completion
+-(void)initializePlayerIfNeeded:(RNSpotifyCompletion*)completion
 {
 	if(![self hasPlayerScope])
 	{
@@ -432,7 +432,7 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 	// handle initialization failure
 	if(!initializedPlayer)
 	{
-		[completion reject:[RCTSpotifyError errorWithNSError:error]];
+		[completion reject:[RNSpotifyError errorWithNSError:error]];
 		return;
 	}
 	
@@ -448,7 +448,7 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 	[self loginPlayer:completion];
 }
 
--(void)loginPlayer:(RCTSpotifyCompletion*)completion
+-(void)loginPlayer:(RNSpotifyCompletion*)completion
 {
 	BOOL loggedIn = NO;
 	
@@ -482,7 +482,7 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 	}
 }
 
--(void)logoutPlayer:(RCTSpotifyCompletion*)completion
+-(void)logoutPlayer:(RNSpotifyCompletion*)completion
 {
 	BOOL loggedOut = NO;
 	
@@ -494,7 +494,7 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 		}
 		else
 		{
-			// wait for RCTSpotifyModule.onLoggedOut
+			// wait for RNSpotifyModule.onLoggedOut
 			[_logoutPlayerResponses addObject:completion];
 		}
 	}
@@ -515,24 +515,24 @@ RCT_EXPORT_METHOD(login:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseReject
 	// ensure we're not already logging in
 	if(_loggingIn)
 	{
-		[[RCTSpotifyError errorWithCodeObj:RCTSpotifyErrorCode.ConflictingCallbacks message:@"Cannot call login multiple times before completing"] reject:reject];
+		[[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.ConflictingCallbacks message:@"Cannot call login multiple times before completing"] reject:reject];
 		return;
 	}
 	_loggingIn = YES;
 	// do UI logic on main thread
 	dispatch_async(dispatch_get_main_queue(), ^{
-		RCTSpotifyAuthController* authController = [[RCTSpotifyAuthController alloc] initWithAuth:_auth];
+		RNSpotifyAuthController* authController = [[RNSpotifyAuthController alloc] initWithAuth:_auth];
 		
-		__weak RCTSpotifyAuthController* weakAuthController = authController;
-		authController.completion = [RCTSpotifyCompletion<NSNumber*> onReject:^(RCTSpotifyError* error) {
+		__weak RNSpotifyAuthController* weakAuthController = authController;
+		authController.completion = [RNSpotifyCompletion<NSNumber*> onReject:^(RNSpotifyError* error) {
 			// login failed
-			RCTSpotifyAuthController* authController = weakAuthController;
+			RNSpotifyAuthController* authController = weakAuthController;
 			[authController.presentingViewController dismissViewControllerAnimated:YES completion:^{
 				_loggingIn = NO;
 				[error reject:reject];
 			}];
 		} onResolve:^(NSNumber* authenticated) {
-			RCTSpotifyAuthController* authController = weakAuthController;
+			RNSpotifyAuthController* authController = weakAuthController;
 			if(!authenticated.boolValue)
 			{
 				// login cancelled
@@ -544,7 +544,7 @@ RCT_EXPORT_METHOD(login:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseReject
 			else
 			{
 				// login successful
-				[self initializePlayerIfNeeded:[RCTSpotifyCompletion onComplete:^(id unused, RCTSpotifyError* unusedError) {
+				[self initializePlayerIfNeeded:[RNSpotifyCompletion onComplete:^(id unused, RNSpotifyError* unusedError) {
 					// do UI logic on main thread
 					dispatch_async(dispatch_get_main_queue(), ^{
 						[authController.presentingViewController dismissViewControllerAnimated:YES completion:^{
@@ -562,7 +562,7 @@ RCT_EXPORT_METHOD(login:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseReject
 		}];
 		
 		// present auth view controller
-		UIViewController* topViewController = [RCTSpotifyAuthController topViewController];
+		UIViewController* topViewController = [RNSpotifyAuthController topViewController];
 		[topViewController presentViewController:authController animated:YES completion:nil];
 	});
 }
@@ -574,7 +574,7 @@ RCT_EXPORT_METHOD(logout:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejec
 		resolve(nil);
 		return;
 	}
-	[self logoutPlayer:[RCTSpotifyCompletion onReject:^(RCTSpotifyError* error) {
+	[self logoutPlayer:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
 		[error reject:reject];
 	} onResolve:^(id unused) {
 		BOOL loggedIn = [[self isLoggedIn] boolValue];
@@ -610,12 +610,12 @@ RCT_EXPORT_METHOD(isLoggedInAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPro
 
 RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getAuth)
 {
-	return [RCTSpotifyConvert SPTAuth:_auth];
+	return [RNSpotifyConvert SPTAuth:_auth];
 }
 
 RCT_EXPORT_METHOD(getAuthAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
-	resolve(@[ [RCTSpotifyConvert ID:[self getAuth]] ]);
+	resolve(@[ [RNSpotifyConvert ID:[self getAuth]] ]);
 }
 
 
@@ -624,14 +624,14 @@ RCT_EXPORT_METHOD(getAuthAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromis
 
 #pragma mark - React Native functions - Playback
 
--(void)prepareForPlayer:(RCTSpotifyCompletion*)completion
+-(void)prepareForPlayer:(RNSpotifyCompletion*)completion
 {
 	if(!_initialized)
 	{
-		[completion reject:[RCTSpotifyError errorWithCodeObj:RCTSpotifyErrorCode.NotInitialized]];
+		[completion reject:[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.NotInitialized]];
 		return;
 	}
-	[self logBackInIfNeeded:[RCTSpotifyCompletion onReject:^(RCTSpotifyError* error) {
+	[self logBackInIfNeeded:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
 		if(!_player.loggedIn && [self hasPlayerScope])
 		{
 			[completion reject:error];
@@ -643,7 +643,7 @@ RCT_EXPORT_METHOD(getAuthAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromis
 	} onResolve:^(id unused) {
 		if([[self isLoggedIn] boolValue])
 		{
-			[self initializePlayerIfNeeded:[RCTSpotifyCompletion onReject:^(RCTSpotifyError* error) {
+			[self initializePlayerIfNeeded:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
 				if(!_player.loggedIn && [self hasPlayerScope])
 				{
 					[completion reject:error];
@@ -655,7 +655,7 @@ RCT_EXPORT_METHOD(getAuthAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromis
 			} onResolve:^(id result) {
 				if(!_player.loggedIn && [self hasPlayerScope])
 				{
-					[completion reject:[RCTSpotifyError errorWithCodeObj:RCTSpotifyErrorCode.PlayerNotReady]];
+					[completion reject:[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.PlayerNotReady]];
 				}
 				else
 				{
@@ -665,20 +665,20 @@ RCT_EXPORT_METHOD(getAuthAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromis
 		}
 		else
 		{
-			[completion reject:[RCTSpotifyError errorWithCodeObj:RCTSpotifyErrorCode.NotLoggedIn]];
+			[completion reject:[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.NotLoggedIn]];
 		}
 	}] waitForDefinitiveResponse:NO];
 }
 
 RCT_EXPORT_METHOD(playURI:(NSString*)uri startIndex:(NSUInteger)startIndex startPosition:(NSTimeInterval)startPosition resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
-	[self prepareForPlayer:[RCTSpotifyCompletion onReject:^(RCTSpotifyError* error) {
+	[self prepareForPlayer:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
 		[error reject:reject];
 	} onResolve:^(id unused) {
 		[_player playSpotifyURI:uri startingWithIndex:startIndex startingWithPosition:startPosition callback:^(NSError* error) {
 			if(error != nil)
 			{
-				[[RCTSpotifyError errorWithNSError:error] reject:reject];
+				[[RNSpotifyError errorWithNSError:error] reject:reject];
 			}
 			else
 			{
@@ -690,13 +690,13 @@ RCT_EXPORT_METHOD(playURI:(NSString*)uri startIndex:(NSUInteger)startIndex start
 
 RCT_EXPORT_METHOD(queueURI:(NSString*)uri resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
-	[self prepareForPlayer:[RCTSpotifyCompletion onReject:^(RCTSpotifyError* error) {
+	[self prepareForPlayer:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
 		[error reject:reject];
 	} onResolve:^(id result) {
 		[_player queueSpotifyURI:uri callback:^(NSError* error) {
 			if(error != nil)
 			{
-				[[RCTSpotifyError errorWithNSError:error] reject:reject];
+				[[RNSpotifyError errorWithNSError:error] reject:reject];
 			}
 			else
 			{
@@ -710,13 +710,13 @@ RCT_EXPORT_METHOD(setVolume:(double)volume resolve:(RCTPromiseResolveBlock)resol
 {
 	if(!_initialized)
 	{
-		[[RCTSpotifyError errorWithCodeObj:RCTSpotifyErrorCode.NotInitialized] reject:reject];
+		[[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.NotInitialized] reject:reject];
 		return;
 	}
 	[_player setVolume:(SPTVolume)volume callback:^(NSError* error){
 		if(error != nil)
 		{
-			[[RCTSpotifyError errorWithNSError:error] reject:reject];
+			[[RNSpotifyError errorWithNSError:error] reject:reject];
 		}
 		else
 		{
@@ -736,18 +736,18 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getVolume)
 
 RCT_EXPORT_METHOD(getVolumeAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
-	resolve([RCTSpotifyConvert ID:[self getVolume]]);
+	resolve([RNSpotifyConvert ID:[self getVolume]]);
 }
 
 RCT_EXPORT_METHOD(setPlaying:(BOOL)playing resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
-	[self prepareForPlayer:[RCTSpotifyCompletion onReject:^(RCTSpotifyError* error) {
+	[self prepareForPlayer:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
 		[error reject:reject];
 	} onResolve:^(id unused) {
 		[_player setIsPlaying:playing callback:^(NSError* error) {
 			if(error != nil)
 			{
-				[[RCTSpotifyError errorWithNSError:error] reject:reject];
+				[[RNSpotifyError errorWithNSError:error] reject:reject];
 			}
 			else
 			{
@@ -759,13 +759,13 @@ RCT_EXPORT_METHOD(setPlaying:(BOOL)playing resolve:(RCTPromiseResolveBlock)resol
 
 RCT_EXPORT_METHOD(setShuffling:(BOOL)shuffling resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
-	[self prepareForPlayer:[RCTSpotifyCompletion onReject:^(RCTSpotifyError* error) {
+	[self prepareForPlayer:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
 		[error reject:reject];
 	} onResolve:^(id unused) {
 		[_player setShuffle:shuffling callback:^(NSError* error) {
 			if(error != nil)
 			{
-				[[RCTSpotifyError errorWithNSError:error] reject:reject];
+				[[RNSpotifyError errorWithNSError:error] reject:reject];
 			}
 			else
 			{
@@ -777,7 +777,7 @@ RCT_EXPORT_METHOD(setShuffling:(BOOL)shuffling resolve:(RCTPromiseResolveBlock)r
 
 RCT_EXPORT_METHOD(setRepeating:(BOOL)repeating resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
-	[self prepareForPlayer:[RCTSpotifyCompletion onReject:^(RCTSpotifyError* error) {
+	[self prepareForPlayer:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
 		[error reject:reject];
 	} onResolve:^(id unused) {
 		SPTRepeatMode repeatMode = SPTRepeatOff;
@@ -788,7 +788,7 @@ RCT_EXPORT_METHOD(setRepeating:(BOOL)repeating resolve:(RCTPromiseResolveBlock)r
 		[_player setRepeat:repeatMode callback:^(NSError* error) {
 			if(error != nil)
 			{
-				[[RCTSpotifyError errorWithNSError:error] reject:reject];
+				[[RNSpotifyError errorWithNSError:error] reject:reject];
 			}
 			else
 			{
@@ -800,33 +800,33 @@ RCT_EXPORT_METHOD(setRepeating:(BOOL)repeating resolve:(RCTPromiseResolveBlock)r
 
 RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getPlaybackState)
 {
-	return [RCTSpotifyConvert SPTPlaybackState:_player.playbackState];
+	return [RNSpotifyConvert SPTPlaybackState:_player.playbackState];
 }
 
 RCT_EXPORT_METHOD(getPlaybackStateAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
-	resolve([RCTSpotifyConvert ID:[self getPlaybackState]]);
+	resolve([RNSpotifyConvert ID:[self getPlaybackState]]);
 }
 
 RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getPlaybackMetadata)
 {
-	return [RCTSpotifyConvert SPTPlaybackMetadata:_player.metadata];
+	return [RNSpotifyConvert SPTPlaybackMetadata:_player.metadata];
 }
 
 RCT_EXPORT_METHOD(getPlaybackMetadataAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
-	resolve([RCTSpotifyConvert ID:[self getPlaybackMetadata]]);
+	resolve([RNSpotifyConvert ID:[self getPlaybackMetadata]]);
 }
 
 RCT_EXPORT_METHOD(skipToNext:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
-	[self prepareForPlayer:[RCTSpotifyCompletion onReject:^(RCTSpotifyError* error) {
+	[self prepareForPlayer:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
 		[error reject:reject];
 	} onResolve:^(id unused) {
 		[_player skipNext:^(NSError* error) {
 			if(error != nil)
 			{
-				[[RCTSpotifyError errorWithNSError:error] reject:reject];
+				[[RNSpotifyError errorWithNSError:error] reject:reject];
 			}
 			else
 			{
@@ -838,13 +838,13 @@ RCT_EXPORT_METHOD(skipToNext:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseR
 
 RCT_EXPORT_METHOD(skipToPrevious:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
-	[self prepareForPlayer:[RCTSpotifyCompletion onReject:^(RCTSpotifyError* error) {
+	[self prepareForPlayer:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
 		[error reject:reject];
 	} onResolve:^(id unused) {
 		[_player skipPrevious:^(NSError *error) {
 			if(error != nil)
 			{
-				[[RCTSpotifyError errorWithNSError:error] reject:reject];
+				[[RNSpotifyError errorWithNSError:error] reject:reject];
 			}
 			else
 			{
@@ -858,21 +858,21 @@ RCT_EXPORT_METHOD(skipToPrevious:(RCTPromiseResolveBlock)resolve reject:(RCTProm
 
 #pragma mark - React Native functions - Request Sending
 
--(void)prepareForRequest:(RCTSpotifyCompletion*)completion
+-(void)prepareForRequest:(RNSpotifyCompletion*)completion
 {
 	if(!_initialized)
 	{
-		[completion reject:[RCTSpotifyError errorWithCodeObj:RCTSpotifyErrorCode.NotInitialized]];
+		[completion reject:[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.NotInitialized]];
 		return;
 	}
-	[self logBackInIfNeeded:[RCTSpotifyCompletion onComplete:^(id unused, RCTSpotifyError* unusedError) {
+	[self logBackInIfNeeded:[RNSpotifyCompletion onComplete:^(id unused, RNSpotifyError* unusedError) {
 		[completion resolve:nil];
 	}] waitForDefinitiveResponse:NO];
 }
 
--(void)doAPIRequest:(NSString*)endpoint method:(NSString*)method params:(NSDictionary*)params jsonBody:(BOOL)jsonBody completion:(RCTSpotifyCompletion*)completion
+-(void)doAPIRequest:(NSString*)endpoint method:(NSString*)method params:(NSDictionary*)params jsonBody:(BOOL)jsonBody completion:(RNSpotifyCompletion*)completion
 {
-	[self prepareForRequest:[RCTSpotifyCompletion onReject:^(RCTSpotifyError* error) {
+	[self prepareForRequest:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
 		[completion reject:error];
 	} onResolve:^(id unused) {
 		// build request
@@ -887,7 +887,7 @@ RCT_EXPORT_METHOD(skipToPrevious:(RCTPromiseResolveBlock)resolve reject:(RCTProm
 		// handle request params error
 		if(error != nil)
 		{
-			[completion reject:[RCTSpotifyError errorWithNSError:error]];
+			[completion reject:[RNSpotifyError errorWithNSError:error]];
 			return;
 		}
 		
@@ -895,7 +895,7 @@ RCT_EXPORT_METHOD(skipToPrevious:(RCTPromiseResolveBlock)resolve reject:(RCTProm
 		[[SPTRequest sharedHandler] performRequest:request callback:^(NSError* error, NSURLResponse* response, NSData* data) {
 			if(error != nil)
 			{
-				[completion reject:[RCTSpotifyError errorWithNSError:error]];
+				[completion reject:[RNSpotifyError errorWithNSError:error]];
 				return;
 			}
 			
@@ -921,7 +921,7 @@ RCT_EXPORT_METHOD(skipToPrevious:(RCTPromiseResolveBlock)resolve reject:(RCTProm
 				result = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
 				if(error != nil)
 				{
-					[completion reject:[RCTSpotifyError errorWithNSError:error]];
+					[completion reject:[RNSpotifyError errorWithNSError:error]];
 					return;
 				}
 				
@@ -933,26 +933,26 @@ RCT_EXPORT_METHOD(skipToPrevious:(RCTPromiseResolveBlock)resolve reject:(RCTProm
 					{
 						if(![errorObj isKindOfClass:[NSString class]] || ![errorDescription isKindOfClass:[NSString class]])
 						{
-							[completion reject:[RCTSpotifyError errorWithCodeObj:RCTSpotifyErrorCode.BadResponse]];
+							[completion reject:[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadResponse]];
 							return;
 						}
-						[completion reject:[RCTSpotifyError errorWithCode:errorObj message:errorDescription]];
+						[completion reject:[RNSpotifyError errorWithCode:errorObj message:errorDescription]];
 					}
 					else
 					{
 						if(![errorObj isKindOfClass:[NSDictionary class]])
 						{
-							[completion reject:[RCTSpotifyError errorWithCodeObj:RCTSpotifyErrorCode.BadResponse]];
+							[completion reject:[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadResponse]];
 							return;
 						}
 						id statusCode = errorObj[@"status"];
 						id message = errorObj[@"message"];
 						if(statusCode == nil || message == nil || ![statusCode isKindOfClass:[NSNumber class]] || ![message isKindOfClass:[NSString class]])
 						{
-							[completion reject:[RCTSpotifyError errorWithCodeObj:RCTSpotifyErrorCode.BadResponse]];
+							[completion reject:[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadResponse]];
 							return;
 						}
-						[completion reject:[RCTSpotifyError httpErrorForStatusCode:[statusCode integerValue] message:message]];
+						[completion reject:[RNSpotifyError httpErrorForStatusCode:[statusCode integerValue] message:message]];
 					}
 					return;
 				}
@@ -976,7 +976,7 @@ RCT_EXPORT_METHOD(skipToPrevious:(RCTPromiseResolveBlock)resolve reject:(RCTProm
 
 RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method params:(NSDictionary*)params isJSONBody:(BOOL)jsonBody resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
-	[self doAPIRequest:endpoint method:method params:params jsonBody:jsonBody completion:[RCTSpotifyCompletion onReject:^(RCTSpotifyError* error) {
+	[self doAPIRequest:endpoint method:method params:params jsonBody:jsonBody completion:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
 		[error reject:reject];
 	} onResolve:^(id result) {
 		resolve(result);
@@ -992,9 +992,9 @@ RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method param
 	_loggingInPlayer = NO;
 	
 	// handle loginPlayer callbacks
-	NSArray<RCTSpotifyCompletion*>* loginPlayerResponses = [NSArray arrayWithArray:_loginPlayerResponses];
+	NSArray<RNSpotifyCompletion*>* loginPlayerResponses = [NSArray arrayWithArray:_loginPlayerResponses];
 	[_loginPlayerResponses removeAllObjects];
-	for(RCTSpotifyCompletion* response in loginPlayerResponses)
+	for(RNSpotifyCompletion* response in loginPlayerResponses)
 	{
 		[response resolve:nil];
 	}
@@ -1020,11 +1020,11 @@ RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method param
 		}
 		
 		// handle loginPlayer callbacks
-		NSArray<RCTSpotifyCompletion*>* loginPlayerResponses = [NSArray arrayWithArray:_loginPlayerResponses];
+		NSArray<RNSpotifyCompletion*>* loginPlayerResponses = [NSArray arrayWithArray:_loginPlayerResponses];
 		[_loginPlayerResponses removeAllObjects];
-		for(RCTSpotifyCompletion* response in loginPlayerResponses)
+		for(RNSpotifyCompletion* response in loginPlayerResponses)
 		{
-			[response reject:[RCTSpotifyError errorWithNSError:error]];
+			[response reject:[RNSpotifyError errorWithNSError:error]];
 		}
 		
 		if(sendLogoutEvent)
@@ -1042,11 +1042,11 @@ RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method param
 	_loggingOutPlayer = NO;
 	
 	// handle loginPlayer callbacks
-	NSArray<RCTSpotifyCompletion*>* loginPlayerResponses = [NSArray arrayWithArray:_loginPlayerResponses];
+	NSArray<RNSpotifyCompletion*>* loginPlayerResponses = [NSArray arrayWithArray:_loginPlayerResponses];
 	[_loginPlayerResponses removeAllObjects];
-	for(RCTSpotifyCompletion* response in loginPlayerResponses)
+	for(RNSpotifyCompletion* response in loginPlayerResponses)
 	{
-		[response reject:[RCTSpotifyError errorWithCodeObj:RCTSpotifyErrorCode.NotLoggedIn message:@"You have been logged out"]];
+		[response reject:[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.NotLoggedIn message:@"You have been logged out"]];
 	}
 	
 	// if we didn't explicitly log out, try to renew the session
@@ -1054,7 +1054,7 @@ RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method param
 	{
 		if(_auth.hasTokenRefreshService && _auth.session != nil && _auth.session.encryptedRefreshToken != nil)
 		{
-			[self renewSession:[RCTSpotifyCompletion onReject:^(RCTSpotifyError* error) {
+			[self renewSession:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
 				if([[self isLoggedIn] boolValue])
 				{
 					// clear session and stop player
@@ -1063,7 +1063,7 @@ RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method param
 					[self sendEvent:@"logout" args:@[]];
 				}
 			} onResolve:^(id result) {
-				[self initializePlayerIfNeeded:[RCTSpotifyCompletion onComplete:^(id unused, RCTSpotifyError* unusedError) {
+				[self initializePlayerIfNeeded:[RNSpotifyCompletion onComplete:^(id unused, RNSpotifyError* unusedError) {
 					// we've logged back in
 				}]];
 			}] waitForDefinitiveResponse:YES];
@@ -1076,9 +1076,9 @@ RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method param
 	[_player stopWithError:nil];
 	
 	// handle logoutPlayer callbacks
-	NSArray<RCTSpotifyCompletion*>* logoutResponses = [NSArray arrayWithArray:_logoutPlayerResponses];
+	NSArray<RNSpotifyCompletion*>* logoutResponses = [NSArray arrayWithArray:_logoutPlayerResponses];
 	[_logoutPlayerResponses removeAllObjects];
-	for(RCTSpotifyCompletion* response in logoutResponses)
+	for(RNSpotifyCompletion* response in logoutResponses)
 	{
 		[response resolve:nil];
 	}

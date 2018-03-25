@@ -2,7 +2,7 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:RCTSpotify.xcodeproj">
+      location = "group:RNSpotify.xcodeproj">
    </FileRef>
 </Workspace>
   

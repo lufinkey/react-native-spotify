@@ -2,7 +2,7 @@
 import { NativeModules } from 'react-native';
 import RNEvents from 'react-native-events';
 
-const Spotify = NativeModules.Spotify;
+const Spotify = NativeModules.RNSpotify;
 RNEvents.register(Spotify);
 RNEvents.conform(Spotify);
 

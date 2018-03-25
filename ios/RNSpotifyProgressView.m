@@ -1,21 +1,21 @@
 //
-//  RCTSpotifyProgressView.m
-//  RCTSpotify
+//  RNSpotifyProgressView.m
+//  RNSpotify
 //
 //  Created by Luis Finke on 1/16/18.
 //  Copyright © 2018 Facebook. All rights reserved.
 //
 
-#import "RCTSpotifyProgressView.h"
+#import "RNSpotifyProgressView.h"
 #import <QuartzCore/QuartzCore.h>
 
-@interface RCTSpotifyProgressView()
+@interface RNSpotifyProgressView()
 {
 	UIView* _hudView;
 }
 @end
 
-@implementation RCTSpotifyProgressView
+@implementation RNSpotifyProgressView
 
 -(id)initWithFrame:(CGRect)frame
 {

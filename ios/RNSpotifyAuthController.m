@@ -1,25 +1,25 @@
 //
-//  RCTSpotifyAuthController.m
-//  RCTSpotify
+//  RNSpotifyAuthController.m
+//  RNSpotify
 //
 //  Created by Luis Finke on 11/5/17.
 //  Copyright © 2017 Facebook. All rights reserved.
 //
 
-#import "RCTSpotifyAuthController.h"
-#import "RCTSpotifyWebViewController.h"
-#import "RCTSpotifyProgressView.h"
+#import "RNSpotifyAuthController.h"
+#import "RNSpotifyWebViewController.h"
+#import "RNSpotifyProgressView.h"
 
-@interface RCTSpotifyAuthController() <UIWebViewDelegate>
+@interface RNSpotifyAuthController() <UIWebViewDelegate>
 {
 	SPTAuth* _auth;
-	RCTSpotifyWebViewController* _webController;
-	RCTSpotifyProgressView* _progressView;
+	RNSpotifyWebViewController* _webController;
+	RNSpotifyProgressView* _progressView;
 }
 -(void)didSelectCancelButton;
 @end
 
-@implementation RCTSpotifyAuthController
+@implementation RNSpotifyAuthController
 
 +(UIViewController*)topViewController
 {
@@ -33,12 +33,12 @@
 
 -(id)initWithAuth:(SPTAuth*)auth
 {
-	RCTSpotifyWebViewController* rootController = [[RCTSpotifyWebViewController alloc] init];
+	RNSpotifyWebViewController* rootController = [[RNSpotifyWebViewController alloc] init];
 	if(self = [super initWithRootViewController:rootController])
 	{
 		_auth = auth;
 		_webController = rootController;
-		_progressView = [[RCTSpotifyProgressView alloc] init];
+		_progressView = [[RNSpotifyProgressView alloc] init];
 		
 		self.navigationBar.barTintColor = [UIColor blackColor];
 		self.navigationBar.tintColor = [UIColor whiteColor];
@@ -153,7 +153,7 @@
 				NSDictionary* urlParams = [self.class parseOAuthQueryParams:request.URL];
 				if(_completion != nil)
 				{
-					[_completion reject:[RCTSpotifyError errorWithCode:urlParams[@"error"] error:error]];
+					[_completion reject:[RNSpotifyError errorWithCode:urlParams[@"error"] error:error]];
 				}
 			}
 		}];

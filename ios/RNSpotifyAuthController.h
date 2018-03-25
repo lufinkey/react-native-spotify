@@ -1,6 +1,6 @@
 //
-//  RCTSpotifyAuthController.h
-//  RCTSpotify
+//  RNSpotifyAuthController.h
+//  RNSpotify
 //
 //  Created by Luis Finke on 11/5/17.
 //  Copyright © 2017 Facebook. All rights reserved.
@@ -8,11 +8,11 @@
 
 #import <UIKit/UIKit.h>
 #import <SpotifyAuthentication/SpotifyAuthentication.h>
-#import "RCTSpotifyCompletion.h"
+#import "RNSpotifyCompletion.h"
 
-typedef void(^RCTSpotifyAuthCallback)(BOOL authenticated, NSError* error);
+typedef void(^RNSpotifyAuthCallback)(BOOL authenticated, NSError* error);
 
-@interface RCTSpotifyAuthController : UINavigationController
+@interface RNSpotifyAuthController : UINavigationController
 
 -(id)initWithAuth:(SPTAuth*)auth;
 
@@ -20,6 +20,6 @@ typedef void(^RCTSpotifyAuthCallback)(BOOL authenticated, NSError* error);
 
 +(UIViewController*)topViewController;
 
-@property (strong) RCTSpotifyCompletion<NSNumber*>* completion;
+@property (strong) RNSpotifyCompletion<NSNumber*>* completion;
 
 @end
