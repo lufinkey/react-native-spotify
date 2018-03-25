@@ -49,9 +49,6 @@ function postRequest(url, data={})
 				'Content-Type': 'application/x-www-form-urlencoded'
 			}
 		}
-		console.log("sending reqData:");
-		console.log(reqData);
-		console.log("");
 
 		// create request
 		const req = https.request(reqData, (res) => {
@@ -84,12 +81,9 @@ function postRequest(url, data={})
 				}
 				catch(error)
 				{
-					console.error(error);
 					reject(error);
 					return;
 				}
-				console.log("got result:");
-				console.log(result);
 				resolve(result);
 			})
 		});
@@ -101,9 +95,6 @@ function postRequest(url, data={})
 
 		// send
 		data = QueryString.stringify(data);
-		console.log("sending data:");
-		console.log(data);
-		console.log("");
 		req.write(data);
 		req.end();
 	});
@@ -117,14 +108,14 @@ app.use(express.urlencoded());
  * Uses an authentication code on body to request access and refresh tokens
  */
 app.post('/swap', async (req, res) => {
-	console.log("/swap called");
+	// build request data
 	const data = {
 		grant_type: 'authorization_code',
 		redirect_uri: spClientCallback,
 		code: req.body.code
 	};
 
-	// get tokens from spotify api
+	// get new token from Spotify API
 	const result = await postRequest(spotifyEndpoint, data);
 
 	// encrypt refresh_token
@@ -141,7 +132,7 @@ app.post('/swap', async (req, res) => {
  * Uses the refresh token on request body to get a new access token
  */
 app.post('/refresh', async (req, res) => {
-	console.log("/refresh called");
+	// ensure refresh token parameter
 	if (!req.body.refresh_token) {
 		res.status(400).send({error: 'Refresh token is missing from body'});
 		return;
@@ -149,7 +140,7 @@ app.post('/refresh', async (req, res) => {
 
 	// decrypt token
 	const refreshToken = decrypt(req.body.refresh_token);
-	// prepare data for request
+	// build request data
 	const data = {
 		grant_type: 'refresh_token',
 		refresh_token: refreshToken
