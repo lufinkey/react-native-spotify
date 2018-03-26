@@ -124,7 +124,7 @@ app.post('/swap', async (req, res) => {
 	}
 
 	// send response
-	res.send(result);
+	res.status(res.status).send(result);
 });
 
 /**
