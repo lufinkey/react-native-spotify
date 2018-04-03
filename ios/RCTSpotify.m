@@ -21,13 +21,13 @@ NSString* const RCTSpotifyWebAPIDomain = @"com.spotify.web-api";
 	BOOL initialized;
 	SPTAuth* _auth;
 	SPTAudioStreamingController* _player;
-	
+
 	NSDictionary* _options;
 	NSNumber* _cacheSize;
-	
+
 	NSMutableArray<void(^)(BOOL, NSError*)>* _loginPlayerResponses;
 	NSMutableArray<void(^)(NSError*)>* _logoutResponses;
-	
+
 	NSString* _audioSessionCategory;
 }
 +(NSError*)errorWithCode:(RCTSpotifyErrorCode)code description:(NSString*)description;
@@ -42,6 +42,7 @@ NSString* const RCTSpotifyWebAPIDomain = @"com.spotify.web-api";
 -(void)prepareForRequest:(void(^)(NSError* error))completion;
 -(void)performRequest:(NSURLRequest*)request completion:(void(^)(id resultObj, NSError* error))completion;
 -(void)doAPIRequest:(NSString*)endpoint method:(NSString*)method params:(NSDictionary*)params jsonBody:(BOOL)jsonBody completion:(void(^)(id resultObj, NSError* error))completion;
+-(NSDictionary*)getTrackAsDictionary:(SPTPlaybackTrack*)track;
 @end
 
 @implementation RCTSpotify
@@ -170,7 +171,7 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSende
 		return;
 	}
 	initialized = NO;
-	
+
 	//set default values
 	_options = options;
 	_auth = [SPTAuth defaultInstance];
@@ -178,7 +179,7 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSende
 	_cacheSize = @(1024 * 1024 * 64);
 	_loginPlayerResponses = [NSMutableArray array];
 	_logoutResponses = [NSMutableArray array];
-	
+
 	//get options
 	_auth.clientID = options[@"clientID"];
 	_auth.redirectURL = [NSURL URLWithString:options[@"redirectURL"]];
@@ -191,7 +192,7 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSende
 	{
 		_cacheSize = cacheSize;
 	}
-	
+
 	NSDictionary* iosOptions = options[@"ios"];
 	if(iosOptions == nil)
 	{
@@ -202,7 +203,7 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options completion:(RCTResponseSende
 	{
 		_audioSessionCategory = AVAudioSessionCategoryPlayback;
 	}
-	
+
 	[self logBackInIfNeeded:^(BOOL loggedIn, NSError* error) {
 		initialized = YES;
 		if(completion)
@@ -298,7 +299,7 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTResponseSenderBlock)completion)
 		{
 			_player.diskCache = [[SPTDiskCache alloc] initWithCapacity:_cacheSize.unsignedIntegerValue];
 		}
-		
+
 		[self loginPlayer:_auth.session.accessToken completion:^(BOOL loggedIn, NSError* error) {
 			completion(loggedIn, error);
 		}];
@@ -345,11 +346,11 @@ RCT_EXPORT_METHOD(login:(RCTResponseSenderBlock)completion)
 	//do UI logic on main thread
 	dispatch_async(dispatch_get_main_queue(), ^{
 		RCTSpotifyAuthController* authController = [[RCTSpotifyAuthController alloc] initWithAuth:_auth];
-		
+
 		__weak RCTSpotifyAuthController* weakAuthController = authController;
 		authController.completion = ^(BOOL authenticated, NSError* error) {
 			RCTSpotifyAuthController* authController = weakAuthController;
-			
+
 			if(!authenticated)
 			{
 				[authController.presentingViewController dismissViewControllerAnimated:YES completion:^{
@@ -360,7 +361,7 @@ RCT_EXPORT_METHOD(login:(RCTResponseSenderBlock)completion)
 				}];
 				return;
 			}
-			
+
 			[self initializePlayerIfNeeded:^(BOOL loggedIn, NSError* error) {
 				dispatch_async(dispatch_get_main_queue(), ^{
 					[authController.presentingViewController dismissViewControllerAnimated:YES completion:^{
@@ -372,7 +373,7 @@ RCT_EXPORT_METHOD(login:(RCTResponseSenderBlock)completion)
 				});
 			}];
 		};
-		
+
 		UIViewController* topViewController = [RCTSpotifyAuthController topViewController];
 		[topViewController presentViewController:authController animated:YES completion:nil];
 	});
@@ -397,13 +398,13 @@ RCT_EXPORT_METHOD(logout:(RCTResponseSenderBlock)completion)
 			}
 			return;
 		}
-		
+
 		__weak RCTSpotify* _self = self;
 		[_logoutResponses addObject:^void(NSError* error) {
 			RCTSpotify* __self = _self;
 			[__self->_player stopWithError:&error];
 			__self->_auth.session = nil;
-			
+
 			if(completion!=nil)
 			{
 				completion(@[ [RCTSpotifyConvert NSError:error] ]);
@@ -486,7 +487,7 @@ RCT_EXPORT_METHOD(playURI:(NSString*)uri startIndex:(NSUInteger)startIndex start
 			}
 			return;
 		}
-		
+
 		[_player playSpotifyURI:uri startingWithIndex:startIndex startingWithPosition:startPosition callback:^(NSError* error) {
 			if(completion!=nil)
 			{
@@ -507,7 +508,7 @@ RCT_EXPORT_METHOD(queueURI:(NSString*)uri completion:(RCTResponseSenderBlock)com
 			}
 			return;
 		}
-		
+
 		[_player queueSpotifyURI:uri callback:^(NSError* error) {
 			if(completion)
 			{
@@ -690,7 +691,7 @@ RCT_EXPORT_METHOD(skipToPrevious:(RCTResponseSenderBlock)completion)
 {
 	[[SPTRequest sharedHandler] performRequest:request callback:^(NSError* error, NSURLResponse* response, NSData* data) {
 		callbackAndReturnIfError(error, completion, nil, error);
-		
+
 		BOOL isJSON = NO;
 		NSError* httpError = nil;
 		if([response isKindOfClass:[NSHTTPURLResponse class]])
@@ -710,7 +711,7 @@ RCT_EXPORT_METHOD(skipToPrevious:(RCTResponseSenderBlock)completion)
 				httpError = [NSError errorWithDomain:RCTSpotifyWebAPIDomain code:httpResponse.statusCode userInfo:@{NSLocalizedDescriptionKey:[NSHTTPURLResponse localizedStringForStatusCode:httpResponse.statusCode]}];
 			}
 		}
-		
+
 		id resultObj = nil;
 		if(isJSON)
 		{
@@ -721,7 +722,7 @@ RCT_EXPORT_METHOD(skipToPrevious:(RCTResponseSenderBlock)completion)
 		{
 			resultObj = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
 		}
-		
+
 		if(resultObj != nil && [resultObj isKindOfClass:[NSDictionary class]])
 		{
 			id errorObj = resultObj[@"error_description"];
@@ -753,7 +754,7 @@ RCT_EXPORT_METHOD(skipToPrevious:(RCTResponseSenderBlock)completion)
 {
 	[self prepareForRequest:^(NSError* error) {
 		callbackAndReturnIfError(error, completion, nil, error);
-		
+
 		NSURLRequest* request = [SPTRequest createRequestForURL:SPOTIFY_API_URL(endpoint)
 												withAccessToken:_auth.session.accessToken
 													 httpMethod:method
@@ -762,7 +763,7 @@ RCT_EXPORT_METHOD(skipToPrevious:(RCTResponseSenderBlock)completion)
 										  sendDataAsQueryString:!jsonBody
 														  error:&error];
 		callbackAndReturnIfError(error, completion, nil, error);
-		
+
 		[self performRequest:request completion:^(id resultObj, NSError* error){
 			if(completion)
 			{
@@ -800,11 +801,11 @@ RCT_EXPORT_METHOD(search:(NSString*)query types:(NSArray<NSString*>*)types optio
 {
 	reactCallbackAndReturnIfNil(query, completion, [NSNull null], );
 	reactCallbackAndReturnIfNil(types, completion, [NSNull null], );
-	
+
 	NSMutableDictionary* body = [[self class] mutableDictFromDict:options];
 	body[@"q"] = query;
 	body[@"type"] = [types componentsJoinedByString:@","];
-	
+
 	[self doAPIRequest:@"v1/search" method:@"GET" params:body jsonBody:NO completion:^(id resultObj, NSError* error) {
 		if(completion)
 		{
@@ -816,7 +817,7 @@ RCT_EXPORT_METHOD(search:(NSString*)query types:(NSArray<NSString*>*)types optio
 RCT_EXPORT_METHOD(getAlbum:(NSString*)albumID options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion)
 {
 	reactCallbackAndReturnIfNil(albumID, completion, [NSNull null], );
-	
+
 	NSString* endpoint = NSString_concat(@"v1/albums/", albumID);
 	[self doAPIRequest:endpoint method:@"GET" params:options jsonBody:NO completion:^(id resultObj, NSError *error) {
 		if(completion)
@@ -829,10 +830,10 @@ RCT_EXPORT_METHOD(getAlbum:(NSString*)albumID options:(NSDictionary*)options com
 RCT_EXPORT_METHOD(getAlbums:(NSArray<NSString*>*)albumIDs options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion)
 {
 	reactCallbackAndReturnIfNil(albumIDs, completion, [NSNull null], );
-	
+
 	NSMutableDictionary* body = [[self class] mutableDictFromDict:options];
 	body[@"ids"] = [albumIDs componentsJoinedByString:@","];
-	
+
 	[self doAPIRequest:@"v1/albums" method:@"GET" params:body jsonBody:NO completion:^(id resultObj, NSError* error) {
 		if(completion)
 		{
@@ -844,7 +845,7 @@ RCT_EXPORT_METHOD(getAlbums:(NSArray<NSString*>*)albumIDs options:(NSDictionary*
 RCT_EXPORT_METHOD(getAlbumTracks:(NSString*)albumID options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion)
 {
 	reactCallbackAndReturnIfNil(albumID, completion, [NSNull null], );
-	
+
 	NSString* endpoint = NSString_concat(@"v1/albums/", albumID, @"/tracks");
 	[self doAPIRequest:endpoint method:@"GET" params:options jsonBody:NO completion:^(id resultObj, NSError* error) {
 		if(completion)
@@ -857,7 +858,7 @@ RCT_EXPORT_METHOD(getAlbumTracks:(NSString*)albumID options:(NSDictionary*)optio
 RCT_EXPORT_METHOD(getArtist:(NSString*)artistID options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion)
 {
 	reactCallbackAndReturnIfNil(artistID, completion, [NSNull null], );
-	
+
 	NSString* endpoint = NSString_concat(@"v1/artists/", artistID);
 	[self doAPIRequest:endpoint method:@"GET" params:options jsonBody:NO completion:^(id resultObj, NSError *error) {
 		if(completion)
@@ -870,10 +871,10 @@ RCT_EXPORT_METHOD(getArtist:(NSString*)artistID options:(NSDictionary*)options c
 RCT_EXPORT_METHOD(getArtists:(NSArray<NSString*>*)artistIDs options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion)
 {
 	reactCallbackAndReturnIfNil(artistIDs, completion, [NSNull null], );
-	
+
 	NSMutableDictionary* body = [[self class] mutableDictFromDict:options];
 	body[@"ids"] = [artistIDs componentsJoinedByString:@","];
-	
+
 	[self doAPIRequest:@"v1/artists" method:@"GET" params:body jsonBody:NO completion:^(id resultObj, NSError* error) {
 		if(completion)
 		{
@@ -885,7 +886,7 @@ RCT_EXPORT_METHOD(getArtists:(NSArray<NSString*>*)artistIDs options:(NSDictionar
 RCT_EXPORT_METHOD(getArtistAlbums:(NSString*)artistID options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion)
 {
 	reactCallbackAndReturnIfNil(artistID, completion, [NSNull null], );
-	
+
 	NSString* endpoint = NSString_concat(@"v1/artists/", artistID, @"/albums");
 	[self doAPIRequest:endpoint method:@"GET" params:options jsonBody:NO completion:^(id resultObj, NSError* error) {
 		if(completion)
@@ -899,10 +900,10 @@ RCT_EXPORT_METHOD(getArtistTopTracks:(NSString*)artistID country:(NSString*)coun
 {
 	reactCallbackAndReturnIfNil(artistID, completion, [NSNull null], );
 	reactCallbackAndReturnIfNil(country, completion, [NSNull null], );
-	
+
 	NSMutableDictionary* body = [[self class] mutableDictFromDict:options];
 	body[@"country"] = country;
-	
+
 	NSString* endpoint = NSString_concat(@"v1/artists/", artistID, @"/top-tracks");
 	[self doAPIRequest:endpoint method:@"GET" params:body jsonBody:NO completion:^(id resultObj, NSError* error) {
 		if(completion)
@@ -915,7 +916,7 @@ RCT_EXPORT_METHOD(getArtistTopTracks:(NSString*)artistID country:(NSString*)coun
 RCT_EXPORT_METHOD(getArtistRelatedArtists:(NSString*)artistID options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion)
 {
 	reactCallbackAndReturnIfNil(artistID, completion, [NSNull null], );
-	
+
 	NSString* endpoint = NSString_concat(@"v1/artists/", artistID, @"/related-artists");
 	[self doAPIRequest:endpoint method:@"GET" params:options jsonBody:NO completion:^(id resultObj, NSError* error) {
 		if(completion)
@@ -928,7 +929,7 @@ RCT_EXPORT_METHOD(getArtistRelatedArtists:(NSString*)artistID options:(NSDiction
 RCT_EXPORT_METHOD(getTrack:(NSString*)trackID options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion)
 {
 	reactCallbackAndReturnIfNil(trackID, completion, [NSNull null], );
-	
+
 	NSString* endpoint = NSString_concat(@"v1/tracks/", trackID);
 	[self doAPIRequest:endpoint method:@"GET" params:options jsonBody:NO completion:^(id resultObj, NSError *error) {
 		if(completion)
@@ -941,10 +942,10 @@ RCT_EXPORT_METHOD(getTrack:(NSString*)trackID options:(NSDictionary*)options com
 RCT_EXPORT_METHOD(getTracks:(NSArray<NSString*>*)trackIDs options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion)
 {
 	reactCallbackAndReturnIfNil(trackIDs, completion, [NSNull null], );
-	
+
 	NSMutableDictionary* body = [[self class] mutableDictFromDict:options];
 	body[@"ids"] = [trackIDs componentsJoinedByString:@","];
-	
+
 	[self doAPIRequest:@"v1/tracks" method:@"GET" params:body jsonBody:NO completion:^(id resultObj, NSError* error) {
 		if(completion)
 		{
@@ -956,7 +957,7 @@ RCT_EXPORT_METHOD(getTracks:(NSArray<NSString*>*)trackIDs options:(NSDictionary*
 RCT_EXPORT_METHOD(getTrackAudioAnalysis:(NSString*)trackID options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion)
 {
 	reactCallbackAndReturnIfNil(trackID, completion, [NSNull null], );
-	
+
 	NSString* endpoint = NSString_concat(@"v1/audio-analysis/", trackID);
 	[self doAPIRequest:endpoint method:@"GET" params:options jsonBody:NO completion:^(id resultObj, NSError *error) {
 		if(completion)
@@ -969,7 +970,7 @@ RCT_EXPORT_METHOD(getTrackAudioAnalysis:(NSString*)trackID options:(NSDictionary
 RCT_EXPORT_METHOD(getTrackAudioFeatures:(NSString*)trackID options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion)
 {
 	reactCallbackAndReturnIfNil(trackID, completion, [NSNull null], );
-	
+
 	NSString* endpoint = NSString_concat(@"v1/audio-features/", trackID);
 	[self doAPIRequest:endpoint method:@"GET" params:options jsonBody:NO completion:^(id resultObj, NSError* error) {
 		if(completion)
@@ -982,10 +983,10 @@ RCT_EXPORT_METHOD(getTrackAudioFeatures:(NSString*)trackID options:(NSDictionary
 RCT_EXPORT_METHOD(getTracksAudioFeatures:(NSArray<NSString*>*)trackIDs options:(NSDictionary*)options completion:(RCTResponseSenderBlock)completion)
 {
 	reactCallbackAndReturnIfNil(trackIDs, completion, [NSNull null], );
-	
+
 	NSMutableDictionary* body = [[self class] mutableDictFromDict:options];
 	body[@"ids"] = [trackIDs componentsJoinedByString:@","];
-	
+
 	[self doAPIRequest:@"v1/audio-features" method:@"GET" params:body jsonBody:NO completion:^(id resultObj, NSError* error) {
 		if(completion)
 		{
@@ -1026,7 +1027,7 @@ RCT_EXPORT_METHOD(getTracksAudioFeatures:(NSArray<NSString*>*)trackIDs options:(
 -(void)audioStreamingDidLogout:(SPTAudioStreamingController*)audioStreaming
 {
 	NSError* error = [RCTSpotify errorWithCode:RCTSpotifyErrorCodeNotLoggedIn description:@"Spotify was logged out"];
-	
+
 	//do initializePlayerIfNeeded callbacks
 	NSArray<void(^)(BOOL, NSError*)>* loginPlayerResponses = [NSArray arrayWithArray:_loginPlayerResponses];
 	[_loginPlayerResponses removeAllObjects];
@@ -1034,7 +1035,7 @@ RCT_EXPORT_METHOD(getTracksAudioFeatures:(NSArray<NSString*>*)trackIDs options:(
 	{
 		response(NO, error);
 	}
-	
+
 	//do logout callbacks
 	NSArray<void(^)(NSError*)>* logoutResponses = [NSArray arrayWithArray:_logoutResponses];
 	[_logoutResponses removeAllObjects];
@@ -1057,6 +1058,75 @@ RCT_EXPORT_METHOD(getTracksAudioFeatures:(NSArray<NSString*>*)trackIDs options:(
 	else
 	{
 		[self deactivateAudioSession];
+	}
+
+	#ifdef DEBUG
+	NSLog(@"RNS: sending didChangePlaybackStatus event");
+	#endif DEBUG
+
+	[self sendEventWithName:@"didChangePlaybackStatus" body:@(isPlaying)];
+}
+
+
+#pragma mark - EventEmitters
+
+- (NSArray<NSString *> *)supportedEvents
+{
+  return @[@"didChangePlaybackStatus", @"didChangePosition", @"didChangeMetadata", @"didReceivePlaybackEvent", @"didFinishPlayback"];
+}
+
+- (void)audioStreaming:(SPTAudioStreamingController *)audioStreaming didChangePosition:(NSTimeInterval)position
+{
+	#ifdef DEBUG
+	NSLog(@"RNS: sending didChangePosition event");
+	#endif
+
+	[self sendEventWithName:@"didChangePosition" body:@(position)];
+}
+
+- (NSDictionary*)getTrackAsDictionary:(SPTPlaybackTrack *)track
+{
+	NSDictionary *dict = @{
+		@"name": track.name,
+		@"uri": track.uri,
+		@"playbackSourceUri": track.playbackSourceUri,
+		@"playbackSourceName": track.playbackSourceName,
+		@"artistName": track.artistName,
+		@"artistUri": track.artistUri,
+		@"albumName": track.albumName,
+		@"albumUri": track.albumUri,
+		@"albumCoverArtURL": track.albumCoverArtURL == nil ? [NSNull null] : track.albumCoverArtURL,
+		@"duration": @(track.duration),
+		@"indexInContext": @(track.indexInContext)
+	};
+
+	return dict;
+}
+
+- (void)audioStreaming:(SPTAudioStreamingController *)audioStreaming didChangeMetadata:(SPTPlaybackMetadata *)metadata
+{
+	NSDictionary *metadataDict = @{
+		@"prevTrack": metadata.prevTrack == nil ? [NSNull null] : [self getTrackAsDictionary:metadata.prevTrack],
+		@"currentTrack": metadata.currentTrack == nil ? [NSNull null] : [self getTrackAsDictionary:metadata.currentTrack],
+		@"nextTrack": metadata.nextTrack == nil ? [NSNull null] : [self getTrackAsDictionary:metadata.nextTrack]
+	};
+
+	#ifdef DEBUG
+	NSLog(@"RNS: sending didChangeMetadata event");
+	#endif
+
+	[self sendEventWithName:@"didChangeMetadata" body:metadataDict];
+}
+
+- (void)audioStreaming:(SPTAudioStreamingController *)audioStreaming didReceivePlaybackEvent:(SpPlaybackEvent)event
+{
+
+	if (event == SPPlaybackNotifyAudioDeliveryDone) {
+		#ifdef DEBUG
+		NSLog(@"RNS: sending didReceivePlaybackEvent: %@", @(event));
+		#endif
+
+		[self sendEventWithName:@"didFinishPlayback" body:@(true)];
 	}
 }
 
