@@ -6,6 +6,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.view.Gravity;
+import android.util.Log;
 
 import com.android.volley.NetworkResponse;
 import com.facebook.react.bridge.Arguments;
@@ -16,8 +17,12 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.WritableNativeMap;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 import com.spotify.sdk.android.player.*;
+import com.spotify.sdk.android.player.Metadata;
+import com.spotify.sdk.android.player.Metadata.Track;
 import com.spotify.sdk.android.player.Error;
 
 import org.json.JSONException;
@@ -25,6 +30,10 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Player.NotificationCallback, ConnectionStateCallback
 {
@@ -38,6 +47,27 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 	private SpotifyPlayer player;
 	private final ArrayList<CompletionBlock<Boolean>> playerLoginResponses;
 	private final ArrayList<CompletionBlock<Boolean>> playerLogoutResponses;
+
+	private ScheduledExecutorService emitPositionScheduler = null;
+	private ScheduledFuture<?> emitPositionHandler = null;
+	private boolean isEmittingPosition = false;
+
+
+	/**
+	 * Runnable to simulate the iOS didChangePosition notification
+	 */
+	private final Runnable emitPosition = new Runnable() {
+		public void run() {
+			if (player != null) {
+				PlaybackState state = player.getPlaybackState();
+				double seconds = state.positionMs / (double) 1000;
+				if (BuildConfig.DEBUG) {
+					Log.i(getName(), "didChangePosition: " + seconds);
+				}
+				sendEvent("didChangePosition", seconds);
+			}
+		}
+	};
 
 	private ReadableMap options;
 
@@ -58,6 +88,7 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		player = null;
 		playerLoginResponses = new ArrayList<>();
 		playerLogoutResponses = new ArrayList<>();
+		emitPositionScheduler = Executors.newSingleThreadScheduledExecutor();
 
 		options = null;
 	}
@@ -1693,19 +1724,172 @@ public class RCTSpotifyModule extends ReactContextBaseJavaModule implements Play
 		//
 	}
 
-
-
 	//Player.NotificationCallback
 
+	/**
+	 * Send data over the bridge to JS
+	 */
+	private void sendEvent(String eventName, WritableMap params) {
+		reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(eventName, params);
+	}
+
+	private void sendEvent(String eventName, boolean params) {
+		reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(eventName, params);
+	}
+
+	private void sendEvent(String eventName, double params) {
+		reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(eventName, params);
+	}
+
+	/**
+	 * Convert a Spotify Track to a WritableMap for passing to JS
+	 */
+	private WritableMap getTrackMetadataForJS(Track track) {
+		WritableMap trackMap = new WritableNativeMap();
+
+		trackMap.putString("name", track.name);
+		trackMap.putString("uri", track.uri);
+		trackMap.putString("playbackSourceUri", track.uri);
+		trackMap.putString("playbackSourceName", track.name);
+		trackMap.putString("artistName", track.artistName);
+		trackMap.putString("artistUri", track.artistUri);
+		trackMap.putString("albumName", track.albumName);
+		trackMap.putString("albumUri", track.albumUri);
+		trackMap.putString("albumCoverArtURL", track.albumCoverWebUrl);
+		trackMap.putDouble("duration", track.durationMs / 1000);
+		trackMap.putDouble("indexInContext", track.indexInContext);
+
+		return trackMap;
+	}
+
+	/**
+	 * Convert a Spotify Metadata object to a WritableMap for sending to JS
+	 *
+	 * Example Metadata{
+	 * contentName=All I'm Asking,
+	 * contentUri=spotify:track:7IuT4ia8ydOYmEPNYeFONM,
+	 * prevTrack=null,
+	 * currentTrack=Track{
+	 *	name='All I'm Asking',
+	 *	uri='spotify:track:7IuT4ia8ydOYmEPNYeFONM',
+	 *	artistName='The Band Of Heathens',
+	 *	artistUri='spotify:artist:5K4gVy6DhNd39mSjuK95Y7',
+	 *	albumName='Duende',
+	 *	albumUri='spotify:album:5rn6UKHdcFK3Vpix9LHcxz',
+	 *	durationMs=230586,
+	 *	indexInContext=0,
+	 *	albumCoverWebUrl=http://i.scdn.co/image/a7430b0e3013ddc5c7a79ef5d024a019392aeb89
+	 * },
+	 * nextTrack=null
+	 * }
+	 */
+	private WritableMap getMetadataForJS(Metadata mMetadata) {
+		WritableMap params = new WritableNativeMap();
+		Track prevTrack = mMetadata.prevTrack;
+		Track currentTrack = mMetadata.currentTrack;
+		Track nextTrack = mMetadata.nextTrack;
+
+		if (prevTrack == null) {
+			params.putNull("prevTrack");
+		} else {
+			params.putMap("prevTrack", getTrackMetadataForJS(prevTrack));
+		}
+
+		if (currentTrack == null) {
+			params.putNull("currentTrack");
+		} else {
+			params.putMap("currentTrack", getTrackMetadataForJS(currentTrack));
+		}
+
+		if (nextTrack == null) {
+			params.putNull("nextTrack");
+		} else {
+			params.putMap("nextTrack", getTrackMetadataForJS(nextTrack));
+		}
+
+		return params;
+	}
+
+	/**
+	 * Stop sending position updates to JS
+	 */
+	private void stopEmittingPosition() {
+		emitPositionHandler.cancel(true);
+		isEmittingPosition = false;
+	}
+
+	/**
+	 * Start sending position updates to JS. Added to maintain parity with iOS didChangePosition notification
+	 */
+	private void startEmittingPosition() {
+		if (!isEmittingPosition) {
+			isEmittingPosition = true;
+			emitPositionHandler = emitPositionScheduler.scheduleWithFixedDelay(emitPosition, 0, 1, TimeUnit.SECONDS);
+		}
+	}
+
+	/**
+	 * Handled onPlaybackEvent messages and sends certain ones over the bridge to JS.
+	 */
 	@Override
-	public void onPlaybackEvent(PlayerEvent playerEvent)
-	{
-		//
+	public void onPlaybackEvent(PlayerEvent playerEvent) {
+		if (BuildConfig.DEBUG) {
+			Log.i(getName(), "onPlaybackEvent: " + playerEvent.name());
+		}
+
+		switch (playerEvent.name()) {
+			case "kSpPlaybackNotifyPlay":
+				startEmittingPosition();
+				sendEvent("didChangePlaybackStatus", true);
+				break;
+			case "kSpPlaybackNotifyPause":
+				stopEmittingPosition();
+				sendEvent("didChangePlaybackStatus", false);
+				break;
+			case "kSpPlaybackNotifyTrackChanged":
+				sendEvent("didChangeMetadata", getMetadataForJS(player.getMetadata()));
+				break;
+			case "kSpPlaybackNotifyNext":
+				break;
+			case "kSpPlaybackNotifyPrev":
+				break;
+			case "kSpPlaybackNotifyShuffleOn":
+				break;
+			case "kSpPlaybackNotifyShuffleOff":
+				break;
+			case "kSpPlaybackNotifyRepeatOn":
+				break;
+			case "kSpPlaybackNotifyRepeatOff":
+				break;
+			case "kSpPlaybackNotifyBecameActive":
+				break;
+			case "kSpPlaybackNotifyBecameInactive":
+				break;
+			case "kSpPlaybackNotifyLostPermission":
+				break;
+			case "kSpPlaybackEventAudioFlush":
+				break;
+			case "kSpPlaybackNotifyAudioDeliveryDone":
+				stopEmittingPosition();
+				sendEvent("didFinishPlayback", true);
+				break;
+			case "kSpPlaybackNotifyContextChanged":
+				break;
+			case "kSpPlaybackNotifyTrackDelivered":
+				break;
+			case "kSpPlaybackNotifyMetadataChanged":
+				startEmittingPosition();
+				sendEvent("didChangeMetadata", getMetadataForJS(player.getMetadata()));
+				break;
+			default:
+				break;
+		}
 	}
 
 	@Override
-	public void onPlaybackError(Error error)
-	{
-		//
+	public void onPlaybackError(Error error) {
+		if (BuildConfig.DEBUG) {
+			Log.e(getName(), "onPlaybackError: " + error);
+		}
 	}
 }

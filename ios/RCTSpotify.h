@@ -1,8 +1,10 @@
 
 #if __has_include("RCTBridgeModule.h")
 #import "RCTBridgeModule.h"
+#import "RCTEventEmitter.h"
 #else
 #import <React/RCTBridgeModule.h>
+#import <React/RCTEventEmitter.h>
 #endif
 
 extern NSString* const RCTSpotifyErrorDomain;
@@ -28,7 +30,7 @@ typedef enum
 
 
 
-@interface RCTSpotify : NSObject <RCTBridgeModule>
+@interface RCTSpotify : RCTEventEmitter <RCTBridgeModule>
 
 +(NSError*)errorWithCode:(RCTSpotifyErrorCode)code description:(NSString*)description;
 
