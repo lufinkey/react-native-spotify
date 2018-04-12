@@ -11,7 +11,7 @@ Please do not open issues about getting the module to work unless you have tried
 
 ## Install
 
-To add rn-spotify-sdk to your project, cd into your project directory and run the following commands:
+To add the Spotify SDK to your project, cd into your project directory and run the following commands:
 ```bash
 npm install --save rn-spotify-sdk
 react-native link
