@@ -35,7 +35,6 @@ project.xcworkspace
 # Android/IntelliJ
 #
 /android/gradle/
-/example/android/gradle
 gradlew
 gradlew.bat
 build/
@@ -48,6 +47,4 @@ local.properties
 buck-out/
 \.buckd/
 *.keystore
-      
-# example app
-/example/package-lock.json
+
