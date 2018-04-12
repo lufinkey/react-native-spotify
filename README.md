@@ -271,6 +271,10 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 			* **scopes** - An array of scopes to use in the application. A list of scopes can be found [here](https://developer.spotify.com/web-api/using-scopes/)
 			* **tokenSwapURL** - The URL to use to swap an authentication code for an access token (see [Token swap and refresh](#token-swap-and-refresh) section for more info)
 			* **tokenRefreshURL** - The URL to use to get a new access token from a refresh token
+			* **ios** - iOS specific options
+				* **audioSessionCategory** - The name of the audio session category to use for playing music in the app. Default is `'AVAudioSessionCategoryPlayback'`
+			* **android** - Android specific options
+				* **loginLoadingText** - The "Loading" text that will show on the login popup
 	
 	* *Returns*
 	
