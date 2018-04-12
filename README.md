@@ -1,5 +1,5 @@
 
-# react-native-spotify
+# Spotify for React Native
 
 A react native module for the Spotify SDK
 
@@ -11,16 +11,16 @@ Please do not open issues about getting the module to work unless you have tried
 
 ## Install
 
-To add react-native-spotify to your project, cd into your project directory and run the following commands:
+To add rn-spotify-sdk to your project, cd into your project directory and run the following commands:
 ```bash
-npm install --save https://github.com/lufinkey/react-native-spotify
+npm install --save rn-spotify-sdk
 react-native link
 ```
 
 Next, do the manual setup for each platform:
 
 #### iOS
-Manually add the frameworks from `node_modules/react-native-spotify/ios/external/SpotifySDK` to *Linked Frameworks and Libraries* in your project settings. Then add `../node_modules/react-native-spotify/ios/external/SpotifySDK` to *Framework Search Paths* in your project settings.
+Manually add the frameworks from `node_modules/rn-spotify-sdk/ios/external/SpotifySDK` to *Linked Frameworks and Libraries* in your project settings. Then add `../node_modules/rn-spotify-sdk/ios/external/SpotifySDK` to *Framework Search Paths* in your project settings.
 
 #### Android
 
@@ -37,7 +37,7 @@ allprojects {
 			url "$rootDir/../node_modules/react-native/android"
 		}
 		flatDir {
-			dirs project(':react-native-spotify').file('libs'), 'libs'
+			dirs project(':rn-spotify-sdk').file('libs'), 'libs'
 		}
 	}
 }
@@ -68,7 +68,7 @@ If you have issues linking the module, please check that gradle is updated to th
 ## Usage
 
 ```javascript
-import Spotify from 'react-native-spotify';
+import Spotify from 'rn-spotify-sdk';
 ```
 
 ### Types
