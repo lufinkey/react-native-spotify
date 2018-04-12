@@ -3,6 +3,12 @@
 
 A react native module for the Spotify SDK
 
+## Contributing / Opening Issues
+
+If you would like to make a pull request, fork from and merge into the *dev* branch only.
+
+Please do not open issues about getting the module to work unless you have tried using both the example app and the example token swap server. Please make sure you have tried running on the latest react-native version before submitting a bug.
+
 ## Install
 
 To add react-native-spotify to your project, cd into your project directory and run the following commands:
@@ -794,13 +800,3 @@ Both URLs are queried using POST with a Content-Type of `application/x-www-form-
 You can find an example server implementation [here](https://github.com/lufinkey/react-native-spotify/tree/master/example-server).
 
 Refresh tokens are part of [OAuth standard](https://tools.ietf.org/html/rfc6749#section-1.5). If you are not familiar with them, [Understanding Refresh Tokens](https://auth0.com/learn/refresh-tokens/) can give you a basic idea on how they work.
-
-
-
-
-## Contributing / Opening Issues
-
-If you would like to make a pull request, fork from and merge into the *dev* branch only.
-
-Please do not open issues about getting the module to work unless you have tried using both the example app and the example token swap server. Please make sure you have tried running on the latest react-native version before submitting a bug.
-
