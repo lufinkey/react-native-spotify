@@ -854,6 +854,24 @@ RCT_EXPORT_METHOD(skipToPrevious:(RCTPromiseResolveBlock)resolve reject:(RCTProm
 	}]];
 }
 
+RCT_EXPORT_METHOD(seek:(double)position resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
+{
+	[self prepareForPlayer:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
+		[error reject:reject];
+	} onResolve:^(id result) {
+		[_player seekTo:(NSTimeInterval)position callback:^(NSError* error) {
+			if(error != nil)
+			{
+				[[RNSpotifyError errorWithNSError:error] reject:reject];
+			}
+			else
+			{
+				resolve(nil);
+			}
+		}];
+	}]];
+}
+
 
 
 #pragma mark - React Native functions - Request Sending
