@@ -234,7 +234,7 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 
 	- `event` {PlaybackEvent}
 	
-	Emitted when the application accepted all samples from the current track. This is an informative event that indicates that all samples from the current track have been delivered to and accepted by the application. The track has not finished yet.
+	Emitted when the application accepted all samples from the current track. This is an informative event that indicates that all samples from the current track have been delivered to and accepted by the application. The track has not yet finished playing the last audio sample, but no more audio will be delivered for this track. For nearly all intents and purposes, the track has finished playing.
 
 - **'disconnect'**
 
