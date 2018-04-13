@@ -73,75 +73,75 @@ import Spotify from 'rn-spotify-sdk';
 
 ### Types
 
-* **Auth**
+- **Auth**
 
 	Contains information about authentication data
 	
-	* *Properties*
+	- *Properties*
 	
-		* **accessToken** - A token used to communicate with the Spotify API
-		* **refreshToken** - An encrypted token used to get a new access token when it expires. This should be encrypted by your token swap service, as per OAuth standards.
-		* **expireTime** - The time that the access token expires, in milliseconds from January 1, 1970 00:00:00 UTC
+		- **accessToken** - A token used to communicate with the Spotify API
+		- **refreshToken** - An encrypted token used to get a new access token when it expires. This should be encrypted by your token swap service, as per OAuth standards.
+		- **expireTime** - The time that the access token expires, in milliseconds from January 1, 1970 00:00:00 UTC
 
 
 
-* **PlaybackState**
+- **PlaybackState**
 
 	Contains information about the current state of the player
 	
-	* *Properties*
+	- *Properties*
 	
-		* **playing** - boolean indicating whether the player is playing
-		* **repeating** - boolean indicating whether the player is repeating
-		* **shuffling** - boolean indicating whether the player is shuffling
-		* **activeDevice** - boolean indicating whether the current device is the one playing
-		* **position** - the position of the player in the current track, in seconds
+		- **playing** - boolean indicating whether the player is playing
+		- **repeating** - boolean indicating whether the player is repeating
+		- **shuffling** - boolean indicating whether the player is shuffling
+		- **activeDevice** - boolean indicating whether the current device is the one playing
+		- **position** - the position of the player in the current track, in seconds
 
 
 
 
-* **PlaybackTrack**
+- **PlaybackTrack**
 
 	Contains information about a track in the playback queue
 	
-	* *Properties*
+	- *Properties*
 	
-		* **name** - The title of the track
-		* **uri** - The uri of the track
-		* **contextName** - The name of the playlist or album that the track is being played from
-		* **contextUri** - The uri of the playlist or album that the track is being played from
-		* **artistName** - The name of the track's artist
-		* **artistUri** - The uri of the track's artist
-		* **albumName** - The name of the album that the track belongs to
-		* **albumUri** - The uri of the album that the track belongs to
-		* **albumCoverArtURL** - A URL for the album art image
-		* **indexInContext** - The track index in the playlist or album that the track is being played from
+		- **name** - The title of the track
+		- **uri** - The uri of the track
+		- **contextName** - The name of the playlist or album that the track is being played from
+		- **contextUri** - The uri of the playlist or album that the track is being played from
+		- **artistName** - The name of the track's artist
+		- **artistUri** - The uri of the track's artist
+		- **albumName** - The name of the album that the track belongs to
+		- **albumUri** - The uri of the album that the track belongs to
+		- **albumCoverArtURL** - A URL for the album art image
+		- **indexInContext** - The track index in the playlist or album that the track is being played from
 
 
 
 
-* **PlaybackMetadata**
+- **PlaybackMetadata**
 
 	Contains information about the previous, current, and next tracks in the player
 	
-	* *Properties*
+	- *Properties*
 	
-		* **prevTrack** - A *PlaybackTrack* with information about the previous track
-		* **currentTrack** - A *PlaybackTrack* with information about the current track
-		* **nextTrack** - A *PlaybackTrack* with information about the next track
+		- **prevTrack** - A *PlaybackTrack* with information about the previous track
+		- **currentTrack** - A *PlaybackTrack* with information about the current track
+		- **nextTrack** - A *PlaybackTrack* with information about the next track
 
 
 
 
-* **PlaybackEvent**
+- **PlaybackEvent**
 
 	Contains information about a playback event and the state of the player.
 	
-	* *Properties*
+	- *Properties*
 	
-		* **state** - the player's current *PlaybackState*
-		* **metadata** - the player's current *PlaybackMetadata*
-		* **error** - an *Error* 
+		- **state** - the player's current *PlaybackState*
+		- **metadata** - the player's current *PlaybackMetadata*
+		- **error** - an *Error*
 
 
 
@@ -150,107 +150,107 @@ import Spotify from 'rn-spotify-sdk';
 
 This module uses [react-native-events](https://www.npmjs.com/package/react-native-events), so it has all of the same methods as an [EventEmitter](https://nodejs.org/api/events.html) object. All of the events, excluding the **'login'** and **'logout'** events, come from Spotify's native SDK and are simply forwarded to javascript. If one of these events occurs at a weird time or has strange data, please open an issue on Spotify's [ios-sdk](https://github.com/spotify/ios-sdk) or [android-sdk](https://github.com/spotify/android-sdk) repo, and not here.
 
-* **'login'**
+- **'login'**
 
 	Emitted when the module has successfully logged in.
 
-* **'logout'**
+- **'logout'**
 
 	Emitted when the module is logged out.
 
-* **'play'**
+- **'play'**
 
-	* `event` {PlaybackEvent}
+	- `event` {PlaybackEvent}
 	
 	Emitted when playback has started or has resumed.
 
-* **'pause'**
+- **'pause'**
 
-	* `event` {PlaybackEvent}
+	- `event` {PlaybackEvent}
 	
 	Emitted when playback is paused.
 
-* **'trackChange'**
+- **'trackChange'**
 
-	* `event` {PlaybackEvent}
+	- `event` {PlaybackEvent}
 	
 	Emitted when playback of a new/different track starts.
 
-* **'metadataChange'**
+- **'metadataChange'**
 
-	* `event` {PlaybackEvent}
+	- `event` {PlaybackEvent}
 	
 	Emitted when metadata has changed. This event occurs when playback starts or changes to a different context, when a track switch occurs, etc. This is an informational event that does not require action, but should be used to keep the UI display updated with the latest metadata information.
 
-* **'contextChange'**
+- **'contextChange'**
 
-	* `event` {PlaybackEvent}
+	- `event` {PlaybackEvent}
 	
 	Emitted when playback starts or changes to a different context than was playing before, such as a change in album or playlist.
 
-* **'shuffleStatusChange'**
+- **'shuffleStatusChange'**
 
-	* `event` {PlaybackEvent}
+	- `event` {PlaybackEvent}
 	
 	Emitted when "shuffle" is switched on or off.
 
-* **'repeatStatusChange'**
+- **'repeatStatusChange'**
 
-	* `event` {PlaybackEvent}
+	- `event` {PlaybackEvent}
 	
 	Emitted when "repeat" is switched on or off.
 
-* **'active'**
+- **'active'**
 
-	* `event` {PlaybackEvent}
+	- `event` {PlaybackEvent}
 	
 	Emitted when this device has become the active playback device. This event occurs when the users moves playback to this device using Spotify Connect.
 
-* **'inactive'**
+- **'inactive'**
 
-	* `event` {PlaybackEvent}
+	- `event` {PlaybackEvent}
 	
 	Emitted when this device is no longer the active playback device. This event occurs when the user moves playback to a different device using Spotify Connect.
 
-* **'permissionLost'**
+- **'permissionLost'**
 
-	* `event` {PlaybackEvent}
+	- `event` {PlaybackEvent}
 	
 	Emitted when this device has temporarily lost permission to stream audio from Spotify. A user can only stream audio on one of her devices at any given time. If playback is started on a different device, this event may occur.
 
-* **'audioFlush'**
+- **'audioFlush'**
 
-	* `event` {PlaybackEvent}
+	- `event` {PlaybackEvent}
 	
 	Emitted when the application should flush its audio buffers (you don't need to deal with this since that's handled by the native code). For example, this event occurs when seeking to a different position within a track.
 
-* **audioDeliveryDone**
+- **audioDeliveryDone**
 
-	* `event` {PlaybackEvent}
+	- `event` {PlaybackEvent}
 	
 	Emitted when the library reaches the end of a playback context and has no more audio to deliver.
 
-* **trackDelivered**
+- **trackDelivered**
 
-	* `event` {PlaybackEvent}
+	- `event` {PlaybackEvent}
 	
 	Emitted when the application accepted all samples from the current track. This is an informative event that indicates that all samples from the current track have been delivered to and accepted by the application. The track has not finished yet.
 
-* **'disconnect'**
+- **'disconnect'**
 
 	Emitted when the player loses network connectivity.
 
-* **'reconnect'**
+- **'reconnect'**
 
 	Emitted when the player regains network connectivity.
 
-* **'temporaryPlayerError'**
+- **'temporaryPlayerError'**
 
 	Emitted when service has been interrupted, usually by lack of network access. However, it can also occur if there is a problem with Spotify's backend services, or also when the user switches from WiFi to 3G. These errors can occur in many non-critical situations, and thus it is not necessary to show toasts or alert dialogs when receiving this event, or else you will unnecessarily annoy or panic the user. However, it can be useful to know about these events if operations are consistently failing, in which case showing a toast or alert may be justified.
 
-* **'playerMessage'**
+- **'playerMessage'**
 
-	* `message` {String}
+	- `message` {String}
 	
 	Called when the player has recieved a message for the end user from the Spotify service.
 
@@ -259,549 +259,549 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 
 ### Initialization/Authorization Methods
 
-* **initialize**( *options* )
+- **initialize**( *options* )
 
 	Initializes the Spotify module and resumes a logged in session if there is one. This must be the first method you call when using this module.
 	
-	* *Parameters*
-		* **options** - an object with options to pass to the Spotify Module
-			* **clientID** - (*Required*) Your spotify application's ClientID that you registered with spotify [here](https://developer.spotify.com/my-applications)
-			* **redirectURL** - The redirect URL to use when you've finished logging in. You NEED to set this URL for your application [here](https://developer.spotify.com/my-applications), otherwise the login screen will not close
-			* **sessionUserDefaultsKey** - The preference key to use to store session data for this module
-			* **scopes** - An array of scopes to use in the application. A list of scopes can be found [here](https://developer.spotify.com/web-api/using-scopes/)
-			* **tokenSwapURL** - The URL to use to swap an authentication code for an access token (see [Token swap and refresh](#token-swap-and-refresh) section for more info)
-			* **tokenRefreshURL** - The URL to use to get a new access token from a refresh token
-			* **ios** - iOS specific options
-				* **audioSessionCategory** - The name of the audio session category to use for playing music in the app. Default is `'AVAudioSessionCategoryPlayback'`
-			* **android** - Android specific options
-				* **loginLoadingText** - The "Loading" text that will show on the login popup
+	- *Parameters*
+		- **options** - an object with options to pass to the Spotify Module
+			- **clientID** - (*Required*) Your spotify application's ClientID that you registered with spotify [here](https://developer.spotify.com/my-applications)
+			- **redirectURL** - The redirect URL to use when you've finished logging in. You NEED to set this URL for your application [here](https://developer.spotify.com/my-applications), otherwise the login screen will not close
+			- **sessionUserDefaultsKey** - The preference key to use to store session data for this module
+			- **scopes** - An array of scopes to use in the application. A list of scopes can be found [here](https://developer.spotify.com/web-api/using-scopes/)
+			- **tokenSwapURL** - The URL to use to swap an authentication code for an access token (see [Token swap and refresh](#token-swap-and-refresh) section for more info)
+			- **tokenRefreshURL** - The URL to use to get a new access token from a refresh token
+			- **ios** - iOS specific options
+				- **audioSessionCategory** - The name of the audio session category to use for playing music in the app. Default is `'AVAudioSessionCategoryPlayback'`
+			- **android** - Android specific options
+				- **loginLoadingText** - The "Loading" text that will show on the login popup
 	
-	* *Returns*
+	- *Returns*
 	
-		* A *Promise* that resolves to a boolean when the module finishes initialization, indicating whether or not a session was automatically logged back in
+		- A *Promise* that resolves to a boolean when the module finishes initialization, indicating whether or not a session was automatically logged back in
 
 
 
 
-* **isInitialized**()
+- **isInitialized**()
 
 	Checks if the Spotify module has been initialized yet.
 
-	* *Returns*
+	- *Returns*
 	
-		* *true* if the Spotify module has been initialized
-		* *false* if the Spotify module has not been initialized
+		- *true* if the Spotify module has been initialized
+		- *false* if the Spotify module has not been initialized
 
 
 
 
-* **isInitializedAsync**()
+- **isInitializedAsync**()
 
 	Checks if the Spotify module has been initialized yet, but returns a *Promise* that resolves to the result.
 	
-	* *Returns*
+	- *Returns*
 	
-		* A *Promise* that resolves to a boolean, indicating whether or not the Spotify module has been initialized
+		- A *Promise* that resolves to a boolean, indicating whether or not the Spotify module has been initialized
 
 
 
 
-* **login**()
+- **login**()
 
 	Opens a UI to log into Spotify.
 	
-	* *Returns*
+	- *Returns*
 	
-		* A *Promise* that resolves to a boolean, indicating whether or not the user was logged in
+		- A *Promise* that resolves to a boolean, indicating whether or not the user was logged in
 
 
 
 
-* **isLoggedIn**()
+- **isLoggedIn**()
 
 	Checks if the client is logged in.
 
-	* *Returns*
+	- *Returns*
 		
-		* *true* if the client is logged in
-		* *false* if the client is not logged in
+		- *true* if the client is logged in
+		- *false* if the client is not logged in
 
 
 
 
-* **isLoggedInAsync**()
+- **isLoggedInAsync**()
 
 	Checks if the client is logged in, but returns a *Promise* that resolves to the result.
 	
-	* *Returns*
+	- *Returns*
 	
-		* A *Promise* that resolves to a boolean, indicating whether or not a user is currently logged in
+		- A *Promise* that resolves to a boolean, indicating whether or not a user is currently logged in
 
 
 
 
-* **logout**()
+- **logout**()
 
 	Logs out of Spotify.
 	
-	* *Returns*
+	- *Returns*
 	
-		* A *Promise* that resolves when the logout completes
+		- A *Promise* that resolves when the logout completes
 
 
 
 
-* **getAuth**()
+- **getAuth**()
 
 	Gives information about authentication data.
 	
-	* *Returns*
+	- *Returns*
 	
-		* An *Auth* object, or *null* if not logged in
+		- An *Auth* object, or *null* if not logged in
 
 
 
 
-* **getAuthAsync**()
+- **getAuthAsync**()
 
 	Gives information about authentication data, but returns a *Promise* that resolves to the result.
 	
-	* *Returns*
+	- *Returns*
 	
-		* A *Promise* that resolves to an *Auth* object, or *null* if not logged in
+		- A *Promise* that resolves to an *Auth* object, or *null* if not logged in
 
 
 
 
 ### Playback Methods
 
-* **playURI**( *spotifyURI*, *startIndex*, *startPosition* )
+- **playURI**( *spotifyURI*, *startIndex*, *startPosition* )
 
 	Play a Spotify URI.
 	
-	* *Parameters*
+	- *Parameters*
 		
-		* **spotifyURI** - The Spotify URI to play
+		- **spotifyURI** - The Spotify URI to play
 		
-		* **startIndex** - The index of an item that should be played first, e.g. 0 - for the very first track in the playlist or a single track
+		- **startIndex** - The index of an item that should be played first, e.g. 0 - for the very first track in the playlist or a single track
 		
-		* **startPosition** - starting position for playback in seconds
+		- **startPosition** - starting position for playback in seconds
 	
-	* *Returns*
+	- *Returns*
 	
-		* A *Promise* that resolves or rejects when the operation is complete
+		- A *Promise* that resolves or rejects when the operation is complete
 
 
 
 
-* **queueURI**( *spotifyURI* )
+- **queueURI**( *spotifyURI* )
 
 	Queue a Spotify URI. **WARNING: This function has proven to be very [inconsistent and buggy](https://github.com/spotify/ios-sdk/issues/717).**
 	
-	* *Parameters*
+	- *Parameters*
 	
-		* **spotifyURI** - The Spotify URI to queue
+		- **spotifyURI** - The Spotify URI to queue
 	
-	* *Returns*
+	- *Returns*
 	
-		* A *Promise* that resolves or rejects when the operation is complete
+		- A *Promise* that resolves or rejects when the operation is complete
 
 
 
 
-* **setPlaying**( *playing* )
+- **setPlaying**( *playing* )
 
 	Set the “playing” status of the player.
 	
-	* *Parameters*
+	- *Parameters*
 	
-		* **playing** - *true* to resume playback, or *false* to pause it
+		- **playing** - *true* to resume playback, or *false* to pause it
 	
-	* *Returns*
+	- *Returns*
 	
-		* A *Promise* that resolves or rejects when the operation is complete
+		- A *Promise* that resolves or rejects when the operation is complete
 
-* **getPlaybackState**()
+- **getPlaybackState**()
 
 	Gives the player's current state.
 	
-	* *Returns*
+	- *Returns*
 	
-		* A *PlaybackState* object, or *null* if the player has not yet initialized
+		- A *PlaybackState* object, or *null* if the player has not yet initialized
 
 
 
 
-* **getPlaybackStateAsync**()
+- **getPlaybackStateAsync**()
 
 	Gives the player's current state, but returns a *Promise* that resolves to the result.
 	
-	* *Returns*
+	- *Returns*
 	
-		* A *Promise* that resolves to a *PlaybackState* object or *null* if the player has not yet initialized
+		- A *Promise* that resolves to a *PlaybackState* object or *null* if the player has not yet initialized
 
 
 
-* **getPlaybackMetadata**()
+- **getPlaybackMetadata**()
 
 	Gives information about the previous, current, and next track in the player.
 	
-	* *Returns*
+	- *Returns*
 	
-		* A *PlaybackMetadata* object, or *null* if the player has yet initialized
+		- A *PlaybackMetadata* object, or *null* if the player has yet initialized
 
 
 
-* **getPlaybackMetadataAsync**()
+- **getPlaybackMetadataAsync**()
 
 	Gives information about the previous, current, and next track in the player, but returns a *Promise* that resolves to the result.
 	
-	* *Returns*
+	- *Returns*
 	
-		* A *Promise* that resolves to a *PlaybackMetadata* object or *null* if the player has not yet initialized
+		- A *Promise* that resolves to a *PlaybackMetadata* object or *null* if the player has not yet initialized
 
 
 
 
-* **skipToNext**()
+- **skipToNext**()
 
 	Skips to the next track.
 	
-	* *Returns*
+	- *Returns*
 	
-		* A *Promise* that resolves or rejects when the operation is complete
+		- A *Promise* that resolves or rejects when the operation is complete
 
 
 
 
-* **skipToPrevious**()
+- **skipToPrevious**()
 
 	Skips to the previous track.
 	
-	* *Returns*
+	- *Returns*
 	
-		* A *Promise* that resolves or rejects when the operation is complete
+		- A *Promise* that resolves or rejects when the operation is complete
 
 
 
 
-* **seek**( *position* )
+- **seek**( *position* )
 
 	Seeks to a position within the current track
 	
-	* *Parameters*
+	- *Parameters*
 	
-		* **position** - The position in seconds to seek to
+		- **position** - The position in seconds to seek to
 	
-	* *Returns*
+	- *Returns*
 	
-		* A *Promise* that resolves or rejects when the operation is complete
+		- A *Promise* that resolves or rejects when the operation is complete
 
 
 
 
-* **setShuffling**( *shuffling* )
+- **setShuffling**( *shuffling* )
 
 	Enables or disables shuffling on the player.
 	
-	* *Parameters*
+	- *Parameters*
 	
-		* **shuffling** - *true* to enable shuffle, *false* to disable it
+		- **shuffling** - *true* to enable shuffle, *false* to disable it
 	
-	* *Returns*
+	- *Returns*
 	
-		* A *Promise* that resolves or rejects when the operation is complete
+		- A *Promise* that resolves or rejects when the operation is complete
 
 
 
 
-* **setRepeating**( *repeating* )
+- **setRepeating**( *repeating* )
 
 	Enables or disables repeating on the player.
 	
-	* *Parameters*
+	- *Parameters*
 	
-		* **repeating** - *true* to enable repeat, *false* to disable it
+		- **repeating** - *true* to enable repeat, *false* to disable it
 	
-	* *Returns*
+	- *Returns*
 	
-		* A *Promise* that resolves or rejects when the operation is complete
+		- A *Promise* that resolves or rejects when the operation is complete
 
 
 
 
 ### Metadata Methods
 
-* **sendRequest**( *endpoint*, *method*, *params*, *isJSONBody* )
+- **sendRequest**( *endpoint*, *method*, *params*, *isJSONBody* )
 
 	Sends a general request to the spotify api. A list of potential endpoints can be found [here](https://developer.spotify.com/web-api/endpoint-reference/).
 	
-	* *Parameters*
+	- *Parameters*
 	
-		* **endpoint** - the api endpoint, without a leading slash, e.g. `'v1/browse/new-releases'`
+		- **endpoint** - the api endpoint, without a leading slash, e.g. `'v1/browse/new-releases'`
 		
-		* **method** - the HTTP method to use
+		- **method** - the HTTP method to use
 		
-		* **params** - the request parameters
+		- **params** - the request parameters
 		
-		* **isJSONBody** - whether or not to send the parameters as json in the body of the request
+		- **isJSONBody** - whether or not to send the parameters as json in the body of the request
 	
-	* *Returns*
+	- *Returns*
 	
-		* A *Promise* that resolves to the result of the API request
+		- A *Promise* that resolves to the result of the API request
 
 
 
 
-* **getMe**()
+- **getMe**()
 
 	Retrieves information about the logged in Spotify user.
 	
-	* *Returns*
+	- *Returns*
 	
-		* A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-current-users-profile/#example)
+		- A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-current-users-profile/#example)
 
 
 
 
-* **search**( *query*, *types*, *options*? )
+- **search**( *query*, *types*, *options*? )
 
 	Sends a [search](https://developer.spotify.com/web-api/search-item/) request to spotify.
 	
-	* *Parameters*
+	- *Parameters*
 	
-		* **query** - The search query string. Same as the *q* parameter on the [search](https://developer.spotify.com/web-api/search-item/) endpoint
+		- **query** - The search query string. Same as the *q* parameter on the [search](https://developer.spotify.com/web-api/search-item/) endpoint
 		
-		* **types** - An array of item types to search for. Valid types are: `'album'`, `'artist'`, `'playlist'`, and `'track'`.
+		- **types** - An array of item types to search for. Valid types are: `'album'`, `'artist'`, `'playlist'`, and `'track'`.
 		
-		* **options** - A map of other optional parameters to specify for the query
+		- **options** - A map of other optional parameters to specify for the query
 	
-	* *Returns*
+	- *Returns*
 	
-		* A *Promise* that resolves to the search result object. An example response can be seen [here](https://developer.spotify.com/web-api/search-item/#example)
+		- A *Promise* that resolves to the search result object. An example response can be seen [here](https://developer.spotify.com/web-api/search-item/#example)
 
 
 
 
-* **getAlbum**( *albumID*, *options*? )
+- **getAlbum**( *albumID*, *options*? )
 
 	Gets Spotify catalog information for a single album.
 	
-	* *Parameters*
+	- *Parameters*
 	
-		* **albumID** - The Spotify ID for the album
+		- **albumID** - The Spotify ID for the album
 		
-		* **options** - A map of other optional parameters to specify for the query
+		- **options** - A map of other optional parameters to specify for the query
 	
-	* *Returns*
+	- *Returns*
 	
-		* A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-album/#example)
+		- A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-album/#example)
 
 
 
 
-* **getAlbums**( *albumIDs*, *options*? )
+- **getAlbums**( *albumIDs*, *options*? )
 
 	Gets Spotify catalog information for multiple albums identified by their Spotify IDs.
 	
-	* *Parameters*
+	- *Parameters*
 	
-		* **albumIDs** - An array of the Spotify IDs for the albums
+		- **albumIDs** - An array of the Spotify IDs for the albums
 		
-		* **options** - A map of other optional parameters to specify for the query
+		- **options** - A map of other optional parameters to specify for the query
 	
-	* *Returns*
+	- *Returns*
 	
-		* A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-several-albums/#example)
+		- A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-several-albums/#example)
 
 
 
 
-* **getAlbumTracks**( *albumID*, *options*? )
+- **getAlbumTracks**( *albumID*, *options*? )
 
 	Gets Spotify catalog information about an album’s tracks.
 
-	* *Parameters*
+	- *Parameters*
 	
-		* **albumID** - The Spotify ID for the album
+		- **albumID** - The Spotify ID for the album
 		
-		* **options** - A map of other optional parameters to specify for the query
+		- **options** - A map of other optional parameters to specify for the query
 	
-	* *Returns*
+	- *Returns*
 	
-		* A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-albums-tracks/#example)
+		- A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-albums-tracks/#example)
 
 
 
 
-* **getArtist**( *artistID*, *options*? )
+- **getArtist**( *artistID*, *options*? )
 
 	Gets Spotify catalog information for a single artist.
 	
-	* *Parameters*
+	- *Parameters*
 	
-		* **artistID** - The Spotify ID for the artist
+		- **artistID** - The Spotify ID for the artist
 		
-		* **options** - A map of other optional parameters to specify for the query
+		- **options** - A map of other optional parameters to specify for the query
 	
-	* *Returns*
+	- *Returns*
 	
-		* A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-artist/#example)
+		- A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-artist/#example)
 
 
 
 
-* **getArtists**( *artistIDs*, *options*? )
+- **getArtists**( *artistIDs*, *options*? )
 
 	Gets Spotify catalog information for several artists based on their Spotify IDs.
 	
-	* *Parameters*
+	- *Parameters*
 	
-		* **artistIDs** - An array of the Spotify IDs for the artists
+		- **artistIDs** - An array of the Spotify IDs for the artists
 		
-		* **options** - A map of other optional parameters to specify for the query
+		- **options** - A map of other optional parameters to specify for the query
 	
-	* *Returns*
+	- *Returns*
 	
-		* A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-several-artists/#example)
+		- A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-several-artists/#example)
 
 
 
 
-* **getArtistAlbums**( *artistID*, *options*? )
+- **getArtistAlbums**( *artistID*, *options*? )
 
 	Gets Spotify catalog information about an artist’s albums.
 	
-	* *Parameters*
+	- *Parameters*
 	
-		* **artistID** - The Spotify ID for the artist
+		- **artistID** - The Spotify ID for the artist
 		
-		* **options** - A map of other optional parameters to specify for the query
+		- **options** - A map of other optional parameters to specify for the query
 	
-	* *Returns*
+	- *Returns*
 	
-		* A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-artists-albums/#example)
+		- A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-artists-albums/#example)
 
 
 
 
-* **getArtistTopTracks**( *artistID*, *country*, *options*? )
+- **getArtistTopTracks**( *artistID*, *country*, *options*? )
 
 	Gets Spotify catalog information about an artist’s top tracks by country.
 	
-	* *Parameters*
+	- *Parameters*
 	
-		* **artistID** - The Spotify ID for the artist
+		- **artistID** - The Spotify ID for the artist
 		
-		* **country** - The country: an [ISO 3166-1 alpha-2 country code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2).
+		- **country** - The country: an [ISO 3166-1 alpha-2 country code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2).
 		
-		* **options** - A map of other optional parameters to specify for the query
+		- **options** - A map of other optional parameters to specify for the query
 	
-	* *Returns*
+	- *Returns*
 	
-		* A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-artists-top-tracks/#example)
+		- A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-artists-top-tracks/#example)
 
 
 
 
-* **getArtistRelatedArtists**( *artistID*, *options*? )
+- **getArtistRelatedArtists**( *artistID*, *options*? )
 
 	Gets Spotify catalog information about artists similar to a given artist.
 	
-	* *Parameters*
+	- *Parameters*
 	
-		* **artistID** - The Spotify ID for the artist
+		- **artistID** - The Spotify ID for the artist
 		
-		* **options** - A map of other optional parameters to specify for the query
+		- **options** - A map of other optional parameters to specify for the query
 	
-	* *Returns*
+	- *Returns*
 	
-		* A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-related-artists/#example)
+		- A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-related-artists/#example)
 
 
 
 
-* **getTrack**( *trackID*, *options*? )
+- **getTrack**( *trackID*, *options*? )
 
 	Gets Spotify catalog information for a single track identified by its unique Spotify ID.
 	
-	* *Parameters*
+	- *Parameters*
 	
-		* **trackID** - The Spotify ID for the track
+		- **trackID** - The Spotify ID for the track
 		
-		* **options** - A map of other optional parameters to specify for the query
+		- **options** - A map of other optional parameters to specify for the query
 	
-	* *Returns*
+	- *Returns*
 	
-		* A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-track/#example)
+		- A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-track/#example)
 
 
 
 
-* **getTracks**( *trackIDs*, *options*? )
+- **getTracks**( *trackIDs*, *options*? )
 
 	Gets Spotify catalog information for multiple tracks based on their Spotify IDs.
 	
-	* *Parameters*
+	- *Parameters*
 	
-		* **trackIDs** - An array of the Spotify IDs for the tracks
+		- **trackIDs** - An array of the Spotify IDs for the tracks
 		
-		* **options** - A map of other optional parameters to specify for the query
+		- **options** - A map of other optional parameters to specify for the query
 	
-	* *Returns*
+	- *Returns*
 	
-		* A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-several-tracks/#example)
+		- A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-several-tracks/#example)
 
 
 
 
-* **getTrackAudioAnalysis**( *trackID*, *options*? )
+- **getTrackAudioAnalysis**( *trackID*, *options*? )
 
 	Gets a detailed audio analysis for a single track identified by its unique Spotify ID.
 	
-	* *Parameters*
+	- *Parameters*
 	
-		* **trackID** - The Spotify ID for the track
+		- **trackID** - The Spotify ID for the track
 		
-		* **options** - A map of other optional parameters to specify for the query
+		- **options** - A map of other optional parameters to specify for the query
 	
-	* *Returns*
+	- *Returns*
 	
-		* A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-audio-analysis/#example)
+		- A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-audio-analysis/#example)
 
 
 
 
-* **getTrackAudioFeatures**( *trackID*, *options*? )
+- **getTrackAudioFeatures**( *trackID*, *options*? )
 
 	Gets audio feature information for a single track identified by its unique Spotify ID.
 	
-	* *Parameters*
+	- *Parameters*
 	
-		* **trackID** - The Spotify ID for the track
+		- **trackID** - The Spotify ID for the track
 		
-		* **options** - A map of other optional parameters to specify for the query
+		- **options** - A map of other optional parameters to specify for the query
 	
-	* *Returns*
+	- *Returns*
 	
-		* A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-audio-features/#example)
+		- A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-audio-features/#example)
 
 
 
 
-* **getTracksAudioFeatures**( *trackIDs*, *options*? )
+- **getTracksAudioFeatures**( *trackIDs*, *options*? )
 
 	Gets audio features for multiple tracks based on their Spotify IDs.
 	
-	* *Parameters*
+	- *Parameters*
 	
-		* **trackIDs** - An array of the Spotify IDs for the tracks
+		- **trackIDs** - An array of the Spotify IDs for the tracks
 		
-		* **options** - A map of other optional parameters to specify for the query
+		- **options** - A map of other optional parameters to specify for the query
 	
-	* *Returns*
+	- *Returns*
 	
-		* A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-several-audio-features/#example)
+		- A *Promise* that resolves to the request result object. An example response can be seen [here](https://developer.spotify.com/web-api/get-several-audio-features/#example)
 
 
 
