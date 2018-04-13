@@ -485,6 +485,21 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 
 
 
+* **seek**( *position* )
+
+	Seeks to a position within the current track
+	
+	* *Parameters*
+	
+		* **position** - The position in seconds to seek to
+	
+	* *Returns*
+	
+		* A *Promise* that resolves or rejects when the operation is complete
+
+
+
+
 * **setShuffling**( *shuffling* )
 
 	Enables or disables shuffling on the player.
