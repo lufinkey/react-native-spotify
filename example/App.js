@@ -9,7 +9,6 @@ import {
 	View
 } from 'react-native';
 import { StackNavigator } from 'react-navigation';
-import Spotify from 'react-native-spotify';
 
 var { InitialScreen } = require("./InitialScreen.js");
 var { PlayerScreen } = require("./PlayerScreen.js");
