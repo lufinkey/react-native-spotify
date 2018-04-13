@@ -1,9 +1,12 @@
 
 import EventEmitter from 'events';
 import Spotify from './Spotify';
+import RNEvents from 'react-native-events';
 
 
 const Queue = new EventEmitter();
+const nativeEvents = new EventEmitter();
+RNEvents.addPreSubscriber(Spotify, nativeEvents);
 
 let currentURI = null;
 let uris = [];
@@ -13,23 +16,23 @@ let connected = null;
 
 // handle connection
 
-Spotify.on('login', () => {
+nativeEvents.on('login', () => {
 	if(connected === null)
 	{
 		connected = true;
 	}
 });
 
-Spotify.on('logout', () => {
+nativeEvents.on('logout', () => {
 	connected = null;
 	Queue.clear();
 });
 
-Spotify.on('disconnect', () => {
+nativeEvents.on('disconnect', () => {
 	connected = false;
 });
 
-Spotify.on('reconnect', () => {
+nativeEvents.on('reconnect', () => {
 	connected = true;
 });
 
@@ -53,7 +56,7 @@ tryQueuePlayback = () => {
 			if(!connected)
 			{
 				// we must have failed because we weren't connected, so wait until we are
-				Spotify.once('reconnect', tryQueuePlayback);
+				nativeEvents.once('reconnect', tryQueuePlayback);
 			}
 			else
 			{
@@ -64,7 +67,7 @@ tryQueuePlayback = () => {
 	});
 };
 
-Spotify.on("trackDelivered", (event) => {
+nativeEvents.on("trackDelivered", (event) => {
 	if(uris.length > 0)
 	{
 		// play the next song in the queue
