@@ -1021,8 +1021,8 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	}
 
 	@ReactMethod
-	//seekToPosition(position)
-	public void seekToPosition(final double position, final Promise promise)
+	//seek(position)
+	public void seek(final double position, final Promise promise)
 	{
 		prepareForPlayer(new Completion<Void>() {
 			@Override
