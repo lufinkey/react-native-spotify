@@ -238,11 +238,11 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 
 * **'disconnect'**
 
-	Emitted when network connectivity is lost.
+	Emitted when the player loses network connectivity.
 
 * **'reconnect'**
 
-	Emitted when network connectivitiy returns after being lost.
+	Emitted when the player regains network connectivity.
 
 * **'temporaryPlayerError'**
 
