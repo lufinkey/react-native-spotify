@@ -148,7 +148,7 @@ import Spotify from 'rn-spotify-sdk';
 
 ### Events
 
-This module uses [react-native-events](https://www.npmjs.com/package/react-native-events), so it has all of the same methods as an [EventEmitter](https://nodejs.org/api/events.html) object. All of the events, excluding the **'login'** and **'logout'** events, come from Spotify's native SDK and are simply forwarded to javascript. If one of these events occurs at a weird time or has strange data, please open an issue on Spotify's [ios-sdk](https://github.com/spotify/ios-sdk) or [android-sdk](https://github.com/spotify/android-sdk) repo, and not here.
+This module uses [react-native-events](https://www.npmjs.com/package/react-native-events), so it has all of the same methods as an [EventEmitter](https://nodejs.org/api/events.html) object. All of the events except for **'login'**, **'logout'**, **'disconnect'** (on Android), and **'reconnect'** (on Android) come from Spotify's native SDK and are simply forwarded to javascript. If one of these events occurs at a weird time or has strange data, please open an issue on Spotify's [ios-sdk](https://github.com/spotify/ios-sdk) or [android-sdk](https://github.com/spotify/android-sdk) repo, and not here.
 
 - **'login'**
 
