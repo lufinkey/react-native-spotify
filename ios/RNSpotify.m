@@ -615,7 +615,7 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getAuth)
 
 RCT_EXPORT_METHOD(getAuthAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
-	resolve(@[ [RNSpotifyConvert ID:[self getAuth]] ]);
+	resolve([RNSpotifyConvert ID:[self getAuth]]);
 }
 
 
