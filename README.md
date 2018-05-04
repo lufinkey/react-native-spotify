@@ -819,3 +819,7 @@ Both URLs are queried using POST with a Content-Type of `application/x-www-form-
 You can find an example server implementation [here](https://github.com/lufinkey/react-native-spotify/tree/master/example-server).
 
 Refresh tokens are part of [OAuth standard](https://tools.ietf.org/html/rfc6749#section-1.5). If you are not familiar with them, [Understanding Refresh Tokens](https://auth0.com/learn/refresh-tokens/) can give you a basic idea on how they work.
+
+## Additional notes
+
+This module only works for Spotify Premium users.
