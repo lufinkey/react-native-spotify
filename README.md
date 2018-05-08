@@ -224,13 +224,13 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	
 	Emitted when the application should flush its audio buffers (you don't need to deal with this since that's handled by the native code). For example, this event occurs when seeking to a different position within a track.
 
-- **audioDeliveryDone**
+- **'audioDeliveryDone'**
 
 	- `event` {PlaybackEvent}
 	
 	Emitted when the library reaches the end of a playback context and has no more audio to deliver.
 
-- **trackDelivered**
+- **'trackDelivered'**
 
 	- `event` {PlaybackEvent}
 	
