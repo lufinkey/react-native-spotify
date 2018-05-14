@@ -17,6 +17,20 @@ Spotify.getMe = () => {
 
 
 
+Spotify.getMePlaylists = (options) => {
+	var body = Object.assign({}, options);
+	return sendRequest('v1/me/playlists', 'GET', body, false);
+}
+
+
+
+Spotify.getSavedTracks = (options) => {
+	var body = Object.assign({}, options);
+	return sendRequest('v1/me/tracks', 'GET', body, false);
+}
+
+
+
 Spotify.search = (query, types, options) => {
 	if(!(types instanceof Array))
 	{
@@ -28,6 +42,13 @@ Spotify.search = (query, types, options) => {
 	body['type'] = types.join(',');
 	
 	return sendRequest('v1/search', 'GET', body, false);
+}
+
+
+
+Spotify.getPlaylist = (ownerId, playlistId, options) => {
+	var body = Object.assign({}, options);
+	return sendRequest(`v1/users/${ownerId}/playlists/${playlistId}/tracks`, 'GET', body, false);
 }
 
 
