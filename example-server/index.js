@@ -124,7 +124,7 @@ app.post('/swap', async (req, res) => {
 	}
 
 	// send response
-	res.status(res.status).send(result);
+	res.status(res.statusCode).send(result);
 });
 
 /**
@@ -154,7 +154,7 @@ app.post('/refresh', async (req, res) => {
 	}
 
 	// send response
-	res.status(res.status).send(result);
+	res.status(res.statusCode).send(result);
 });
 
 // start server
