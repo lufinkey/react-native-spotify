@@ -60,7 +60,7 @@ function postRequest(url, data={})
 
 			res.on('end', () => {
 				// parse response
-				var result = null;
+				let result = null;
 				try
 				{
 					result = Buffer.concat(buffers);
@@ -81,10 +81,12 @@ function postRequest(url, data={})
 				}
 				catch(error)
 				{
+					error.response = res;
+					error.data = result;
 					reject(error);
 					return;
 				}
-				resolve(result);
+				resolve({response: res, result: result});
 			})
 		});
 
@@ -108,23 +110,39 @@ app.use(express.urlencoded());
  * Uses an authentication code on body to request access and refresh tokens
  */
 app.post('/swap', async (req, res) => {
-	// build request data
-	const data = {
-		grant_type: 'authorization_code',
-		redirect_uri: spClientCallback,
-		code: req.body.code
-	};
+	try {
+		// build request data
+		const reqData = {
+			grant_type: 'authorization_code',
+			redirect_uri: spClientCallback,
+			code: req.body.code
+		};
 
-	// get new token from Spotify API
-	const result = await postRequest(spotifyEndpoint, data);
+		// get new token from Spotify API
+		const { response, result } = await postRequest(spotifyEndpoint, reqData);
 
-	// encrypt refresh_token
-	if (result.refresh_token) {
-		result.refresh_token = encrypt(result.refresh_token);
+		// encrypt refresh_token
+		if (result.refresh_token) {
+			result.refresh_token = encrypt(result.refresh_token);
+		}
+
+		// send response
+		res.status(response.statusCode).json(result);
 	}
-
-	// send response
-	res.status(res.statusCode).send(result);
+	catch(error) {
+		if(error.response) {
+			res.status(error.response.statusCode);
+		}
+		else {
+			res.status(500);
+		}
+		if(error.data) {
+			res.send(error.data);
+		}
+		else {
+			res.send("");
+		}
+	}
 });
 
 /**
@@ -132,29 +150,45 @@ app.post('/swap', async (req, res) => {
  * Uses the refresh token on request body to get a new access token
  */
 app.post('/refresh', async (req, res) => {
-	// ensure refresh token parameter
-	if (!req.body.refresh_token) {
-		res.status(400).send({error: 'Refresh token is missing from body'});
-		return;
+	try {
+		// ensure refresh token parameter
+		if (!req.body.refresh_token) {
+			res.status(400).json({error: 'Refresh token is missing from body'});
+			return;
+		}
+
+		// decrypt token
+		const refreshToken = decrypt(req.body.refresh_token);
+		// build request data
+		const reqData = {
+			grant_type: 'refresh_token',
+			refresh_token: refreshToken
+		};
+		// get new token from Spotify API
+		const { response, result } = await postRequest(spotifyEndpoint, reqData);
+
+		// encrypt refresh_token
+		if (result.refresh_token) {
+			result.refresh_token = encrypt(result.refresh_token);
+		}
+
+		// send response
+		res.status(response.statusCode).json(result);
 	}
-
-	// decrypt token
-	const refreshToken = decrypt(req.body.refresh_token);
-	// build request data
-	const data = {
-		grant_type: 'refresh_token',
-		refresh_token: refreshToken
-	};
-	// get new token from Spotify API
-	const result = postRequest(spotifyEndpoint, data);
-
-	// encrypt refresh_token
-	if (result.refresh_token) {
-		result.refresh_token = encrypt(result.refresh_token);
+	catch(error) {
+		if(error.response) {
+			res.status(error.response.statusCode);
+		}
+		else {
+			res.status(500);
+		}
+		if(error.data) {
+			res.send(error.data);
+		}
+		else {
+			res.send("");
+		}
 	}
-
-	// send response
-	res.status(res.statusCode).send(result);
 });
 
 // start server
