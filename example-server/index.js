@@ -103,7 +103,7 @@ function postRequest(url, data={})
 }
 
 // support form body
-app.use(express.urlencoded());
+app.use(express.urlencoded({extended: false}));
 
 /**
  * Swap endpoint
