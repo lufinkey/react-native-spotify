@@ -1203,6 +1203,12 @@ RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method param
 	}
 }
 
+-(void)audioStreaming:(SPTAudioStreamingController *)audioStreaming didChangePosition:
+    (NSTimeInterval)position
+{
+    [self sendEvent:@"positionChange" args:@[[self createPlaybackEvent]]];
+}
+
 -(void)audioStreaming:(SPTAudioStreamingController*)audioStreaming didChangePlaybackStatus:(BOOL)isPlaying
 {
 	if(isPlaying)
