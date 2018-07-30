@@ -39,13 +39,11 @@ repositories {
 }
 
 dependencies {
-	compile "com.facebook.react:react-native:${_reactNativeVersion}"
-	compile fileTree(dir: 'libs', include: ['*.jar'])
-
-    compile 'com.android.volley:volley:1.0.0'
-
-	compile(name: 'spotify-android-auth-1.0.0', ext: 'aar')
-	compile(name: 'spotify-player-24-noconnect-2.20b', ext: 'aar')
-	compile project(path: ':react-native-events')
+	implementation "com.facebook.react:react-native:${_reactNativeVersion}"
+	implementation fileTree(dir: 'libs', include: ['*.jar'])
+    	implementation 'com.android.volley:volley:1.0.0'
+	implementation(name: 'spotify-android-auth-1.0.0', ext: 'aar')
+	implementation(name: 'spotify-player-24-noconnect-2.20b', ext: 'aar')
+	implementation project(path: ':react-native-events')
 }
 
