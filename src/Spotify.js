@@ -17,14 +17,14 @@ Spotify.getMe = () => {
 
 
 
-Spotify.getMePlaylists = (options) => {
+Spotify.getMyPlaylists = (options) => {
 	var body = Object.assign({}, options);
 	return sendRequest('v1/me/playlists', 'GET', body, false);
 }
 
 
 
-Spotify.getSavedTracks = (options) => {
+Spotify.getMyTracks = (options) => {
 	var body = Object.assign({}, options);
 	return sendRequest('v1/me/tracks', 'GET', body, false);
 }
@@ -46,9 +46,9 @@ Spotify.search = (query, types, options) => {
 
 
 
-Spotify.getPlaylist = (ownerId, playlistId, options) => {
+Spotify.getPlaylistTracks = (userId, playlistId, options) => {
 	var body = Object.assign({}, options);
-	return sendRequest(`v1/users/${ownerId}/playlists/${playlistId}/tracks`, 'GET', body, false);
+	return sendRequest(`v1/users/${userId}/playlists/${playlistId}/tracks`, 'GET', body, false);
 }
 
 
