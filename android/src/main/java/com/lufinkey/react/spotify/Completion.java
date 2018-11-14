@@ -4,10 +4,8 @@ public abstract class Completion<T>
 {
 	private boolean responded = false;
 
-	public final void resolve(T result)
-	{
-		if(responded)
-		{
+	public final void resolve(T result) {
+		if(responded) {
 			throw new IllegalStateException("cannot call resolve or reject multiple times on a Completion object");
 		}
 		responded = true;
@@ -15,10 +13,8 @@ public abstract class Completion<T>
 		onComplete(result, null);
 	}
 
-	public final void reject(SpotifyError error)
-	{
-		if(responded)
-		{
+	public final void reject(SpotifyError error) {
+		if(responded) {
 			throw new IllegalStateException("cannot call resolve or reject multiple times on a Completion object");
 		}
 		responded = true;
@@ -26,18 +22,15 @@ public abstract class Completion<T>
 		onComplete(null, error);
 	}
 
-	public void onResolve(T result)
-	{
+	public void onResolve(T result) {
 		//
 	}
 
-	public void onReject(SpotifyError error)
-	{
+	public void onReject(SpotifyError error) {
 		//
 	}
 
-	public void onComplete(T result, SpotifyError error)
-	{
+	public void onComplete(T result, SpotifyError error) {
 		//
 	}
 }

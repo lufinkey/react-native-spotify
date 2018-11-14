@@ -17,17 +17,13 @@ import java.util.Iterator;
 
 public class Convert
 {
-	public static JSONObject toJSONObject(ReadableMap readableMap)
-	{
-		try
-		{
+	public static JSONObject toJSONObject(ReadableMap readableMap) {
+		try {
 			JSONObject object = new JSONObject();
 			ReadableMapKeySetIterator iterator = readableMap.keySetIterator();
-			while (iterator.hasNextKey())
-			{
+			while (iterator.hasNextKey()) {
 				String key = iterator.nextKey();
-				switch (readableMap.getType(key))
-				{
+				switch (readableMap.getType(key)) {
 					case Null:
 						object.put(key, JSONObject.NULL);
 						break;
@@ -50,21 +46,16 @@ public class Convert
 			}
 			return object;
 		}
-		catch(JSONException e)
-		{
+		catch(JSONException e) {
 			return null;
 		}
 	}
 
-	public static JSONArray toJSONArray(ReadableArray readableArray)
-	{
-		try
-		{
+	public static JSONArray toJSONArray(ReadableArray readableArray) {
+		try {
 			JSONArray array = new JSONArray();
-			for (int i = 0; i < readableArray.size(); i++)
-			{
-				switch (readableArray.getType(i))
-				{
+			for (int i = 0; i < readableArray.size(); i++) {
+				switch (readableArray.getType(i)) {
 					case Null:
 						break;
 					case Boolean:
@@ -86,20 +77,16 @@ public class Convert
 			}
 			return array;
 		}
-		catch(JSONException e)
-		{
+		catch(JSONException e) {
 			return null;
 		}
 	}
 
-	public static WritableMap fromJSONObject(JSONObject jsonObject)
-	{
-		try
-		{
+	public static WritableMap fromJSONObject(JSONObject jsonObject) {
+		try {
 			WritableMap map = Arguments.createMap();
 			Iterator<String> iterator = jsonObject.keys();
-			while (iterator.hasNext())
-			{
+			while (iterator.hasNext()) {
 				String key = iterator.next();
 				Object value = jsonObject.get(key);
 				if (value instanceof JSONObject) {
@@ -120,19 +107,15 @@ public class Convert
 			}
 			return map;
 		}
-		catch(JSONException e)
-		{
+		catch(JSONException e) {
 			return null;
 		}
 	}
 
-	public static WritableArray fromJSONArray(JSONArray jsonArray)
-	{
-		try
-		{
+	public static WritableArray fromJSONArray(JSONArray jsonArray) {
+		try {
 			WritableArray array = Arguments.createArray();
-			for (int i = 0; i < jsonArray.length(); i++)
-			{
+			for (int i = 0; i < jsonArray.length(); i++) {
 				Object value = jsonArray.get(i);
 				if (value instanceof JSONObject) {
 					array.pushMap(fromJSONObject((JSONObject) value));
@@ -152,50 +135,40 @@ public class Convert
 			}
 			return array;
 		}
-		catch(JSONException e)
-		{
+		catch(JSONException e) {
 			return null;
 		}
 	}
 
-	public static ReadableMap fromRNSpotifyError(SpotifyError error)
-	{
-		if(error==null)
-		{
+	public static ReadableMap fromRNSpotifyError(SpotifyError error) {
+		if(error==null) {
 			return null;
 		}
 		return error.toReactObject();
 	}
 
-	public static String joinedIntoString(ReadableArray array, String delimiter)
-	{
+	public static String joinedIntoString(ReadableArray array, String delimiter) {
 		String str = "";
-		for(int i=0; i<array.size(); i++)
-		{
-			if(i==0)
-			{
+		for(int i=0; i<array.size(); i++) {
+			if(i==0) {
 				str = array.getString(i);
 			}
-			else
-			{
+			else {
 				str += delimiter + array.getString(i);
 			}
 		}
 		return str;
 	}
 
-	public static WritableMap toWritableMap(ReadableMap map)
-	{
+	public static WritableMap toWritableMap(ReadableMap map) {
 		WritableMap mutMap = Arguments.createMap();
-		if(map!=null)
-		{
+		if(map!=null) {
 			mutMap.merge(map);
 		}
 		return mutMap;
 	}
 
-	public static WritableMap fromPlaybackState(PlaybackState playbackState)
-	{
+	public static WritableMap fromPlaybackState(PlaybackState playbackState) {
 		WritableMap map = Arguments.createMap();
 		map.putBoolean("playing", playbackState.isPlaying);
 		map.putBoolean("repeating", playbackState.isRepeating);
@@ -205,10 +178,8 @@ public class Convert
 		return map;
 	}
 
-	public static WritableMap fromPlaybackTrack(Metadata.Track track, Metadata metadata)
-	{
-		if(track==null)
-		{
+	public static WritableMap fromPlaybackTrack(Metadata.Track track, Metadata metadata) {
+		if(track==null) {
 			return null;
 		}
 		WritableMap map = Arguments.createMap();
@@ -226,10 +197,8 @@ public class Convert
 		return map;
 	}
 
-	public static WritableMap fromPlaybackMetadata(Metadata metadata)
-	{
-		if(metadata==null)
-		{
+	public static WritableMap fromPlaybackMetadata(Metadata metadata) {
+		if(metadata==null) {
 			return null;
 		}
 		WritableMap map = Arguments.createMap();
@@ -239,14 +208,11 @@ public class Convert
 		return map;
 	}
 
-	public static WritableMap fromAuth(Auth auth)
-	{
-		if(auth == null)
-		{
+	public static WritableMap fromAuth(Auth auth) {
+		if(auth == null) {
 			return null;
 		}
-		else if(auth.getAccessToken() == null && auth.getRefreshToken() == null)
-		{
+		else if(auth.getAccessToken() == null && auth.getRefreshToken() == null) {
 			return null;
 		}
 		WritableMap map = Arguments.createMap();

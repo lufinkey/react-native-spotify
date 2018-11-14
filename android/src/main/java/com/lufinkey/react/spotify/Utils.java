@@ -23,33 +23,26 @@ public class Utils
 
 	private static RequestQueue requestQueue = null;
 
-	public static String makeQueryString(ReadableMap params)
-	{
+	public static String makeQueryString(ReadableMap params) {
 		HashMap<String, Object> map = params.toHashMap();
 		return makeQueryString(map);
 	}
 
-	public static String makeQueryString(HashMap<String,Object> params)
-	{
+	public static String makeQueryString(HashMap<String,Object> params) {
 		String query = "";
 		boolean firstArg = true;
-		for(String key : params.keySet())
-		{
-			if(firstArg)
-			{
+		for(String key : params.keySet()) {
+			if(firstArg) {
 				firstArg = false;
 			}
-			else
-			{
+			else {
 				query += "&";
 			}
 			String value = params.get(key).toString();
-			try
-			{
+			try {
 				query += URLEncoder.encode(key, "UTF-8")+"="+URLEncoder.encode(value, "UTF-8");
 			}
-			catch (UnsupportedEncodingException e)
-			{
+			catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 				break;
 			}
@@ -57,27 +50,21 @@ public class Utils
 		return query;
 	}
 
-	public static String getResponseString(NetworkResponse response)
-	{
-		if(response == null)
-		{
+	public static String getResponseString(NetworkResponse response) {
+		if(response == null) {
 			return null;
 		}
-		try
-		{
+		try {
 			return new String(response.data, HttpHeaderParser.parseCharset(response.headers));
 		}
-		catch (UnsupportedEncodingException e)
-		{
+		catch (UnsupportedEncodingException e) {
 			return new String(response.data);
 		}
 	}
 
-	public static void doHTTPRequest(String url, String method, final HashMap<String,String> headers, final byte[] body, final Completion<NetworkResponse> completion)
-	{
+	public static void doHTTPRequest(String url, String method, final HashMap<String,String> headers, final byte[] body, final Completion<NetworkResponse> completion) {
 		System.out.println("doHTTPRequest");
-		if(requestQueue == null)
-		{
+		if(requestQueue == null) {
 			requestQueue = Volley.newRequestQueue(reactContext.getCurrentActivity());
 		}
 
@@ -100,17 +87,14 @@ public class Utils
 		requestQueue.add(request);
 	}
 
-	public static Connectivity getNetworkConnectivity()
-	{
+	public static Connectivity getNetworkConnectivity() {
 		ConnectivityManager connectivityManager;
 		connectivityManager = (ConnectivityManager)reactContext.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
-		if (activeNetwork != null && activeNetwork.isConnected())
-		{
+		if (activeNetwork != null && activeNetwork.isConnected()) {
 			return Connectivity.fromNetworkType(activeNetwork.getType());
 		}
-		else
-		{
+		else {
 			return Connectivity.OFFLINE;
 		}
 	}

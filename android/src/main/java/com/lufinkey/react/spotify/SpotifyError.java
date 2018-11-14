@@ -9,8 +9,7 @@ import com.spotify.sdk.android.player.Error;
 
 public class SpotifyError
 {
-	public enum Code
-	{
+	public enum Code {
 		AlreadyInitialized("Spotify has already been initialized"),
 		NotInitialized("Spotify has not been initialized"),
 		NotImplemented("This feature has not been implemented"),
@@ -24,18 +23,15 @@ public class SpotifyError
 
 		public final String description;
 
-		private Code(String description)
-		{
+		private Code(String description) {
 			this.description = description;
 		}
 
-		public String getCodeName()
-		{
+		public String getCodeName() {
 			return "RNS"+name();
 		}
 
-		public void reject(Promise promise)
-		{
+		public void reject(Promise promise) {
 			promise.reject(getCodeName(), description);
 		}
 	};
@@ -43,20 +39,16 @@ public class SpotifyError
 	private String code;
 	private String message;
 
-	public static String getSDKErrorCode(Error error)
-	{
+	public static String getSDKErrorCode(Error error) {
 		String code = error.name();
-		if(code.startsWith("kSp"))
-		{
+		if(code.startsWith("kSp")) {
 			return "SP"+code.substring(3);
 		}
 		return code;
 	}
 
-	public static String getSDKErrorMessage(Error error)
-	{
-		switch(error)
-		{
+	public static String getSDKErrorMessage(Error error) {
+		switch(error) {
 			case kSpErrorOk:
 				return "The operation was successful. I don't know why this is an error...";
 			case kSpErrorFailed:
@@ -118,91 +110,74 @@ public class SpotifyError
 		}
 	}
 
-	public SpotifyError(Error error)
-	{
+	public SpotifyError(Error error) {
 		this.code = getSDKErrorCode(error);
 		this.message = getSDKErrorMessage(error);
 	}
 
-	public SpotifyError(Error error, String message)
-	{
+	public SpotifyError(Error error, String message) {
 		this.code = getSDKErrorCode(error);
-		if(message != null && message.length() > 0)
-		{
+		if(message != null && message.length() > 0) {
 			this.message = message;
 		}
-		else
-		{
+		else {
 			this.message = getSDKErrorMessage(error);
 		}
 	}
 
-	public SpotifyError(Code code)
-	{
+	public SpotifyError(Code code) {
 		this.code = code.getCodeName();
 		this.message = code.description;
 	}
 
-	public SpotifyError(Code code, String message)
-	{
+	public SpotifyError(Code code, String message) {
 		this.code = code.getCodeName();
 		this.message = message;
 	}
 
-	public SpotifyError(String code, String message)
-	{
+	public SpotifyError(String code, String message) {
 		this.code = code;
 		this.message = message;
 
 	}
 
-	public String getCode()
-	{
+	public String getCode() {
 		return code;
 	}
 
-	public String getMessage()
-	{
+	public String getMessage() {
 		return message;
 	}
 
-	public ReadableMap toReactObject()
-	{
+	public ReadableMap toReactObject() {
 		WritableMap map = Arguments.createMap();
 		map.putString("code", code);
 		map.putString("message", message);
 		return map;
 	}
 
-	public void reject(Promise promise)
-	{
+	public void reject(Promise promise) {
 		promise.reject(code, message);
 	}
 
-	public static SpotifyError getNullParameterError(String parameterName)
-	{
+	public static SpotifyError getNullParameterError(String parameterName) {
 		return new SpotifyError(Code.NullParameter, parameterName+" cannot be null");
 	}
 
-	public static SpotifyError getMissingOptionError(String optionName)
-	{
+	public static SpotifyError getMissingOptionError(String optionName) {
 		return new SpotifyError(Code.MissingOption, "Missing required option "+optionName);
 	}
 
-	public static SpotifyError getHTTPError(int statusCode)
-	{
-		if(statusCode <= 0)
-		{
+	public static SpotifyError getHTTPError(int statusCode) {
+		if(statusCode <= 0) {
 			return new SpotifyError("HTTPRequestFailed", "Unable to send request");
 		}
 		return getHTTPError(statusCode, "Request failed with status "+statusCode);
 	}
 
-	public static SpotifyError getHTTPError(int statusCode, String message)
-	{
+	public static SpotifyError getHTTPError(int statusCode, String message) {
 		String code = "HTTP"+statusCode;
-		if(statusCode <= 0)
-		{
+		if(statusCode <= 0) {
 			code = "HTTPRequestFailed";
 		}
 		return new SpotifyError("HTTP"+statusCode, message);

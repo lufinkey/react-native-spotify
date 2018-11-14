@@ -20,11 +20,9 @@ public class AuthActivity extends Activity
 	private AuthActivityListener listener;
 	private Completion<Void> finishCompletion;
 
-	public static void performAuthFlow(Activity context, Auth auth, AuthActivityListener listener)
-	{
+	public static void performAuthFlow(Activity context, Auth auth, AuthActivityListener listener) {
 		// ensure no conflicting callbacks
-		if(authFlow_auth != null || authFlow_listener != null || currentAuthActivity != null)
-		{
+		if(authFlow_auth != null || authFlow_listener != null || currentAuthActivity != null) {
 			SpotifyError error = new SpotifyError(SpotifyError.Code.ConflictingCallbacks, "Cannot call login multiple times before completing");
 			listener.onAuthActivityFailure(null, error);
 			return;
@@ -39,8 +37,7 @@ public class AuthActivity extends Activity
 	}
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState)
-	{
+	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setFinishOnTouchOutside(false);
 
@@ -53,8 +50,7 @@ public class AuthActivity extends Activity
 
 		// decide response type
 		AuthenticationResponse.Type responseType = AuthenticationResponse.Type.TOKEN;
-		if(auth.tokenSwapURL!=null)
-		{
+		if(auth.tokenSwapURL!=null) {
 			responseType = AuthenticationResponse.Type.CODE;
 		}
 
@@ -69,27 +65,22 @@ public class AuthActivity extends Activity
 	}
 
 	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent intent)
-	{
+	protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
 		super.onActivityResult(requestCode, resultCode, intent);
 
-		if(requestCode == REQUEST_CODE)
-		{
+		if(requestCode == REQUEST_CODE) {
 			AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
 
-			switch(response.getType())
-			{
+			switch(response.getType()) {
 				default:
 					listener.onAuthActivityCancel(this);
 					break;
 
 				case ERROR:
-					if(response.getError().equals("access_denied"))
-					{
+					if(response.getError().equals("access_denied")) {
 						listener.onAuthActivityCancel(this);
 					}
-					else
-					{
+					else {
 						listener.onAuthActivityFailure(this, new SpotifyError(response.getError(), response.getError()));
 					}
 					break;
@@ -105,28 +96,23 @@ public class AuthActivity extends Activity
 		}
 	}
 
-	public void finish(Completion<Void> completion)
-	{
+	public void finish(Completion<Void> completion) {
 		finishCompletion = completion;
 		this.finish();
 	}
 
 	@Override
-	public void finish()
-	{
+	public void finish() {
 		AuthenticationClient.stopLoginActivity(this, REQUEST_CODE);
 		super.finish();
 	}
 
 	@Override
-	protected void onDestroy()
-	{
+	protected void onDestroy() {
 		super.onDestroy();
-		if(isFinishing())
-		{
+		if(isFinishing()) {
 			currentAuthActivity = null;
-			if(finishCompletion != null)
-			{
+			if(finishCompletion != null) {
 				Completion<Void> completionTmp = finishCompletion;
 				finishCompletion = null;
 				completionTmp.resolve(null);
