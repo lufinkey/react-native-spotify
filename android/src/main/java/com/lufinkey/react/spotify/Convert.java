@@ -252,7 +252,7 @@ public class Convert
 		WritableMap map = Arguments.createMap();
 		map.putString("accessToken", auth.getAccessToken());
 		map.putString("refreshToken", auth.getRefreshToken());
-		map.putInt("expireTime", (int)auth.getExpireDate().getTime());
+		map.putDouble("expireTime", (double)auth.getExpireDate().getTime());
 		return map;
 	}
 }
