@@ -34,6 +34,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	private final ReactApplicationContext reactContext;
 
 	private boolean initialized;
+	private boolean loggedIn;
 	private boolean loggingOutPlayer;
 
 	private BroadcastReceiver networkStateReceiver;
@@ -56,6 +57,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 		Utils.reactContext = reactContext;
 
 		initialized = false;
+		loggedIn = false;
 		loggingOutPlayer = false;
 
 		networkStateReceiver = null;
@@ -96,6 +98,8 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	public void test() {
 		System.out.println("ayy lmao");
 	}
+
+
 
 	@ReactMethod
 	//initialize(options)
@@ -185,7 +189,10 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 		initialized = true;
 
 		// call promise
-		boolean loggedIn = isLoggedIn();
+		boolean authLoggedIn = auth.isLoggedIn();
+		if(authLoggedIn) {
+			loggedIn = true;
+		}
 		promise.resolve(loggedIn);
 		if(loggedIn) {
 			sendEvent("login");
@@ -213,6 +220,8 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 		}, true);
 	}
 
+
+
 	@ReactMethod(isBlockingSynchronousMethod = true)
 	//isInitialized()
 	public Boolean isInitialized() {
@@ -224,6 +233,8 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	public void isInitializedAsync(final Promise promise) {
 		promise.resolve(isInitialized());
 	}
+
+
 
 	private void logBackInIfNeeded(final Completion<Boolean> completion, final boolean waitForDefinitiveResponse) {
 		// ensure auth is actually logged in
@@ -246,8 +257,8 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 						@Override
 						public void onComplete(Void unused, SpotifyError error) {
 							// clear session
-							boolean loggedIn = isLoggedIn();
-							if(loggedIn) {
+							boolean wasLoggedIn = isLoggedIn();
+							if(wasLoggedIn) {
 								auth.clearSession();
 							}
 							// call completion
@@ -255,7 +266,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 								completion.resolve(false);
 							}
 							// send logout event
-							if(loggedIn) {
+							if(wasLoggedIn) {
 								sendEvent("logout");
 							}
 						}
@@ -280,6 +291,8 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 			}
 		}, waitForDefinitiveResponse);
 	}
+
+
 
 	private void initializePlayerIfNeeded(final Completion<Void> completion) {
 		// make sure we have the player scope
@@ -365,15 +378,17 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 		}
 	}
 
+
+
 	private void loginPlayer(final Completion<Void> completion) {
-		boolean loggedIn = false;
+		boolean playerLoggedIn = false;
 		boolean firstLoginAttempt = false;
 
 		// add completion to a list to be called when the login succeeds or fails
 		synchronized(playerLoginResponses) {
 			// ensure we're not already logged in
 			if(player.isLoggedIn()) {
-				loggedIn = true;
+				playerLoggedIn = true;
 			}
 			else {
 				if(playerLoginResponses.size()==0) {
@@ -386,7 +401,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 			}
 		}
 
-		if(loggedIn) {
+		if(playerLoggedIn) {
 			// we're already logged in, so finish
 			completion.resolve(null);
 		}
@@ -395,6 +410,8 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 			player.login(auth.getAccessToken());
 		}
 	}
+
+
 
 	private void logoutPlayer(final Completion<Void> completion) {
 		if(player == null) {
@@ -425,6 +442,8 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 		}
 	}
 
+
+
 	@ReactMethod
 	//login()
 	public void login(final Promise promise) {
@@ -432,6 +451,9 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 		if(!initialized) {
 			SpotifyError.Code.NotInitialized.reject(promise);
 			return;
+		}
+		else if(isLoggedIn()) {
+			promise.resolve(true);
 		}
 		// perform login flow
 		AuthActivity.performAuthFlow(reactContext.getCurrentActivity(), auth, new AuthActivityListener() {
@@ -480,8 +502,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 						// dismiss activity
 						activity.finish(new Completion<Void>() {
 							@Override
-							public void onComplete(Void unused, SpotifyError unusedError)
-							{
+							public void onComplete(Void unused, SpotifyError unusedError) {
 								error.reject(promise);
 							}
 						});
@@ -492,16 +513,25 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 						// initialize player
 						initializePlayerIfNeeded(new Completion<Void>() {
 							@Override
-							public void onComplete(Void unused, final SpotifyError unusedError) {
+							public void onComplete(Void unused, final SpotifyError error) {
 								dialog.dismiss();
 								// dismiss activity
 								activity.finish(new Completion<Void>() {
 									@Override
 									public void onComplete(Void unused, SpotifyError unusedError) {
-										boolean loggedIn = isLoggedIn();
-										promise.resolve(loggedIn);
-										if(loggedIn) {
-											sendEvent("login");
+										if (error != null) {
+											auth.clearSession();
+											error.reject(promise);
+										}
+										else {
+											boolean authLoggedIn = auth.isLoggedIn();
+											if (authLoggedIn) {
+												loggedIn = true;
+											}
+											promise.resolve(loggedIn);
+											if (loggedIn) {
+												sendEvent("login");
+											}
 										}
 									}
 								});
@@ -527,16 +557,25 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 				// initialize player
 				initializePlayerIfNeeded(new Completion<Void>() {
 					@Override
-					public void onComplete(Void unused, SpotifyError unusedError) {
+					public void onComplete(Void unused, final SpotifyError error) {
 						dialog.dismiss();
 						// dismiss activity
 						activity.finish(new Completion<Void>() {
 							@Override
 							public void onComplete(Void unused, SpotifyError unusedError) {
-								boolean loggedIn = isLoggedIn();
-								promise.resolve(loggedIn);
-								if(loggedIn) {
-									sendEvent("login");
+								if (error != null) {
+									auth.clearSession();
+									error.reject(promise);
+								}
+								else {
+									boolean authLoggedIn = auth.isLoggedIn();
+									if (authLoggedIn) {
+										loggedIn = true;
+									}
+									promise.resolve(loggedIn);
+									if (loggedIn) {
+										sendEvent("login");
+									}
 								}
 							}
 						});
@@ -545,6 +584,8 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 			}
 		});
 	}
+
+
 
 	@ReactMethod
 	//logout()
@@ -568,28 +609,31 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 
 			@Override
 			public void onResolve(Void unused) {
-				boolean loggedIn = isLoggedIn();
-				if(loggedIn) {
-					auth.clearSession();
-				}
+				boolean wasLoggedIn = clearSession();
 				promise.resolve(null);
-				if(loggedIn) {
+				if(wasLoggedIn) {
 					sendEvent("logout");
 				}
 			}
 		});
 	}
 
+	private boolean clearSession() {
+		boolean wasLoggedIn = isLoggedIn();
+		auth.clearSession();
+		loggedIn = false;
+		return wasLoggedIn;
+	}
+
+
+
 	@ReactMethod(isBlockingSynchronousMethod = true)
 	//isLoggedIn()
 	public Boolean isLoggedIn() {
-		if(!initialized) {
-			return false;
+		if(initialized && loggedIn && auth.isLoggedIn()) {
+			return true;
 		}
-		else if(auth.getAccessToken()==null) {
-			return false;
-		}
-		return true;
+		return false;
 	}
 
 	@ReactMethod
@@ -597,6 +641,8 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	public void isLoggedInAsync(final Promise promise) {
 		promise.resolve(isLoggedIn());
 	}
+
+
 
 	@ReactMethod(isBlockingSynchronousMethod = true)
 	//getAuth()
@@ -1105,71 +1151,64 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 			response.reject(new SpotifyError(SpotifyError.Code.NotLoggedIn, "You have been logged out"));
 		}
 
-		// if we didn't explicitly log out, try to renew the session
-		if(!wasLoggingOutPlayer) {
-			if(auth.tokenRefreshURL != null && auth.getRefreshToken() != null) {
-				final Object reference = this;
-				auth.renewSession(new Completion<Boolean>() {
-					@Override
-					public void onReject(SpotifyError error) {
-						// we couldn't renew the session
-						if(isLoggedIn()) {
-							// clear session and destroy player
-							auth.clearSession();
-							Spotify.destroyPlayer(reference);
-							player = null;
-							// send logout event
-							sendEvent("logout");
+		// if we didn't explicitly log out, and we can renew the session, then try to renew the session
+		if(!wasLoggingOutPlayer && auth.tokenRefreshURL != null && auth.getRefreshToken() != null) {
+			final Object reference = this;
+			auth.renewSession(new Completion<Boolean>() {
+				@Override
+				public void onReject(SpotifyError error) {
+					// we couldn't renew the session
+					if(isLoggedIn()) {
+						// clear session and destroy player
+						clearSession();
+						Spotify.destroyPlayer(reference);
+						player = null;
+						// send logout event
+						sendEvent("logout");
+					}
+				}
+
+				@Override
+				public void onResolve(Boolean renewed) {
+					initializePlayerIfNeeded(new Completion<Void>() {
+						@Override
+						public void onComplete(Void result, SpotifyError error) {
+							// we've logged back in
 						}
-					}
+					});
+				}
+			}, true);
+		}
+		else {
+			// clear session and destroy player
+			clearSession();
+			Spotify.destroyPlayer(this);
+			player = null;
 
-					@Override
-					public void onResolve(Boolean renewed) {
-						initializePlayerIfNeeded(new Completion<Void>() {
-							@Override
-							public void onComplete(Void result, SpotifyError error)
-							{
-								// we've logged back in
-							}
-						});
-					}
-				}, true);
-				return;
+			// handle logoutPlayer callbacks
+			ArrayList<Completion<Void>> logoutResponses;
+			synchronized(playerLogoutResponses) {
+				logoutResponses = new ArrayList<>(playerLogoutResponses);
+				playerLogoutResponses.clear();
 			}
-		}
+			for(Completion<Void> response : logoutResponses) {
+				response.resolve(null);
+			}
 
-		// clear session and destroy player
-		auth.clearSession();
-		Spotify.destroyPlayer(this);
-		player = null;
-
-		// handle logoutPlayer callbacks
-		ArrayList<Completion<Void>> logoutResponses;
-		synchronized(playerLogoutResponses) {
-			logoutResponses = new ArrayList<>(playerLogoutResponses);
-			playerLogoutResponses.clear();
+			// send logout event
+			sendEvent("logout");
 		}
-		for(Completion<Void> response : logoutResponses) {
-			response.resolve(null);
-		}
-		
-		// send logout event
-		sendEvent("logout");
 	}
 
 	@Override
 	public void onLoginFailed(Error error) {
 		boolean sendLogoutEvent = false;
 		if(isLoggedIn()) {
-			// if the error is one that requires logging out, log out
-			if(error==Error.kSpErrorApplicationBanned || error==Error.kSpErrorLoginBadCredentials
-				|| error==Error.kSpErrorNeedsPremium || error==Error.kSpErrorGeneralLoginError) {
-				// clear session and destroy player
-				auth.clearSession();
-				Spotify.destroyPlayer(this);
-				player = null;
-				sendLogoutEvent = true;
-			}
+			// clear session and destroy player
+			clearSession();
+			Spotify.destroyPlayer(this);
+			player = null;
+			sendLogoutEvent = true;
 		}
 
 		// handle loginPlayer callbacks

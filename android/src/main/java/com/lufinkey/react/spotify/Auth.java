@@ -202,7 +202,6 @@ public class Auth
 
 	public void swapCodeForToken(String code, final Completion<String> completion) {
 		if(tokenSwapURL==null) {
-
 			completion.reject(SpotifyError.getMissingOptionError("tokenSwapURL"));
 			return;
 		}
