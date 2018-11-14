@@ -11,7 +11,7 @@
   "description": "",
   "author": "lufinkey",
   "nativePackage": true,
-  "license": "ISC",
+  "license": "zlib",
   "keywords": [
     "react-native",
 	"spotify",
