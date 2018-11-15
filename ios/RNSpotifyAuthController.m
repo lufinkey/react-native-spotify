@@ -22,8 +22,7 @@
 
 +(UIViewController*)topViewController {
 	UIViewController* topController = [UIApplication sharedApplication].keyWindow.rootViewController;
-	while(topController.presentedViewController != nil)
-	{
+	while(topController.presentedViewController != nil) {
 		topController = topController.presentedViewController;
 	}
 	return topController;
@@ -83,8 +82,7 @@
 	for(NSString* part in parts) {
 		NSString* escapedPart = [part stringByReplacingOccurrencesOfString:@"+" withString:@"%20"];
 		NSArray<NSString*>* expressionParts = [escapedPart componentsSeparatedByString:@"="];
-		if(expressionParts.count != 2)
-		{
+		if(expressionParts.count != 2) {
 			continue;
 		}
 		NSString* key = [expressionParts[0] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
