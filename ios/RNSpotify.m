@@ -13,8 +13,7 @@
 #define SPOTIFY_API_BASE_URL @"https://api.spotify.com/"
 #define SPOTIFY_API_URL(endpoint) [NSURL URLWithString:NSString_concat(SPOTIFY_API_BASE_URL, endpoint)]
 
-@interface RNSpotify() <SPTAudioStreamingDelegate, SPTAudioStreamingPlaybackDelegate>
-{
+@interface RNSpotify() <SPTAudioStreamingDelegate, SPTAudioStreamingPlaybackDelegate> {
 	BOOL _initialized;
 	BOOL _loggingIn;
 	BOOL _loggingInPlayer;
@@ -50,10 +49,8 @@
 
 @synthesize bridge = _bridge;
 
--(id)init
-{
-	if(self = [super init])
-	{
+-(id)init {
+	if(self = [super init]) {
 		_initialized = NO;
 		_loggingIn = NO;
 		_loggingInPlayer = NO;
@@ -76,80 +73,64 @@
 	return self;
 }
 
-+(BOOL)requiresMainQueueSetup
-{
++(BOOL)requiresMainQueueSetup {
 	return NO;
 }
 
-RCT_EXPORT_METHOD(__registerAsJSEventEmitter:(int)moduleId)
-{
+RCT_EXPORT_METHOD(__registerAsJSEventEmitter:(int)moduleId) {
 	[RNEventEmitter registerEventEmitterModule:self withID:moduleId bridge:_bridge];
 }
 
--(void)sendEvent:(NSString*)event args:(NSArray*)args
-{
+-(void)sendEvent:(NSString*)event args:(NSArray*)args {
 	[RNEventEmitter emitEvent:event withParams:args module:self bridge:_bridge];
 }
 
-+(id)reactSafeArg:(id)arg
-{
-	if(arg==nil)
-	{
++(id)reactSafeArg:(id)arg {
+	if(arg==nil) {
 		return [NSNull null];
 	}
 	return arg;
 }
 
-+(NSMutableDictionary*)mutableDictFromDict:(NSDictionary*)dict
-{
-	if(dict==nil)
-	{
++(NSMutableDictionary*)mutableDictFromDict:(NSDictionary*)dict {
+	if(dict==nil) {
 		return [NSMutableDictionary dictionary];
 	}
 	return dict.mutableCopy;
 }
 
--(BOOL)hasPlayerScope
-{
-	if(_options==nil)
-	{
+-(BOOL)hasPlayerScope {
+	if(_options==nil) {
 		return NO;
 	}
 	id scopes = _options[@"scopes"];
-	if(scopes==nil || ![scopes isKindOfClass:[NSArray class]])
-	{
+	if(scopes==nil || ![scopes isKindOfClass:[NSArray class]]) {
 		return NO;
 	}
 	return [scopes containsObject:@"streaming"];
 }
 
--(void)activateAudioSession
-{
+-(void)activateAudioSession {
 	AVAudioSession* audioSession = [AVAudioSession sharedInstance];
 	NSError* error = nil;
-	if(![_audioSessionCategory isEqualToString:audioSession.category])
-	{
+	if(![_audioSessionCategory isEqualToString:audioSession.category]) {
 		[audioSession setCategory:_audioSessionCategory error:&error];
-		if(error != nil)
-		{
+		if(error != nil) {
 			NSLog(@"Error setting spotify audio session category: %@", error);
 		}
 	}
 	error = nil;
 	[audioSession setActive:YES error:&error];
-	if(error != nil)
-	{
+	if(error != nil) {
 		NSLog(@"Error setting spotify audio session active: %@", error);
 	}
 }
 
--(void)deactivateAudioSession
-{
+-(void)deactivateAudioSession {
 	AVAudioSession* audioSession = [AVAudioSession sharedInstance];
 	NSError* error = nil;
 	[audioSession setActive:NO error:&error];
-	if(error != nil)
-	{
+	if(error != nil) {
 		NSLog(@"Error setting spotify audio session inactive: %@", error);
 	}
 }
@@ -160,28 +141,23 @@ RCT_EXPORT_METHOD(__registerAsJSEventEmitter:(int)moduleId)
 
 RCT_EXPORT_MODULE()
 
-RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(test)
-{
+RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(test) {
 	NSLog(@"ayy lmao");
 	return [NSNull null];
 }
 
-RCT_EXPORT_METHOD(initialize:(NSDictionary*)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
-{
-	if(_initialized)
-	{
+RCT_EXPORT_METHOD(initialize:(NSDictionary*)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
+	if(_initialized) {
 		[RNSpotifyErrorCode.AlreadyInitialized reject:reject];
 		return;
 	}
 	
 	// ensure options is not null or missing fields
-	if(options == nil)
-	{
+	if(options == nil) {
 		[[RNSpotifyError nullParameterErrorForName:@"options"] reject:reject];
 		return;
 	}
-	else if(options[@"clientID"] == nil)
-	{
+	else if(options[@"clientID"] == nil) {
 		[[RNSpotifyError missingOptionErrorForName:@"clientID"] reject:reject];
 		return;
 	}
@@ -200,20 +176,17 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options resolve:(RCTPromiseResolveBl
 	_auth.tokenSwapURL = [NSURL URLWithString:options[@"tokenSwapURL"]];
 	_auth.tokenRefreshURL = [NSURL URLWithString:options[@"tokenRefreshURL"]];
 	NSNumber* cacheSize = options[@"cacheSize"];
-	if(cacheSize!=nil)
-	{
+	if(cacheSize!=nil) {
 		_cacheSize = cacheSize;
 	}
 	
 	// load iOS-specific options
 	NSDictionary* iosOptions = options[@"ios"];
-	if(iosOptions == nil)
-	{
+	if(iosOptions == nil) {
 		iosOptions = @{};
 	}
 	_audioSessionCategory = iosOptions[@"audioSessionCategory"];
-	if(_audioSessionCategory == nil)
-	{
+	if(_audioSessionCategory == nil) {
 		_audioSessionCategory = AVAudioSessionCategoryPlayback;
 	}
 	
@@ -223,8 +196,7 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options resolve:(RCTPromiseResolveBl
 	// call callback
 	NSNumber* loggedIn = [self isLoggedIn];
 	resolve(loggedIn);
-	if(loggedIn.boolValue)
-	{
+	if(loggedIn.boolValue) {
 		[self sendEvent:@"login" args:@[]];
 	}
 	
@@ -232,8 +204,7 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options resolve:(RCTPromiseResolveBl
 		// failure
 	} onResolve:^(NSNumber* loggedIn) {
 		// success
-		if(loggedIn.boolValue)
-		{
+		if(loggedIn.boolValue) {
 			// initialize player
 			[self initializePlayerIfNeeded:[RNSpotifyCompletion onComplete:^(id unused, RNSpotifyError* unusedError) {
 				// done
@@ -242,17 +213,14 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options resolve:(RCTPromiseResolveBl
 	}] waitForDefinitiveResponse:YES];
 }
 
-RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(isInitialized)
-{
-	if(_auth==nil)
-	{
+RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(isInitialized) {
+	if(_auth==nil) {
 		return @NO;
 	}
 	return [NSNumber numberWithBool:_initialized];
 }
 
-RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
-{
+RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
 	resolve([self isInitialized]);
 }
 
@@ -260,46 +228,38 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 
 #pragma mark - React Native functions - Session Handling
 
--(void)logBackInIfNeeded:(RNSpotifyCompletion*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse
-{
+-(void)logBackInIfNeeded:(RNSpotifyCompletion*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse {
 	// ensure auth is actually logged in
-	if(_auth.session == nil)
-	{
+	if(_auth.session == nil) {
 		[completion resolve:@NO];
 		return;
 	}
 	// attempt to renew auth session
 	[self renewSessionIfNeeded:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
 		// session renewal failed (we should log out)
-		if([[self isLoggedIn] boolValue])
-		{
+		if([[self isLoggedIn] boolValue]) {
 			// session renewal returned a failure, but we're still logged in
 			// log out player
 			[self logoutPlayer:[RNSpotifyCompletion onComplete:^(id result, RNSpotifyError* error) {
 				// clear session
 				BOOL loggedIn = [[self isLoggedIn] boolValue];
-				if(loggedIn)
-				{
+				if(loggedIn) {
 					_auth.session = nil;
 				}
 				// call completion
 				[completion resolve:@NO];
 				// send logout event
-				if(loggedIn)
-				{
+				if(loggedIn) {
 					[self sendEvent:@"logout" args:@[]];
 				}
 			}]];
 		}
-		else
-		{
+		else {
 			// auth wasn't logged in during the renewal failure, so just fail
-			if (waitForDefinitiveResponse)
-			{
+			if(waitForDefinitiveResponse) {
 				[completion resolve:@NO];
 			}
-			else
-			{
+			else {
 				[completion reject:error];
 			}
 		}
@@ -309,25 +269,20 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 	}] waitForDefinitiveResponse:waitForDefinitiveResponse];
 }
 
--(void)renewSessionIfNeeded:(RNSpotifyCompletion*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse
-{
-	if(_auth.session == nil)
-	{
+-(void)renewSessionIfNeeded:(RNSpotifyCompletion*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse {
+	if(_auth.session == nil) {
 		// not logged in
 		[completion resolve:@NO];
 	}
-	else if(_auth.session.isValid)
-	{
+	else if(_auth.session.isValid) {
 		// session does not need renewal
 		[completion resolve:@NO];
 	}
-	else if(_auth.session.encryptedRefreshToken == nil)
-	{
+	else if(_auth.session.encryptedRefreshToken == nil) {
 		// no refresh token to renew session with, so the session has expired
 		[completion reject:[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.SessionExpired]];
 	}
-	else
-	{
+	else {
 		[self renewSession:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
 			[completion reject:error];
 		} onResolve:^(id result) {
@@ -336,34 +291,28 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 	}
 }
 
--(void)renewSession:(RNSpotifyCompletion*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse
-{
+-(void)renewSession:(RNSpotifyCompletion*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse {
 	dispatch_async(dispatch_get_main_queue(), ^{
-		if(_auth.session == nil)
-		{
+		if(_auth.session == nil) {
 			[completion reject:[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.NotLoggedIn]];
 			return;
 		}
-		else if(!_auth.hasTokenRefreshService)
-		{
+		else if(!_auth.hasTokenRefreshService) {
 			[completion resolve:@NO];
 			return;
 		}
-		else if(_auth.session.encryptedRefreshToken == nil)
-		{
+		else if(_auth.session.encryptedRefreshToken == nil) {
 			[completion resolve:@NO];
 			return;
 		}
 		
 		// add completion to be called when the renewal finishes
-		if(completion != nil)
-		{
+		if(completion != nil) {
 			[_renewCallbacks addObject:completion];
 		}
 		
 		// if we're already in the process of renewing the session, don't continue
-		if(_renewingSession)
-		{
+		if(_renewingSession) {
 			return;
 		}
 		_renewingSession = YES;
@@ -373,14 +322,12 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 			dispatch_async(dispatch_get_main_queue(), ^{
 				_renewingSession = NO;
 				
-				if(session != nil && _auth.session != nil)
-				{
+				if(session != nil && _auth.session != nil) {
 					_auth.session = session;
 				}
 				
 				id renewed = @NO;
-				if(session != nil)
-				{
+				if(session != nil) {
 					renewed = @YES;
 				}
 				
@@ -388,14 +335,11 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 				
 				NSArray<RNSpotifyCompletion*>* renewCallbacks = [NSArray arrayWithArray:_renewCallbacks];
 				[_renewCallbacks removeAllObjects];
-				for(RNSpotifyCompletion* completion in renewCallbacks)
-				{
-					if(error != nil)
-					{
+				for(RNSpotifyCompletion* completion in renewCallbacks) {
+					if(error != nil) {
 						[completion reject:[RNSpotifyError errorWithNSError:error]];
 					}
-					else
-					{
+					else {
 						[completion resolve:renewed];
 					}
 				}
@@ -404,10 +348,8 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 	});
 }
 
--(void)initializePlayerIfNeeded:(RNSpotifyCompletion*)completion
-{
-	if(![self hasPlayerScope])
-	{
+-(void)initializePlayerIfNeeded:(RNSpotifyCompletion*)completion {
+	if(![self hasPlayerScope]) {
 		[completion resolve:nil];
 		return;
 	}
@@ -416,22 +358,18 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 	BOOL initializedPlayer = NO;
 	NSError* error = nil;
 	BOOL allowCaching = (_cacheSize.unsignedIntegerValue > 0);
-	@synchronized(_player)
-	{
+	@synchronized(_player) {
 		// check if player is already initialized
-		if(_player.initialized)
-		{
+		if(_player.initialized) {
 			initializedPlayer = YES;
 		}
-		else
-		{
+		else {
 			initializedPlayer = [_player startWithClientId:_auth.clientID audioController:nil allowCaching:allowCaching error:&error];
 		}
 	}
 	
 	// handle initialization failure
-	if(!initializedPlayer)
-	{
+	if(!initializedPlayer) {
 		[completion reject:[RNSpotifyError errorWithNSError:error]];
 		return;
 	}
@@ -439,8 +377,7 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 	// setup player
 	_player.delegate = self;
 	_player.playbackDelegate = self;
-	if(allowCaching)
-	{
+	if(allowCaching) {
 		_player.diskCache = [[SPTDiskCache alloc] initWithCapacity:_cacheSize.unsignedIntegerValue];
 	}
 	
@@ -448,20 +385,16 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 	[self loginPlayer:completion];
 }
 
--(void)loginPlayer:(RNSpotifyCompletion*)completion
-{
+-(void)loginPlayer:(RNSpotifyCompletion*)completion {
 	BOOL loggedIn = NO;
 	
 	// add completion to a list to be called when the login succeeds or fails
-	@synchronized(_loginPlayerResponses)
-	{
+	@synchronized(_loginPlayerResponses) {
 		// ensure we're not already logged in
-		if(_player.loggedIn)
-		{
+		if(_player.loggedIn) {
 			loggedIn = true;
 		}
-		else
-		{
+		else {
 			//wait for audioStreamingDidLogin:
 			// or audioStreaming:didReceiveError:
 			// or audioStreamingDidLogout:
@@ -469,52 +402,42 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 		}
 	}
 	
-	if(loggedIn)
-	{
+	if(loggedIn) {
 		// we're already logged in, so finish
 		[completion resolve:nil];
 	}
-	else if(!_loggingInPlayer)
-	{
+	else if(!_loggingInPlayer) {
 		// only the first thread to call loginPlayer should actually attempt to log the player in
 		_loggingInPlayer = YES;
 		[_player loginWithAccessToken:_auth.session.accessToken];
 	}
 }
 
--(void)logoutPlayer:(RNSpotifyCompletion*)completion
-{
+-(void)logoutPlayer:(RNSpotifyCompletion*)completion {
 	BOOL loggedOut = NO;
 	
-	@synchronized(_logoutPlayerResponses)
-	{
-		if(!_player.loggedIn)
-		{
+	@synchronized(_logoutPlayerResponses) {
+		if(!_player.loggedIn) {
 			loggedOut = YES;
 		}
-		else
-		{
+		else {
 			// wait for RNSpotifyModule.onLoggedOut
 			[_logoutPlayerResponses addObject:completion];
 		}
 	}
 	
-	if(loggedOut)
-	{
+	if(loggedOut) {
 		[completion resolve:nil];
 	}
-	else if(!_loggingOutPlayer)
-	{
+	else if(!_loggingOutPlayer) {
 		_loggingOutPlayer = true;
 		[_player logout];
 	}
 }
 
-RCT_EXPORT_METHOD(login:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
-{
+RCT_EXPORT_METHOD(login:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
 	// ensure we're not already logging in
-	if(_loggingIn)
-	{
+	if(_loggingIn) {
 		[[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.ConflictingCallbacks message:@"Cannot call login multiple times before completing"] reject:reject];
 		return;
 	}
@@ -533,16 +456,14 @@ RCT_EXPORT_METHOD(login:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseReject
 			}];
 		} onResolve:^(NSNumber* authenticated) {
 			RNSpotifyAuthController* authController = weakAuthController;
-			if(!authenticated.boolValue)
-			{
+			if(!authenticated.boolValue) {
 				// login cancelled
 				[authController.presentingViewController dismissViewControllerAnimated:YES completion:^{
 					_loggingIn = NO;
 					resolve(@NO);
 				}];
 			}
-			else
-			{
+			else {
 				// login successful
 				[self initializePlayerIfNeeded:[RNSpotifyCompletion onComplete:^(id unused, RNSpotifyError* unusedError) {
 					// do UI logic on main thread
@@ -567,10 +488,8 @@ RCT_EXPORT_METHOD(login:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseReject
 	});
 }
 
-RCT_EXPORT_METHOD(logout:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
-{
-	if(![[self isLoggedIn] boolValue])
-	{
+RCT_EXPORT_METHOD(logout:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
+	if(![[self isLoggedIn] boolValue]) {
 		resolve(nil);
 		return;
 	}
@@ -578,43 +497,32 @@ RCT_EXPORT_METHOD(logout:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejec
 		[error reject:reject];
 	} onResolve:^(id unused) {
 		BOOL loggedIn = [[self isLoggedIn] boolValue];
-		if(loggedIn)
-		{
+		if(loggedIn) {
 			_auth.session = nil;
 		}
 		resolve(nil);
-		if(loggedIn)
-		{
+		if(loggedIn) {
 			[self sendEvent:@"logout" args:@[]];
 		}
 	}]];
 }
 
-RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(isLoggedIn)
-{
-	if(!_initialized)
-	{
-		return @NO;
+RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(isLoggedIn) {
+	if(_initialized && _auth.session != nil) {
+		return @YES;
 	}
-	else if(_auth.session == nil)
-	{
-		return @NO;
-	}
-	return @YES;
+	return @NO;
 }
 
-RCT_EXPORT_METHOD(isLoggedInAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
-{
+RCT_EXPORT_METHOD(isLoggedInAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
 	resolve([self isLoggedIn]);
 }
 
-RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getAuth)
-{
+RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getAuth) {
 	return [RNSpotifyConvert SPTAuth:_auth];
 }
 
-RCT_EXPORT_METHOD(getAuthAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
-{
+RCT_EXPORT_METHOD(getAuthAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
 	resolve([RNSpotifyConvert ID:[self getAuth]]);
 }
 
@@ -624,248 +532,202 @@ RCT_EXPORT_METHOD(getAuthAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromis
 
 #pragma mark - React Native functions - Playback
 
--(void)prepareForPlayer:(RNSpotifyCompletion*)completion
-{
-	if(!_initialized)
-	{
+-(void)prepareForPlayer:(RNSpotifyCompletion*)completion {
+	if(!_initialized) {
 		[completion reject:[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.NotInitialized]];
 		return;
 	}
 	[self logBackInIfNeeded:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
-		if(!_player.loggedIn && [self hasPlayerScope])
-		{
+		if(!_player.loggedIn && [self hasPlayerScope]) {
 			[completion reject:error];
 		}
-		else
-		{
+		else {
 			[completion resolve:nil];
 		}
 	} onResolve:^(id unused) {
-		if([[self isLoggedIn] boolValue])
-		{
+		if([[self isLoggedIn] boolValue]) {
 			[self initializePlayerIfNeeded:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
-				if(!_player.loggedIn && [self hasPlayerScope])
-				{
+				if(!_player.loggedIn && [self hasPlayerScope]) {
 					[completion reject:error];
 				}
-				else
-				{
+				else {
 					[completion resolve:nil];
 				}
 			} onResolve:^(id result) {
-				if(!_player.loggedIn && [self hasPlayerScope])
-				{
+				if(!_player.loggedIn && [self hasPlayerScope]) {
 					[completion reject:[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.PlayerNotReady]];
 				}
-				else
-				{
+				else {
 					[completion resolve:nil];
 				}
 			}]];
 		}
-		else
-		{
+		else {
 			[completion reject:[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.NotLoggedIn]];
 		}
 	}] waitForDefinitiveResponse:NO];
 }
 
-RCT_EXPORT_METHOD(playURI:(NSString*)uri startIndex:(NSUInteger)startIndex startPosition:(NSTimeInterval)startPosition resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
-{
+RCT_EXPORT_METHOD(playURI:(NSString*)uri startIndex:(NSUInteger)startIndex startPosition:(NSTimeInterval)startPosition resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
 	[self prepareForPlayer:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
 		[error reject:reject];
 	} onResolve:^(id unused) {
 		[_player playSpotifyURI:uri startingWithIndex:startIndex startingWithPosition:startPosition callback:^(NSError* error) {
-			if(error != nil)
-			{
+			if(error != nil) {
 				[[RNSpotifyError errorWithNSError:error] reject:reject];
 			}
-			else
-			{
+			else {
 				resolve(nil);
 			}
 		}];
 	}]];
 }
 
-RCT_EXPORT_METHOD(queueURI:(NSString*)uri resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
-{
+RCT_EXPORT_METHOD(queueURI:(NSString*)uri resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
 	[self prepareForPlayer:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
 		[error reject:reject];
 	} onResolve:^(id result) {
 		[_player queueSpotifyURI:uri callback:^(NSError* error) {
-			if(error != nil)
-			{
+			if(error != nil) {
 				[[RNSpotifyError errorWithNSError:error] reject:reject];
 			}
-			else
-			{
+			else {
 				resolve(nil);
 			}
 		}];
 	}]];
 }
 
-RCT_EXPORT_METHOD(setVolume:(double)volume resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
-{
-	if(!_initialized)
-	{
+RCT_EXPORT_METHOD(setVolume:(double)volume resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
+	if(!_initialized) {
 		[[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.NotInitialized] reject:reject];
 		return;
 	}
 	[_player setVolume:(SPTVolume)volume callback:^(NSError* error){
-		if(error != nil)
-		{
+		if(error != nil) {
 			[[RNSpotifyError errorWithNSError:error] reject:reject];
 		}
-		else
-		{
+		else {
 			resolve(nil);
 		}
 	}];
 }
 
-RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getVolume)
-{
-	if(_player==nil)
-	{
+RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getVolume) {
+	if(_player==nil) {
 		return nil;
 	}
 	return @(_player.volume);
 }
 
-RCT_EXPORT_METHOD(getVolumeAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
-{
+RCT_EXPORT_METHOD(getVolumeAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
 	resolve([RNSpotifyConvert ID:[self getVolume]]);
 }
 
-RCT_EXPORT_METHOD(setPlaying:(BOOL)playing resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
-{
+RCT_EXPORT_METHOD(setPlaying:(BOOL)playing resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
 	[self prepareForPlayer:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
 		[error reject:reject];
 	} onResolve:^(id unused) {
 		[_player setIsPlaying:playing callback:^(NSError* error) {
-			if(error != nil)
-			{
+			if(error != nil) {
 				[[RNSpotifyError errorWithNSError:error] reject:reject];
 			}
-			else
-			{
+			else {
 				resolve(nil);
 			}
 		}];
 	}]];
 }
 
-RCT_EXPORT_METHOD(setShuffling:(BOOL)shuffling resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
-{
+RCT_EXPORT_METHOD(setShuffling:(BOOL)shuffling resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
 	[self prepareForPlayer:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
 		[error reject:reject];
 	} onResolve:^(id unused) {
 		[_player setShuffle:shuffling callback:^(NSError* error) {
-			if(error != nil)
-			{
+			if(error != nil) {
 				[[RNSpotifyError errorWithNSError:error] reject:reject];
 			}
-			else
-			{
+			else {
 				resolve(nil);
 			}
 		}];
 	}]];
 }
 
-RCT_EXPORT_METHOD(setRepeating:(BOOL)repeating resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
-{
+RCT_EXPORT_METHOD(setRepeating:(BOOL)repeating resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
 	[self prepareForPlayer:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
 		[error reject:reject];
 	} onResolve:^(id unused) {
 		SPTRepeatMode repeatMode = SPTRepeatOff;
-		if(repeating)
-		{
+		if(repeating) {
 			repeatMode = SPTRepeatContext;
 		}
 		[_player setRepeat:repeatMode callback:^(NSError* error) {
-			if(error != nil)
-			{
+			if(error != nil) {
 				[[RNSpotifyError errorWithNSError:error] reject:reject];
 			}
-			else
-			{
+			else {
 				resolve(nil);
 			}
 		}];
 	}]];
 }
 
-RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getPlaybackState)
-{
+RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getPlaybackState) {
 	return [RNSpotifyConvert SPTPlaybackState:_player.playbackState];
 }
 
-RCT_EXPORT_METHOD(getPlaybackStateAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
-{
+RCT_EXPORT_METHOD(getPlaybackStateAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
 	resolve([RNSpotifyConvert ID:[self getPlaybackState]]);
 }
 
-RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getPlaybackMetadata)
-{
+RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getPlaybackMetadata) {
 	return [RNSpotifyConvert SPTPlaybackMetadata:_player.metadata];
 }
 
-RCT_EXPORT_METHOD(getPlaybackMetadataAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
-{
+RCT_EXPORT_METHOD(getPlaybackMetadataAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
 	resolve([RNSpotifyConvert ID:[self getPlaybackMetadata]]);
 }
 
-RCT_EXPORT_METHOD(skipToNext:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
-{
+RCT_EXPORT_METHOD(skipToNext:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
 	[self prepareForPlayer:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
 		[error reject:reject];
 	} onResolve:^(id unused) {
 		[_player skipNext:^(NSError* error) {
-			if(error != nil)
-			{
+			if(error != nil) {
 				[[RNSpotifyError errorWithNSError:error] reject:reject];
 			}
-			else
-			{
+			else {
 				resolve(nil);
 			}
 		}];
 	}]];
 }
 
-RCT_EXPORT_METHOD(skipToPrevious:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
-{
+RCT_EXPORT_METHOD(skipToPrevious:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
 	[self prepareForPlayer:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
 		[error reject:reject];
 	} onResolve:^(id unused) {
 		[_player skipPrevious:^(NSError *error) {
-			if(error != nil)
-			{
+			if(error != nil) {
 				[[RNSpotifyError errorWithNSError:error] reject:reject];
 			}
-			else
-			{
+			else {
 				resolve(nil);
 			}
 		}];
 	}]];
 }
 
-RCT_EXPORT_METHOD(seek:(double)position resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
-{
+RCT_EXPORT_METHOD(seek:(double)position resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
 	[self prepareForPlayer:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
 		[error reject:reject];
 	} onResolve:^(id result) {
 		[_player seekTo:(NSTimeInterval)position callback:^(NSError* error) {
-			if(error != nil)
-			{
+			if(error != nil) {
 				[[RNSpotifyError errorWithNSError:error] reject:reject];
 			}
-			else
-			{
+			else {
 				resolve(nil);
 			}
 		}];
@@ -876,10 +738,8 @@ RCT_EXPORT_METHOD(seek:(double)position resolve:(RCTPromiseResolveBlock)resolve 
 
 #pragma mark - React Native functions - Request Sending
 
--(void)prepareForRequest:(RNSpotifyCompletion*)completion
-{
-	if(!_initialized)
-	{
+-(void)prepareForRequest:(RNSpotifyCompletion*)completion {
+	if(!_initialized) {
 		[completion reject:[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.NotInitialized]];
 		return;
 	}
@@ -888,8 +748,7 @@ RCT_EXPORT_METHOD(seek:(double)position resolve:(RCTPromiseResolveBlock)resolve 
 	}] waitForDefinitiveResponse:NO];
 }
 
--(void)doAPIRequest:(NSString*)endpoint method:(NSString*)method params:(NSDictionary*)params jsonBody:(BOOL)jsonBody completion:(RNSpotifyCompletion*)completion
-{
+-(void)doAPIRequest:(NSString*)endpoint method:(NSString*)method params:(NSDictionary*)params jsonBody:(BOOL)jsonBody completion:(RNSpotifyCompletion*)completion {
 	[self prepareForRequest:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
 		[completion reject:error];
 	} onResolve:^(id unused) {
@@ -903,70 +762,57 @@ RCT_EXPORT_METHOD(seek:(double)position resolve:(RCTPromiseResolveBlock)resolve 
 										  sendDataAsQueryString:!jsonBody
 														  error:&error];
 		// handle request params error
-		if(error != nil)
-		{
+		if(error != nil) {
 			[completion reject:[RNSpotifyError errorWithNSError:error]];
 			return;
 		}
 		
 		// send request
 		[[SPTRequest sharedHandler] performRequest:request callback:^(NSError* error, NSURLResponse* response, NSData* data) {
-			if(error != nil)
-			{
+			if(error != nil) {
 				[completion reject:[RNSpotifyError errorWithNSError:error]];
 				return;
 			}
 			
 			// check if content is json
 			BOOL isJSON = NO;
-			if([response isKindOfClass:[NSHTTPURLResponse class]])
-			{
+			if([response isKindOfClass:[NSHTTPURLResponse class]]) {
 				NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
 				NSString* contentType = httpResponse.allHeaderFields[@"Content-Type"];
-				if(contentType!=nil)
-				{
+				if(contentType!=nil) {
 					contentType = [contentType componentsSeparatedByString:@";"][0];
 				}
-				if([contentType caseInsensitiveCompare:@"application/json"] == NSOrderedSame)
-				{
+				if([contentType caseInsensitiveCompare:@"application/json"] == NSOrderedSame) {
 					isJSON = YES;
 				}
 			}
 			
 			id result = nil;
-			if(isJSON)
-			{
+			if(isJSON) {
 				result = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
-				if(error != nil)
-				{
+				if(error != nil) {
 					[completion reject:[RNSpotifyError errorWithNSError:error]];
 					return;
 				}
 				
 				id errorObj = result[@"error"];
-				if(error != nil)
-				{
+				if(error != nil) {
 					id errorDescription = result[@"error_description"];
-					if(errorDescription != nil)
-					{
-						if(![errorObj isKindOfClass:[NSString class]] || ![errorDescription isKindOfClass:[NSString class]])
-						{
+					if(errorDescription != nil) {
+						if(![errorObj isKindOfClass:[NSString class]] || ![errorDescription isKindOfClass:[NSString class]]) {
 							[completion reject:[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadResponse]];
 							return;
 						}
 						[completion reject:[RNSpotifyError errorWithCode:errorObj message:errorDescription]];
 					}
-					else
-					{
-						if(![errorObj isKindOfClass:[NSDictionary class]])
-						{
+					else {
+						if(![errorObj isKindOfClass:[NSDictionary class]]) {
 							[completion reject:[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadResponse]];
 							return;
 						}
 						id statusCode = errorObj[@"status"];
 						id message = errorObj[@"message"];
-						if(statusCode == nil || message == nil || ![statusCode isKindOfClass:[NSNumber class]] || ![message isKindOfClass:[NSString class]])
-						{
+						if(statusCode == nil || message == nil || ![statusCode isKindOfClass:[NSNumber class]] || ![message isKindOfClass:[NSString class]]) {
 							[completion reject:[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadResponse]];
 							return;
 						}
@@ -975,13 +821,10 @@ RCT_EXPORT_METHOD(seek:(double)position resolve:(RCTPromiseResolveBlock)resolve 
 					return;
 				}
 			}
-			else
-			{
-				if(data.length > 0)
-				{
+			else {
+				if(data.length > 0) {
 					NSStringEncoding encoding = NSUTF8StringEncoding;
-					if(response.textEncodingName != nil)
-					{
+					if(response.textEncodingName != nil) {
 						encoding = CFStringConvertEncodingToNSStringEncoding(CFStringConvertIANACharSetNameToEncoding((__bridge CFStringRef)response.textEncodingName));
 					}
 					result = [[NSString alloc] initWithData:data encoding:encoding];
@@ -992,8 +835,7 @@ RCT_EXPORT_METHOD(seek:(double)position resolve:(RCTPromiseResolveBlock)resolve 
 	}]];
 }
 
-RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method params:(NSDictionary*)params isJSONBody:(BOOL)jsonBody resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
-{
+RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method params:(NSDictionary*)params isJSONBody:(BOOL)jsonBody resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
 	[self doAPIRequest:endpoint method:method params:params jsonBody:jsonBody completion:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
 		[error reject:reject];
 	} onResolve:^(id result) {
@@ -1005,31 +847,25 @@ RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method param
 
 #pragma mark - SPTAudioStreamingDelegate
 
--(void)audioStreamingDidLogin:(SPTAudioStreamingController*)audioStreaming
-{
+-(void)audioStreamingDidLogin:(SPTAudioStreamingController*)audioStreaming {
 	_loggingInPlayer = NO;
 	
 	// handle loginPlayer callbacks
 	NSArray<RNSpotifyCompletion*>* loginPlayerResponses = [NSArray arrayWithArray:_loginPlayerResponses];
 	[_loginPlayerResponses removeAllObjects];
-	for(RNSpotifyCompletion* response in loginPlayerResponses)
-	{
+	for(RNSpotifyCompletion* response in loginPlayerResponses) {
 		[response resolve:nil];
 	}
 }
 
--(void)audioStreaming:(SPTAudioStreamingController*)audioStreaming didReceiveError:(NSError*)error
-{
-	if(_loggingInPlayer)
-	{
+-(void)audioStreaming:(SPTAudioStreamingController*)audioStreaming didReceiveError:(NSError*)error {
+	if(_loggingInPlayer) {
 		_loggingInPlayer = NO;
 		// if the error is one that requires logging out, log out
 		BOOL sendLogoutEvent = NO;
-		if([[self isLoggedIn] boolValue])
-		{
+		if([[self isLoggedIn] boolValue]) {
 			if(error.code==SPErrorApplicationBanned || error.code==SPErrorLoginBadCredentials
-			   || error.code==SPErrorNeedsPremium || error.code==SPErrorGeneralLoginError)
-			{
+			   || error.code==SPErrorNeedsPremium || error.code==SPErrorGeneralLoginError) {
 				// clear session and stop player
 				_auth.session = nil;
 				[_player stopWithError:nil];
@@ -1040,20 +876,17 @@ RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method param
 		// handle loginPlayer callbacks
 		NSArray<RNSpotifyCompletion*>* loginPlayerResponses = [NSArray arrayWithArray:_loginPlayerResponses];
 		[_loginPlayerResponses removeAllObjects];
-		for(RNSpotifyCompletion* response in loginPlayerResponses)
-		{
+		for(RNSpotifyCompletion* response in loginPlayerResponses) {
 			[response reject:[RNSpotifyError errorWithNSError:error]];
 		}
 		
-		if(sendLogoutEvent)
-		{
+		if(sendLogoutEvent) {
 			[self sendEvent:@"logout" args:@[]];
 		}
 	}
 }
 
--(void)audioStreamingDidLogout:(SPTAudioStreamingController*)audioStreaming
-{
+-(void)audioStreamingDidLogout:(SPTAudioStreamingController*)audioStreaming {
 	_loggingInPlayer = NO;
 	
 	BOOL wasLoggingOutPlayer = _loggingOutPlayer;
@@ -1062,19 +895,15 @@ RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method param
 	// handle loginPlayer callbacks
 	NSArray<RNSpotifyCompletion*>* loginPlayerResponses = [NSArray arrayWithArray:_loginPlayerResponses];
 	[_loginPlayerResponses removeAllObjects];
-	for(RNSpotifyCompletion* response in loginPlayerResponses)
-	{
+	for(RNSpotifyCompletion* response in loginPlayerResponses) {
 		[response reject:[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.NotLoggedIn message:@"You have been logged out"]];
 	}
 	
 	// if we didn't explicitly log out, try to renew the session
-	if(!wasLoggingOutPlayer)
-	{
-		if(_auth.hasTokenRefreshService && _auth.session != nil && _auth.session.encryptedRefreshToken != nil)
-		{
+	if(!wasLoggingOutPlayer) {
+		if(_auth.hasTokenRefreshService && _auth.session != nil && _auth.session.encryptedRefreshToken != nil) {
 			[self renewSession:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
-				if([[self isLoggedIn] boolValue])
-				{
+				if([[self isLoggedIn] boolValue]) {
 					// clear session and stop player
 					_auth.session = nil;
 					[_player stopWithError:nil];
@@ -1096,8 +925,7 @@ RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method param
 	// handle logoutPlayer callbacks
 	NSArray<RNSpotifyCompletion*>* logoutResponses = [NSArray arrayWithArray:_logoutPlayerResponses];
 	[_logoutPlayerResponses removeAllObjects];
-	for(RNSpotifyCompletion* response in logoutResponses)
-	{
+	for(RNSpotifyCompletion* response in logoutResponses) {
 		[response resolve:nil];
 	}
 	
@@ -1105,23 +933,19 @@ RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method param
 	[self sendEvent:@"logout" args:@[]];
 }
 
--(void)audioStreamingDidDisconnect:(SPTAudioStreamingController*)audioStreaming
-{
+-(void)audioStreamingDidDisconnect:(SPTAudioStreamingController*)audioStreaming {
 	[self sendEvent:@"disconnect" args:@[]];
 }
 
--(void)audioStreamingDidReconnect:(SPTAudioStreamingController*)audioStreaming
-{
+-(void)audioStreamingDidReconnect:(SPTAudioStreamingController*)audioStreaming {
 	[self sendEvent:@"reconnect" args:@[]];
 }
 
--(void)audioStreamingDidEncounterTemporaryConnectionError:(SPTAudioStreamingController*)audioStreaming
-{
+-(void)audioStreamingDidEncounterTemporaryConnectionError:(SPTAudioStreamingController*)audioStreaming {
 	[self sendEvent:@"temporaryPlayerError" args:@[]];
 }
 
--(void)audioStreaming:(SPTAudioStreamingController*)audioStreaming didReceiveMessage:(NSString*)message
-{
+-(void)audioStreaming:(SPTAudioStreamingController*)audioStreaming didReceiveMessage:(NSString*)message {
 	[self sendEvent:@"playerMessage" args:@[message]];
 }
 
@@ -1129,8 +953,7 @@ RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method param
 
 #pragma mark - SPTAudioStreamingPlaybackDelegate
 
--(NSMutableDictionary*)createPlaybackEvent
-{
+-(NSMutableDictionary*)createPlaybackEvent {
 	NSMutableDictionary* event = [NSMutableDictionary dictionary];
 	event[@"state"] = [self getPlaybackState];
 	event[@"metadata"] = [self getPlaybackMetadata];
@@ -1138,10 +961,8 @@ RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method param
 	return event;
 }
 
--(void)audioStreaming:(SPTAudioStreamingController*)audioStreaming didReceivePlaybackEvent:(SpPlaybackEvent)event
-{
-	switch(event)
-	{
+-(void)audioStreaming:(SPTAudioStreamingController*)audioStreaming didReceivePlaybackEvent:(SpPlaybackEvent)event {
+	switch(event) {
 		case SPPlaybackNotifyPlay:
 			[self sendEvent:@"play" args:@[[self createPlaybackEvent]]];
 			break;
@@ -1203,25 +1024,20 @@ RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method param
 	}
 }
 
--(void)audioStreaming:(SPTAudioStreamingController*)audioStreaming didChangePlaybackStatus:(BOOL)isPlaying
-{
-	if(isPlaying)
-	{
+-(void)audioStreaming:(SPTAudioStreamingController*)audioStreaming didChangePlaybackStatus:(BOOL)isPlaying {
+	if(isPlaying) {
 		[self activateAudioSession];
 	}
-	else
-	{
+	else {
 		[self deactivateAudioSession];
 	}
 }
 
--(void)audioStreaming:(SPTAudioStreamingController *)audioStreaming didChangeShuffleStatus:(BOOL)enabled
-{
+-(void)audioStreaming:(SPTAudioStreamingController *)audioStreaming didChangeShuffleStatus:(BOOL)enabled {
 	[self sendEvent:@"shuffleStatusChange" args:@[[self createPlaybackEvent]]];
 }
 
--(void)audioStreaming:(SPTAudioStreamingController*)audioStreaming didChangeRepeatStatus:(SPTRepeatMode)repeateMode
-{
+-(void)audioStreaming:(SPTAudioStreamingController*)audioStreaming didChangeRepeatStatus:(SPTRepeatMode)repeateMode {
 	[self sendEvent:@"repeatStatusChange" args:@[[self createPlaybackEvent]]];
 }
 

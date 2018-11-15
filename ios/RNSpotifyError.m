@@ -40,33 +40,27 @@ DEFINE_SPOTIFY_ERROR_CODE(SessionExpired, @"Your login session has expired")
 @synthesize name = _name;
 @synthesize message = _message;
 
--(id)initWithName:(NSString*)name message:(NSString*)message
-{
-	if(self = [super init])
-	{
+-(id)initWithName:(NSString*)name message:(NSString*)message {
+	if(self = [super init]) {
 		_name = [NSString stringWithString:name];
 		_message = [NSString stringWithString:message];
 	}
 	return self;
 }
 
-+(instancetype)codeWithName:(NSString*)name message:(NSString*)message
-{
++(instancetype)codeWithName:(NSString*)name message:(NSString*)message {
 	return [[self alloc] initWithName:name message:message];
 }
 
--(NSString*)code
-{
+-(NSString*)code {
 	return [NSString stringWithFormat:@"RNS%@", _name];
 }
 
--(NSDictionary*)reactObject
-{
+-(NSDictionary*)reactObject {
 	return @{ @"code":self.code, @"message":self.message };
 }
 
--(void)reject:(void(^)(NSString*,NSString*,NSError*))promiseRejector
-{
+-(void)reject:(void(^)(NSString*,NSString*,NSError*))promiseRejector {
 	promiseRejector(self.code, self.message, nil);
 }
 
@@ -74,8 +68,7 @@ DEFINE_SPOTIFY_ERROR_CODE(SessionExpired, @"Your login session has expired")
 
 
 
-@interface RNSpotifyError()
-{
+@interface RNSpotifyError() {
 	NSError* _error;
 }
 +(NSString*)getSDKErrorCode:(SpErrorCode)enumVal;
@@ -86,10 +79,8 @@ DEFINE_SPOTIFY_ERROR_CODE(SessionExpired, @"Your login session has expired")
 @synthesize code = _code;
 @synthesize message = _message;
 
--(id)initWithCode:(NSString*)code message:(NSString*)message
-{
-	if(self = [super init])
-	{
+-(id)initWithCode:(NSString*)code message:(NSString*)message {
+	if(self = [super init]) {
 		_error = nil;
 		_code = [NSString stringWithString:code];
 		_message = [NSString stringWithString:message];
@@ -97,16 +88,12 @@ DEFINE_SPOTIFY_ERROR_CODE(SessionExpired, @"Your login session has expired")
 	return self;
 }
 
--(id)initWithCode:(NSString*)code error:(NSError*)error
-{
-	if(code == nil || code.length == 0)
-	{
+-(id)initWithCode:(NSString*)code error:(NSError*)error {
+	if(code == nil || code.length == 0) {
 		return [self initWithNSError:error];
 	}
-	if(self = [super init])
-	{
-		if(error == nil)
-		{
+	if(self = [super init]) {
+		if(error == nil) {
 			@throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Cannot provide a nil error to RNSpotifyError" userInfo:nil];
 		}
 		_error = error;
@@ -116,15 +103,12 @@ DEFINE_SPOTIFY_ERROR_CODE(SessionExpired, @"Your login session has expired")
 	return self;
 }
 
--(id)initWithCodeObj:(RNSpotifyErrorCode*)code
-{
+-(id)initWithCodeObj:(RNSpotifyErrorCode*)code {
 	return [self initWithCodeObj:code message:code.message];
 }
 
--(id)initWithCodeObj:(RNSpotifyErrorCode*)code message:(NSString*)message
-{
-	if(self = [super init])
-	{
+-(id)initWithCodeObj:(RNSpotifyErrorCode*)code message:(NSString*)message {
+	if(self = [super init]) {
 		_error = nil;
 		_code = [NSString stringWithString:code.code];
 		_message = [NSString stringWithString:message];
@@ -132,22 +116,17 @@ DEFINE_SPOTIFY_ERROR_CODE(SessionExpired, @"Your login session has expired")
 	return self;
 }
 
--(id)initWithNSError:(NSError*)error
-{
-	if(self = [super init])
-	{
-		if(error == nil)
-		{
+-(id)initWithNSError:(NSError*)error {
+	if(self = [super init]) {
+		if(error == nil) {
 			@throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Cannot provide a nil error to RNSpotifyError" userInfo:nil];
 		}
 		_error = error;
-		if([_error.domain isEqualToString:@"com.spotify.ios-sdk.playback"])
-		{
+		if([_error.domain isEqualToString:@"com.spotify.ios-sdk.playback"]) {
 			_code = [self.class getSDKErrorCode:_error.code];
 			_message = _error.localizedDescription;
 		}
-		else
-		{
+		else {
 			_code = [NSString stringWithFormat:@"%@:%ld", _error.domain, _error.code];
 			_message = _error.localizedDescription;
 		}
@@ -155,70 +134,57 @@ DEFINE_SPOTIFY_ERROR_CODE(SessionExpired, @"Your login session has expired")
 	return self;
 }
 
-+(instancetype)errorWithCode:(NSString*)code message:(NSString*)message
-{
++(instancetype)errorWithCode:(NSString*)code message:(NSString*)message {
 	return [[self alloc] initWithCode:code message:message];
 }
 
-+(instancetype)errorWithCode:(NSString *)code error:(NSError *)error
-{
++(instancetype)errorWithCode:(NSString *)code error:(NSError *)error {
 	return [[self alloc] initWithCode:code error:error];
 }
 
-+(instancetype)errorWithCodeObj:(RNSpotifyErrorCode*)code
-{
++(instancetype)errorWithCodeObj:(RNSpotifyErrorCode*)code {
 	return [[self alloc] initWithCodeObj:code];
 }
 
-+(instancetype)errorWithCodeObj:(RNSpotifyErrorCode*)code message:(NSString*)message
-{
++(instancetype)errorWithCodeObj:(RNSpotifyErrorCode*)code message:(NSString*)message {
 	return [[self alloc] initWithCodeObj:code message:message];
 }
 
-+(instancetype)errorWithNSError:(NSError*)error
-{
++(instancetype)errorWithNSError:(NSError*)error {
 	return [[self alloc] initWithNSError:error];
 }
 
--(void)reject:(void(^)(NSString*,NSString*,NSError*))promiseRejector
-{
+-(void)reject:(void(^)(NSString*,NSString*,NSError*))promiseRejector {
 	promiseRejector(_code, _message, _error);
 }
 
--(NSDictionary*)reactObject
-{
+-(NSDictionary*)reactObject {
 	return @{ @"code":_code, @"message":_message };
 }
 
 
 
-+(RNSpotifyError*)nullParameterErrorForName:(NSString*)paramName
-{
++(RNSpotifyError*)nullParameterErrorForName:(NSString*)paramName {
 	return [RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.NullParameter
 									 message:[NSString stringWithFormat:@"%@ cannot be null", paramName]];
 }
 
-+(RNSpotifyError*)missingOptionErrorForName:(NSString*)optionName
-{
++(RNSpotifyError*)missingOptionErrorForName:(NSString*)optionName {
 	return [RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.MissingOption
 									 message:[NSString stringWithFormat:@"Missing required option %@", optionName]];
 }
 
-+(RNSpotifyError*)httpErrorForStatusCode:(NSInteger)statusCode
-{
-	if(statusCode <= 0)
-	{
++(RNSpotifyError*)httpErrorForStatusCode:(NSInteger)statusCode {
+	if(statusCode <= 0) {
 		return [RNSpotifyError errorWithCode:@"HTTPRequestFailed" message:@"Unable to send request"];
 	}
 	return [RNSpotifyError errorWithCode:[NSString stringWithFormat:@"HTTP%ld", statusCode]
 								  message:[NSHTTPURLResponse localizedStringForStatusCode:statusCode]];
 }
 
-+(RNSpotifyError*)httpErrorForStatusCode:(NSInteger)statusCode message:(NSString*)message
-{
++(RNSpotifyError*)httpErrorForStatusCode:(NSInteger)statusCode message:(NSString*)message {
 	NSString* code = [NSString stringWithFormat:@"HTTP%ld", statusCode];
-	if(statusCode <= 0)
-	{
+	if(statusCode <= 0) {
 		code = @"HTTPRequestFailed";
 	}
 	return [RNSpotifyError errorWithCode:code message:message];
@@ -228,10 +194,8 @@ DEFINE_SPOTIFY_ERROR_CODE(SessionExpired, @"Your login session has expired")
 
 #define SDK_ERROR_CASE(error) case error: return @#error;
 
-+(NSString*)getSDKErrorCode:(SpErrorCode)enumVal
-{
-	switch(enumVal)
-	{
++(NSString*)getSDKErrorCode:(SpErrorCode)enumVal {
+	switch(enumVal) {
 		SDK_ERROR_CASE(SPErrorOk)
 		SDK_ERROR_CASE(SPErrorFailed)
 		SDK_ERROR_CASE(SPErrorInitFailed)

@@ -17,10 +17,8 @@
 
 @implementation RNSpotifyProgressView
 
--(id)initWithFrame:(CGRect)frame
-{
-	if(self = [super initWithFrame:frame])
-	{
+-(id)initWithFrame:(CGRect)frame {
+	if(self = [super initWithFrame:frame]) {
 		self.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 		
 		CGSize hudSize = CGSizeMake(100, 100);
@@ -38,35 +36,29 @@
 	return self;
 }
 
--(void)layoutSubviews
-{
+-(void)layoutSubviews {
 	[super layoutSubviews];
 	CGSize size = self.bounds.size;
 	
 	_hudView.center = CGPointMake(size.width/2, size.height/2);
 }
 
--(void)willMoveToSuperview:(UIView*)newSuperview
-{
+-(void)willMoveToSuperview:(UIView*)newSuperview {
 	[super willMoveToSuperview:newSuperview];
-	if(newSuperview != nil)
-	{
+	if(newSuperview != nil) {
 		[_activityIndicator startAnimating];
 	}
-	else
-	{
+	else {
 		[_activityIndicator stopAnimating];
 	}
 }
 
--(void)showInView:(UIView*)view animated:(BOOL)animated completion:(void(^)(void))completion
-{
+-(void)showInView:(UIView*)view animated:(BOOL)animated completion:(void(^)(void))completion {
 	CGSize viewSize = view.bounds.size;
 	self.frame = CGRectMake(0, 0, viewSize.width, viewSize.height);
 	[self setNeedsLayout];
 	
-	if(animated)
-	{
+	if(animated) {
 		_hudView.alpha = 0;
 		_hudView.transform = CGAffineTransformMakeScale(1.4, 1.4);
 		[view addSubview:self];
@@ -80,36 +72,29 @@
 			}
 		}];
 	}
-	else
-	{
+	else {
 		[view addSubview:self];
-		if(completion != nil)
-		{
+		if(completion != nil) {
 			completion();
 		}
 	}
 }
 
--(void)dismissAnimated:(BOOL)animated completion:(void(^)(void))completion
-{
-	if(animated)
-	{
+-(void)dismissAnimated:(BOOL)animated completion:(void(^)(void))completion {
+	if(animated) {
 		[UIView animateWithDuration:0.25 animations:^{
 			self.alpha = 0;
 		} completion:^(BOOL finished) {
 			[self removeFromSuperview];
 			self.alpha = 1;
-			if(completion!=nil)
-			{
+			if(completion!=nil) {
 				completion();
 			}
 		}];
 	}
-	else
-	{
+	else {
 		[self removeFromSuperview];
-		if(completion!=nil)
-		{
+		if(completion!=nil) {
 			completion();
 		}
 	}

@@ -10,8 +10,7 @@
 #import "RNSpotifyWebViewController.h"
 #import "RNSpotifyProgressView.h"
 
-@interface RNSpotifyAuthController() <UIWebViewDelegate>
-{
+@interface RNSpotifyAuthController() <UIWebViewDelegate> {
 	SPTAuth* _auth;
 	RNSpotifyWebViewController* _webController;
 	RNSpotifyProgressView* _progressView;
@@ -21,8 +20,7 @@
 
 @implementation RNSpotifyAuthController
 
-+(UIViewController*)topViewController
-{
++(UIViewController*)topViewController {
 	UIViewController* topController = [UIApplication sharedApplication].keyWindow.rootViewController;
 	while(topController.presentedViewController != nil)
 	{
@@ -31,11 +29,9 @@
 	return topController;
 }
 
--(id)initWithAuth:(SPTAuth*)auth
-{
+-(id)initWithAuth:(SPTAuth*)auth {
 	RNSpotifyWebViewController* rootController = [[RNSpotifyWebViewController alloc] init];
-	if(self = [super initWithRootViewController:rootController])
-	{
+	if(self = [super initWithRootViewController:rootController]) {
 		_auth = auth;
 		_webController = rootController;
 		_progressView = [[RNSpotifyProgressView alloc] init];
@@ -56,13 +52,11 @@
 	return self;
 }
 
--(UIStatusBarStyle)preferredStatusBarStyle
-{
+-(UIStatusBarStyle)preferredStatusBarStyle {
 	return UIStatusBarStyleLightContent;
 }
 
--(void)clearCookies:(void(^)())completion
-{
+-(void)clearCookies:(void(^)())completion {
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 		NSHTTPCookieStorage *storage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
 		for (NSHTTPCookie *cookie in [storage cookies]) {
@@ -70,28 +64,23 @@
 		}
 		[[NSUserDefaults standardUserDefaults] synchronize];
 		dispatch_async(dispatch_get_main_queue(), ^{
-			if(completion != nil)
-			{
+			if(completion != nil) {
 				completion();
 			}
 		});
 	});
 }
 
--(void)didSelectCancelButton
-{
-	if(_completion != nil)
-	{
+-(void)didSelectCancelButton {
+	if(_completion != nil) {
 		[_completion resolve:@NO];
 	}
 }
 
-+(NSDictionary*)decodeQueryString:(NSString*)queryString
-{
++(NSDictionary*)decodeQueryString:(NSString*)queryString {
 	NSArray<NSString*>* parts = [queryString componentsSeparatedByString:@"&"];
 	NSMutableDictionary* params = [NSMutableDictionary dictionary];
-	for (NSString* part in parts)
-	{
+	for(NSString* part in parts) {
 		NSString* escapedPart = [part stringByReplacingOccurrencesOfString:@"+" withString:@"%20"];
 		NSArray<NSString*>* expressionParts = [escapedPart componentsSeparatedByString:@"="];
 		if(expressionParts.count != 2)
@@ -105,20 +94,16 @@
 	return params;
 }
 
-+(NSDictionary*)parseOAuthQueryParams:(NSURL*)url
-{
-	if(url == nil)
-	{
++(NSDictionary*)parseOAuthQueryParams:(NSURL*)url {
+	if(url == nil) {
 		return [NSDictionary dictionary];
 	}
 	NSDictionary* queryParams = [self decodeQueryString:url.query];
-	if(queryParams != nil && queryParams.count > 0)
-	{
+	if(queryParams != nil && queryParams.count > 0) {
 		return queryParams;
 	}
 	NSDictionary* fragmentParams = [self decodeQueryString:url.fragment];
-	if(fragmentParams != nil && fragmentParams.count > 0)
-	{
+	if(fragmentParams != nil && fragmentParams.count > 0) {
 		return fragmentParams;
 	}
 	return [NSDictionary dictionary];
@@ -127,32 +112,25 @@
 
 #pragma mark - UIWebViewDelegate
 
--(BOOL)webView:(UIWebView*)webView shouldStartLoadWithRequest:(NSURLRequest*)request navigationType:(UIWebViewNavigationType)navigationType
-{
-	if([_auth canHandleURL:request.URL])
-	{
+-(BOOL)webView:(UIWebView*)webView shouldStartLoadWithRequest:(NSURLRequest*)request navigationType:(UIWebViewNavigationType)navigationType {
+	if([_auth canHandleURL:request.URL]) {
 		[_progressView showInView:self.view animated:YES completion:nil];
 		[_auth handleAuthCallbackWithTriggeredAuthURL:request.URL callback:^(NSError* error, SPTSession* session){
-			if(session!=nil)
-			{
+			if(session!=nil) {
 				_auth.session = session;
 			}
 			
-			if(error == nil)
-			{
+			if(error == nil) {
 				// success
-				if(_completion != nil)
-				{
+				if(_completion != nil) {
 					[_completion resolve:@YES];
 				}
 			}
-			else
-			{
+			else {
 				// error
 				// get actual oauth error if possible
 				NSDictionary* urlParams = [self.class parseOAuthQueryParams:request.URL];
-				if(_completion != nil)
-				{
+				if(_completion != nil) {
 					[_completion reject:[RNSpotifyError errorWithCode:urlParams[@"error"] error:error]];
 				}
 			}

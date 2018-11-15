@@ -3,37 +3,29 @@
 
 @implementation RNSpotifyConvert
 
-+(id)ID:(id)obj
-{
-	if(obj == nil)
-	{
++(id)ID:(id)obj {
+	if(obj == nil) {
 		return [NSNull null];
 	}
 	return obj;
 }
 
-+(id)RNSpotifyError:(RNSpotifyError*)error
-{
-	if(error==nil)
-	{
++(id)RNSpotifyError:(RNSpotifyError*)error {
+	if(error==nil) {
 		return [NSNull null];
 	}
 	return error.reactObject;
 }
 
-+(id)NSError:(NSError*)error
-{
-	if(error==nil)
-	{
++(id)NSError:(NSError*)error {
+	if(error==nil) {
 		return [NSNull null];
 	}
 	return [self RNSpotifyError:[RNSpotifyError errorWithNSError:error]];
 }
 
-+(id)SPTPlaybackState:(SPTPlaybackState*)state
-{
-	if(state == nil)
-	{
++(id)SPTPlaybackState:(SPTPlaybackState*)state {
+	if(state == nil) {
 		return [NSNull null];
 	}
 	return @{
@@ -45,10 +37,8 @@
 	};
 }
 
-+(id)SPTPlaybackTrack:(SPTPlaybackTrack*)track
-{
-	if(track == nil)
-	{
++(id)SPTPlaybackTrack:(SPTPlaybackTrack*)track {
+	if(track == nil) {
 		return [NSNull null];
 	}
 	return @{
@@ -66,10 +56,8 @@
 	};
 }
 
-+(id)SPTPlaybackMetadata:(SPTPlaybackMetadata*)metadata
-{
-	if(metadata == nil)
-	{
++(id)SPTPlaybackMetadata:(SPTPlaybackMetadata*)metadata {
+	if(metadata == nil) {
 		return [NSNull null];
 	}
 	return @{
@@ -79,15 +67,12 @@
 	};
 }
 
-+(id)SPTAuth:(SPTAuth*)auth
-{
-	if(auth == nil)
-	{
++(id)SPTAuth:(SPTAuth*)auth {
+	if(auth == nil) {
 		return [NSNull null];
 	}
 	SPTSession* session = auth.session;
-	if(session == nil)
-	{
+	if(session == nil) {
 		return [NSNull null];
 	}
 	return @{

@@ -10,24 +10,20 @@
 
 @implementation RNSpotifyWebViewController
 
--(id)init
-{
-	if(self = [super init])
-	{
+-(id)init {
+	if(self = [super init]) {
 		_webView = [[UIWebView alloc] init];
 	}
 	return self;
 }
 
--(void)viewDidLoad
-{
+-(void)viewDidLoad {
 	[super viewDidLoad];
 	
 	[self.view addSubview:_webView];
 }
 
--(void)viewWillLayoutSubviews
-{
+-(void)viewWillLayoutSubviews {
 	[super viewWillLayoutSubviews];
 	CGSize size = self.view.bounds.size;
 	
