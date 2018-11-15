@@ -7,7 +7,7 @@ import {
 	TouchableHighlight,
 	View
 } from 'react-native';
-import { NavigationActions } from 'react-navigation';
+import { StackActions, NavigationActions } from 'react-navigation';
 import Spotify from 'rn-spotify-sdk';
 
 export class PlayerScreen extends Component
@@ -43,7 +43,7 @@ export class PlayerScreen extends Component
 
 	goToInitialScreen()
 	{
-		const navAction = NavigationActions.reset({
+		const navAction = StackActions.reset({
 			index: 0,
 			actions: [
 			  NavigationActions.navigate({ routeName: 'initial'})
