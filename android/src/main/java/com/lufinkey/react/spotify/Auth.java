@@ -314,7 +314,7 @@ public class Auth
 
 				// determine if session was renewed
 				boolean renewed = false;
-				if(error == null) {
+				if(error == null && refreshToken != null) {
 					try {
 						String newAccessToken = response.getString("access_token");
 						int newExpireTime = response.getInt("expires_in");
