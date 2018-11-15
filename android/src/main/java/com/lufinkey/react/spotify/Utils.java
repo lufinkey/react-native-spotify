@@ -38,9 +38,25 @@ public class Utils
 			else {
 				query += "&";
 			}
-			String value = params.get(key).toString();
+			Object value = params.get(key);
+			String valueStr = value.toString();
+			if(value instanceof Double) {
+				int dotIndex = valueStr.indexOf('.');
+				if(dotIndex != -1) {
+					boolean allZeroes = true;
+					for(int i=(dotIndex+1); i<valueStr.length(); i++) {
+						if(valueStr.charAt(i) != '0') {
+							allZeroes = false;
+							break;
+						}
+					}
+					if(allZeroes) {
+						valueStr = valueStr.substring(0, dotIndex);
+					}
+				}
+			}
 			try {
-				query += URLEncoder.encode(key, "UTF-8")+"="+URLEncoder.encode(value, "UTF-8");
+				query += URLEncoder.encode(key, "UTF-8")+"="+URLEncoder.encode(valueStr, "UTF-8");
 			}
 			catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
