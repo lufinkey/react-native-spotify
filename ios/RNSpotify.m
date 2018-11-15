@@ -327,12 +327,9 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 			dispatch_async(dispatch_get_main_queue(), ^{
 				_renewingSession = NO;
 				
+				id renewed = @NO;
 				if(session != nil && _auth.session != nil) {
 					_auth.session = session;
-				}
-				
-				id renewed = @NO;
-				if(session != nil) {
 					renewed = @YES;
 				}
 				
