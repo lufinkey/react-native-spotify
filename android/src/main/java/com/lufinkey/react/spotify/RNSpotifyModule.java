@@ -257,10 +257,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 						@Override
 						public void onComplete(Void unused, SpotifyError error) {
 							// clear session
-							boolean wasLoggedIn = isLoggedIn();
-							if(wasLoggedIn) {
-								auth.clearSession();
-							}
+							boolean wasLoggedIn = clearSession();
 							// call completion
 							if(completion != null) {
 								completion.resolve(false);
@@ -454,6 +451,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 		}
 		else if(isLoggedIn()) {
 			promise.resolve(true);
+			return;
 		}
 		// perform login flow
 		AuthActivity.performAuthFlow(reactContext.getCurrentActivity(), auth, new AuthActivityListener() {
