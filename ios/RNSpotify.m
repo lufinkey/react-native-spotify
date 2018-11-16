@@ -41,6 +41,7 @@
 -(void)initializePlayerIfNeeded:(RNSpotifyCompletion*)completion;
 -(void)loginPlayer:(RNSpotifyCompletion*)completion;
 -(void)logoutPlayer:(RNSpotifyCompletion*)completion;
+-(BOOL)clearSession;
 -(void)prepareForPlayer:(RNSpotifyCompletion*)completion;
 -(void)prepareForRequest:(RNSpotifyCompletion*)completion;
 -(void)doAPIRequest:(NSString*)endpoint method:(NSString*)method params:(NSDictionary*)params jsonBody:(BOOL)jsonBody completion:(RNSpotifyCompletion*)completion;
