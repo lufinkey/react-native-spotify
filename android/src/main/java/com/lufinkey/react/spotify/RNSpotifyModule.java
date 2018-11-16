@@ -72,8 +72,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	}
 
 	@Override
-	public String getName()
-	{
+	public String getName() {
 		return "RNSpotify";
 	}
 
@@ -201,21 +200,8 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 		// try to log back in if necessary
 		logBackInIfNeeded(new Completion<Boolean>() {
 			@Override
-			public void onReject(SpotifyError error) {
-				// failure
-			}
-
-			@Override
-			public void onResolve(Boolean loggedIn) {
-				if(loggedIn) {
-					// initialize player
-					initializePlayerIfNeeded(new Completion<Void>() {
-						@Override
-						public void onComplete(Void unused, SpotifyError unusedError) {
-							// done
-						}
-					});
-				}
+			public void onComplete(Boolean loggedIn, SpotifyError error) {
+				// done
 			}
 		}, true);
 	}
@@ -246,7 +232,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 			return;
 		}
 		// attempt to renew auth session
-		auth.renewSessionIfNeeded(new Completion<Boolean>() {
+		renewSessionIfNeeded(new Completion<Boolean>() {
 			@Override
 			public void onReject(SpotifyError error) {
 				// session renewal failed (we should log out)
@@ -272,7 +258,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 				else {
 					// auth wasn't logged in during the renewal failure, so just fail
 					if(completion != null) {
-						if (waitForDefinitiveResponse) {
+						if(waitForDefinitiveResponse) {
 							completion.resolve(false);
 						}
 						else {
@@ -285,6 +271,50 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 			@Override
 			public void onResolve(Boolean renewed) {
 				completion.resolve(true);
+			}
+		}, waitForDefinitiveResponse);
+	}
+
+
+
+	private void renewSessionIfNeeded(final Completion<Boolean> completion, boolean waitForDefinitiveResponse) {
+		if(auth.isSessionValid() || auth.tokenRefreshURL == null || auth.getRefreshToken() == null) {
+			completion.resolve(false);
+		}
+		else {
+			renewSession(completion, waitForDefinitiveResponse);
+		}
+	}
+
+	private void renewSession(final Completion<Boolean> completion, boolean waitForDefinitiveResponse) {
+		auth.renewSession(new Completion<Boolean>() {
+			@Override
+			public void onResolve(final Boolean renewed) {
+				if(renewed.booleanValue()) {
+					if(!player.isLoggedIn()) {
+						initializePlayerIfNeeded(new Completion<Void>() {
+							@Override
+							public void onResolve(Void unused) {
+								completion.resolve(renewed);
+							}
+
+							@Override
+							public void onReject(SpotifyError error) {
+								super.onReject(error);
+							}
+						});
+						return;
+					}
+					else {
+						player.login(auth.getAccessToken());
+					}
+				}
+				completion.resolve(renewed);
+			}
+
+			@Override
+			public void onReject(SpotifyError error) {
+				completion.reject(error);
 			}
 		}, waitForDefinitiveResponse);
 	}
@@ -1071,7 +1101,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 									else {
 										JSONObject errorObj = resultObj.getJSONObject("error");
 										int statusCode = errorObj.getInt("status");
-										String errorMessage = resultObj.getString("message");
+										String errorMessage = errorObj.getString("message");
 										completion.reject(SpotifyError.getHTTPError(statusCode, errorMessage));
 									}
 									return;
@@ -1152,28 +1182,23 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 		// if we didn't explicitly log out, and we can renew the session, then try to renew the session
 		if(!wasLoggingOutPlayer && auth.tokenRefreshURL != null && auth.getRefreshToken() != null) {
 			final Object reference = this;
-			auth.renewSession(new Completion<Boolean>() {
+			renewSession(new Completion<Boolean>() {
 				@Override
-				public void onReject(SpotifyError error) {
-					// we couldn't renew the session
-					if(isLoggedIn()) {
-						// clear session and destroy player
-						clearSession();
-						Spotify.destroyPlayer(reference);
-						player = null;
-						// send logout event
-						sendEvent("logout");
-					}
-				}
-
-				@Override
-				public void onResolve(Boolean renewed) {
-					initializePlayerIfNeeded(new Completion<Void>() {
-						@Override
-						public void onComplete(Void result, SpotifyError error) {
-							// we've logged back in
+				public void onComplete(Boolean renewed, SpotifyError error) {
+					if(error != null || !renewed.booleanValue()) {
+						// we couldn't renew the session
+						if(isLoggedIn()) {
+							// clear session and destroy player
+							clearSession();
+							Spotify.destroyPlayer(reference);
+							player = null;
+							// send logout event
+							sendEvent("logout");
 						}
-					});
+					}
+					else {
+						// we renewed the auth token, so we're good here
+					}
 				}
 			}, true);
 		}

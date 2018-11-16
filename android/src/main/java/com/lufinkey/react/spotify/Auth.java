@@ -67,7 +67,7 @@ public class Auth
 				prefsEditor.putLong("expireTime", 0);
 			}
 			prefsEditor.putString("refreshToken", refreshToken);
-			prefsEditor.apply();
+			prefsEditor.commit();
 		}
 	}
 
@@ -238,12 +238,8 @@ public class Auth
 	}
 
 	public void renewSessionIfNeeded(final Completion<Boolean> completion, boolean waitForDefinitiveResponse) {
-		if(accessToken == null) {
+		if(accessToken == null || isSessionValid()) {
 			// not logged in
-			completion.resolve(false);
-		}
-		else if(isSessionValid()) {
-			// session does not need renewal
 			completion.resolve(false);
 		}
 		else if(refreshToken==null) {
