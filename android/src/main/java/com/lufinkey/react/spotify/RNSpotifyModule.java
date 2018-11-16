@@ -294,7 +294,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 			@Override
 			public void onResolve(final Boolean renewed) {
 				if(renewed.booleanValue()) {
-					if(!player.isLoggedIn()) {
+					if(player == null || !player.isLoggedIn()) {
 						initializePlayerIfNeeded(new Completion<Void>() {
 							@Override
 							public void onResolve(Void unused) {
