@@ -21,6 +21,7 @@
 	BOOL _loggingOutPlayer;
 	
 	SPTAuth* _auth;
+	NSTimer* _authRenewalTimer;
 	SPTAudioStreamingController* _player;
 	
 	NSDictionary* _options;
@@ -37,10 +38,15 @@
 +(NSMutableDictionary*)mutableDictFromDict:(NSDictionary*)dict;
 -(BOOL)hasPlayerScope;
 
--(void)logBackInIfNeeded:(RNSpotifyCompletion*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse;
+-(void)logBackInIfNeeded:(RNSpotifyCompletion<NSNumber*>*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse;
 -(void)initializePlayerIfNeeded:(RNSpotifyCompletion*)completion;
 -(void)loginPlayer:(RNSpotifyCompletion*)completion;
 -(void)logoutPlayer:(RNSpotifyCompletion*)completion;
+-(void)startAuthRenewalTimer;
+-(NSTimeInterval)tokenRefreshEarliness;
+-(void)scheduleAuthRenewalTimer;
+-(void)authRenewalTimerDidFire;
+-(void)stopAuthRenewalTimer;
 -(BOOL)clearSession;
 -(void)prepareForPlayer:(RNSpotifyCompletion*)completion;
 -(void)prepareForRequest:(RNSpotifyCompletion*)completion;
@@ -60,6 +66,7 @@
 		_loggingOutPlayer = NO;
 		
 		_auth = nil;
+		_authRenewalTimer = nil;
 		_player = nil;
 		
 		_options = nil;
@@ -206,8 +213,10 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options resolve:(RCTPromiseResolveBl
 		[self sendEvent:@"login" args:@[]];
 	}
 	
-	[self logBackInIfNeeded:[RNSpotifyCompletion<NSNumber*> onComplete:^(NSNumber *result, RNSpotifyError *error) {
-		// done
+	[self logBackInIfNeeded:[RNSpotifyCompletion<NSNumber*> onComplete:^(NSNumber* loggedIn, RNSpotifyError* error) {
+		if(loggedIn != nil && loggedIn.boolValue && [[self isLoggedIn] boolValue]) {
+			[self startAuthRenewalTimer];
+		}
 	}] waitForDefinitiveResponse:YES];
 }
 
@@ -505,6 +514,7 @@ RCT_EXPORT_METHOD(login:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseReject
 								if(_loggedIn) {
 									[self sendEvent:@"login" args:@[]];
 								}
+								[self startAuthRenewalTimer];
 							}
 						}];
 					});
@@ -536,8 +546,63 @@ RCT_EXPORT_METHOD(logout:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejec
 
 
 
+-(void)startAuthRenewalTimer {
+	if(_authRenewalTimer != nil) {
+		// auth renewal timer has already been started, don't bother starting again
+	}
+	[self scheduleAuthRenewalTimer];
+}
+
+-(NSTimeInterval)tokenRefreshEarliness {
+	id tokenRefreshEarliness = _options[@"tokenRefreshEarliness"];
+	if(tokenRefreshEarliness == nil || ![tokenRefreshEarliness isKindOfClass:[NSNumber class]]) {
+		return 300.0;
+	}
+	return (NSTimeInterval)[tokenRefreshEarliness doubleValue];
+}
+
+-(void)scheduleAuthRenewalTimer {
+	if(_auth.tokenRefreshURL == nil || _auth.session == nil || _auth.session.encryptedRefreshToken == nil) {
+		// we can't perform token refresh, so don't bother scheduling the timer
+		return;
+	}
+	NSTimeInterval now = [NSDate date].timeIntervalSince1970;
+	NSTimeInterval expirationTime = _auth.session.expirationDate.timeIntervalSince1970;
+	NSTimeInterval timeDiff = expirationTime - now;
+	NSTimeInterval tokenRefreshEarliness = [self tokenRefreshEarliness];
+	NSTimeInterval renewalTimeDiff = (expirationTime - tokenRefreshEarliness) - now;
+	if(timeDiff <= 30.0 || timeDiff <= (tokenRefreshEarliness + 30.0) || renewalTimeDiff <= 0.0) {
+		[self authRenewalTimerDidFire];
+	}
+	else {
+		if(_authRenewalTimer != nil) {
+			[_authRenewalTimer invalidate];
+		}
+		_authRenewalTimer = [NSTimer timerWithTimeInterval:renewalTimeDiff target:self selector:@selector(authRenewalTimerDidFire) userInfo:nil repeats:NO];
+		[[NSRunLoop mainRunLoop] addTimer:_authRenewalTimer forMode:NSRunLoopCommonModes];
+	}
+}
+
+-(void)authRenewalTimerDidFire {
+	[self renewSession:[RNSpotifyCompletion onComplete:^(id result, RNSpotifyError *error) {
+		// ensure the timer has not been stopped
+		if(_authRenewalTimer != nil) {
+			// reschedule the timer
+			[self scheduleAuthRenewalTimer];
+		}
+	}] waitForDefinitiveResponse:YES];
+}
+
+-(void)stopAuthRenewalTimer {
+	if(_authRenewalTimer != nil) {
+		[_authRenewalTimer invalidate];
+		_authRenewalTimer = nil;
+	}
+}
+
 -(BOOL)clearSession {
 	BOOL wasLoggedIn = [[self isLoggedIn] boolValue];
+	[self stopAuthRenewalTimer];
 	_auth.session = nil;
 	_loggedIn = NO;
 	return wasLoggedIn;
@@ -575,14 +640,14 @@ RCT_EXPORT_METHOD(getAuthAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromis
 		[completion reject:[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.NotInitialized]];
 		return;
 	}
-	[self logBackInIfNeeded:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
+	[self logBackInIfNeeded:[RNSpotifyCompletion<NSNumber*> onReject:^(RNSpotifyError* error) {
 		if(!_player.loggedIn && [self hasPlayerScope]) {
 			[completion reject:error];
 		}
 		else {
 			[completion resolve:nil];
 		}
-	} onResolve:^(id unused) {
+	} onResolve:^(NSNumber* unused) {
 		if([[self isLoggedIn] boolValue]) {
 			[self initializePlayerIfNeeded:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
 				if(!_player.loggedIn && [self hasPlayerScope]) {
