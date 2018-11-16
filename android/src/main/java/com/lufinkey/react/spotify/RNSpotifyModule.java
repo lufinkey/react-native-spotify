@@ -278,8 +278,11 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 
 
 	private void renewSessionIfNeeded(final Completion<Boolean> completion, boolean waitForDefinitiveResponse) {
-		if(auth.isSessionValid() || auth.tokenRefreshURL == null || auth.getRefreshToken() == null) {
+		if(auth.getAccessToken() == null || auth.isSessionValid()) {
 			completion.resolve(false);
+		}
+		else if(auth.getRefreshToken() == null) {
+			completion.reject(new SpotifyError(SpotifyError.Code.SessionExpired));
 		}
 		else {
 			renewSession(completion, waitForDefinitiveResponse);
