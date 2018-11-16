@@ -206,16 +206,8 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options resolve:(RCTPromiseResolveBl
 		[self sendEvent:@"login" args:@[]];
 	}
 	
-	[self logBackInIfNeeded:[RNSpotifyCompletion<NSNumber*> onReject:^(RNSpotifyError* error) {
-		// failure
-	} onResolve:^(NSNumber* loggedIn) {
-		// success
-		if(loggedIn.boolValue) {
-			// initialize player
-			[self initializePlayerIfNeeded:[RNSpotifyCompletion onComplete:^(id unused, RNSpotifyError* unusedError) {
-				// done
-			}]];
-		}
+	[self logBackInIfNeeded:[RNSpotifyCompletion<NSNumber*> onComplete:^(NSNumber *result, RNSpotifyError *error) {
+		// done
 	}] waitForDefinitiveResponse:YES];
 }
 
@@ -276,12 +268,8 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 }
 
 -(void)renewSessionIfNeeded:(RNSpotifyCompletion*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse {
-	if(_auth.session == nil) {
-		// not logged in
-		[completion resolve:@NO];
-	}
-	else if(_auth.session.isValid) {
-		// session does not need renewal
+	if(_auth.session == nil || _auth.session.isValid) {
+		// not logged in or session does not need renewal
 		[completion resolve:@NO];
 	}
 	else if(_auth.session.encryptedRefreshToken == nil) {
@@ -297,7 +285,7 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 	}
 }
 
--(void)renewSession:(RNSpotifyCompletion*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse {
+-(void)renewSPTAuthSession:(RNSpotifyCompletion*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse {
 	dispatch_async(dispatch_get_main_queue(), ^{
 		if(_auth.session == nil) {
 			[completion reject:[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.NotLoggedIn]];
@@ -350,6 +338,33 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 		}];
 	});
 }
+
+-(void)renewSession:(RNSpotifyCompletion*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse {
+	[self renewSPTAuthSession:[RNSpotifyCompletion  onResolve:^(NSNumber* renewed) {
+		if(renewed.boolValue) {
+			if(_player == nil || !_player.loggedIn) {
+				[self initializePlayerIfNeeded:[RNSpotifyCompletion onResolve:^(id unused) {
+					[completion resolve:renewed];
+				} onReject:^(RNSpotifyError* error) {
+					[completion reject:error];
+				}]];
+				return;
+			}
+			else {
+				NSString* accessToken = nil;
+				if(_auth.session != nil) {
+					accessToken = _auth.session.accessToken;
+				}
+				[_player loginWithAccessToken:accessToken];
+			}
+		}
+		[completion resolve:renewed];
+	} onReject:^(RNSpotifyError* error) {
+		[completion reject:error];
+	}] waitForDefinitiveResponse:waitForDefinitiveResponse];
+}
+
+
 
 -(void)initializePlayerIfNeeded:(RNSpotifyCompletion*)completion {
 	if(![self hasPlayerScope]) {
@@ -921,17 +936,18 @@ RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method param
 	
 	// if we didn't explicitly log out, try to renew the session
 	if(!wasLoggingOutPlayer && _auth.hasTokenRefreshService && _auth.session != nil && _auth.session.encryptedRefreshToken != nil) {
-		[self renewSession:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
-			if([[self isLoggedIn] boolValue]) {
-				// clear session and stop player
-				[self clearSession];
-				[_player stopWithError:nil];
-				[self sendEvent:@"logout" args:@[]];
+		[self renewSession:[RNSpotifyCompletion onComplete:^(NSNumber* renewed, RNSpotifyError* error) {
+			if(error != nil || !renewed.boolValue) {
+				if([[self isLoggedIn] boolValue]) {
+					// clear session and stop player
+					[self clearSession];
+					[_player stopWithError:nil];
+					[self sendEvent:@"logout" args:@[]];
+				}
 			}
-		} onResolve:^(id result) {
-			[self initializePlayerIfNeeded:[RNSpotifyCompletion onComplete:^(id unused, RNSpotifyError* unusedError) {
-				// we've logged back in
-			}]];
+			else {
+				// we renewed the auth token, so we're good here
+			}
 		}] waitForDefinitiveResponse:YES];
 	}
 	else {
