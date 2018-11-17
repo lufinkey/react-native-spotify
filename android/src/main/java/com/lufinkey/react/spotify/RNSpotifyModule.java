@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
+import android.os.Handler;
 import android.view.Gravity;
 
 import com.android.volley.NetworkResponse;
@@ -16,6 +17,7 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.ReadableType;
 import com.facebook.react.bridge.WritableMap;
 
 import com.lufinkey.react.eventemitter.RNEventConformer;
@@ -27,6 +29,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 public class RNSpotifyModule extends ReactContextBaseJavaModule implements Player.NotificationCallback, ConnectionStateCallback, RNEventConformer
@@ -41,6 +44,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	private Connectivity currentConnectivity = Connectivity.OFFLINE;
 
 	private Auth auth;
+	private Handler authRenewalTimer;
 	private SpotifyPlayer player;
 	private final ArrayList<Completion<Void>> playerInitResponses;
 	private final ArrayList<Completion<Void>> playerLoginResponses;
@@ -63,6 +67,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 		networkStateReceiver = null;
 
 		auth = null;
+		authRenewalTimer = null;
 		player = null;
 		playerInitResponses = new ArrayList<>();
 		playerLoginResponses = new ArrayList<>();
@@ -201,7 +206,9 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 		logBackInIfNeeded(new Completion<Boolean>() {
 			@Override
 			public void onComplete(Boolean loggedIn, SpotifyError error) {
-				// done
+				if(loggedIn != null && loggedIn) {
+					startAuthRenewalTimer();
+				}
 			}
 		}, true);
 	}
@@ -563,6 +570,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 											if (loggedIn) {
 												sendEvent("login");
 											}
+											startAuthRenewalTimer();
 										}
 									}
 								});
@@ -607,6 +615,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 									if (loggedIn) {
 										sendEvent("login");
 									}
+									startAuthRenewalTimer();
 								}
 							}
 						});
@@ -649,8 +658,76 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 		});
 	}
 
+
+
+	private void startAuthRenewalTimer() {
+		if(authRenewalTimer != null) {
+			// auth renewal timer has already been started, don't bother starting again
+			return;
+		}
+		scheduleAuthRenewalTimer();
+	}
+
+	private double getTokenRefreshEarliness() {
+		String key = "tokenRefreshEarliness";
+		if(!options.hasKey(key) || options.getType(key) != ReadableType.Number) {
+			return 300.0;
+		}
+		return options.getDouble(key);
+	}
+
+	private void scheduleAuthRenewalTimer() {
+		if(auth == null || auth.tokenRefreshURL == null || auth.getRefreshToken() == null) {
+			// we can't perform token refresh, so don't bother scheduling the timer
+			return;
+		}
+		long now = (new Date()).getTime();
+		long expirationTime = auth.getExpireDate().getTime();
+		long timeDiff = expirationTime - now;
+		long tokenRefreshEarliness = (long)(getTokenRefreshEarliness() * 1000);
+		final long renewalTimeDiff = (expirationTime - tokenRefreshEarliness) - now;
+		if(timeDiff <= 30.0 || timeDiff <= (tokenRefreshEarliness + 30.0) || renewalTimeDiff <= 0.0) {
+			onAuthRenewalTimerFire();
+		}
+		else {
+			if(authRenewalTimer == null) {
+				authRenewalTimer = new Handler();
+			}
+			else {
+				authRenewalTimer.removeCallbacksAndMessages(null);
+			}
+			authRenewalTimer.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					onAuthRenewalTimerFire();
+				}
+			}, renewalTimeDiff);
+		}
+	}
+
+	private void onAuthRenewalTimerFire() {
+		renewSession(new Completion<Boolean>() {
+			@Override
+			public void onComplete(Boolean renewed, SpotifyError error) {
+				// ensure the timer has not been stopped
+				if(authRenewalTimer != null) {
+					// reschedule the timer
+					scheduleAuthRenewalTimer();
+				}
+			}
+		}, true);
+	}
+
+	private void stopAuthRenewalTimer() {
+		if(authRenewalTimer != null) {
+			authRenewalTimer.removeCallbacksAndMessages(null);
+			authRenewalTimer = null;
+		}
+	}
+
 	private boolean clearSession() {
 		boolean wasLoggedIn = isLoggedIn();
+		stopAuthRenewalTimer();
 		auth.clearSession();
 		loggedIn = false;
 		return wasLoggedIn;
