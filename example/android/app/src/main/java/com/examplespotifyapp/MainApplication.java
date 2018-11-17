@@ -3,8 +3,8 @@ package com.examplespotifyapp;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
-import com.lufinkey.react.eventemitter.RNEventEmitterPackage;
 import com.lufinkey.react.spotify.RNSpotifyPackage;
+import com.lufinkey.react.eventemitter.RNEventEmitterPackage;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
@@ -25,8 +25,8 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
-            new RNEventEmitterPackage(),
-            new RNSpotifyPackage()
+            new RNSpotifyPackage(),
+            new RNEventEmitterPackage()
       );
     }
 

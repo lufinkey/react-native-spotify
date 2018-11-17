@@ -52,6 +52,5 @@ buck-out/
 */fastlane/Preview.html
 */fastlane/screenshots
 
-# ignore package-lock
-package-lock.json
-
+# Bundle artifact
+*.jsbundle

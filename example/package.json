@@ -7,16 +7,16 @@
     "test": "jest"
   },
   "dependencies": {
-    "react": "^16.2.0",
-    "react-native": "^0.53.3",
-    "rn-spotify-sdk": "~1.1.0",
-    "react-navigation": "^1.5.8"
+    "react": "16.6.1",
+    "react-native": "0.57.5",
+    "react-navigation": "^2.18.2",
+    "rn-spotify-sdk": "git://github.com/lufinkey/react-native-spotify.git#dev"
   },
   "devDependencies": {
-    "babel-jest": "21.2.0",
-    "babel-preset-react-native": "4.0.0",
-    "jest": "21.2.1",
-    "react-test-renderer": "16.0.0"
+    "babel-jest": "23.6.0",
+    "jest": "23.6.0",
+    "metro-react-native-babel-preset": "0.49.1",
+    "react-test-renderer": "16.6.1"
   },
   "jest": {
     "preset": "react-native"
