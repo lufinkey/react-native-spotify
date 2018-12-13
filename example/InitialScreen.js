@@ -17,16 +17,14 @@ export class InitialScreen extends Component
 		header: null
 	};
 
-	constructor()
-	{
-		super();
+	constructor(props) {
+		super(props);
 
 		this.state = {spotifyInitialized: false};
 		this.spotifyLoginButtonWasPressed = this.spotifyLoginButtonWasPressed.bind(this);
 	}
 
-	goToPlayer()
-	{
+	goToPlayer() {
 		const navAction = StackActions.reset({
 			index: 0,
 			actions: [
@@ -36,11 +34,9 @@ export class InitialScreen extends Component
 		this.props.navigation.dispatch(navAction);
 	}
 
-	componentDidMount()
-	{
+	componentDidMount() {
 		// initialize Spotify if it hasn't been initialized yet
-		if(!Spotify.isInitialized())
-		{
+		if(!Spotify.isInitialized()) {
 			// initialize spotify
 			var spotifyOptions = {
 				"clientID":"<INSERT-YOUR-CLIENT-ID-HERE>",
@@ -60,32 +56,27 @@ export class InitialScreen extends Component
 				Alert.alert("Error", error.message);
 			});
 		}
-		else
-		{
+		else {
 			// update UI state
 			this.setState((state) => {
 				state.spotifyInitialized = true;
 				return state;
 			});
 			// handle logged in
-			if(Spotify.isLoggedIn())
-			{
+			if(Spotify.isLoggedIn()) {
 				this.goToPlayer();
 			}
 		}
 	}
 
-	spotifyLoginButtonWasPressed()
-	{
+	spotifyLoginButtonWasPressed() {
 		// log into Spotify
 		Spotify.login().then((loggedIn) => {
-			if(loggedIn)
-			{
+			if(loggedIn) {
 				// logged in
 				this.goToPlayer();
 			}
-			else
-			{
+			else {
 				// cancelled
 			}
 		}).catch((error) => {
@@ -94,10 +85,8 @@ export class InitialScreen extends Component
 		});
 	}
 
-	render()
-	{
-		if(!this.state.spotifyInitialized)
-		{
+	render() {
+		if(!this.state.spotifyInitialized) {
 			return (
 				<View style={styles.container}>
 					<ActivityIndicator animating={true} style={styles.loadIndicator}>
@@ -108,8 +97,7 @@ export class InitialScreen extends Component
 				</View>
 			);
 		}
-		else
-		{
+		else {
 			return (
 				<View style={styles.container}>
 					<Text style={styles.greeting}>

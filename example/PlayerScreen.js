@@ -16,17 +16,15 @@ export class PlayerScreen extends Component
 		title: 'Player',
 	};
 
-	constructor()
-	{
-		super();
+	constructor(props) {
+		super(props);
 
 		this.state = { spotifyUserName: null };
 
 		this.spotifyLogoutButtonWasPressed = this.spotifyLogoutButtonWasPressed.bind(this);
 	}
 
-	componentDidMount()
-	{
+	componentDidMount() {
 		// send api request to get user info
 		Spotify.getMe().then((result) => {
 			// update state with user info
@@ -41,8 +39,7 @@ export class PlayerScreen extends Component
 		});
 	}
 
-	goToInitialScreen()
-	{
+	goToInitialScreen() {
 		const navAction = StackActions.reset({
 			index: 0,
 			actions: [
@@ -52,15 +49,13 @@ export class PlayerScreen extends Component
 		this.props.navigation.dispatch(navAction);
 	}
 
-	spotifyLogoutButtonWasPressed()
-	{
+	spotifyLogoutButtonWasPressed() {
 		Spotify.logout().finally(() => {
 			this.goToInitialScreen();
 		});
 	}
 
-	render()
-	{
+	render() {
 		return (
 			<View style={styles.container}>
 				{ this.state.spotifyUserName!=null ? (
