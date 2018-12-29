@@ -150,7 +150,7 @@ public class Convert
 	public static String joinedIntoString(ReadableArray array, String delimiter) {
 		String str = "";
 		for(int i=0; i<array.size(); i++) {
-			if(i==0) {
+			if(i == 0) {
 				str = array.getString(i);
 			}
 			else {
@@ -162,13 +162,16 @@ public class Convert
 
 	public static WritableMap toWritableMap(ReadableMap map) {
 		WritableMap mutMap = Arguments.createMap();
-		if(map!=null) {
+		if(map != null) {
 			mutMap.merge(map);
 		}
 		return mutMap;
 	}
 
 	public static WritableMap fromPlaybackState(PlaybackState playbackState) {
+		if(playbackState == null) {
+			return null;
+		}
 		WritableMap map = Arguments.createMap();
 		map.putBoolean("playing", playbackState.isPlaying);
 		map.putBoolean("repeating", playbackState.isRepeating);
@@ -179,7 +182,7 @@ public class Convert
 	}
 
 	public static WritableMap fromPlaybackTrack(Metadata.Track track, Metadata metadata) {
-		if(track==null) {
+		if(track == null) {
 			return null;
 		}
 		WritableMap map = Arguments.createMap();
@@ -198,7 +201,7 @@ public class Convert
 	}
 
 	public static WritableMap fromPlaybackMetadata(Metadata metadata) {
-		if(metadata==null) {
+		if(metadata == null) {
 			return null;
 		}
 		WritableMap map = Arguments.createMap();
