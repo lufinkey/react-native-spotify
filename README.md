@@ -110,6 +110,7 @@ import Spotify from 'rn-spotify-sdk';
 		- **albumName** - The name of the album that the track belongs to
 		- **albumUri** - The uri of the album that the track belongs to
 		- **albumCoverArtURL** - A URL for the album art image
+		- **duration** - The length of the track in seconds
 		- **indexInContext** - The track index in the playlist or album that the track is being played from
 
 
