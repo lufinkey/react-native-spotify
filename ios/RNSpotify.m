@@ -899,7 +899,7 @@ RCT_EXPORT_METHOD(seek:(double)position resolve:(RCTPromiseResolveBlock)resolve 
 				}
 				
 				id errorObj = result[@"error"];
-				if(error != nil) {
+				if(errorObj != nil) {
 					id errorDescription = result[@"error_description"];
 					if(errorDescription != nil) {
 						if(![errorObj isKindOfClass:[NSString class]] || ![errorDescription isKindOfClass:[NSString class]]) {
