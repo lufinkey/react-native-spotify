@@ -697,7 +697,7 @@ RCT_EXPORT_METHOD(playURI:(NSString*)uri startIndex:(NSUInteger)startIndex start
 	[self prepareForPlayer:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
 		[error reject:reject];
 	} onResolve:^(id unused) {
-		[_player playSpotifyURI:uri startingWithIndex:startIndex startingWithPosition:startPosition callback:^(NSError* error) {
+		[_player playSpotifyURI:uri startingWithIndex:startIndex startingWithPosition:(startPosition*1000) callback:^(NSError* error) {
 			if(error != nil) {
 				[[RNSpotifyError errorWithNSError:error] reject:reject];
 			}
