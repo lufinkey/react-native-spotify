@@ -56,7 +56,7 @@
 #define printOut(...) fprintf(stdout, "%s\n", [NSString stringWithFormat:__VA_ARGS__].UTF8String);
 #define printOutLog(...) {\
 	NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];\
-	dateFormatter.dateFormat = @"yyyy-MM-dd HH:mm:S";\
+	dateFormatter.dateFormat = @"yyyy-MM-dd HH:mm:ss.SSS";\
 	NSString* dateString = [dateFormatter stringFromDate:[NSDate date]];\
 	fprintf(stdout, "%s [rn-spotify-sdk]: %s\n", dateString.UTF8String, [NSString stringWithFormat:__VA_ARGS__].UTF8String);\
 }
@@ -64,7 +64,7 @@
 #define printErr(...) fprintf(stderr, "%s\n", [NSString stringWithFormat:__VA_ARGS__].UTF8String);
 #define printErrLog(...) {\
 	NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];\
-	dateFormatter.dateFormat = @"yyyy-MM-dd HH:mm:S";\
+	dateFormatter.dateFormat = @"yyyy-MM-dd HH:mm:ss.SSS";\
 	NSString* dateString = [dateFormatter stringFromDate:[NSDate date]];\
 	fprintf(stderr, "%s [rn-spotify-sdk]: %s\n", dateString.UTF8String, [NSString stringWithFormat:__VA_ARGS__].UTF8String);\
 }
