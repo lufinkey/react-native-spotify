@@ -35,6 +35,8 @@
 -(id)getAuth;
 //getAuthAsync()
 -(void)getAuthAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
+//renewSession()
+-(void)renewSession:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 
 //playURI(spotifyURI, startIndex, startPosition)
 -(void)playURI:(NSString*)uri startIndex:(NSUInteger)startIndex startPosition:(NSTimeInterval)startPosition resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;

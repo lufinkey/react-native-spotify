@@ -97,6 +97,7 @@
 				134814211AA4EA7D00B7C361 /* Products */,
 			);
 			sourceTree = "<group>";
+			usesTabs = 1;
 		};
 		A0A434191FAE254F0073DAB9 /* Frameworks */ = {
 			isa = PBXGroup;

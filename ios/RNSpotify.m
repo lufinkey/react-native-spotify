@@ -126,13 +126,13 @@ RCT_EXPORT_METHOD(__registerAsJSEventEmitter:(int)moduleId) {
 	if(![_audioSessionCategory isEqualToString:audioSession.category]) {
 		[audioSession setCategory:_audioSessionCategory error:&error];
 		if(error != nil) {
-			printerr(@"Error setting spotify audio session category: %@", error);
+			printErrLog(@"Error setting spotify audio session category: %@", error);
 		}
 	}
 	error = nil;
 	[audioSession setActive:YES error:&error];
 	if(error != nil) {
-		printerr(@"Error setting spotify audio session active: %@", error);
+		printErrLog(@"Error setting spotify audio session active: %@", error);
 	}
 }
 
@@ -141,7 +141,7 @@ RCT_EXPORT_METHOD(__registerAsJSEventEmitter:(int)moduleId) {
 	NSError* error = nil;
 	[audioSession setActive:NO error:&error];
 	if(error != nil) {
-		printerr(@"Error setting spotify audio session inactive: %@", error);
+		printErrLog(@"Error setting spotify audio session inactive: %@", error);
 	}
 }
 
@@ -152,7 +152,7 @@ RCT_EXPORT_METHOD(__registerAsJSEventEmitter:(int)moduleId) {
 RCT_EXPORT_MODULE()
 
 RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(test) {
-	printerr(@"ayy lmao");
+	printOutLog(@"ayy lmao");
 	return [NSNull null];
 }
 
@@ -161,6 +161,8 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options resolve:(RCTPromiseResolveBl
 		[RNSpotifyErrorCode.AlreadyInitialized reject:reject];
 		return;
 	}
+	
+	printOutLog(@"initializing Spotify");
 	
 	// ensure options is not null or missing fields
 	if(options == nil) {
@@ -235,7 +237,7 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 
 #pragma mark - React Native functions - Session Handling
 
--(void)logBackInIfNeeded:(RNSpotifyCompletion*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse {
+-(void)logBackInIfNeeded:(RNSpotifyCompletion<NSNumber*>*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse {
 	// ensure auth is actually logged in
 	if(_auth.session == nil) {
 		[completion resolve:@NO];
@@ -276,7 +278,7 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 	}] waitForDefinitiveResponse:waitForDefinitiveResponse];
 }
 
--(void)renewSessionIfNeeded:(RNSpotifyCompletion*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse {
+-(void)renewSessionIfNeeded:(RNSpotifyCompletion<NSNumber*>*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse {
 	if(_auth.session == nil || _auth.session.isValid) {
 		// not logged in or session does not need renewal
 		[completion resolve:@NO];
@@ -294,7 +296,7 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 	}
 }
 
--(void)renewSPTAuthSession:(RNSpotifyCompletion*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse {
+-(void)renewSPTAuthSession:(RNSpotifyCompletion<NSNumber*>*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse {
 	dispatch_async(dispatch_get_main_queue(), ^{
 		if(_auth.session == nil) {
 			[completion reject:[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.NotLoggedIn]];
@@ -305,6 +307,7 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 			return;
 		}
 		else if(_auth.session.encryptedRefreshToken == nil) {
+			printOutLog(@"No refresh token available. Not renewing session");
 			[completion resolve:@NO];
 			return;
 		}
@@ -321,12 +324,19 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 		_renewingSession = YES;
 		
 		// renew session
+		if(_auth.session.accessToken == nil || _auth.session.accessToken.length == 0) {
+			printOutLog(@"we currently have no auth token");
+		}
+		printOutLog(@"calling SPTAuth.renewSession");
 		[_auth renewSession:_auth.session callback:^(NSError* error, SPTSession* session){
 			dispatch_async(dispatch_get_main_queue(), ^{
+				if(error != nil) {
+					printErrLog(@"failed to renew Spotify session: %@", error);
+				}
 				_renewingSession = NO;
 				
 				id renewed = @NO;
-				if(session != nil && _auth.session != nil) {
+				if(session != nil) {
 					_auth.session = session;
 					renewed = @YES;
 				}
@@ -348,8 +358,10 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 	});
 }
 
--(void)renewSession:(RNSpotifyCompletion*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse {
-	[self renewSPTAuthSession:[RNSpotifyCompletion  onResolve:^(NSNumber* renewed) {
+-(void)renewSession:(RNSpotifyCompletion<NSNumber*>*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse {
+	printOutLog(@"renewing Spotify session");
+	[self renewSPTAuthSession:[RNSpotifyCompletion onResolve:^(NSNumber* renewed) {
+		printOutLog(@"session renewed?: %@", renewed);
 		if(renewed.boolValue) {
 			if(_player == nil || !_player.loggedIn) {
 				[self initializePlayerIfNeeded:[RNSpotifyCompletion onResolve:^(id unused) {
@@ -369,8 +381,17 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 		}
 		[completion resolve:renewed];
 	} onReject:^(RNSpotifyError* error) {
+		printErrLog(@"Couldn't renew session: %@", error);
 		[completion reject:error];
 	}] waitForDefinitiveResponse:waitForDefinitiveResponse];
+}
+
+RCT_EXPORT_METHOD(renewSession:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
+	[self renewSession:[RNSpotifyCompletion onResolve:^(NSNumber* renewed) {
+		resolve(renewed);
+	} onReject:^(RNSpotifyError* error) {
+		[error reject:reject];
+	}] waitForDefinitiveResponse:NO];
 }
 
 
@@ -584,6 +605,7 @@ RCT_EXPORT_METHOD(logout:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejec
 }
 
 -(void)authRenewalTimerDidFire {
+	printOutLog(@"fired auth renewal timer");
 	[self renewSession:[RNSpotifyCompletion onComplete:^(id result, RNSpotifyError *error) {
 		// ensure the timer has not been stopped
 		if(_authRenewalTimer != nil) {
