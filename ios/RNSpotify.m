@@ -126,13 +126,13 @@ RCT_EXPORT_METHOD(__registerAsJSEventEmitter:(int)moduleId) {
 	if(![_audioSessionCategory isEqualToString:audioSession.category]) {
 		[audioSession setCategory:_audioSessionCategory error:&error];
 		if(error != nil) {
-			NSLog(@"Error setting spotify audio session category: %@", error);
+			printerr(@"Error setting spotify audio session category: %@", error);
 		}
 	}
 	error = nil;
 	[audioSession setActive:YES error:&error];
 	if(error != nil) {
-		NSLog(@"Error setting spotify audio session active: %@", error);
+		printerr(@"Error setting spotify audio session active: %@", error);
 	}
 }
 
@@ -141,7 +141,7 @@ RCT_EXPORT_METHOD(__registerAsJSEventEmitter:(int)moduleId) {
 	NSError* error = nil;
 	[audioSession setActive:NO error:&error];
 	if(error != nil) {
-		NSLog(@"Error setting spotify audio session inactive: %@", error);
+		printerr(@"Error setting spotify audio session inactive: %@", error);
 	}
 }
 
@@ -152,7 +152,7 @@ RCT_EXPORT_METHOD(__registerAsJSEventEmitter:(int)moduleId) {
 RCT_EXPORT_MODULE()
 
 RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(test) {
-	NSLog(@"ayy lmao");
+	printerr(@"ayy lmao");
 	return [NSNull null];
 }
 

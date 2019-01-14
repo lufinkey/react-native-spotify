@@ -48,3 +48,10 @@
 			callback(@[ __VA_ARGS__ NIL_PARAMETER_ERROR_OBJ(@#parameter) ]);\
 		}\
 	}
+
+
+
+#pragma mark - Printing macros
+
+#define printout(...) fprintf(stdout, "%s", [NSString stringWithFormat:__VA_ARGS__].UTF8String);
+#define printerr(...) fprintf(stderr, "%s", [NSString stringWithFormat:__VA_ARGS__].UTF8String);
