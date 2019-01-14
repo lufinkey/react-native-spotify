@@ -30,7 +30,7 @@ export class PlayerScreen extends Component
 			// update state with user info
 			this.setState({ spotifyUserName: result.display_name });
 			// play song
-			return Spotify.playURI("spotify:track:7kQiiHm3jvdz2npYMW7wcE", 0, 0);
+			return Spotify.playURI("spotify:track:2zk7TQx9Xa4yxYmsjgDCPp", 0, 0);
 		}).then(() => {
 			// success
 		}).catch((error) => {
