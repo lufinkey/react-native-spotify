@@ -329,6 +329,21 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 		}, waitForDefinitiveResponse);
 	}
 
+	@ReactMethod
+	public void renewSession(final Promise promise) {
+		renewSession(new Completion<Boolean>() {
+			@Override
+			public void onResolve(Boolean result) {
+				promise.resolve(result);
+			}
+
+			@Override
+			public void onReject(SpotifyError error) {
+				error.reject(promise);
+			}
+		}, false);
+	}
+
 
 
 	private void initializePlayerIfNeeded(final Completion<Void> completion) {
