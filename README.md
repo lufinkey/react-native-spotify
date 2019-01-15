@@ -264,7 +264,7 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 			- **clientID** - (*Required*) Your spotify application's ClientID that you registered with spotify [here](https://developer.spotify.com/my-applications)
 			- **redirectURL** - The redirect URL to use when you've finished logging in. You NEED to set this URL for your application [here](https://developer.spotify.com/my-applications), otherwise the login screen will not close
 			- **sessionUserDefaultsKey** - The preference key to use to store session data for this module
-			- **scopes** - An array of scopes to use in the application. A list of scopes can be found [here](https://developer.spotify.com/web-api/using-scopes/)
+			- **scopes** - An array of scopes that define permissions for the Spotify API. A list of scopes can be found [here](https://developer.spotify.com/web-api/using-scopes/)
 			- **tokenSwapURL** - The URL to use to swap an authentication code for an access token (see [Token swap and refresh](#token-swap-and-refresh) section for more info)
 			- **tokenRefreshURL** - The URL to use to get a new access token from a refresh token
 			- **tokenRefreshEarliness** - The number of seconds to set a token refresh timer before the access token expires. Default is `300`
@@ -310,7 +310,7 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	- *Parameters*
 		- **options**
 			- **showDialog** - Whether or not to force the user to approve the app again if they’ve already done so.
-			- **scopes** - An array of scopes to use in the application. This overrides the scopes passed in **initialize**. A list of scopes can be found [here](https://developer.spotify.com/web-api/using-scopes/)
+			- **scopes** - An array of scopes that define permissions for the Spotify API. This overrides the scopes passed in **initialize**. A list of scopes can be found [here](https://developer.spotify.com/web-api/using-scopes/)
 	
 	- *Returns*
 	
