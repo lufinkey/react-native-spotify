@@ -483,7 +483,7 @@ RCT_EXPORT_METHOD(renewSession:(RCTPromiseResolveBlock)resolve reject:(RCTPromis
 	}
 }
 
-RCT_EXPORT_METHOD(login:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(login:(NSDictionary*)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
 	// ensure we're not already logging in
 	if(_loggingIn) {
 		[[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.ConflictingCallbacks message:@"Cannot call login multiple times before completing"] reject:reject];
@@ -493,10 +493,20 @@ RCT_EXPORT_METHOD(login:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseReject
 		resolve(@YES);
 		return;
 	}
+	NSMutableDictionary* loginParams = [NSMutableDictionary dictionary];
+	NSNumber* showDialog = options[@"showDialog"];
+	if(showDialog != nil) {
+		loginParams[@"show_dialog"] = showDialog.boolValue ? @"true" : @"false";
+	}
+	NSArray* scopes = options[@"scopes"];
+	if(scopes != nil) {
+		loginParams[@"scope"] = [scopes componentsJoinedByString:@" "];
+	}
 	_loggingIn = YES;
+	
 	// do UI logic on main thread
 	dispatch_async(dispatch_get_main_queue(), ^{
-		RNSpotifyAuthController* authController = [[RNSpotifyAuthController alloc] initWithAuth:_auth];
+		RNSpotifyAuthController* authController = [[RNSpotifyAuthController alloc] initWithAuth:_auth params:loginParams];
 		
 		__weak RNSpotifyAuthController* weakAuthController = authController;
 		authController.completion = [RNSpotifyCompletion<NSNumber*> onReject:^(RNSpotifyError* error) {

@@ -8,12 +8,17 @@ RNEvents.register(Spotify);
 RNEvents.conform(Spotify);
 
 const sendRequest = Spotify.sendRequest;
+const login = Spotify.login;
 
+
+Spotify.login = (options={}) => {
+	return login(options);
+}
 
 
 Spotify.getMe = () => {
 	return sendRequest('v1/me', 'GET', null, false);
-};
+}
 
 
 

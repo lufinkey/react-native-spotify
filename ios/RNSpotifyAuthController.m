@@ -28,7 +28,7 @@
 	return topController;
 }
 
--(id)initWithAuth:(SPTAuth*)auth {
+-(id)initWithAuth:(SPTAuth*)auth params:(NSDictionary<NSString*,NSString*>*)params {
 	RNSpotifyWebViewController* rootController = [[RNSpotifyWebViewController alloc] init];
 	if(self = [super initWithRootViewController:rootController]) {
 		_auth = auth;
@@ -45,7 +45,26 @@
 		//_webController.title = @"Log into Spotify";
 		_webController.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(didSelectCancelButton)];
 		
-		NSURLRequest* request = [NSURLRequest requestWithURL:_auth.spotifyWebAuthenticationURL];
+		NSURL* authURL = _auth.spotifyWebAuthenticationURL;
+		if(params != nil && params.count > 0) {
+			NSURLComponents* urlComponents = [NSURLComponents componentsWithURL:_auth.spotifyWebAuthenticationURL resolvingAgainstBaseURL:YES];
+			NSMutableArray* queryItems = urlComponents.queryItems.mutableCopy;
+			for(NSString* key in params) {
+				id value = params[key];
+				// remove duplicate query item if it exists
+				for(NSUInteger i=0; i<queryItems.count; i++) {
+					NSURLQueryItem* queryItem = queryItems[i];
+					if([queryItem.name isEqualToString:key]) {
+						[queryItems removeObjectAtIndex:i];
+						break;
+					}
+				}
+				[queryItems addObject:[NSURLQueryItem queryItemWithName:key value:value]];
+			}
+			urlComponents.queryItems = queryItems;
+			authURL = urlComponents.URL;
+		}
+		NSURLRequest* request = [NSURLRequest requestWithURL:authURL];
 		[_webController.webView loadRequest:request];
 	}
 	return self;
