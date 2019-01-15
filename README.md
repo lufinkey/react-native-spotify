@@ -303,9 +303,14 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 
 
 
-- **login**()
+- **login**( *options*? )
 
 	Opens a UI to log into Spotify.
+	
+	- *Parameters*
+		- **options**
+			- **showDialog** - Whether or not to force the user to approve the app again if they’ve already done so.
+			- **scopes** - An array of scopes to use in the application. This overrides the scopes passed in **initialize**. A list of scopes can be found [here](https://developer.spotify.com/web-api/using-scopes/)
 	
 	- *Returns*
 	
