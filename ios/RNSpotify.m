@@ -388,6 +388,10 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 
 RCT_EXPORT_METHOD(renewSession:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
 	[self renewSession:[RNSpotifyCompletion onResolve:^(NSNumber* renewed) {
+		// ensure the timer has not been stopped
+		if(_authRenewalTimer != nil && renewed.boolValue) {
+			[self scheduleAuthRenewalTimer];
+		}
 		resolve(renewed);
 	} onReject:^(RNSpotifyError* error) {
 		[error reject:reject];
@@ -616,7 +620,7 @@ RCT_EXPORT_METHOD(logout:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejec
 
 -(void)authRenewalTimerDidFire {
 	printOutLog(@"fired auth renewal timer");
-	[self renewSession:[RNSpotifyCompletion onComplete:^(id result, RNSpotifyError *error) {
+	[self renewSession:[RNSpotifyCompletion onComplete:^(id result, RNSpotifyError* error) {
 		// ensure the timer has not been stopped
 		if(_authRenewalTimer != nil) {
 			// reschedule the timer
