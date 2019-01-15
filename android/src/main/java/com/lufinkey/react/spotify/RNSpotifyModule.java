@@ -498,7 +498,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 
 	@ReactMethod
 	//login()
-	public void login(final Promise promise) {
+	public void login(ReadableMap options, final Promise promise) {
 		// ensure we're initialized
 		if(!initialized) {
 			SpotifyError.Code.NotInitialized.reject(promise);
@@ -509,7 +509,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 			return;
 		}
 		// perform login flow
-		AuthActivity.performAuthFlow(reactContext.getCurrentActivity(), auth, new AuthActivityListener() {
+		AuthActivity.performAuthFlow(reactContext.getCurrentActivity(), auth, options, new AuthActivityListener() {
 			@Override
 			public void onAuthActivityCancel(AuthActivity activity) {
 				// dismiss activity

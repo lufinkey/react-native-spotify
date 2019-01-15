@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.facebook.react.bridge.ReadableArray;
+import com.facebook.react.bridge.ReadableMap;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
@@ -13,6 +15,7 @@ public class AuthActivity extends Activity
 	private static final int REQUEST_CODE = 6969;
 
 	private static Auth authFlow_auth;
+	private static ReadableMap authFlow_options;
 	private static AuthActivityListener authFlow_listener;
 	private static AuthActivity currentAuthActivity;
 
@@ -20,9 +23,9 @@ public class AuthActivity extends Activity
 	private AuthActivityListener listener;
 	private Completion<Void> finishCompletion;
 
-	public static void performAuthFlow(Activity context, Auth auth, AuthActivityListener listener) {
+	public static void performAuthFlow(Activity context, Auth auth, ReadableMap options, AuthActivityListener listener) {
 		// ensure no conflicting callbacks
-		if(authFlow_auth != null || authFlow_listener != null || currentAuthActivity != null) {
+		if(authFlow_auth != null || authFlow_options != null || authFlow_listener != null || currentAuthActivity != null) {
 			SpotifyError error = new SpotifyError(SpotifyError.Code.ConflictingCallbacks, "Cannot call login multiple times before completing");
 			listener.onAuthActivityFailure(null, error);
 			return;
@@ -30,6 +33,7 @@ public class AuthActivity extends Activity
 
 		// store temporary static variables
 		authFlow_auth = auth;
+		authFlow_options = options;
 		authFlow_listener = listener;
 
 		// start activity
@@ -43,9 +47,11 @@ public class AuthActivity extends Activity
 
 		auth = authFlow_auth;
 		listener = authFlow_listener;
+		ReadableMap options = authFlow_options;
 		currentAuthActivity = this;
 
 		authFlow_auth = null;
+		authFlow_options = null;
 		authFlow_listener = null;
 
 		// decide response type
@@ -56,8 +62,20 @@ public class AuthActivity extends Activity
 
 		// create auth request
 		AuthenticationRequest.Builder requestBuilder = new AuthenticationRequest.Builder(auth.clientID, responseType, auth.redirectURL);
-		requestBuilder.setScopes(auth.requestedScopes);
-		requestBuilder.setShowDialog(true);
+		if(options.hasKey("scopes")) {
+			ReadableArray scopeArray = options.getArray("scopes");
+			String[] scopes = new String[scopeArray.size()];
+			for(int i=0; i<scopeArray.size(); i++) {
+				scopes[i] = scopeArray.getString(i);
+			}
+			requestBuilder.setScopes(scopes);
+		}
+		else {
+			requestBuilder.setScopes(auth.requestedScopes);
+		}
+		if(options.hasKey("showDialog")) {
+			requestBuilder.setShowDialog(options.getBoolean("showDialog"));
+		}
 		AuthenticationRequest request = requestBuilder.build();
 
 		// show auth activity
