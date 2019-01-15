@@ -84,7 +84,7 @@
 }
 
 -(void)invalidate {
-	[_authRenewalTimer invalidate];
+	[self stopAuthRenewalTimer];
 	_player.delegate = nil;
 	_player.playbackDelegate = nil;
 	if(_player.initialized) {
