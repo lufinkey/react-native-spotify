@@ -333,8 +333,13 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	public void renewSession(final Promise promise) {
 		renewSession(new Completion<Boolean>() {
 			@Override
-			public void onResolve(Boolean result) {
-				promise.resolve(result);
+			public void onResolve(Boolean renewed) {
+				// ensure the timer has not been stopped
+				if(authRenewalTimer != null && renewed) {
+					// reschedule the timer
+					scheduleAuthRenewalTimer();
+				}
+				promise.resolve(renewed);
 			}
 
 			@Override

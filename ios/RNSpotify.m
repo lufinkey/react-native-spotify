@@ -390,6 +390,7 @@ RCT_EXPORT_METHOD(renewSession:(RCTPromiseResolveBlock)resolve reject:(RCTPromis
 	[self renewSession:[RNSpotifyCompletion onResolve:^(NSNumber* renewed) {
 		// ensure the timer has not been stopped
 		if(_authRenewalTimer != nil && renewed.boolValue) {
+			// reschedule the timer
 			[self scheduleAuthRenewalTimer];
 		}
 		resolve(renewed);
