@@ -370,6 +370,17 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 
 
 
+- **renewSession**()
+
+	Renews a logged in session. If no token refresh URL was given to **initialize** or if the session does not have a refresh token, this function returns without error
+	
+	- *Returns*
+	
+		- A *Promise* that resolves when the session renewal attempt finishes
+
+
+
+
 ### Playback Methods
 
 - **playURI**( *spotifyURI*, *startIndex*, *startPosition* )
