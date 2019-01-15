@@ -83,6 +83,20 @@
 	return self;
 }
 
+-(void)invalidate {
+	[_authRenewalTimer invalidate];
+	_player.delegate = nil;
+	_player.playbackDelegate = nil;
+	if(_player.initialized) {
+		[_player logout];
+		NSError* error = nil;
+		[_player stopWithError:&error];
+		if(error != nil) {
+			printErrLog(@"error stopping player: %@", error);
+		}
+	}
+}
+
 +(BOOL)requiresMainQueueSetup {
 	return NO;
 }
@@ -388,8 +402,8 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 
 RCT_EXPORT_METHOD(renewSession:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
 	[self renewSession:[RNSpotifyCompletion onResolve:^(NSNumber* renewed) {
-		// ensure the timer has not been stopped
-		if(_authRenewalTimer != nil && renewed.boolValue) {
+		// ensure we're logged in
+		if(_loggedIn && renewed.boolValue) {
 			// reschedule the timer
 			[self scheduleAuthRenewalTimer];
 		}
@@ -614,16 +628,16 @@ RCT_EXPORT_METHOD(logout:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejec
 		if(_authRenewalTimer != nil) {
 			[_authRenewalTimer invalidate];
 		}
-		_authRenewalTimer = [NSTimer timerWithTimeInterval:renewalTimeDiff target:self selector:@selector(authRenewalTimerDidFire) userInfo:nil repeats:NO];
-		[[NSRunLoop mainRunLoop] addTimer:_authRenewalTimer forMode:NSRunLoopCommonModes];
+		NSTimer* timer = [NSTimer timerWithTimeInterval:renewalTimeDiff target:self selector:@selector(authRenewalTimerDidFire) userInfo:nil repeats:NO];
+		[[NSRunLoop mainRunLoop] addTimer:timer forMode:NSRunLoopCommonModes];
+		_authRenewalTimer = timer;
 	}
 }
 
 -(void)authRenewalTimerDidFire {
-	printOutLog(@"fired auth renewal timer");
 	[self renewSession:[RNSpotifyCompletion onComplete:^(id result, RNSpotifyError* error) {
-		// ensure the timer has not been stopped
-		if(_authRenewalTimer != nil) {
+		// ensure we're logged in
+		if(_loggedIn) {
 			// reschedule the timer
 			[self scheduleAuthRenewalTimer];
 		}
@@ -1038,6 +1052,7 @@ RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method param
 	
 	// if we didn't explicitly log out, try to renew the session
 	if(!wasLoggingOutPlayer && _auth.hasTokenRefreshService && _auth.session != nil && _auth.session.encryptedRefreshToken != nil) {
+		printOutLog(@"player logged out, so session needs renewal");
 		[self renewSession:[RNSpotifyCompletion onComplete:^(NSNumber* renewed, RNSpotifyError* error) {
 			if(error != nil || !renewed.boolValue) {
 				if([[self isLoggedIn] boolValue]) {
