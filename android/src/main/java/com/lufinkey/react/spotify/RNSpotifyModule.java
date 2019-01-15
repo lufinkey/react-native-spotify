@@ -83,7 +83,10 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 
 	@Override
 	public void onCatalystInstanceDestroy() {
+		stopAuthRenewalTimer();
 		if(player != null) {
+			player.removeNotificationCallback(RNSpotifyModule.this);
+			player.removeConnectionStateCallback(RNSpotifyModule.this);
 			Spotify.destroyPlayer(this);
 			player = null;
 		}
