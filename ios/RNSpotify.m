@@ -1,6 +1,11 @@
 
 #import "RNSpotify.h"
 #import <AVFoundation/AVFoundation.h>
+
+#import <MediaPlayer/MPRemoteCommandCenter.h>
+#import <MediaPlayer/MPNowPlayingInfoCenter.h>
+#import <MediaPlayer/MediaPlayer.h>
+
 #import <SpotifyAuthentication/SpotifyAuthentication.h>
 #import <SpotifyMetadata/SpotifyMetadata.h>
 #import <SpotifyAudioPlayback/SpotifyAudioPlayback.h>
@@ -176,6 +181,46 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options resolve:(RCTPromiseResolveBl
 		return;
 	}
 	
+	MPRemoteCommandCenter *commandCenter = [MPRemoteCommandCenter sharedCommandCenter];
+	
+	[commandCenter.togglePlayPauseCommand setEnabled:YES];
+	[commandCenter.playCommand setEnabled:YES];
+	[commandCenter.pauseCommand setEnabled:YES];
+	[commandCenter.nextTrackCommand setEnabled:NO];
+	[commandCenter.previousTrackCommand setEnabled:NO];
+	
+	
+	[commandCenter.playCommand addTargetWithHandler:^MPRemoteCommandHandlerStatus(MPRemoteCommandEvent *event) {
+		[_player setIsPlaying:true callback:^(NSError* error) {
+		}];
+		return MPRemoteCommandHandlerStatusSuccess;
+	}];
+	[commandCenter.pauseCommand addTargetWithHandler:^MPRemoteCommandHandlerStatus(MPRemoteCommandEvent *event) {
+		[_player setIsPlaying:false callback:^(NSError* error) {
+		}];
+		return MPRemoteCommandHandlerStatusSuccess;
+	}];
+	
+	[commandCenter.stopCommand setEnabled:NO];
+	[commandCenter.skipForwardCommand setEnabled:NO];
+	[commandCenter.skipBackwardCommand setEnabled:NO];
+	[commandCenter.enableLanguageOptionCommand setEnabled:NO];
+	[commandCenter.disableLanguageOptionCommand setEnabled:NO];
+	[commandCenter.changeRepeatModeCommand setEnabled:NO];
+	[commandCenter.changePlaybackRateCommand setEnabled:NO];
+	[commandCenter.changeShuffleModeCommand setEnabled:NO];
+
+	[commandCenter.seekForwardCommand setEnabled:NO];
+	[commandCenter.seekBackwardCommand setEnabled:NO];
+	[commandCenter.changePlaybackPositionCommand setEnabled:NO];
+
+	
+	[commandCenter.ratingCommand setEnabled:NO];
+	[commandCenter.likeCommand setEnabled:NO];
+	[commandCenter.dislikeCommand setEnabled:NO];
+	[commandCenter.bookmarkCommand setEnabled:NO];
+
+	
 	printOutLog(@"initializing Spotify");
 	
 	// ensure options is not null or missing fields
@@ -246,7 +291,6 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(isInitialized) {
 RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
 	resolve([self isInitialized]);
 }
-
 
 
 #pragma mark - React Native functions - Session Handling
@@ -734,6 +778,17 @@ RCT_EXPORT_METHOD(playURI:(NSString*)uri startIndex:(NSUInteger)startIndex start
 				resolve(nil);
 			}
 		}];
+	}]];
+}
+
+RCT_EXPORT_METHOD(setMediaPlayerInfo:(NSString*)name artist:(NSString*)artist resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
+	[self prepareForPlayer:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
+		[error reject:reject];
+	} onResolve:^(id unused) {
+		[MPNowPlayingInfoCenter defaultCenter].nowPlayingInfo = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+																 name, MPMediaItemPropertyTitle,
+																 artist, MPMediaItemPropertyArtist,
+																 [NSNumber numberWithDouble:0.0], MPNowPlayingInfoPropertyPlaybackRate, nil];
 	}]];
 }
 

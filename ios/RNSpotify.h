@@ -39,7 +39,7 @@
 -(void)renewSession:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 
 //playURI(spotifyURI, startIndex, startPosition)
--(void)playURI:(NSString*)uri startIndex:(NSUInteger)startIndex startPosition:(NSTimeInterval)startPosition resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
+-(void)playURI:(NSString*)uri startIndex:(NSUInteger)startIndex startPosition:(NSTimeInterval)startPosition title:(NSString*)title resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 //queueURI(spotifyURI)
 -(void)queueURI:(NSString*)uri resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 //setVolume(volume)
@@ -69,6 +69,8 @@
 //setRepeating(repeating)
 -(void)setRepeating:(BOOL)repeating resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 
+//setMediaPlayerInfo(name, artist)
+-(void)setMediaPlayerInfo:(NSString*)name artist:(NSString*)artist resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 //sendRequest(endpoint, method, params, isJSONBody)
 -(void)sendRequest:(NSString*)endpoint method:(NSString*)method params:(NSDictionary*)params isJSONBody:(BOOL)jsonBody resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 
