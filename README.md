@@ -6,7 +6,7 @@ A react native module for the Spotify SDK forked from [lufinkey/react-native-spo
 
 I added some methods and activate MediaContoller for IOS [Play/Pause] 
 
-![IOS Screen](https://s3-eu-west-1.amazonaws.com/sharelist2me/screen-media-player.PNG =375x667)  
+<img src="https://s3-eu-west-1.amazonaws.com/sharelist2me/screen-media-player.PNG" width="275">  
 
 ### Playback Methods
 
