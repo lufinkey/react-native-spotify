@@ -615,6 +615,7 @@ RCT_EXPORT_METHOD(logout:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejec
 -(void)scheduleAuthRenewalTimer {
 	if(_auth.tokenRefreshURL == nil || _auth.session == nil || _auth.session.encryptedRefreshToken == nil) {
 		// we can't perform token refresh, so don't bother scheduling the timer
+		printOutLog(@"we can't do session renewal, so not scheduling timer...");
 		return;
 	}
 	NSTimeInterval now = [NSDate date].timeIntervalSince1970;
@@ -629,6 +630,7 @@ RCT_EXPORT_METHOD(logout:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejec
 		if(_authRenewalTimer != nil) {
 			[_authRenewalTimer invalidate];
 		}
+		printOutLog(@"scheduling auth renewal timer");
 		NSTimer* timer = [NSTimer timerWithTimeInterval:renewalTimeDiff target:self selector:@selector(authRenewalTimerDidFire) userInfo:nil repeats:NO];
 		[[NSRunLoop mainRunLoop] addTimer:timer forMode:NSRunLoopCommonModes];
 		_authRenewalTimer = timer;
