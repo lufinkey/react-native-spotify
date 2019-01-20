@@ -378,6 +378,7 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 		printOutLog(@"session renewed?: %@", renewed);
 		if(renewed.boolValue) {
 			if(_player == nil || !_player.loggedIn) {
+				printOutLog(@"re-initializing player");
 				[self initializePlayerIfNeeded:[RNSpotifyCompletion onResolve:^(id unused) {
 					[completion resolve:renewed];
 				} onReject:^(RNSpotifyError* error) {
