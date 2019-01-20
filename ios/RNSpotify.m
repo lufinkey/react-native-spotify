@@ -635,6 +635,7 @@ RCT_EXPORT_METHOD(logout:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejec
 }
 
 -(void)authRenewalTimerDidFire {
+	printOutLog(@"auth renewal timer fired");
 	[self renewSession:[RNSpotifyCompletion onComplete:^(id result, RNSpotifyError* error) {
 		// ensure we're logged in
 		if(_loggedIn) {
