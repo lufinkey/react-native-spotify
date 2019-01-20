@@ -390,6 +390,7 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 				if(_auth.session != nil) {
 					accessToken = _auth.session.accessToken;
 				}
+				printOutLog(@"logging in player with new access token");
 				[_player loginWithAccessToken:accessToken];
 			}
 		}
