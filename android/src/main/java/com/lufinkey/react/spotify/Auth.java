@@ -211,8 +211,7 @@ public class Auth
 
 		performTokenURLRequest(tokenSwapURL, Utils.makeQueryString(params), new Completion<JSONObject>() {
 			@Override
-			public void onReject(SpotifyError error)
-			{
+			public void onReject(SpotifyError error) {
 				completion.reject(error);
 			}
 

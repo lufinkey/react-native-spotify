@@ -88,7 +88,14 @@ public class Utils
 			@Override
 			public void onError(VolleyError error) {
 				// TODO add a switch for volley error types
-				completion.reject(SpotifyError.getHTTPError(0, error.getLocalizedMessage()));
+				String errorMessage = error.getLocalizedMessage();
+				if(errorMessage == null) {
+					errorMessage = error.getMessage();
+					if(errorMessage == null) {
+						errorMessage = "Request failed";
+					}
+				}
+				completion.reject(SpotifyError.getHTTPError(0, errorMessage));
 			}
 
 			@Override

@@ -180,6 +180,6 @@ public class SpotifyError
 		if(statusCode <= 0) {
 			code = "HTTPRequestFailed";
 		}
-		return new SpotifyError("HTTP"+statusCode, message);
+		return new SpotifyError(code, message);
 	}
 }
