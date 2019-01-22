@@ -1018,6 +1018,7 @@ RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method param
 }
 
 -(void)audioStreaming:(SPTAudioStreamingController*)audioStreaming didReceiveError:(NSError*)error {
+	printErrLog(@"received player error: %@", error);
 	if(_loggingInPlayer) {
 		_loggingInPlayer = NO;
 		// if the error is one that requires logging out, log out
@@ -1102,6 +1103,7 @@ RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method param
 }
 
 -(void)audioStreaming:(SPTAudioStreamingController*)audioStreaming didReceiveMessage:(NSString*)message {
+	printOutLog(@"received player message: %@", message);
 	[self sendEvent:@"playerMessage" args:@[message]];
 }
 
