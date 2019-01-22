@@ -12,6 +12,7 @@ const login = Spotify.login;
 
 
 Spotify.login = (options={}) => {
+	options = {...options};
 	return login(options);
 }
 
