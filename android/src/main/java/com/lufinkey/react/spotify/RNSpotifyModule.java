@@ -104,7 +104,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	@Override
 	public void onCatalystInstanceDestroy() {
 		stopAuthRenewalTimer();
-		if (player != null) {
+		if(player != null) {
 			player.removeNotificationCallback(RNSpotifyModule.this);
 			player.removeConnectionStateCallback(RNSpotifyModule.this);
 			Spotify.destroyPlayer(this);
@@ -127,20 +127,22 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	}
 
 
+
 	@ReactMethod
 	//initialize(options)
 	public void initialize(ReadableMap options, final Promise promise) {
 		// ensure module is not already initialized
-		if (initialized) {
+		if(initialized) {
 			SpotifyError.Code.AlreadyInitialized.reject(promise);
 			return;
 		}
 
 		// ensure options is not null or missing fields
-		if (options == null) {
+		if(options==null) {
 			SpotifyError.getNullParameterError("options").reject(promise);
 			return;
-		} else if (!options.hasKey("clientID")) {
+		}
+		else if(!options.hasKey("clientID")) {
 			SpotifyError.getMissingOptionError("clientId").reject(promise);
 			return;
 		}
@@ -151,37 +153,37 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 		auth = new Auth();
 		auth.reactContext = reactContext;
 		auth.clientID = options.getString("clientID");
-		if (options.hasKey("redirectURL")) {
+		if(options.hasKey("redirectURL")) {
 			auth.redirectURL = options.getString("redirectURL");
 		}
-		if (options.hasKey("sessionUserDefaultsKey")) {
+		if(options.hasKey("sessionUserDefaultsKey")) {
 			auth.sessionUserDefaultsKey = options.getString("sessionUserDefaultsKey");
 		}
 		ReadableArray scopes = null;
-		if (options.hasKey("scopes")) {
+		if(options.hasKey("scopes")) {
 			scopes = options.getArray("scopes");
 		}
-		if (scopes != null) {
+		if(scopes!=null) {
 			String[] requestedScopes = new String[scopes.size()];
-			for (int i = 0; i < scopes.size(); i++) {
+			for(int i=0; i<scopes.size(); i++) {
 				requestedScopes[i] = scopes.getString(i);
 			}
 			auth.requestedScopes = requestedScopes;
 		}
-		if (options.hasKey("tokenSwapURL")) {
+		if(options.hasKey("tokenSwapURL")) {
 			auth.tokenSwapURL = options.getString("tokenSwapURL");
 		}
-		if (options.hasKey("tokenRefreshURL")) {
+		if(options.hasKey("tokenRefreshURL")) {
 			auth.tokenRefreshURL = options.getString("tokenRefreshURL");
 		}
 		auth.load();
 
 		// load android-specific options
 		ReadableMap androidOptions = Arguments.createMap();
-		if (options.hasKey("android")) {
+		if(options.hasKey("android")) {
 			androidOptions = options.getMap("android");
 		}
-		if (androidOptions.hasKey("loginLoadingText")) {
+		if(androidOptions.hasKey("loginLoadingText")) {
 			loginLoadingText = androidOptions.getString("loginLoadingText");
 		}
 
@@ -198,9 +200,10 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 					player.setConnectivityStatus(null, connectivity);
 
 					// call events
-					if (prevConnectivity == Connectivity.OFFLINE && connectivity != Connectivity.OFFLINE) {
+					if(prevConnectivity==Connectivity.OFFLINE && connectivity!=Connectivity.OFFLINE) {
 						sendEvent("reconnect");
-					} else if (prevConnectivity != Connectivity.OFFLINE && connectivity == Connectivity.OFFLINE) {
+					}
+					else if(prevConnectivity!=Connectivity.OFFLINE && connectivity==Connectivity.OFFLINE) {
 						sendEvent("disconnect");
 					}
 				}
@@ -214,11 +217,11 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 
 		// call promise
 		boolean authLoggedIn = auth.isLoggedIn();
-		if (authLoggedIn) {
+		if(authLoggedIn) {
 			loggedIn = true;
 		}
 		promise.resolve(loggedIn);
-		if (loggedIn) {
+		if(loggedIn) {
 			sendEvent("login");
 		}
 
@@ -226,12 +229,13 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 		logBackInIfNeeded(new Completion<Boolean>() {
 			@Override
 			public void onComplete(Boolean loggedIn, SpotifyError error) {
-				if (loggedIn != null && loggedIn) {
+				if(loggedIn != null && loggedIn) {
 					startAuthRenewalTimer();
 				}
 			}
 		}, true);
 	}
+
 
 
 	@ReactMethod(isBlockingSynchronousMethod = true)
@@ -247,11 +251,12 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	}
 
 
+
 	private void logBackInIfNeeded(final Completion<Boolean> completion, final boolean waitForDefinitiveResponse) {
 		// ensure auth is actually logged in
-		if (!auth.isLoggedIn()) {
+		if(!auth.isLoggedIn()) {
 			// auth is not logged in, so there's nothing we need to renew
-			if (completion != null) {
+			if(completion != null) {
 				completion.resolve(false);
 			}
 			return;
@@ -261,7 +266,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 			@Override
 			public void onReject(SpotifyError error) {
 				// session renewal failed (we should log out)
-				if (isLoggedIn()) {
+				if(isLoggedIn()) {
 					// session renewal returned a failure, but we're still logged in
 					// log out player
 					logoutPlayer(new Completion<Void>() {
@@ -270,21 +275,23 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 							// clear session
 							boolean wasLoggedIn = clearSession();
 							// call completion
-							if (completion != null) {
+							if(completion != null) {
 								completion.resolve(false);
 							}
 							// send logout event
-							if (wasLoggedIn) {
+							if(wasLoggedIn) {
 								sendEvent("logout");
 							}
 						}
 					});
-				} else {
+				}
+				else {
 					// auth wasn't logged in during the renewal failure, so just fail
-					if (completion != null) {
-						if (waitForDefinitiveResponse) {
+					if(completion != null) {
+						if(waitForDefinitiveResponse) {
 							completion.resolve(false);
-						} else {
+						}
+						else {
 							completion.reject(error);
 						}
 					}
@@ -299,12 +306,15 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	}
 
 
+
 	private void renewSessionIfNeeded(final Completion<Boolean> completion, boolean waitForDefinitiveResponse) {
-		if (auth.getAccessToken() == null || auth.isSessionValid()) {
+		if(auth.getAccessToken() == null || auth.isSessionValid()) {
 			completion.resolve(false);
-		} else if (auth.getRefreshToken() == null) {
+		}
+		else if(auth.getRefreshToken() == null) {
 			completion.reject(new SpotifyError(SpotifyError.Code.SessionExpired));
-		} else {
+		}
+		else {
 			renewSession(completion, waitForDefinitiveResponse);
 		}
 	}
@@ -313,8 +323,8 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 		auth.renewSession(new Completion<Boolean>() {
 			@Override
 			public void onResolve(final Boolean renewed) {
-				if (renewed.booleanValue()) {
-					if (player == null || !player.isLoggedIn()) {
+				if(renewed.booleanValue()) {
+					if(player == null || !player.isLoggedIn()) {
 						initializePlayerIfNeeded(new Completion<Void>() {
 							@Override
 							public void onResolve(Void unused) {
@@ -327,7 +337,8 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 							}
 						});
 						return;
-					} else {
+					}
+					else {
 						player.login(auth.getAccessToken());
 					}
 				}
@@ -347,7 +358,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 			@Override
 			public void onResolve(Boolean renewed) {
 				// ensure the timer has not been stopped
-				if (authRenewalTimer != null && renewed) {
+				if(authRenewalTimer != null && renewed) {
 					// reschedule the timer
 					scheduleAuthRenewalTimer();
 				}
@@ -362,15 +373,16 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	}
 
 
+
 	private void initializePlayerIfNeeded(final Completion<Void> completion) {
 		// make sure we have the player scope
-		if (!auth.hasPlayerScope()) {
+		if(!auth.hasPlayerScope()) {
 			completion.resolve(null);
 			return;
 		}
 
 		// check if player already exists and is initialized
-		if (player != null && player.isInitialized()) {
+		if(player != null && player.isInitialized()) {
 			loginPlayer(completion);
 			return;
 		}
@@ -378,22 +390,22 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 		// ensure only one thread actually invokes the initialization, and the others just wait
 		boolean firstInitAttempt = false;
 		synchronized (playerInitResponses) {
-			if (playerInitResponses.size() == 0) {
+			if(playerInitResponses.size() == 0) {
 				firstInitAttempt = true;
 			}
 			playerInitResponses.add(completion);
 		}
 
 		// if this is the first thread that has tried to initialize the player, then actually do it
-		if (firstInitAttempt) {
+		if(firstInitAttempt) {
 			//initialize player
 			final Object reference = this;
 			Config playerConfig = new Config(reactContext.getApplicationContext(), auth.getAccessToken(), auth.clientID);
-			player = Spotify.getPlayer(playerConfig, reference, new SpotifyPlayer.InitializationObserver() {
+			player = Spotify.getPlayer(playerConfig, reference, new SpotifyPlayer.InitializationObserver(){
 				@Override
 				public void onError(Throwable error) {
 					// error initializing the player
-					if (player != null) {
+					if(player != null) {
 						// destroy the player
 						Spotify.destroyPlayer(reference);
 						player = null;
@@ -405,7 +417,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 						initResponses = new ArrayList<>(playerInitResponses);
 						playerInitResponses.clear();
 					}
-					for (Completion<Void> completion : initResponses) {
+					for(Completion<Void> completion : initResponses) {
 						completion.reject(new SpotifyError(Error.kSpErrorInitFailed, error.getLocalizedMessage()));
 					}
 				}
@@ -431,10 +443,11 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 								initResponses = new ArrayList<>(playerInitResponses);
 								playerInitResponses.clear();
 							}
-							for (Completion<Void> completion : initResponses) {
-								if (error == null) {
+							for(Completion<Void> completion : initResponses) {
+								if(error == null) {
 									completion.resolve(null);
-								} else {
+								}
+								else {
 									completion.reject(error);
 								}
 							}
@@ -446,17 +459,19 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	}
 
 
+
 	private void loginPlayer(final Completion<Void> completion) {
 		boolean playerLoggedIn = false;
 		boolean firstLoginAttempt = false;
 
 		// add completion to a list to be called when the login succeeds or fails
-		synchronized (playerLoginResponses) {
+		synchronized(playerLoginResponses) {
 			// ensure we're not already logged in
-			if (player.isLoggedIn()) {
+			if(player.isLoggedIn()) {
 				playerLoggedIn = true;
-			} else {
-				if (playerLoginResponses.size() == 0) {
+			}
+			else {
+				if(playerLoginResponses.size()==0) {
 					firstLoginAttempt = true;
 				}
 				//wait for RNSpotifyModule.onLoggedIn
@@ -466,52 +481,58 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 			}
 		}
 
-		if (playerLoggedIn) {
+		if(playerLoggedIn) {
 			// we're already logged in, so finish
 			completion.resolve(null);
-		} else if (firstLoginAttempt) {
+		}
+		else if(firstLoginAttempt) {
 			// only the first thread to call loginPlayer should actually attempt to log the player in
 			player.login(auth.getAccessToken());
 		}
 	}
 
 
+
 	private void logoutPlayer(final Completion<Void> completion) {
-		if (player == null) {
+		if(player == null) {
 			completion.resolve(null);
 			return;
 		}
 
 		boolean loggedOut = false;
 
-		synchronized (playerLogoutResponses) {
-			if (!player.isLoggedIn()) {
+		synchronized(playerLogoutResponses) {
+			if(!player.isLoggedIn()) {
 				loggedOut = true;
-			} else {
+			}
+			else {
 				// wait for RNSpotifyModule.onLoggedOut
 				playerLogoutResponses.add(completion);
 			}
 		}
 
-		if (loggedOut) {
+		if(loggedOut) {
 			Spotify.destroyPlayer(this);
 			player = null;
 			completion.resolve(null);
-		} else if (!loggingOutPlayer) {
+		}
+		else if(!loggingOutPlayer) {
 			loggingOutPlayer = true;
 			player.logout();
 		}
 	}
 
 
+
 	@ReactMethod
 	//login()
 	public void login(ReadableMap options, final Promise promise) {
 		// ensure we're initialized
-		if (!initialized) {
+		if(!initialized) {
 			SpotifyError.Code.NotInitialized.reject(promise);
 			return;
-		} else if (isLoggedIn()) {
+		}
+		else if(isLoggedIn()) {
 			promise.resolve(true);
 			return;
 		}
@@ -530,7 +551,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 
 			@Override
 			public void onAuthActivityFailure(AuthActivity activity, final SpotifyError error) {
-				if (activity == null) {
+				if(activity == null) {
 					error.reject(promise);
 					return;
 				}
@@ -582,7 +603,8 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 										if (error != null) {
 											auth.clearSession();
 											error.reject(promise);
-										} else {
+										}
+										else {
 											boolean authLoggedIn = auth.isLoggedIn();
 											if (authLoggedIn) {
 												loggedIn = true;
@@ -626,7 +648,8 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 								if (error != null) {
 									auth.clearSession();
 									error.reject(promise);
-								} else {
+								}
+								else {
 									boolean authLoggedIn = auth.isLoggedIn();
 									if (authLoggedIn) {
 										loggedIn = true;
@@ -646,16 +669,17 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	}
 
 
+
 	@ReactMethod
 	//logout()
 	public void logout(final Promise promise) {
 		// ensure we've been initialized
-		if (!initialized) {
+		if(!initialized) {
 			SpotifyError.Code.NotInitialized.reject(promise);
 			return;
 		}
 		// make sure we're not already logged out
-		if (!isLoggedIn()) {
+		if(!isLoggedIn()) {
 			promise.resolve(null);
 			return;
 		}
@@ -670,7 +694,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 			public void onResolve(Void unused) {
 				boolean wasLoggedIn = clearSession();
 				promise.resolve(null);
-				if (wasLoggedIn) {
+				if(wasLoggedIn) {
 					sendEvent("logout");
 				}
 			}
@@ -678,8 +702,9 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	}
 
 
+
 	private void startAuthRenewalTimer() {
-		if (authRenewalTimer != null) {
+		if(authRenewalTimer != null) {
 			// auth renewal timer has already been started, don't bother starting again
 			return;
 		}
@@ -688,28 +713,30 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 
 	private double getTokenRefreshEarliness() {
 		String key = "tokenRefreshEarliness";
-		if (!options.hasKey(key) || options.getType(key) != ReadableType.Number) {
+		if(!options.hasKey(key) || options.getType(key) != ReadableType.Number) {
 			return 300.0;
 		}
 		return options.getDouble(key);
 	}
 
 	private void scheduleAuthRenewalTimer() {
-		if (auth == null || auth.tokenRefreshURL == null || auth.getRefreshToken() == null) {
+		if(auth == null || auth.tokenRefreshURL == null || auth.getRefreshToken() == null) {
 			// we can't perform token refresh, so don't bother scheduling the timer
 			return;
 		}
 		long now = (new Date()).getTime();
 		long expirationTime = auth.getExpireDate().getTime();
 		long timeDiff = expirationTime - now;
-		long tokenRefreshEarliness = (long) (getTokenRefreshEarliness() * 1000);
+		long tokenRefreshEarliness = (long)(getTokenRefreshEarliness() * 1000);
 		final long renewalTimeDiff = (expirationTime - tokenRefreshEarliness) - now;
-		if (timeDiff <= 30.0 || timeDiff <= (tokenRefreshEarliness + 30.0) || renewalTimeDiff <= 0.0) {
+		if(timeDiff <= 30.0 || timeDiff <= (tokenRefreshEarliness + 30.0) || renewalTimeDiff <= 0.0) {
 			onAuthRenewalTimerFire();
-		} else {
-			if (authRenewalTimer == null) {
+		}
+		else {
+			if(authRenewalTimer == null) {
 				authRenewalTimer = new Handler();
-			} else {
+			}
+			else {
 				authRenewalTimer.removeCallbacksAndMessages(null);
 			}
 			authRenewalTimer.postDelayed(new Runnable() {
@@ -726,7 +753,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 			@Override
 			public void onComplete(Boolean renewed, SpotifyError error) {
 				// ensure the timer has not been stopped
-				if (authRenewalTimer != null) {
+				if(authRenewalTimer != null) {
 					// reschedule the timer
 					scheduleAuthRenewalTimer();
 				}
@@ -735,7 +762,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	}
 
 	private void stopAuthRenewalTimer() {
-		if (authRenewalTimer != null) {
+		if(authRenewalTimer != null) {
 			authRenewalTimer.removeCallbacksAndMessages(null);
 			authRenewalTimer = null;
 		}
@@ -750,10 +777,11 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	}
 
 
+
 	@ReactMethod(isBlockingSynchronousMethod = true)
 	//isLoggedIn()
 	public Boolean isLoggedIn() {
-		if (initialized && loggedIn && auth.isLoggedIn()) {
+		if(initialized && loggedIn && auth.isLoggedIn()) {
 			return true;
 		}
 		return false;
@@ -764,6 +792,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	public void isLoggedInAsync(final Promise promise) {
 		promise.resolve(isLoggedIn());
 	}
+
 
 
 	@ReactMethod(isBlockingSynchronousMethod = true)
@@ -779,44 +808,50 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	}
 
 
+
+
 	private void prepareForPlayer(final Completion<Void> completion) {
-		if (!initialized) {
+		if(!initialized) {
 			completion.reject(new SpotifyError(SpotifyError.Code.NotInitialized));
 			return;
 		}
 		logBackInIfNeeded(new Completion<Boolean>() {
 			@Override
 			public void onReject(SpotifyError error) {
-				if (player == null && auth.hasPlayerScope()) {
+				if(player == null && auth.hasPlayerScope()) {
 					completion.reject(error);
-				} else {
+				}
+				else {
 					completion.resolve(null);
 				}
 			}
 
 			@Override
 			public void onResolve(Boolean loggedIn) {
-				if (isLoggedIn()) {
+				if(isLoggedIn()) {
 					initializePlayerIfNeeded(new Completion<Void>() {
 						@Override
 						public void onReject(SpotifyError error) {
-							if (player == null && auth.hasPlayerScope()) {
+							if(player == null && auth.hasPlayerScope()) {
 								completion.reject(error);
-							} else {
+							}
+							else {
 								completion.resolve(null);
 							}
 						}
 
 						@Override
 						public void onResolve(Void unused) {
-							if (player == null && auth.hasPlayerScope()) {
+							if(player == null && auth.hasPlayerScope()) {
 								completion.reject(new SpotifyError(SpotifyError.Code.PlayerNotReady));
-							} else {
+							}
+							else {
 								completion.resolve(null);
 							}
 						}
 					});
-				} else {
+				}
+				else {
 					completion.reject(new SpotifyError(SpotifyError.Code.NotLoggedIn));
 				}
 			}
@@ -826,7 +861,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	@ReactMethod
 	//playURI(spotifyURI, startIndex, startPosition)
 	public void playURI(final String spotifyURI, final int startIndex, final double startPosition, final Promise promise) {
-		if (spotifyURI == null) {
+		if(spotifyURI==null) {
 			SpotifyError.getNullParameterError("spotifyURI").reject(promise);
 			return;
 		}
@@ -838,7 +873,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 
 			@Override
 			public void onResolve(Void unused) {
-				player.playUri(new Player.OperationCallback() {
+				player.playUri( new Player.OperationCallback() {
 					@Override
 					public void onError(com.spotify.sdk.android.player.Error error) {
 						new SpotifyError(error).reject(promise);
@@ -848,7 +883,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 					public void onSuccess() {
 						promise.resolve(null);
 					}
-				}, spotifyURI, startIndex, (int) (startPosition * 1000));
+				}, spotifyURI, startIndex, (int)(startPosition*1000));
 			}
 		});
 	}
@@ -856,7 +891,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	@ReactMethod
 	//queueURI(spotifyURI)
 	public void queueURI(final String spotifyURI, final Promise promise) {
-		if (spotifyURI == null) {
+		if(spotifyURI==null) {
 			SpotifyError.getNullParameterError("spotifyURI").reject(promise);
 			return;
 		}
@@ -899,7 +934,8 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 
 	@ReactMethod
 	//getVolumeAsync()
-	public void getVolumeAsync(final Promise promise) {
+	public void getVolumeAsync(final Promise promise)
+	{
 		promise.resolve(getVolume());
 	}
 
@@ -914,8 +950,8 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 
 			@Override
 			public void onResolve(Void unused) {
-				if (playing) {
-					player.resume(new Player.OperationCallback() {
+				if(playing) {
+					player.resume(new Player.OperationCallback(){
 						@Override
 						public void onError(com.spotify.sdk.android.player.Error error) {
 							new SpotifyError(error).reject(promise);
@@ -926,8 +962,9 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 							promise.resolve(null);
 						}
 					});
-				} else {
-					player.pause(new Player.OperationCallback() {
+				}
+				else {
+					player.pause(new Player.OperationCallback(){
 						@Override
 						public void onError(com.spotify.sdk.android.player.Error error) {
 							new SpotifyError(error).reject(promise);
@@ -946,7 +983,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	@ReactMethod(isBlockingSynchronousMethod = true)
 	//getPlaybackState()
 	public WritableMap getPlaybackState() {
-		if (player == null) {
+		if(player==null) {
 			return null;
 		}
 		return Convert.fromPlaybackState(player.getPlaybackState());
@@ -961,7 +998,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	@ReactMethod(isBlockingSynchronousMethod = true)
 	//getPlaybackMetadata()
 	public WritableMap getPlaybackMetadata() {
-		if (player == null) {
+		if(player == null) {
 			return null;
 		}
 		return Convert.fromPlaybackMetadata(player.getMetadata());
@@ -1027,7 +1064,8 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 
 	@ReactMethod
 	//seek(position)
-	public void seek(final double position, final Promise promise) {
+	public void seek(final double position, final Promise promise)
+	{
 		prepareForPlayer(new Completion<Void>() {
 			@Override
 			public void onReject(SpotifyError error) {
@@ -1046,7 +1084,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 					public void onSuccess() {
 						promise.resolve(null);
 					}
-				}, (int) (position * 1000));
+				}, (int)(position*1000));
 			}
 		});
 	}
@@ -1104,8 +1142,10 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	}
 
 
+
+
 	private void prepareForRequest(final Completion<Void> completion) {
-		if (!initialized) {
+		if(!initialized) {
 			completion.reject(new SpotifyError(SpotifyError.Code.NotInitialized));
 			return;
 		}
@@ -1120,7 +1160,8 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	private void doAPIRequest(final String endpoint, final String method, final ReadableMap params, final boolean jsonBody, final Completion<Object> completion) {
 		prepareForRequest(new Completion<Void>() {
 			@Override
-			public void onReject(SpotifyError error) {
+			public void onReject(SpotifyError error)
+			{
 				completion.reject(error);
 			}
 
@@ -1129,30 +1170,31 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 				// build headers
 				HashMap<String, String> headers = new HashMap<>();
 				String accessToken = auth.getAccessToken();
-				if (accessToken != null) {
-					headers.put("Authorization", "Bearer " + accessToken);
+				if(accessToken != null) {
+					headers.put("Authorization", "Bearer "+accessToken);
 				}
 
 				// build url
-				String url = "https://api.spotify.com/" + endpoint;
-				if (!jsonBody && params != null && method.equalsIgnoreCase("GET")) {
-					url += "?" + Utils.makeQueryString(params);
+				String url = "https://api.spotify.com/"+endpoint;
+				if(!jsonBody && params!=null && method.equalsIgnoreCase("GET")) {
+					url += "?"+Utils.makeQueryString(params);
 				}
 
 				//create request body
 				byte[] body = null;
-				if (params != null) {
-					if (jsonBody) {
+				if(params!=null) {
+					if(jsonBody) {
 						JSONObject obj = Convert.toJSONObject(params);
 						if (obj != null) {
 							body = obj.toString().getBytes();
 						}
-					} else if (!method.equalsIgnoreCase("GET")) {
+					}
+					else if(!method.equalsIgnoreCase("GET")) {
 						body = Utils.makeQueryString(params).getBytes();
 					}
 				}
 
-				if (jsonBody) {
+				if(jsonBody) {
 					headers.put("Content-Type", "application/json; charset=utf-8");
 				}
 
@@ -1167,18 +1209,19 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 						String responseStr = Utils.getResponseString(response);
 						JSONObject resultObj = null;
 						String contentType = response.headers.get("Content-Type");
-						if (contentType != null) {
+						if(contentType!=null) {
 							contentType = contentType.split(";")[0].trim();
 						}
-						if (contentType != null && contentType.equalsIgnoreCase("application/json") && response.statusCode != 204) {
+						if(contentType!=null && contentType.equalsIgnoreCase("application/json") && response.statusCode!=204) {
 							try {
 								resultObj = new JSONObject(responseStr);
-								if (resultObj.has("error")) {
-									if (resultObj.has("error_description")) {
+								if(resultObj.has("error")) {
+									if(resultObj.has("error_description")) {
 										String errorCode = resultObj.getString("error");
 										String errorDescription = resultObj.getString("error_description");
 										completion.reject(new SpotifyError(errorCode, errorDescription));
-									} else {
+									}
+									else {
 										JSONObject errorObj = resultObj.getJSONObject("error");
 										int statusCode = errorObj.getInt("status");
 										String errorMessage = errorObj.getString("message");
@@ -1186,17 +1229,19 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 									}
 									return;
 								}
-							} catch (JSONException e) {
+							}
+							catch (JSONException e) {
 								completion.reject(new SpotifyError(SpotifyError.Code.BadResponse));
 								return;
 							}
 						}
 
 						Object result = null;
-						if (resultObj != null) {
+						if(resultObj != null) {
 							result = Convert.fromJSONObject(resultObj);
-						} else {
-							if (responseStr.length() > 0) {
+						}
+						else {
+							if(responseStr.length() > 0) {
 								result = responseStr;
 							}
 						}
@@ -1212,16 +1257,19 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	public void sendRequest(String endpoint, String method, ReadableMap params, boolean jsonBody, final Promise promise) {
 		doAPIRequest(endpoint, method, params, jsonBody, new Completion<Object>() {
 			@Override
-			public void onReject(SpotifyError error) {
+			public void onReject(SpotifyError error)
+			{
 				error.reject(promise);
 			}
 
 			@Override
-			public void onResolve(Object result) {
+			public void onResolve(Object result)
+			{
 				promise.resolve(result);
 			}
 		});
 	}
+
 
 
 	//ConnectionStateCallback
@@ -1230,11 +1278,11 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	public void onLoggedIn() {
 		// handle loginPlayer callbacks
 		ArrayList<Completion<Void>> loginResponses;
-		synchronized (playerLoginResponses) {
+		synchronized(playerLoginResponses) {
 			loginResponses = new ArrayList<>(playerLoginResponses);
 			playerLoginResponses.clear();
 		}
-		for (Completion<Void> response : loginResponses) {
+		for(Completion<Void> response : loginResponses) {
 			response.resolve(null);
 		}
 	}
@@ -1246,23 +1294,23 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 
 		// handle loginPlayer callbacks
 		ArrayList<Completion<Void>> loginResponses;
-		synchronized (playerLoginResponses) {
+		synchronized(playerLoginResponses) {
 			loginResponses = new ArrayList<>(playerLoginResponses);
 			playerLoginResponses.clear();
 		}
-		for (Completion<Void> response : loginResponses) {
+		for(Completion<Void> response : loginResponses) {
 			response.reject(new SpotifyError(SpotifyError.Code.NotLoggedIn, "You have been logged out"));
 		}
 
 		// if we didn't explicitly log out, and we can renew the session, then try to renew the session
-		if (!wasLoggingOutPlayer && auth.tokenRefreshURL != null && auth.getRefreshToken() != null) {
+		if(!wasLoggingOutPlayer && auth.tokenRefreshURL != null && auth.getRefreshToken() != null) {
 			final Object reference = this;
 			renewSession(new Completion<Boolean>() {
 				@Override
 				public void onComplete(Boolean renewed, SpotifyError error) {
-					if (error != null || !renewed.booleanValue()) {
+					if(error != null || !renewed.booleanValue()) {
 						// we couldn't renew the session
-						if (isLoggedIn()) {
+						if(isLoggedIn()) {
 							// clear session and destroy player
 							clearSession();
 							Spotify.destroyPlayer(reference);
@@ -1270,12 +1318,14 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 							// send logout event
 							sendEvent("logout");
 						}
-					} else {
+					}
+					else {
 						// we renewed the auth token, so we're good here
 					}
 				}
 			}, true);
-		} else {
+		}
+		else {
 			// clear session and destroy player
 			clearSession();
 			Spotify.destroyPlayer(this);
@@ -1283,11 +1333,11 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 
 			// handle logoutPlayer callbacks
 			ArrayList<Completion<Void>> logoutResponses;
-			synchronized (playerLogoutResponses) {
+			synchronized(playerLogoutResponses) {
 				logoutResponses = new ArrayList<>(playerLogoutResponses);
 				playerLogoutResponses.clear();
 			}
-			for (Completion<Void> response : logoutResponses) {
+			for(Completion<Void> response : logoutResponses) {
 				response.resolve(null);
 			}
 
@@ -1299,7 +1349,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	@Override
 	public void onLoginFailed(Error error) {
 		boolean sendLogoutEvent = false;
-		if (isLoggedIn()) {
+		if(isLoggedIn()) {
 			// clear session and destroy player
 			clearSession();
 			Spotify.destroyPlayer(this);
@@ -1309,16 +1359,16 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 
 		// handle loginPlayer callbacks
 		ArrayList<Completion<Void>> loginResponses;
-		synchronized (playerLoginResponses) {
+		synchronized(playerLoginResponses) {
 			loginResponses = new ArrayList<>(playerLoginResponses);
 			playerLoginResponses.clear();
 		}
-		for (Completion<Void> response : loginResponses) {
+		for(Completion<Void> response : loginResponses) {
 			response.reject(new SpotifyError(error));
 		}
 
 		// send logout event if necessary
-		if (sendLogoutEvent) {
+		if(sendLogoutEvent) {
 			sendEvent("logout");
 		}
 	}
@@ -1334,6 +1384,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	}
 
 
+
 	//Player.NotificationCallback
 
 	private WritableMap createPlaybackEvent() {
@@ -1341,14 +1392,16 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 		WritableMap state = getPlaybackState();
 
 		WritableMap event = Arguments.createMap();
-		if (state != null) {
+		if(state != null) {
 			event.putMap("state", state);
-		} else {
+		}
+		else {
 			event.putNull("state");
 		}
-		if (metadata != null) {
+		if(metadata != null) {
 			event.putMap("metadata", metadata);
-		} else {
+		}
+		else {
 			event.putNull("metadata");
 		}
 		event.putNull("error");
@@ -1436,7 +1489,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 
 	@Override
 	public void onPlaybackEvent(PlayerEvent playerEvent) {
-		switch (playerEvent) {
+		switch(playerEvent) {
 			case kSpPlaybackNotifyPlay:
 				this.sendEvent("play", createPlaybackEvent());
 				showNotification("PLAY");
