@@ -1451,6 +1451,10 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 
 		Metadata playerMetadata = player.getMetadata();
 
+		if (playerMetadata.currentTrack == null) {
+			return;
+		}
+
 		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(reactContext, NOTIFICATION_CHANNEL_ID)
 			.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
 			.setContentTitle(playerMetadata.currentTrack.name)
