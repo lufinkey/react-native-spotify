@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.os.Handler;
+import android.util.Log;
 import android.view.Gravity;
 
 import com.android.volley.NetworkResponse;
@@ -97,6 +98,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	}
 
 	private void sendEvent(String event, Object... args) {
+		Log.d("rn-spotify-sdk", "emitting event "+event);
 		RNEventEmitter.emitEvent(this.reactContext, this, event, args);
 	}
 

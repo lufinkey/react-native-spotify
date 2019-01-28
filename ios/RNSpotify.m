@@ -106,6 +106,7 @@ RCT_EXPORT_METHOD(__registerAsJSEventEmitter:(int)moduleId) {
 }
 
 -(void)sendEvent:(NSString*)event args:(NSArray*)args {
+	printOutLog(@"emitting event %@", event);
 	[RNEventEmitter emitEvent:event withParams:args module:self bridge:_bridge];
 }
 
@@ -1044,6 +1045,8 @@ RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method param
 }
 
 -(void)audioStreamingDidLogout:(SPTAudioStreamingController*)audioStreaming {
+	printOutLog(@"player logged out");
+	
 	_loggingInPlayer = NO;
 	
 	BOOL wasLoggingOutPlayer = _loggingOutPlayer;
