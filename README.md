@@ -75,7 +75,7 @@ import Spotify from 'rn-spotify-sdk';
 	- *Properties*
 	
 		- **accessToken** - A token used to communicate with the Spotify API
-		- **refreshToken** - An encrypted token used to get a new access token when it expires. This should be encrypted by your token swap service, as per OAuth standards.
+		- **refreshToken** - An encrypted token used to get a new access token when they expire. This should be encrypted by your token swap service, as per OAuth standards.
 		- **expireTime** - The time that the access token expires, in milliseconds from January 1, 1970 00:00:00 UTC
 
 
