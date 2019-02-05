@@ -262,8 +262,8 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	- *Parameters*
 		- **options** - an object with options to pass to the Spotify Module
 			- **clientID** - (*Required*) Your spotify application's ClientID that you registered with spotify [here](https://developer.spotify.com/my-applications)
-			- **redirectURL** - The redirect URL to use when you've finished logging in. You NEED to set this URL for your application [here](https://developer.spotify.com/my-applications), otherwise the login screen will not close
-			- **sessionUserDefaultsKey** - The preference key to use to store session data for this module
+			- **redirectURL** - (*Required*) The redirect URL to use when you've finished logging in. You NEED to set this URL for your application [here](https://developer.spotify.com/my-applications), otherwise the login screen will not close
+			- **sessionUserDefaultsKey** - The preference key to use in order to store session data for this module. Set this to a string of your choice when you initialize in order to persist user information between app uses.
 			- **scopes** - An array of scopes that define permissions for the Spotify API. A list of scopes can be found [here](https://developer.spotify.com/web-api/using-scopes/)
 			- **tokenSwapURL** - The URL to use to swap an authentication code for an access token (see [Token swap and refresh](#token-swap-and-refresh) section for more info)
 			- **tokenRefreshURL** - The URL to use to get a new access token from a refresh token
