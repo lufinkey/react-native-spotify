@@ -45,7 +45,6 @@ public class TrackController implements AudioController {
 
     public int onAudioDataDelivered(short[] samples, int sampleCount, int sampleRate, int channels) {
         if (this.mAudioTrack != null && (this.mSampleRate != sampleRate || this.mChannels != channels)) {
-            Object var5 = this.mPlayingMutex;
             synchronized(this.mPlayingMutex) {
                 this.mAudioTrack.release();
                 this.mAudioTrack = null;
@@ -60,9 +59,7 @@ public class TrackController implements AudioController {
 
         try {
             this.mExecutorService.execute(this.mAudioRunnable);
-        } catch (RejectedExecutionException var7) {
-            ;
-        }
+        } catch (RejectedExecutionException e) { }
 
         return this.mAudioBuffer.write(samples, sampleCount);
     }
