@@ -52,6 +52,8 @@ buildTypes {
 packagingOptions {
     pickFirst 'lib/armeabi-v7a/libgnustl_shared.so'
     pickFirst 'lib/x86/libgnustl_shared.so'
+    exclude 'lib/arm64-v8a/libgnustl_shared.so'
+    exclude 'lib/x86_64/libgnustl_shared.so'
 }
 ...
 ```
