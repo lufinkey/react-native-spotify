@@ -125,7 +125,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 			return;
 		}
 		else if(!options.hasKey("clientID")) {
-			SpotifyError.getMissingOptionError("clientId").reject(promise);
+			SpotifyError.getMissingOptionError("clientID").reject(promise);
 			return;
 		}
 
