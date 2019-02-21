@@ -208,7 +208,7 @@ Spotify.getMyPlaylists = (options) => {
 	return sendRequest('v1/me/playlists', 'GET', body, false);
 }
 
-Spotify.getMyTop = (options, type = 'artists') => {
+Spotify.getMyTop = (type, options) => {
 	const body = {...options};
 	return sendRequest(`v1/me/top/${type}`, 'GET', body, false);
 }
