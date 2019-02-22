@@ -8,14 +8,19 @@ import {
 	Text,
 	View
 } from 'react-native';
-import { StackNavigator } from 'react-navigation';
+import {
+	createSwitchNavigator,
+	createAppContainer
+} from 'react-navigation';
 
 var { InitialScreen } = require("./InitialScreen.js");
 var { PlayerScreen } = require("./PlayerScreen.js");
 
-export default App = StackNavigator({
+const App = createSwitchNavigator({
 	initial: { screen:InitialScreen },
 	player: { screen:PlayerScreen },
-},{
-	headerMode: 'screen',
 });
+
+const AppContainer = createAppContainer(App);
+
+export default AppContainer;
