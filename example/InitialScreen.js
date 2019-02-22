@@ -11,7 +11,7 @@ import {
 import Spotify from 'rn-spotify-sdk';
 
 
-export class InitialScreen extends PureComponent {
+export default class InitialScreen extends PureComponent {
 	static navigationOptions = {
 		header: null
 	};

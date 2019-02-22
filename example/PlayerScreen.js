@@ -10,7 +10,7 @@ import {
 import Spotify from 'rn-spotify-sdk';
 
 
-export class PlayerScreen extends PureComponent {
+export default class PlayerScreen extends PureComponent {
 	static navigationOptions = {
 		title: 'Player',
 	};

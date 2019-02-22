@@ -13,8 +13,8 @@ import {
 	createAppContainer
 } from 'react-navigation';
 
-var { InitialScreen } = require("./InitialScreen.js");
-var { PlayerScreen } = require("./PlayerScreen.js");
+import InitialScreen from './InitialScreen.js';
+import PlayerScreen from './PlayerScreen.js';
 
 const App = createSwitchNavigator({
 	initial: { screen:InitialScreen },
