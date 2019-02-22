@@ -58,7 +58,17 @@ packagingOptions {
 ...
 ```
 
-If you have issues linking the module, please check that gradle is updated to the latest version and that your project is synced.
+On Android, `react-native link` has a bug where it imports `RNSpotifyPackage` using the wrong bundle. You may have to make the following change:
+```java
+...
+// remove this line
+import com.spotify.sdk.android.authentication.RNSpotifyPackage;
+// replace with this line
+import com.lufinkey.react.spotify.RNSpotifyPackage;
+...
+```
+
+If you have issues linking the module, please check that gradle is updated to the latest version and that your project is synced. I also recommend you use the example app for reference.
 
 
 
