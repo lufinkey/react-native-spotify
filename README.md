@@ -58,7 +58,7 @@ packagingOptions {
 ...
 ```
 
-On Android, `react-native link` has a bug where it imports `RNSpotifyPackage` using the wrong bundle. You may have to make the following change:
+On Android, `react-native link` has a bug where it imports `RNSpotifyPackage` using the wrong bundle. You may have to make the following change to `MainApplication.java`:
 ```java
 ...
 import com.spotify.sdk.android.authentication.RNSpotifyPackage; // remove this line
