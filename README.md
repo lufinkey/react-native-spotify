@@ -66,7 +66,7 @@ import com.lufinkey.react.spotify.RNSpotifyPackage; // replace with this line
 ...
 ```
 
-If you have issues linking the module, please check that gradle is updated to the latest version and that your project is synced. I also recommend you use the example app for reference.
+If you have issues linking the module, please check that gradle is updated to the latest version and that your project is synced. Please use the example app for reference before opening an issue.
 
 
 
