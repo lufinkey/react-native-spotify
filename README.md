@@ -147,7 +147,6 @@ import Spotify from 'rn-spotify-sdk';
 	
 		- **state** - the player's current *PlaybackState*
 		- **metadata** - the player's current *PlaybackMetadata*
-		- **error** - an *Error*
 
 
 
