@@ -56,19 +56,20 @@ public class Auth
 	}
 
 	public void save() {
-		if (sessionUserDefaultsKey != null) {
-			SharedPreferences prefs = reactContext.getCurrentActivity().getSharedPreferences(sessionUserDefaultsKey, Context.MODE_PRIVATE);
-			SharedPreferences.Editor prefsEditor = prefs.edit();
-			prefsEditor.putString("accessToken", accessToken);
-			if(expireDate != null) {
-				prefsEditor.putLong("expireTime", expireDate.getTime());
-			}
-			else {
-				prefsEditor.putLong("expireTime", 0);
-			}
-			prefsEditor.putString("refreshToken", refreshToken);
-			prefsEditor.commit();
+		if (sessionUserDefaultsKey == null) {
+			return;
 		}
+		SharedPreferences prefs = reactContext.getCurrentActivity().getSharedPreferences(sessionUserDefaultsKey, Context.MODE_PRIVATE);
+		SharedPreferences.Editor prefsEditor = prefs.edit();
+		prefsEditor.putString("accessToken", accessToken);
+		if(expireDate != null) {
+			prefsEditor.putLong("expireTime", expireDate.getTime());
+		}
+		else {
+			prefsEditor.putLong("expireTime", 0);
+		}
+		prefsEditor.putString("refreshToken", refreshToken);
+		prefsEditor.commit();
 	}
 
 	private static HashMap<String,String> getCookies(android.webkit.CookieManager cookieManager, String url) {
