@@ -418,6 +418,37 @@ RCT_EXPORT_METHOD(renewSession:(RCTPromiseResolveBlock)resolve reject:(RCTPromis
 	}
 }
 
+RCT_EXPORT_METHOD(authenticate:(NSDictionary*)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
+	RNSpotifyError* loginOptionsError = nil;
+	RNSpotifyLoginOptions* loginOptions = [RNSpotifyLoginOptions fromDictionary:options fallback:_options error:&loginOptionsError];
+	if(loginOptionsError != nil) {
+		[loginOptionsError reject:reject];
+		return;
+	}
+	
+	// do UI logic on main thread
+	dispatch_async(dispatch_get_main_queue(), ^{
+		RNSpotifyAuthController* authController = [[RNSpotifyAuthController alloc] initWithOptions:loginOptions];
+		
+		__weak RNSpotifyAuthController* weakAuthController = authController;
+		authController.completion = [RNSpotifyCompletion<RNSpotifySessionData*> onComplete:^(RNSpotifySessionData* sessionData, RNSpotifyError* error) {
+			RNSpotifyAuthController* authController = weakAuthController;
+			[authController.presentingViewController dismissViewControllerAnimated:YES completion:^{
+				if(error != nil) {
+					[error reject:reject];
+				}
+				else {
+					resolve([RNSpotifyConvert RNSpotifySessionData:sessionData]);
+				}
+			}];
+		}];
+		
+		// present auth view controller
+		UIViewController* topViewController = [RNSpotifyAuthController topViewController];
+		[topViewController presentViewController:authController animated:YES completion:nil];
+	});
+}
+
 RCT_EXPORT_METHOD(login:(NSDictionary*)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
 	// ensure we're not already logging in
 	if(_loggingIn) {
@@ -468,6 +499,7 @@ RCT_EXPORT_METHOD(login:(NSDictionary*)options resolve:(RCTPromiseResolveBlock)r
 						[authController.presentingViewController dismissViewControllerAnimated:YES completion:^{
 							if (error != nil) {
 								[_auth clearSession];
+								_loggingIn = NO;
 								[error reject:reject];
 							}
 							else {
@@ -589,7 +621,10 @@ RCT_EXPORT_METHOD(isLoggedInAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPro
 }
 
 RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getAuth) {
-	return [RNSpotifyConvert RNSpotifyAuth:_auth];
+	if(_auth == nil) {
+		return [NSNull null];
+	}
+	return [RNSpotifyConvert RNSpotifySessionData:_auth.session];
 }
 
 RCT_EXPORT_METHOD(getAuthAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {

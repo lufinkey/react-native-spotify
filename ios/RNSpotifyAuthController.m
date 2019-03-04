@@ -187,9 +187,13 @@
 			return;
 		}
 		[RNSpotifyAuth swapCodeForToken:params[@"code"] url:_options.tokenSwapURL completion:[RNSpotifyCompletion onReject:^(RNSpotifyError *error) {
-			[_completion reject:error];
+			dispatch_async(dispatch_get_main_queue(), ^{
+				[_completion reject:error];
+			});
 		} onResolve:^(RNSpotifySessionData* sessionData) {
-			[_completion resolve:sessionData];
+			dispatch_async(dispatch_get_main_queue(), ^{
+				[_completion resolve:sessionData];
+			});
 		}]];
 	}
 	else {

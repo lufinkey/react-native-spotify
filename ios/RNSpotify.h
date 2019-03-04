@@ -23,7 +23,9 @@
 //isInitializedAsync()
 -(void)isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 
-//login()
+//authenticate(options)
+-(void)authenticate:(NSDictionary*)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
+//login(options)
 -(void)login:(NSDictionary*)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 //logout()
 -(void)logout:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;

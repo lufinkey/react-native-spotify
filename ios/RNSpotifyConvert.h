@@ -13,6 +13,6 @@
 +(id)SPTPlaybackState:(SPTPlaybackState*)state;
 +(id)SPTPlaybackTrack:(SPTPlaybackTrack*)track;
 +(id)SPTPlaybackMetadata:(SPTPlaybackMetadata*)metadata;
-+(id)RNSpotifyAuth:(RNSpotifyAuth*)auth;
++(id)RNSpotifySessionData:(RNSpotifySessionData*)session;
 
 @end
