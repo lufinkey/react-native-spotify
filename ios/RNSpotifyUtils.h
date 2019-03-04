@@ -14,5 +14,6 @@
 
 +(BOOL)isNull:(id)obj;
 +(id)getOption:(NSString*)option from:(NSDictionary*)options fallback:(NSDictionary*)fallback;
++(void)setOrRemoveObject:(id)object forKey:(NSString*)key in:(NSMutableDictionary*)dict;
 
 @end

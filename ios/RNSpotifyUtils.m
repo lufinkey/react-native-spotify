@@ -38,7 +38,19 @@
 	if(value == nil && fallback != nil) {
 		value = fallback[option];
 	}
+	if(value != nil && [value isKindOfClass:[NSNull class]]) {
+		return nil;
+	}
 	return value;
+}
+
++(void)setOrRemoveObject:(id)object forKey:(NSString*)key in:(NSMutableDictionary*)dict {
+	if(object != nil && ![object isKindOfClass:[NSNull null]]) {
+		[dict setObject:object forKey:key];
+	}
+	else {
+		[dict removeObjectForKey:key];
+	}
 }
 
 @end

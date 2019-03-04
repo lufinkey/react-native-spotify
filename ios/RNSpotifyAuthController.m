@@ -119,7 +119,6 @@
 }
 
 -(BOOL)canHandleRedirectURL:(NSURL*)url {
-	printOutLog(@"checking for redirect url in %@", url);
 	if(_options.redirectURL == nil) {
 		return NO;
 	}

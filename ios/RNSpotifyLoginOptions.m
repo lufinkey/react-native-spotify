@@ -51,33 +51,42 @@
 	return components.URL;
 }
 
-
 +(RNSpotifyLoginOptions*)fromDictionary:(NSDictionary*)dict fallback:(NSDictionary*)fallbackDict error:(RNSpotifyError**)error {
+	return [self fromDictionary:dict fallback:fallbackDict ignore:@[] error:error];
+}
+
++(RNSpotifyLoginOptions*)fromDictionary:(NSDictionary*)dict fallback:(NSDictionary*)fallbackDict ignore:(NSArray<NSString*>*)ignore error:(RNSpotifyError**)error {
 	RNSpotifyLoginOptions* options = [[RNSpotifyLoginOptions alloc] init];
 	// clientID
 	options.clientID = [RNSpotifyUtils getOption:@"clientID" from:dict fallback:fallbackDict];
 	if(options.clientID == nil) {
-		*error = [RNSpotifyError missingOptionErrorForName:@"clientID"];
-		return nil;
+		if(![ignore containsObject:@"ignore"]) {
+			*error = [RNSpotifyError missingOptionErrorForName:@"clientID"];
+			return nil;
+		}
 	}
-	if(![options.clientID isKindOfClass:[NSString class]]) {
+	else if(![options.clientID isKindOfClass:[NSString class]]) {
 		*error = [RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadParameter message:@"clientID must be a string"];
 		return nil;
 	}
 	// redirectURL
 	NSString* redirectURLString = [RNSpotifyUtils getOption:@"redirectURL" from:dict fallback:fallbackDict];
 	if(redirectURLString == nil) {
-		*error = [RNSpotifyError missingOptionErrorForName:@"redirectURL"];
-		return nil;
+		if(![ignore containsObject:@"redirectURL"]) {
+			*error = [RNSpotifyError missingOptionErrorForName:@"redirectURL"];
+			return nil;
+		}
 	}
-	if(![redirectURLString isKindOfClass:[NSString class]]) {
-		*error = [RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadParameter message:@"redirectURL must be a string"];
-		return nil;
-	}
-	options.redirectURL = [NSURL URLWithString:redirectURLString];
-	if(options.redirectURL == nil) {
-		*error = [RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadParameter message:@"redirectURL is not a valid URL"];
-		return nil;
+	else {
+		if(![redirectURLString isKindOfClass:[NSString class]]) {
+			*error = [RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadParameter message:@"redirectURL must be a string"];
+			return nil;
+		}
+		options.redirectURL = [NSURL URLWithString:redirectURLString];
+		if(options.redirectURL == nil) {
+			*error = [RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadParameter message:@"redirectURL is not a valid URL"];
+			return nil;
+		}
 	}
 	// scopes
 	options.scopes = [RNSpotifyUtils getOption:@"scopes" from:dict fallback:fallbackDict];
@@ -93,10 +102,7 @@
 	// tokenSwapURL
 	NSString* tokenSwapURLString = [RNSpotifyUtils getOption:@"tokenSwapURL" from:dict fallback:fallbackDict];
 	if(tokenSwapURLString != nil) {
-		if([tokenSwapURLString isKindOfClass:[NSNull class]]) {
-			tokenSwapURLString = nil;
-		}
-		else if(![tokenSwapURLString isKindOfClass:[NSString class]]) {
+		if(![tokenSwapURLString isKindOfClass:[NSString class]]) {
 			*error = [RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadParameter message:@"tokenSwapURL must be a string"];
 			return nil;
 		}
@@ -111,10 +117,7 @@
 	// tokenSwapURL
 	NSString* tokenRefreshURLString = [RNSpotifyUtils getOption:@"tokenRefreshURL" from:dict fallback:fallbackDict];
 	if(tokenRefreshURLString != nil) {
-		if([tokenRefreshURLString isKindOfClass:[NSNull class]]) {
-			tokenRefreshURLString = nil;
-		}
-		else if(![tokenRefreshURLString isKindOfClass:[NSString class]]) {
+		if(![tokenRefreshURLString isKindOfClass:[NSString class]]) {
 			*error = [RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadParameter message:@"tokenRefreshURL must be a string"];
 			return nil;
 		}

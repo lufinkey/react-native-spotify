@@ -290,7 +290,6 @@
 	[self.class performTokenURLRequestTo:url params:params completion:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
 		[completion reject:error];
 	} onResolve:^(NSDictionary* result) {
-		printOutLog(@"got result from token swap: %@", result);
 		NSString* accessToken = result[@"access_token"];
 		NSString* refreshToken = result[@"refresh_token"];
 		NSNumber* expireSeconds = result[@"expires_in"];

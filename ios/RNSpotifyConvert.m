@@ -74,7 +74,8 @@
 	return @{
 		@"accessToken": [RNSpotifyConvert ID:session.accessToken],
 		@"refreshToken": [RNSpotifyConvert ID:session.refreshToken],
-		@"expireTime": (session.expireDate != nil) ? [NSNumber numberWithDouble:(session.expireDate.timeIntervalSince1970*1000.0)] : [NSNull null]
+		@"expireTime": (session.expireDate != nil) ? [NSNumber numberWithDouble:(session.expireDate.timeIntervalSince1970*1000.0)] : [NSNull null],
+		@"scopes": [RNSpotifyConvert ID:session.scopes]
 	};
 }
 

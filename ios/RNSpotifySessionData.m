@@ -8,6 +8,8 @@
 
 #import "RNSpotifySessionData.h"
 #import "RNSpotifyConvert.h"
+#import "RNSpotifyUtils.h"
+#import "HelperMacros.h"
 
 @implementation RNSpotifySessionData
 
@@ -32,10 +34,10 @@
 
 -(void)saveToUserDefaults:(NSUserDefaults*)userDefaults key:(NSString*)key {
 	NSMutableDictionary* sessionData = [NSMutableDictionary dictionary];
-	[sessionData setObject:[RNSpotifyConvert ID:_accessToken] forKey:@"accessToken"];
-	[sessionData setObject:[RNSpotifyConvert ID:_expireDate] forKey:@"expireDate"];
-	[sessionData setObject:[RNSpotifyConvert ID:_refreshToken] forKey:@"refreshToken"];
-	[sessionData setObject:[RNSpotifyConvert ID:_scopes] forKey:@"scopes"];
+	[RNSpotifyUtils setOrRemoveObject:_accessToken forKey:@"accessToken" in:sessionData];
+	[RNSpotifyUtils setOrRemoveObject:_expireDate forKey:@"expireDate" in:sessionData];
+	[RNSpotifyUtils setOrRemoveObject:_refreshToken forKey:@"refreshToken" in:sessionData];
+	[RNSpotifyUtils setOrRemoveObject:_scopes forKey:@"scopes" in:sessionData];
 	[userDefaults setObject:sessionData forKey:key];
 }
 

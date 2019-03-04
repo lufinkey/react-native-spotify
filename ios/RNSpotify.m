@@ -477,18 +477,22 @@ RCT_EXPORT_METHOD(login:(NSDictionary*)options resolve:(RCTPromiseResolveBlock)r
 		authController.completion = [RNSpotifyCompletion<RNSpotifySessionData*> onReject:^(RNSpotifyError* error) {
 			// login failed
 			RNSpotifyAuthController* authController = weakAuthController;
-			[authController.presentingViewController dismissViewControllerAnimated:YES completion:^{
-				_loggingIn = NO;
-				[error reject:reject];
-			}];
+			dispatch_async(dispatch_get_main_queue(), ^{
+				[authController.presentingViewController dismissViewControllerAnimated:YES completion:^{
+					_loggingIn = NO;
+					[error reject:reject];
+				}];
+			});
 		} onResolve:^(RNSpotifySessionData* sessionData) {
 			RNSpotifyAuthController* authController = weakAuthController;
 			if(sessionData == nil) {
 				// login cancelled
-				[authController.presentingViewController dismissViewControllerAnimated:YES completion:^{
-					_loggingIn = NO;
-					resolve(@NO);
-				}];
+				dispatch_async(dispatch_get_main_queue(), ^{
+					[authController.presentingViewController dismissViewControllerAnimated:YES completion:^{
+						_loggingIn = NO;
+						resolve(@NO);
+					}];
+				});
 			}
 			else {
 				[_auth startSession:sessionData options:loginOptions];
