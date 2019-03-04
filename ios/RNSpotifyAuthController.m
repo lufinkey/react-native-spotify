@@ -9,9 +9,13 @@
 #import "RNSpotifyAuthController.h"
 #import "RNSpotifyWebViewController.h"
 #import "RNSpotifyProgressView.h"
+#import "RNSpotifyAuth.h"
+#import "HelperMacros.h"
 
 @interface RNSpotifyAuthController() <UIWebViewDelegate> {
-	SPTAuth* _auth;
+	RNSpotifyLoginOptions* _options;
+	NSString* _xssState;
+	
 	RNSpotifyWebViewController* _webController;
 	RNSpotifyProgressView* _progressView;
 }
@@ -28,12 +32,15 @@
 	return topController;
 }
 
--(id)initWithAuth:(SPTAuth*)auth params:(NSDictionary<NSString*,NSString*>*)params {
+-(id)initWithOptions:(RNSpotifyLoginOptions*)options {
 	RNSpotifyWebViewController* rootController = [[RNSpotifyWebViewController alloc] init];
 	if(self = [super initWithRootViewController:rootController]) {
-		_auth = auth;
 		_webController = rootController;
 		_progressView = [[RNSpotifyProgressView alloc] init];
+		
+		
+		_options = options;
+		_xssState = [NSUUID UUID].UUIDString;
 		
 		self.navigationBar.barTintColor = [UIColor blackColor];
 		self.navigationBar.tintColor = [UIColor whiteColor];
@@ -45,26 +52,8 @@
 		//_webController.title = @"Log into Spotify";
 		_webController.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(didSelectCancelButton)];
 		
-		NSURL* authURL = _auth.spotifyWebAuthenticationURL;
-		if(params != nil && params.count > 0) {
-			NSURLComponents* urlComponents = [NSURLComponents componentsWithURL:_auth.spotifyWebAuthenticationURL resolvingAgainstBaseURL:YES];
-			NSMutableArray* queryItems = urlComponents.queryItems.mutableCopy;
-			for(NSString* key in params) {
-				id value = params[key];
-				// remove duplicate query item if it exists
-				for(NSUInteger i=0; i<queryItems.count; i++) {
-					NSURLQueryItem* queryItem = queryItems[i];
-					if([queryItem.name isEqualToString:key]) {
-						[queryItems removeObjectAtIndex:i];
-						break;
-					}
-				}
-				[queryItems addObject:[NSURLQueryItem queryItemWithName:key value:value]];
-			}
-			urlComponents.queryItems = queryItems;
-			authURL = urlComponents.URL;
-		}
-		NSURLRequest* request = [NSURLRequest requestWithURL:authURL];
+		NSURL* url = [_options spotifyWebAuthenticationURLWithState:_xssState];
+		NSURLRequest* request = [NSURLRequest requestWithURL:url];
 		[_webController.webView loadRequest:request];
 	}
 	return self;
@@ -91,9 +80,12 @@
 
 -(void)didSelectCancelButton {
 	if(_completion != nil) {
-		[_completion resolve:@NO];
+		[_completion resolve:nil];
 	}
 }
+
+
+#pragma mark - auth methods
 
 +(NSDictionary*)decodeQueryString:(NSString*)queryString {
 	NSArray<NSString*>* parts = [queryString componentsSeparatedByString:@"&"];
@@ -126,32 +118,92 @@
 	return [NSDictionary dictionary];
 }
 
+-(BOOL)canHandleRedirectURL:(NSURL*)url {
+	printOutLog(@"checking for redirect url in %@", url);
+	if(_options.redirectURL == nil) {
+		return NO;
+	}
+	if(![url.absoluteString hasPrefix:_options.redirectURL.absoluteString]) {
+		return NO;
+	}
+	NSString* path = _options.redirectURL.path;
+	if(path == nil || [path isEqualToString:@"/"]) {
+		path = @"";
+	}
+	NSString* cmpPath = url.path;
+	if(cmpPath == nil || [cmpPath isEqualToString:@"/"]) {
+		cmpPath = @"";
+	}
+	if(![path isEqualToString:cmpPath]) {
+		return NO;
+	}
+	return YES;
+}
+
+-(void)handleRedirectURL:(NSURL*)url {
+	NSDictionary* params = [RNSpotifyAuthController parseOAuthQueryParams:url];
+	NSString* state = params[@"state"];
+	NSString* error = params[@"error"];
+	if(error != nil) {
+		// error
+		if([error isEqualToString:@"access_denied"]) {
+			[_completion resolve:nil];
+		}
+		else {
+			[_completion reject:[RNSpotifyError errorWithCode:error message:error]];
+		}
+	}
+	else if(_xssState != nil && (state == nil || ![_xssState isEqualToString:state])) {
+		// state mismatch
+		[_completion reject:[RNSpotifyError errorWithCode:@"state_mismatch" message:@"state mismatch"]];
+	}
+	else if(params[@"access_token"] != nil) {
+		// access token
+		RNSpotifySessionData* sessionData = [[RNSpotifySessionData alloc] init];
+		sessionData.accessToken = params[@"access_token"];
+		NSString* expiresIn = params[@"expires_in"];
+		NSInteger expireSeconds = [expiresIn integerValue];
+		if(expireSeconds == 0) {
+			[_completion reject:[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadResponse message:@"Access token expire time was 0"]];
+			return;
+		}
+		NSString* scope = params[@"scope"];
+		NSArray<NSString*>* scopes = nil;
+		if(scope != nil) {
+			scopes = [scope componentsSeparatedByString:@" "];
+		}
+		else if(_options.scopes != nil) {
+			scopes = [NSArray arrayWithArray:_options.scopes];
+		}
+		sessionData.expireDate = [RNSpotifySessionData expireDateFromSeconds:expireSeconds];
+		sessionData.refreshToken = params[@"refresh_token"];
+		sessionData.scopes = scopes;
+		[_completion resolve:sessionData];
+	}
+	else if(params[@"code"] != nil) {
+		// authentication code
+		if(_options.tokenSwapURL == nil) {
+			[_completion reject:[RNSpotifyError missingOptionErrorForName:@"tokenSwapURL"]];
+			return;
+		}
+		[RNSpotifyAuth swapCodeForToken:params[@"code"] url:_options.tokenSwapURL completion:[RNSpotifyCompletion onReject:^(RNSpotifyError *error) {
+			[_completion reject:error];
+		} onResolve:^(RNSpotifySessionData* sessionData) {
+			[_completion resolve:sessionData];
+		}]];
+	}
+	else {
+		[_completion reject:[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadResponse message:@"Missing expected parameters in redirect URL"]];
+	}
+}
+
 
 #pragma mark - UIWebViewDelegate
 
 -(BOOL)webView:(UIWebView*)webView shouldStartLoadWithRequest:(NSURLRequest*)request navigationType:(UIWebViewNavigationType)navigationType {
-	if([_auth canHandleURL:request.URL]) {
+	if([self canHandleRedirectURL:request.URL]) {
 		[_progressView showInView:self.view animated:YES completion:nil];
-		[_auth handleAuthCallbackWithTriggeredAuthURL:request.URL callback:^(NSError* error, SPTSession* session){
-			if(session!=nil) {
-				_auth.session = session;
-			}
-			
-			if(error == nil) {
-				// success
-				if(_completion != nil) {
-					[_completion resolve:@YES];
-				}
-			}
-			else {
-				// error
-				// get actual oauth error if possible
-				NSDictionary* urlParams = [self.class parseOAuthQueryParams:request.URL];
-				if(_completion != nil) {
-					[_completion reject:[RNSpotifyError errorWithCode:urlParams[@"error"] error:error]];
-				}
-			}
-		}];
+		[self handleRedirectURL:request.URL];
 		return NO;
 	}
 	return YES;

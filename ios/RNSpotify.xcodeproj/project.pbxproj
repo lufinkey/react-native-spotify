@@ -16,6 +16,10 @@
 		A0AD6946200E7277003EC7D8 /* RNSpotifyWebViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A0AD6945200E7277003EC7D8 /* RNSpotifyWebViewController.m */; };
 		A0C233722036800A0063A745 /* RNSpotifyCompletion.m in Sources */ = {isa = PBXBuildFile; fileRef = A0C233712036800A0063A745 /* RNSpotifyCompletion.m */; };
 		A0C233752036800A0063A745 /* RNSpotifyError.m in Sources */ = {isa = PBXBuildFile; fileRef = A0C233742036800A0063A745 /* RNSpotifyError.m */; };
+		A58F1016222C8D1800B04887 /* RNSpotifyAuth.m in Sources */ = {isa = PBXBuildFile; fileRef = A58F1015222C8D1800B04887 /* RNSpotifyAuth.m */; };
+		A58F1019222CA04D00B04887 /* RNSpotifyUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = A58F1018222CA04D00B04887 /* RNSpotifyUtils.m */; };
+		A58F101C222D82FB00B04887 /* RNSpotifySessionData.m in Sources */ = {isa = PBXBuildFile; fileRef = A58F101B222D82FB00B04887 /* RNSpotifySessionData.m */; };
+		A58F101F222DAE2D00B04887 /* RNSpotifyLoginOptions.m in Sources */ = {isa = PBXBuildFile; fileRef = A58F101E222DAE2D00B04887 /* RNSpotifyLoginOptions.m */; };
 		B3E7B58A1CC2AC0600A0062D /* RNSpotify.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* RNSpotify.m */; };
 /* End PBXBuildFile section */
 
@@ -49,6 +53,14 @@
 		A0C233732036800A0063A745 /* RNSpotifyError.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RNSpotifyError.h; sourceTree = "<group>"; };
 		A0C233742036800A0063A745 /* RNSpotifyError.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNSpotifyError.m; sourceTree = "<group>"; };
 		A0CB1CFF1FB4D718009989EA /* HelperMacros.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HelperMacros.h; sourceTree = "<group>"; };
+		A58F1014222C8D1800B04887 /* RNSpotifyAuth.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RNSpotifyAuth.h; sourceTree = "<group>"; };
+		A58F1015222C8D1800B04887 /* RNSpotifyAuth.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNSpotifyAuth.m; sourceTree = "<group>"; };
+		A58F1017222CA04D00B04887 /* RNSpotifyUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RNSpotifyUtils.h; sourceTree = "<group>"; };
+		A58F1018222CA04D00B04887 /* RNSpotifyUtils.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNSpotifyUtils.m; sourceTree = "<group>"; };
+		A58F101A222D82FB00B04887 /* RNSpotifySessionData.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RNSpotifySessionData.h; sourceTree = "<group>"; };
+		A58F101B222D82FB00B04887 /* RNSpotifySessionData.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNSpotifySessionData.m; sourceTree = "<group>"; };
+		A58F101D222DAE2D00B04887 /* RNSpotifyLoginOptions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RNSpotifyLoginOptions.h; sourceTree = "<group>"; };
+		A58F101E222DAE2D00B04887 /* RNSpotifyLoginOptions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNSpotifyLoginOptions.m; sourceTree = "<group>"; };
 		B3E7B5881CC2AC0600A0062D /* RNSpotify.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNSpotify.h; sourceTree = "<group>"; };
 		B3E7B5891CC2AC0600A0062D /* RNSpotify.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNSpotify.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -81,14 +93,22 @@
 				A0CB1CFF1FB4D718009989EA /* HelperMacros.h */,
 				B3E7B5881CC2AC0600A0062D /* RNSpotify.h */,
 				B3E7B5891CC2AC0600A0062D /* RNSpotify.m */,
+				A58F1014222C8D1800B04887 /* RNSpotifyAuth.h */,
+				A58F1015222C8D1800B04887 /* RNSpotifyAuth.m */,
 				A00A83BD1FB5188A00394AF0 /* RNSpotifyConvert.h */,
 				A00A83BC1FB5188A00394AF0 /* RNSpotifyConvert.m */,
 				A0C233702036800A0063A745 /* RNSpotifyCompletion.h */,
 				A0C233712036800A0063A745 /* RNSpotifyCompletion.m */,
 				A0C233732036800A0063A745 /* RNSpotifyError.h */,
 				A0C233742036800A0063A745 /* RNSpotifyError.m */,
+				A58F101D222DAE2D00B04887 /* RNSpotifyLoginOptions.h */,
+				A58F101E222DAE2D00B04887 /* RNSpotifyLoginOptions.m */,
 				A0AD6941200E5B00003EC7D8 /* RNSpotifyProgressView.h */,
 				A0AD6942200E5B00003EC7D8 /* RNSpotifyProgressView.m */,
+				A58F101A222D82FB00B04887 /* RNSpotifySessionData.h */,
+				A58F101B222D82FB00B04887 /* RNSpotifySessionData.m */,
+				A58F1017222CA04D00B04887 /* RNSpotifyUtils.h */,
+				A58F1018222CA04D00B04887 /* RNSpotifyUtils.m */,
 				A0AD6944200E7277003EC7D8 /* RNSpotifyWebViewController.h */,
 				A0AD6945200E7277003EC7D8 /* RNSpotifyWebViewController.m */,
 				A01F099D1FAED1DB002AA48C /* RNSpotifyAuthController.h */,
@@ -166,12 +186,16 @@
 			buildActionMask = 2147483647;
 			files = (
 				A01F099F1FAED1DB002AA48C /* RNSpotifyAuthController.m in Sources */,
+				A58F101F222DAE2D00B04887 /* RNSpotifyLoginOptions.m in Sources */,
+				A58F101C222D82FB00B04887 /* RNSpotifySessionData.m in Sources */,
 				A00A83BE1FB5188A00394AF0 /* RNSpotifyConvert.m in Sources */,
+				A58F1016222C8D1800B04887 /* RNSpotifyAuth.m in Sources */,
 				A0AD6943200E5B00003EC7D8 /* RNSpotifyProgressView.m in Sources */,
 				B3E7B58A1CC2AC0600A0062D /* RNSpotify.m in Sources */,
 				A0C233722036800A0063A745 /* RNSpotifyCompletion.m in Sources */,
 				A0C233752036800A0063A745 /* RNSpotifyError.m in Sources */,
 				A0AD6946200E7277003EC7D8 /* RNSpotifyWebViewController.m in Sources */,
+				A58F1019222CA04D00B04887 /* RNSpotifyUtils.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
