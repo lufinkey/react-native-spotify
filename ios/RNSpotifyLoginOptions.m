@@ -60,7 +60,7 @@
 	// clientID
 	options.clientID = [RNSpotifyUtils getOption:@"clientID" from:dict fallback:fallbackDict];
 	if(options.clientID == nil) {
-		if(![ignore containsObject:@"ignore"]) {
+		if(![ignore containsObject:@"clientID"]) {
 			if(error != nil) {
 				*error = [RNSpotifyError missingOptionErrorForName:@"clientID"];
 			}
@@ -130,7 +130,7 @@
 			}
 		}
 	}
-	// tokenSwapURL
+	// tokenRefreshURL
 	NSString* tokenRefreshURLString = [RNSpotifyUtils getOption:@"tokenRefreshURL" from:dict fallback:fallbackDict];
 	if(tokenRefreshURLString != nil) {
 		if(![tokenRefreshURLString isKindOfClass:[NSString class]]) {
