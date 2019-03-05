@@ -142,11 +142,7 @@
 }
 
 -(void)renewSession:(RNSpotifyCompletion*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse {
-	if(_tokenRefreshURL == nil) {
-		[completion resolve:@NO];
-		return;
-	}
-	else if(_session.refreshToken == nil) {
+	if(![self canRefreshSession]) {
 		[completion resolve:@NO];
 		return;
 	}
