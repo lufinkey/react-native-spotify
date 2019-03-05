@@ -429,7 +429,7 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 			- **refreshToken** - An encrypted token used to get a new access token when it expires.
 			- **scopes** - An array of scopes that the session has access to. A list of scopes can be found [here](https://developer.spotify.com/web-api/using-scopes/).
 			- **clientID** - Your spotify application's client ID that you registered with spotify [here](https://developer.spotify.com/my-applications). Falls back to value given in **initialize**.
-			- **tokenRefreshURL** - The URL to use to get a new access token from a refresh token. Falls back to value given in **initialize**.
+			- **tokenRefreshURL** - The URL to use to get a new access token from a refresh token (see [Token swap and refresh](#token-swap-and-refresh) section for more info). Falls back to value given in **initialize**.
 	
 	- *Returns*
 	
