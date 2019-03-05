@@ -63,21 +63,6 @@
 	return UIStatusBarStyleLightContent;
 }
 
--(void)clearCookies:(void(^)())completion {
-	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-		NSHTTPCookieStorage *storage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
-		for (NSHTTPCookie *cookie in [storage cookies]) {
-			[storage deleteCookie:cookie];
-		}
-		[[NSUserDefaults standardUserDefaults] synchronize];
-		dispatch_async(dispatch_get_main_queue(), ^{
-			if(completion != nil) {
-				completion();
-			}
-		});
-	});
-}
-
 -(void)didSelectCancelButton {
 	if(_completion != nil) {
 		[_completion resolve:nil];
@@ -158,8 +143,8 @@
 	}
 	else if(params[@"access_token"] != nil) {
 		// access token
-		RNSpotifySessionData* sessionData = [[RNSpotifySessionData alloc] init];
-		sessionData.accessToken = params[@"access_token"];
+		RNSpotifySessionData* session = [[RNSpotifySessionData alloc] init];
+		session.accessToken = params[@"access_token"];
 		NSString* expiresIn = params[@"expires_in"];
 		NSInteger expireSeconds = [expiresIn integerValue];
 		if(expireSeconds == 0) {
@@ -174,10 +159,10 @@
 		else if(_options.scopes != nil) {
 			scopes = [NSArray arrayWithArray:_options.scopes];
 		}
-		sessionData.expireDate = [RNSpotifySessionData expireDateFromSeconds:expireSeconds];
-		sessionData.refreshToken = params[@"refresh_token"];
-		sessionData.scopes = scopes;
-		[_completion resolve:sessionData];
+		session.expireDate = [RNSpotifySessionData expireDateFromSeconds:expireSeconds];
+		session.refreshToken = params[@"refresh_token"];
+		session.scopes = scopes;
+		[_completion resolve:session];
 	}
 	else if(params[@"code"] != nil) {
 		// authentication code
@@ -189,9 +174,9 @@
 			dispatch_async(dispatch_get_main_queue(), ^{
 				[_completion reject:error];
 			});
-		} onResolve:^(RNSpotifySessionData* sessionData) {
+		} onResolve:^(RNSpotifySessionData* session) {
 			dispatch_async(dispatch_get_main_queue(), ^{
-				[_completion resolve:sessionData];
+				[_completion resolve:session];
 			});
 		}]];
 	}

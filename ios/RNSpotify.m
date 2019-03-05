@@ -332,7 +332,7 @@ RCT_EXPORT_METHOD(renewSession:(RCTPromiseResolveBlock)resolve reject:(RCTPromis
 
 
 -(void)initializePlayerIfNeeded:(RNSpotifyCompletion*)completion {
-	if(!_auth.hasStreamingScope) {
+	if(_auth.session == nil || !_auth.hasStreamingScope) {
 		[completion resolve:nil];
 		return;
 	}
@@ -1048,11 +1048,13 @@ RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method param
 	
 	// if we didn't explicitly log out, try to renew the session
 	if(!wasLoggingOutPlayer && _auth.canRefreshSession) {
+		// the player gets logged out when the session gets renewed (for some reason) so reuse access token if possible
 		NSDate* expireDate = (_auth.session != nil) ? _auth.session.expireDate : nil;
 		if((expireDate.timeIntervalSince1970 - [NSDate date].timeIntervalSince1970) >= 3500.0) {
 			[_player loginWithAccessToken:_auth.session.accessToken];
 			return;
 		}
+		// renew session
 		[self renewSession:[RNSpotifyCompletion onComplete:^(NSNumber* renewed, RNSpotifyError* error) {
 			if(error != nil || !renewed.boolValue) {
 				if([[self isLoggedIn] boolValue]) {

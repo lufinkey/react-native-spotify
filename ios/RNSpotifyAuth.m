@@ -85,7 +85,6 @@
 	return NO;
 }
 
-
 -(BOOL)hasStreamingScope {
 	if(_session == nil) {
 		return NO;
@@ -98,6 +97,25 @@
 		return YES;
 	}
 	return NO;
+}
+
+
+
+#pragma mark - Cookies
+
+-(void)clearCookies:(void(^)())completion {
+	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+		NSHTTPCookieStorage *storage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
+		for (NSHTTPCookie *cookie in [storage cookies]) {
+			[storage deleteCookie:cookie];
+		}
+		[[NSUserDefaults standardUserDefaults] synchronize];
+		dispatch_async(dispatch_get_main_queue(), ^{
+			if(completion != nil) {
+				completion();
+			}
+		});
+	});
 }
 
 
@@ -212,8 +230,8 @@
 					   || [error.code isEqualToString:[RNSpotifyError httpErrorForStatusCode:504].code]
 					   || [error.code isEqualToString:[RNSpotifyError httpErrorForStatusCode:598].code]
 					   || [error.code isEqualToString:[RNSpotifyError httpErrorForStatusCode:599].code])) {
-					   error = nil;
-				   }
+					error = nil;
+				}
 				
 				// check if the session was renewed, or if it got a failure error
 				if(_renewed || error != nil) {
@@ -277,13 +295,6 @@
 }
 
 +(void)swapCodeForToken:(NSString*)code url:(NSURL*)url completion:(RNSpotifyCompletion<RNSpotifySessionData*>*)completion {
-	[self swapCodeForToken:code url:url session:nil completion:completion];
-}
-
-+(void)swapCodeForToken:(NSString*)code url:(NSURL*)url session:(RNSpotifySessionData*)session completion:(RNSpotifyCompletion<RNSpotifySessionData*>*)completion {
-	if(session == nil) {
-		session = [[RNSpotifySessionData alloc] init];
-	}
 	NSDictionary* params = @{
 		@"code": code
 	};
@@ -302,6 +313,7 @@
 		if(scope != nil) {
 			scopes = [scope componentsSeparatedByString:@" "];
 		}
+		RNSpotifySessionData* session = [[RNSpotifySessionData alloc] init];
 		session.accessToken = accessToken;
 		session.refreshToken = refreshToken;
 		session.expireDate = [RNSpotifySessionData expireDateFromSeconds:expireSeconds.integerValue];

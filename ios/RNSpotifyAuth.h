@@ -37,6 +37,5 @@
 
 +(void)performTokenURLRequestTo:(NSURL*)url params:(NSDictionary*)params completion:(RNSpotifyCompletion<NSDictionary*>*)completion;
 +(void)swapCodeForToken:(NSString*)code url:(NSURL*)url completion:(RNSpotifyCompletion<RNSpotifySessionData*>*)completion;
-+(void)swapCodeForToken:(NSString*)code url:(NSURL*)url session:(RNSpotifySessionData*)session completion:(RNSpotifyCompletion<RNSpotifySessionData*>*)completion;
 
 @end

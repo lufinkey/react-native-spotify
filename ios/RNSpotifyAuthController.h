@@ -16,8 +16,6 @@
 
 -(id)initWithOptions:(RNSpotifyLoginOptions*)options;
 
--(void)clearCookies:(void(^)())completion;
-
 +(UIViewController*)topViewController;
 
 @property (nonatomic) RNSpotifyCompletion<RNSpotifySessionData*>* completion;
