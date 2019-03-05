@@ -9,11 +9,17 @@ RNEvents.conform(Spotify);
 
 const sendRequest = Spotify.sendRequest;
 const login = Spotify.login;
+const authenticate = Spotify.authenticate;
 
 
 Spotify.login = (options={}) => {
 	options = {...options};
 	return login(options);
+}
+
+Spotify.authenticate = (options={}) => {
+	options = {...options};
+	return authenticate(options);
 }
 
 
