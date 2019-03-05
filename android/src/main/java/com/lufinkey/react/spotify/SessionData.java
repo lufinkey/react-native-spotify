@@ -2,6 +2,9 @@ package com.lufinkey.react.spotify;
 
 import android.content.SharedPreferences;
 
+import com.facebook.react.bridge.ReadableArray;
+import com.facebook.react.bridge.ReadableMap;
+
 import java.util.Calendar;
 import java.util.Date;
 
@@ -82,6 +85,32 @@ public class SessionData {
 		SessionData session = new SessionData();
 		session.accessToken = accessToken;
 		session.expireDate = new Date(expireTime);
+		session.refreshToken = refreshToken;
+		session.scopes = scopes;
+		return session;
+	}
+
+	public static SessionData from(ReadableMap map) throws SpotifyError {
+		String accessToken = map.getString("accessToken");
+		if(accessToken == null) {
+			throw SpotifyError.getMissingOptionError("accessToken");
+		}
+		double expireTime = map.getDouble("expireTime");
+		if(expireTime == 0) {
+			throw SpotifyError.getMissingOptionError("expireTime");
+		}
+		String refreshToken = map.getString("refreshToken");
+		String[] scopes = null;
+		ReadableArray scope = map.getArray("scopes");
+		if(scope != null) {
+			scopes = new String[scope.size()];
+			for(int i=0; i<scope.size(); i++) {
+				scopes[i] = scope.getString(i);
+			}
+		}
+		SessionData session = new SessionData();
+		session.accessToken = accessToken;
+		session.expireDate = new Date((long)expireTime);
 		session.refreshToken = refreshToken;
 		session.scopes = scopes;
 		return session;

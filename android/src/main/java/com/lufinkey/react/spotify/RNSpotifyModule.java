@@ -500,7 +500,113 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 
 
 	@ReactMethod
-	//login()
+	//authenticate(options)
+	public void authenticate(ReadableMap options, final Promise promise) {
+		LoginOptions tmpLoginOptions = null;
+		try {
+			tmpLoginOptions = LoginOptions.from(options, this.options);
+		}
+		catch(SpotifyError error) {
+			error.reject(promise);
+			return;
+		}
+		final LoginOptions loginOptions = tmpLoginOptions;
+
+		// perform login flow
+		AuthActivity.performAuthFlow(reactContext.getCurrentActivity(), loginOptions, new AuthActivityListener() {
+			@Override
+			public void onAuthActivityCancel(AuthActivity activity) {
+				// dismiss activity
+				activity.finish(new Completion<Void>() {
+					@Override
+					public void onComplete(Void unused, SpotifyError unusedError) {
+						promise.resolve(false);
+					}
+				});
+			}
+
+			@Override
+			public void onAuthActivityFailure(AuthActivity activity, final SpotifyError error) {
+				if(activity == null) {
+					error.reject(promise);
+					return;
+				}
+				// dismiss activity
+				activity.finish(new Completion<Void>() {
+					@Override
+					public void onComplete(Void unused, SpotifyError unusedError) {
+						error.reject(promise);
+					}
+				});
+			}
+
+			@Override
+			public void onAuthActivityReceiveSession(final AuthActivity activity, final SessionData session) {
+				// dismiss activity
+				activity.finish(new Completion<Void>() {
+					@Override
+					public void onComplete(Void unused, SpotifyError unusedError) {
+						promise.resolve(Convert.fromSessionData(session));
+					}
+				});
+			}
+		});
+	}
+
+
+
+	@ReactMethod
+	//loginWithSession(options)
+	public void loginWithSession(ReadableMap options, final Promise promise) {
+		LoginOptions tmpLoginOptions = null;
+		try {
+			tmpLoginOptions = LoginOptions.from(options, this.options);
+		}
+		catch(SpotifyError error) {
+			error.reject(promise);
+			return;
+		}
+		final LoginOptions loginOptions = tmpLoginOptions;
+		SessionData session = null;
+		try {
+			session = SessionData.from(options);
+		}
+		catch(SpotifyError error) {
+			error.reject(promise);
+			return;
+		}
+		auth.startSession(session, loginOptions);
+		final RNSpotifyModule module = this;
+		initializePlayerIfNeeded(new Completion<Void>() {
+			@Override
+			public void onReject(SpotifyError error) {
+				auth.clearSession();
+				error.reject(promise);
+			}
+
+			@Override
+			public void onResolve(Void result) {
+				boolean wasLoggedIn = module.loggedIn;
+				boolean loggedIn = auth.isLoggedIn();
+				if(!wasLoggedIn) {
+					if(!loggedIn) {
+						(new SpotifyError(SpotifyError.Code.NotLoggedIn, "module was logged out")).reject(promise);
+						return;
+					}
+					module.loggedIn = true;
+				}
+				resolve(null);
+				if(!wasLoggedIn) {
+					sendEvent("login");
+				}
+			}
+		});
+	}
+
+
+
+	@ReactMethod
+	//login(options)
 	public void login(ReadableMap options, final Promise promise) {
 		// ensure we're initialized
 		if(!initialized) {
