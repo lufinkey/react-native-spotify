@@ -405,6 +405,7 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	
 	- *Parameters*
 		- **options**
+			- **showDialog** - Whether or not to force the user to approve the app again if they’ve already done so.
 			- **clientID** - Your spotify application's client ID that you registered with spotify [here](https://developer.spotify.com/my-applications). Falls back to value given in **initialize**.
 			- **redirectURL** - The redirect URL to use when you've finished logging in. You NEED to set this URL for your application [here](https://developer.spotify.com/my-applications), otherwise the login screen will not close. Falls back to value given in **initialize**.
 			- **scopes** - An array of scopes that define permissions for the Spotify API. A list of scopes can be found [here](https://developer.spotify.com/web-api/using-scopes/). Falls back to value given in **initialize**.
