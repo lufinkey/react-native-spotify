@@ -80,7 +80,7 @@ import Spotify from 'rn-spotify-sdk';
 
 - **Session**
 
-	Contains information about authentication data
+	Contains information about a session
 	
 	- *Properties*
 	
