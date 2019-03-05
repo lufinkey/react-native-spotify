@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "RNSpotifyError.h"
 
 @interface RNSpotifySessionData : NSObject
 
@@ -21,6 +22,7 @@
 
 -(void)saveToUserDefaults:(NSUserDefaults*)userDefaults key:(NSString*)key;
 +(RNSpotifySessionData*)sessionFromUserDefaults:(NSUserDefaults*)userDefaults key:(NSString*)key;
++(RNSpotifySessionData*)sessionFromDictionary:(NSDictionary*)dict error:(RNSpotifyError**)error;
 
 +(NSDate*)expireDateFromSeconds:(NSInteger)seconds;
 

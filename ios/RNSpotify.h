@@ -25,6 +25,8 @@
 
 //authenticate(options)
 -(void)authenticate:(NSDictionary*)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
+//loginWithSession(session)
+-(void)loginWithSession:(NSDictionary*)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 //login(options)
 -(void)login:(NSDictionary*)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 //logout()
@@ -33,10 +35,10 @@
 -(id)isLoggedIn;
 //isLoggedInAsync()
 -(void)isLoggedInAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
-//getAuth()
--(id)getAuth;
-//getAuthAsync()
--(void)getAuthAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
+//getSession()
+-(id)getSession;
+//getSessionAsync()
+-(void)getSessionAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 //renewSession()
 -(void)renewSession:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 

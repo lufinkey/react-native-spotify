@@ -19,6 +19,6 @@
 
 -(NSURL*)spotifyWebAuthenticationURLWithState:(NSString*)state;
 
-+(RNSpotifyLoginOptions*)fromDictionary:(NSDictionary*)dict fallback:(NSDictionary*)fallbackDict error:(RNSpotifyError**)error;
-+(RNSpotifyLoginOptions*)fromDictionary:(NSDictionary*)dict fallback:(NSDictionary*)fallbackDict ignore:(NSArray<NSString*>*)ignore error:(RNSpotifyError**)error;
++(RNSpotifyLoginOptions*)optionsFromDictionary:(NSDictionary*)dict fallback:(NSDictionary*)fallbackDict error:(RNSpotifyError**)error;
++(RNSpotifyLoginOptions*)optionsFromDictionary:(NSDictionary*)dict fallback:(NSDictionary*)fallbackDict ignore:(NSArray<NSString*>*)ignore error:(RNSpotifyError**)error;
 @end

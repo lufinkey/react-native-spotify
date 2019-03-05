@@ -51,40 +51,50 @@
 	return components.URL;
 }
 
-+(RNSpotifyLoginOptions*)fromDictionary:(NSDictionary*)dict fallback:(NSDictionary*)fallbackDict error:(RNSpotifyError**)error {
-	return [self fromDictionary:dict fallback:fallbackDict ignore:@[] error:error];
++(RNSpotifyLoginOptions*)optionsFromDictionary:(NSDictionary*)dict fallback:(NSDictionary*)fallbackDict error:(RNSpotifyError**)error {
+	return [self optionsFromDictionary:dict fallback:fallbackDict ignore:@[] error:error];
 }
 
-+(RNSpotifyLoginOptions*)fromDictionary:(NSDictionary*)dict fallback:(NSDictionary*)fallbackDict ignore:(NSArray<NSString*>*)ignore error:(RNSpotifyError**)error {
++(RNSpotifyLoginOptions*)optionsFromDictionary:(NSDictionary*)dict fallback:(NSDictionary*)fallbackDict ignore:(NSArray<NSString*>*)ignore error:(RNSpotifyError**)error {
 	RNSpotifyLoginOptions* options = [[RNSpotifyLoginOptions alloc] init];
 	// clientID
 	options.clientID = [RNSpotifyUtils getOption:@"clientID" from:dict fallback:fallbackDict];
 	if(options.clientID == nil) {
 		if(![ignore containsObject:@"ignore"]) {
-			*error = [RNSpotifyError missingOptionErrorForName:@"clientID"];
+			if(error != nil) {
+				*error = [RNSpotifyError missingOptionErrorForName:@"clientID"];
+			}
 			return nil;
 		}
 	}
 	else if(![options.clientID isKindOfClass:[NSString class]]) {
-		*error = [RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadParameter message:@"clientID must be a string"];
+		if(error != nil) {
+			*error = [RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadParameter message:@"clientID must be a string"];
+		}
 		return nil;
 	}
 	// redirectURL
 	NSString* redirectURLString = [RNSpotifyUtils getOption:@"redirectURL" from:dict fallback:fallbackDict];
 	if(redirectURLString == nil) {
 		if(![ignore containsObject:@"redirectURL"]) {
-			*error = [RNSpotifyError missingOptionErrorForName:@"redirectURL"];
+			if(error != nil) {
+				*error = [RNSpotifyError missingOptionErrorForName:@"redirectURL"];
+			}
 			return nil;
 		}
 	}
 	else {
 		if(![redirectURLString isKindOfClass:[NSString class]]) {
-			*error = [RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadParameter message:@"redirectURL must be a string"];
+			if(error != nil) {
+				*error = [RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadParameter message:@"redirectURL must be a string"];
+			}
 			return nil;
 		}
 		options.redirectURL = [NSURL URLWithString:redirectURLString];
 		if(options.redirectURL == nil) {
-			*error = [RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadParameter message:@"redirectURL is not a valid URL"];
+			if(error != nil) {
+				*error = [RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadParameter message:@"redirectURL is not a valid URL"];
+			}
 			return nil;
 		}
 	}
@@ -95,7 +105,9 @@
 			options.scopes = nil;
 		}
 		else if(![options.scopes isKindOfClass:[NSArray class]]) {
-			*error = [RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadParameter message:@"scopes must be an array"];
+			if(error != nil) {
+				*error = [RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadParameter message:@"scopes must be an array"];
+			}
 			return nil;
 		}
 	}
@@ -103,13 +115,17 @@
 	NSString* tokenSwapURLString = [RNSpotifyUtils getOption:@"tokenSwapURL" from:dict fallback:fallbackDict];
 	if(tokenSwapURLString != nil) {
 		if(![tokenSwapURLString isKindOfClass:[NSString class]]) {
-			*error = [RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadParameter message:@"tokenSwapURL must be a string"];
+			if(error != nil) {
+				*error = [RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadParameter message:@"tokenSwapURL must be a string"];
+			}
 			return nil;
 		}
 		else {
 			options.tokenSwapURL = [NSURL URLWithString:tokenSwapURLString];
 			if(options.tokenSwapURL == nil) {
-				*error = [RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadParameter message:@"tokenSwapURL is not a valid URL"];
+				if(error != nil) {
+					*error = [RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadParameter message:@"tokenSwapURL is not a valid URL"];
+				}
 				return nil;
 			}
 		}
@@ -118,13 +134,17 @@
 	NSString* tokenRefreshURLString = [RNSpotifyUtils getOption:@"tokenRefreshURL" from:dict fallback:fallbackDict];
 	if(tokenRefreshURLString != nil) {
 		if(![tokenRefreshURLString isKindOfClass:[NSString class]]) {
-			*error = [RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadParameter message:@"tokenRefreshURL must be a string"];
+			if(error != nil) {
+				*error = [RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadParameter message:@"tokenRefreshURL must be a string"];
+			}
 			return nil;
 		}
 		else {
 			options.tokenRefreshURL = [NSURL URLWithString:tokenRefreshURLString];
 			if(options.tokenRefreshURL == nil) {
-				*error = [RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadParameter message:@"tokenRefreshURL is not a valid URL"];
+				if(error != nil) {
+					*error = [RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadParameter message:@"tokenRefreshURL is not a valid URL"];
+				}
 				return nil;
 			}
 		}
@@ -134,7 +154,9 @@
 	NSNumber* showDialog = [RNSpotifyUtils getOption:@"showDialog" from:dict fallback:fallbackDict];
 	if(showDialog != nil) {
 		if(![showDialog isKindOfClass:[NSNumber class]]) {
-			*error = [RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadParameter message:@"showDialog must be a boolean"];
+			if(error != nil) {
+				*error = [RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadParameter message:@"showDialog must be a boolean"];
+			}
 			return nil;
 		}
 		params[@"show_dialog"] = showDialog.boolValue ? @"true" : @"false";

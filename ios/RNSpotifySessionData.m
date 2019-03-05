@@ -46,21 +46,63 @@
 	if(sessionData == nil || ![sessionData isKindOfClass:[NSDictionary class]]) {
 		return nil;
 	}
-	NSString* accessToken = [sessionData objectForKey:@"accessToken"];
-	if(accessToken == nil || ![accessToken isKindOfClass:[NSString class]]) {
+	return [self sessionFromDictionary:sessionData error:nil];
+}
+
++(RNSpotifySessionData*)sessionFromDictionary:(NSDictionary*)dict error:(RNSpotifyError**)error {
+	// access token
+	NSString* accessToken = [RNSpotifyUtils getObjectForKey:@"accessToken" in:dict];
+	if(accessToken == nil) {
+		if(error != nil) {
+			*error = [RNSpotifyError nullParameterErrorForName:@"accessToken"];
+		}
 		return nil;
 	}
-	NSDate* expireDate = [sessionData objectForKey:@"expireDate"];
-	if(expireDate == nil || ![expireDate isKindOfClass:[NSDate class]]) {
+	else if(![accessToken isKindOfClass:[NSString class]]) {
+		if(error != nil) {
+			*error = [RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadParameter message:@"accessToken must be a string"];
+		}
 		return nil;
 	}
-	NSString* refreshToken = [sessionData objectForKey:@"refreshToken"];
+	// expire date
+	NSDate* expireDate = [RNSpotifyUtils getObjectForKey:@"expireDate" in:dict];
+	if(expireDate == nil) {
+		NSNumber* expireTime = [RNSpotifyUtils getObjectForKey:@"expireTime" in:dict];
+		if(expireTime == nil) {
+			if(error != nil) {
+				*error = [RNSpotifyError nullParameterErrorForName:@"expireTime"];
+			}
+			return nil;
+		}
+		if(![expireTime isKindOfClass:[NSNumber class]]) {
+			if(error != nil) {
+				*error = [RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadParameter message:@"expireTime must be a number"];
+			}
+			return nil;
+		}
+		expireDate = [NSDate dateWithTimeIntervalSince1970:(expireTime.doubleValue/1000.0)];
+	}
+	if(![expireDate isKindOfClass:[NSDate class]]) {
+		if(error != nil) {
+			*error = [RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadParameter message:@"expireDate must be a date"];
+		}
+		return nil;
+	}
+	// refresh token
+	NSString* refreshToken = [RNSpotifyUtils getObjectForKey:@"refreshToken" in:dict];
 	if(refreshToken != nil && ![refreshToken isKindOfClass:[NSString class]]) {
-		refreshToken = nil;
+		if(error != nil) {
+			*error = [RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadParameter message:@"refreshToken must be a string"];
+		}
+		return nil;
 	}
-	NSArray* scopes = [sessionData objectForKey:@"scopes"];
+	// scopes
+	NSArray* scopes = [RNSpotifyUtils getObjectForKey:@"scopes" in:dict];
 	if(scopes != nil && ![scopes isKindOfClass:[NSArray class]]) {
-		scopes = nil;
+		if(error != nil) {
+			*error = [RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadParameter message:@"scopes must be an array"];
+		}
+		return nil;
 	}
 	RNSpotifySessionData* session = [[RNSpotifySessionData alloc] init];
 	session.accessToken = accessToken;

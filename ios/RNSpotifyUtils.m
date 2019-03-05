@@ -45,12 +45,20 @@
 }
 
 +(void)setOrRemoveObject:(id)object forKey:(NSString*)key in:(NSMutableDictionary*)dict {
-	if(object != nil && ![object isKindOfClass:[NSNull null]]) {
+	if(object != nil && ![object isKindOfClass:[NSNull class]]) {
 		[dict setObject:object forKey:key];
 	}
 	else {
 		[dict removeObjectForKey:key];
 	}
+}
+
++(id)getObjectForKey:(NSString*)key in:(NSDictionary*)dict {
+	id object = [dict objectForKey:key];
+	if(object != nil && [object isKindOfClass:[NSNull class]]) {
+		return nil;
+	}
+	return object;
 }
 
 @end

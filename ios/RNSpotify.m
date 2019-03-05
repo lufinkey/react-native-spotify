@@ -188,7 +188,7 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options resolve:(RCTPromiseResolveBl
 		_cacheSize = cacheSize;
 	}
 	RNSpotifyError* loginOptionsError = nil;
-	RNSpotifyLoginOptions* loginOptions = [RNSpotifyLoginOptions fromDictionary:options fallback:nil error:&loginOptionsError];
+	RNSpotifyLoginOptions* loginOptions = [RNSpotifyLoginOptions optionsFromDictionary:options fallback:nil error:&loginOptionsError];
 	if(loginOptionsError != nil) {
 		[loginOptionsError reject:reject];
 		return;
@@ -420,7 +420,7 @@ RCT_EXPORT_METHOD(renewSession:(RCTPromiseResolveBlock)resolve reject:(RCTPromis
 
 RCT_EXPORT_METHOD(authenticate:(NSDictionary*)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
 	RNSpotifyError* loginOptionsError = nil;
-	RNSpotifyLoginOptions* loginOptions = [RNSpotifyLoginOptions fromDictionary:options fallback:_options error:&loginOptionsError];
+	RNSpotifyLoginOptions* loginOptions = [RNSpotifyLoginOptions optionsFromDictionary:options fallback:_options error:&loginOptionsError];
 	if(loginOptionsError != nil) {
 		[loginOptionsError reject:reject];
 		return;
@@ -449,28 +449,61 @@ RCT_EXPORT_METHOD(authenticate:(NSDictionary*)options resolve:(RCTPromiseResolve
 	});
 }
 
+RCT_EXPORT_METHOD(loginWithSession:(NSDictionary*)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
+	RNSpotifyError* error = nil;
+	RNSpotifyLoginOptions* loginOptions = [RNSpotifyLoginOptions optionsFromDictionary:options fallback:_options ignore:@[@"redirectURL"] error:&error];
+	if(error != nil) {
+		[error reject:reject];
+		return;
+	}
+	RNSpotifySessionData* session = [RNSpotifySessionData sessionFromDictionary:options error:&error];
+	if(error != nil) {
+		[error reject:reject];
+		return;
+	}
+	[_auth startSession:session options:loginOptions];
+	[self initializePlayerIfNeeded:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
+		// error
+		[_auth clearSession];
+		[error reject:reject];
+	} onResolve:^(id unused) {
+		BOOL wasLoggedIn = _loggedIn;
+		BOOL loggedIn = _auth.isLoggedIn;
+		if(!wasLoggedIn) {
+			if(!loggedIn) {
+				[[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.NotLoggedIn message:@"module was logged out"] reject:reject];
+				return;
+			}
+			_loggedIn = YES;
+		}
+		resolve(nil);
+		if(!wasLoggedIn) {
+			[self sendEvent:@"login" args:@[]];
+		}
+	}]];
+}
+
 RCT_EXPORT_METHOD(login:(NSDictionary*)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
-	// ensure we're not already logging in
-	if(_loggingIn) {
-		[[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.ConflictingCallbacks message:@"Cannot call login multiple times before completing"] reject:reject];
-		return;
-	}
-	else if([[self isLoggedIn] boolValue]) {
-		resolve(@YES);
-		return;
-	}
-	
-	RNSpotifyError* loginOptionsError = nil;
-	RNSpotifyLoginOptions* loginOptions = [RNSpotifyLoginOptions fromDictionary:options fallback:_options error:&loginOptionsError];
-	if(loginOptionsError != nil) {
-		[loginOptionsError reject:reject];
-		return;
-	}
-	
-	_loggingIn = YES;
-	
-	// do UI logic on main thread
 	dispatch_async(dispatch_get_main_queue(), ^{
+		// ensure we're not already logging in
+		if(_loggingIn) {
+			[[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.ConflictingCallbacks message:@"Cannot call login multiple times before completing"] reject:reject];
+			return;
+		}
+		else if([[self isLoggedIn] boolValue]) {
+			resolve(@YES);
+			return;
+		}
+		
+		RNSpotifyError* loginOptionsError = nil;
+		RNSpotifyLoginOptions* loginOptions = [RNSpotifyLoginOptions optionsFromDictionary:options fallback:_options error:&loginOptionsError];
+		if(loginOptionsError != nil) {
+			[loginOptionsError reject:reject];
+			return;
+		}
+		
+		_loggingIn = YES;
+		
 		RNSpotifyAuthController* authController = [[RNSpotifyAuthController alloc] initWithOptions:loginOptions];
 		
 		__weak RNSpotifyAuthController* weakAuthController = authController;
@@ -624,15 +657,15 @@ RCT_EXPORT_METHOD(isLoggedInAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPro
 	resolve([self isLoggedIn]);
 }
 
-RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getAuth) {
+RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getSession) {
 	if(_auth == nil) {
 		return [NSNull null];
 	}
 	return [RNSpotifyConvert RNSpotifySessionData:_auth.session];
 }
 
-RCT_EXPORT_METHOD(getAuthAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
-	resolve([RNSpotifyConvert ID:[self getAuth]]);
+RCT_EXPORT_METHOD(getSessionAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
+	resolve([RNSpotifyConvert ID:[self getSession]]);
 }
 
 
