@@ -418,7 +418,7 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 
 
 
-- **loginWithSession**( *options*? )
+- **loginWithSession**( *options* )
 
 	Logs into the app with a given session
 	
