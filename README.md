@@ -15,7 +15,7 @@ react-native link rn-spotify-sdk
 Next, do the manual setup for each platform:
 
 #### iOS
-Manually add the frameworks from `node_modules/rn-spotify-sdk/ios/external/SpotifySDK` to *Linked Frameworks and Libraries* in your project settings. Then add `../node_modules/rn-spotify-sdk/ios/external/SpotifySDK` to *Framework Search Paths* in your project settings.
+Manually add `SpotifyMetadata.framework` and `SpotifyAudioPlayback.framework` from `node_modules/rn-spotify-sdk/ios/external/SpotifySDK` to *Linked Frameworks and Libraries* in your project settings. Then add `../node_modules/rn-spotify-sdk/ios/external/SpotifySDK` to *Framework Search Paths* in your project settings.
 
 #### Android
 
