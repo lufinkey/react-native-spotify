@@ -270,6 +270,7 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	Initializes the Spotify module and resumes a logged in session if there is one. This must be the first method you call when using this module.
 	
 	- *Parameters*
+	
 		- **options** - an object with options to pass to the Spotify Module
 			- **clientID** - (*Required*) Your spotify application's client ID that you registered with spotify [here](https://developer.spotify.com/my-applications)
 			- **redirectURL** - (*Required*) The redirect URL to use when you've finished logging in. You NEED to set this URL for your application [here](https://developer.spotify.com/my-applications), otherwise the login screen will not close
@@ -318,6 +319,7 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	Opens a UI to log into Spotify.
 	
 	- *Parameters*
+	
 		- **options**
 			- **showDialog** - Whether or not to force the user to approve the app again if they’ve already done so.
 			- **clientID** - Your spotify application's client ID that you registered with spotify [here](https://developer.spotify.com/my-applications). Falls back to value given in **initialize**.
@@ -404,6 +406,7 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	Opens a UI to perform the auth flow for Spotify, but returns a session instead of logging in.
 	
 	- *Parameters*
+	
 		- **options**
 			- **showDialog** - Whether or not to force the user to approve the app again if they’ve already done so.
 			- **clientID** - Your spotify application's client ID that you registered with spotify [here](https://developer.spotify.com/my-applications). Falls back to value given in **initialize**.
@@ -423,6 +426,7 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	Logs into the app with a given session
 	
 	- *Parameters*
+	
 		- **options**
 			- **accessToken** (*Required*) - The token to use to communicate with the Spotify API.
 			- **expireTime** (*Required*) - The time that the access token expires, in milliseconds from January 1, 1970 00:00:00 UTC
@@ -447,9 +451,7 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	- *Parameters*
 		
 		- **spotifyURI** - The Spotify URI to play
-		
 		- **startIndex** - The index of an item that should be played first, e.g. 0 - for the very first track in the playlist or a single track
-		
 		- **startPosition** - starting position for playback in seconds
 	
 	- *Returns*
@@ -604,11 +606,8 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	- *Parameters*
 	
 		- **endpoint** - the api endpoint, without a leading slash, e.g. `'v1/browse/new-releases'`
-		
 		- **method** - the HTTP method to use
-		
 		- **params** - the request parameters
-		
 		- **isJSONBody** - whether or not to send the parameters as json in the body of the request
 	
 	- *Returns*
@@ -636,9 +635,7 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	- *Parameters*
 	
 		- **query** - The search query string. Same as the *q* parameter on the [search](https://developer.spotify.com/web-api/search-item/) endpoint
-		
 		- **types** - An array of item types to search for. Valid types are: `'album'`, `'artist'`, `'playlist'`, and `'track'`.
-		
 		- **options** - A map of other optional parameters to specify for the query
 	
 	- *Returns*
@@ -655,7 +652,6 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	- *Parameters*
 	
 		- **albumID** - The Spotify ID for the album
-		
 		- **options** - A map of other optional parameters to specify for the query
 	
 	- *Returns*
@@ -672,7 +668,6 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	- *Parameters*
 	
 		- **albumIDs** - An array of the Spotify IDs for the albums
-		
 		- **options** - A map of other optional parameters to specify for the query
 	
 	- *Returns*
@@ -689,7 +684,6 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	- *Parameters*
 	
 		- **albumID** - The Spotify ID for the album
-		
 		- **options** - A map of other optional parameters to specify for the query
 	
 	- *Returns*
@@ -706,7 +700,6 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	- *Parameters*
 	
 		- **artistID** - The Spotify ID for the artist
-		
 		- **options** - A map of other optional parameters to specify for the query
 	
 	- *Returns*
@@ -723,7 +716,6 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	- *Parameters*
 	
 		- **artistIDs** - An array of the Spotify IDs for the artists
-		
 		- **options** - A map of other optional parameters to specify for the query
 	
 	- *Returns*
@@ -740,7 +732,6 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	- *Parameters*
 	
 		- **artistID** - The Spotify ID for the artist
-		
 		- **options** - A map of other optional parameters to specify for the query
 	
 	- *Returns*
@@ -757,9 +748,7 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	- *Parameters*
 	
 		- **artistID** - The Spotify ID for the artist
-		
 		- **country** - The country: an [ISO 3166-1 alpha-2 country code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2).
-		
 		- **options** - A map of other optional parameters to specify for the query
 	
 	- *Returns*
@@ -776,7 +765,6 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	- *Parameters*
 	
 		- **artistID** - The Spotify ID for the artist
-		
 		- **options** - A map of other optional parameters to specify for the query
 	
 	- *Returns*
@@ -793,7 +781,6 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	- *Parameters*
 	
 		- **trackID** - The Spotify ID for the track
-		
 		- **options** - A map of other optional parameters to specify for the query
 	
 	- *Returns*
@@ -810,7 +797,6 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	- *Parameters*
 	
 		- **trackIDs** - An array of the Spotify IDs for the tracks
-		
 		- **options** - A map of other optional parameters to specify for the query
 	
 	- *Returns*
@@ -827,7 +813,6 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	- *Parameters*
 	
 		- **trackID** - The Spotify ID for the track
-		
 		- **options** - A map of other optional parameters to specify for the query
 	
 	- *Returns*
@@ -844,7 +829,6 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	- *Parameters*
 	
 		- **trackID** - The Spotify ID for the track
-		
 		- **options** - A map of other optional parameters to specify for the query
 	
 	- *Returns*
@@ -861,7 +845,6 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	- *Parameters*
 	
 		- **trackIDs** - An array of the Spotify IDs for the tracks
-		
 		- **options** - A map of other optional parameters to specify for the query
 	
 	- *Returns*
