@@ -78,15 +78,16 @@ import Spotify from 'rn-spotify-sdk';
 
 ### Types
 
-- **Auth**
+- **Session**
 
 	Contains information about authentication data
 	
 	- *Properties*
 	
 		- **accessToken** - A token used to communicate with the Spotify API
-		- **refreshToken** - An encrypted token used to get a new access token when they expire. This should be encrypted by your token swap service, as per OAuth standards.
 		- **expireTime** - The time that the access token expires, in milliseconds from January 1, 1970 00:00:00 UTC
+		- **refreshToken** - An encrypted token used to get a new access token when they expire. This should be encrypted by your token swap service, as per OAuth standards.
+		- **scopes** - Am array of scopes that the session has access to. A list of scopes can be found [here](https://developer.spotify.com/web-api/using-scopes/).
 
 
 
@@ -270,7 +271,7 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	
 	- *Parameters*
 		- **options** - an object with options to pass to the Spotify Module
-			- **clientID** - (*Required*) Your spotify application's ClientID that you registered with spotify [here](https://developer.spotify.com/my-applications)
+			- **clientID** - (*Required*) Your spotify application's client ID that you registered with spotify [here](https://developer.spotify.com/my-applications)
 			- **redirectURL** - (*Required*) The redirect URL to use when you've finished logging in. You NEED to set this URL for your application [here](https://developer.spotify.com/my-applications), otherwise the login screen will not close
 			- **sessionUserDefaultsKey** - The preference key to use in order to store session data for this module. Set this to a string of your choice when you initialize in order to persist user information between app uses.
 			- **scopes** - An array of scopes that define permissions for the Spotify API. A list of scopes can be found [here](https://developer.spotify.com/web-api/using-scopes/)
@@ -319,6 +320,10 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	- *Parameters*
 		- **options**
 			- **showDialog** - Whether or not to force the user to approve the app again if they’ve already done so.
+			- **clientID** - Your spotify application's client ID that you registered with spotify [here](https://developer.spotify.com/my-applications). Falls back to value given in **initialize**.
+			- **redirectURL** - The redirect URL to use when you've finished logging in. You NEED to set this URL for your application [here](https://developer.spotify.com/my-applications), otherwise the login screen will not close. Falls back to value given in **initialize**.
+			- **scopes** - An array of scopes that define permissions for the Spotify API. A list of scopes can be found [here](https://developer.spotify.com/web-api/using-scopes/). Falls back to value given in **initialize**.
+			- **tokenSwapURL** - The URL to use to swap an authentication code for an access token (see [Token swap and refresh](#token-swap-and-refresh) section for more info). Falls back to value given in **initialize**.
 	
 	- *Returns*
 	
@@ -361,24 +366,24 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 
 
 
-- **getAuth**()
+- **getSession**()
 
-	Gives information about authentication data.
+	Gives information about the current session.
 	
 	- *Returns*
 	
-		- An *Auth* object, or *null* if not logged in
+		- An *Session* object, or *null* if not logged in
 
 
 
 
-- **getAuthAsync**()
+- **getSessionAsync**()
 
-	Gives information about authentication data, but returns a *Promise* that resolves to the result.
+	Gives information about the current session, but returns a *Promise* that resolves to the result.
 	
 	- *Returns*
 	
-		- A *Promise* that resolves to an *Auth* object, or *null* if not logged in
+		- A *Promise* that resolves to an *Session* object, or *null* if not logged in
 
 
 
@@ -390,6 +395,43 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	- *Returns*
 	
 		- A *Promise* that resolves when the session renewal attempt finishes
+
+
+
+
+- **authenticate**( *options*? )
+
+	Opens a UI to perform the auth flow for Spotify, but returns a session instead of logging in.
+	
+	- *Parameters*
+		- **options**
+			- **clientID** - Your spotify application's client ID that you registered with spotify [here](https://developer.spotify.com/my-applications). Falls back to value given in **initialize**.
+			- **redirectURL** - The redirect URL to use when you've finished logging in. You NEED to set this URL for your application [here](https://developer.spotify.com/my-applications), otherwise the login screen will not close. Falls back to value given in **initialize**.
+			- **scopes** - An array of scopes that define permissions for the Spotify API. A list of scopes can be found [here](https://developer.spotify.com/web-api/using-scopes/). Falls back to value given in **initialize**.
+			- **tokenSwapURL** - The URL to use to swap an authentication code for an access token (see [Token swap and refresh](#token-swap-and-refresh) section for more info). Falls back to value given in **initialize**.
+	
+	- *Returns*
+	
+		- A *Promise* that resolves to an *Session* object, or *null* if login is cancelled
+
+
+
+
+- **loginWithSession**( *options*? )
+
+	Logs into the app with a given session
+	
+	- *Parameters*
+		- **accessToken** (*Required*) - The token to use to communicate with the Spotify API.
+		- **expireTime** (*Required*) - The time that the access token expires, in milliseconds from January 1, 1970 00:00:00 UTC
+		- **refreshToken** - An encrypted token used to get a new access token when it expires.
+		- **scopes** - Am array of scopes that the session has access to. A list of scopes can be found [here](https://developer.spotify.com/web-api/using-scopes/).
+		- **clientID** - Your spotify application's client ID that you registered with spotify [here](https://developer.spotify.com/my-applications). Falls back to value given in **initialize**.
+		- **tokenRefreshURL** - The URL to use to get a new access token from a refresh token. Falls back to value given in **initialize**.
+	
+	- *Returns*
+	
+		- A *Promise* that resolves when the login finishes
 
 
 
