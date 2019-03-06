@@ -309,6 +309,7 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 			else {
 				[_player loginWithAccessToken:_auth.session.accessToken];
 			}
+			[self sendEvent:@"sessionRenewed" args:@[[RNSpotifyConvert RNSpotifySessionData:_auth.session]]];
 		}
 		[completion resolve:renewed];
 	} onReject:^(RNSpotifyError* error) {
