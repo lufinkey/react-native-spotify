@@ -2,145 +2,145 @@ package com.lufinkey.react.spotify;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.view.Window;
 
+import com.facebook.react.bridge.ReadableArray;
+import com.facebook.react.bridge.ReadableMap;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
+
+import java.util.UUID;
 
 public class AuthActivity extends Activity
 {
 	private static final int REQUEST_CODE = 6969;
 
-	private static Auth authFlow_auth;
+	private static LoginOptions authFlow_options;
 	private static AuthActivityListener authFlow_listener;
 	private static AuthActivity currentAuthActivity;
 
-	private Auth auth;
+	private LoginOptions options;
+	private String xssState;
 	private AuthActivityListener listener;
-	private CompletionBlock<Void> finishCompletion;
+	private Completion<Void> finishCompletion;
 
-	public static void performAuthFlow(Activity context, Auth auth, AuthActivityListener listener)
-	{
-		// check for missing options
-		if(auth.clientID == null)
-		{
-			SpotifyError error = new SpotifyError(SpotifyError.Code.MISSING_PARAMETERS, "missing option clientID");
-			listener.onAuthActivityFailure(null, error);
-			return;
-		}
-
+	public static void performAuthFlow(Activity context, LoginOptions options, AuthActivityListener listener) {
 		// ensure no conflicting callbacks
-		if(authFlow_auth != null || authFlow_listener != null || currentAuthActivity != null)
-		{
-			System.out.println("AuthActivity is already being shown");
-			SpotifyError error = new SpotifyError(SpotifyError.Code.CONFLICTING_CALLBACKS, "Cannot call login multiple times before completing");
+		if(authFlow_options != null || authFlow_listener != null || currentAuthActivity != null) {
+			SpotifyError error = new SpotifyError(SpotifyError.Code.ConflictingCallbacks, "Cannot call login or authenticate multiple times before completing");
 			listener.onAuthActivityFailure(null, error);
 			return;
 		}
 
 		// store temporary static variables
-		authFlow_auth = auth;
+		authFlow_options = options;
 		authFlow_listener = listener;
 
 		// start activity
-		context.startActivity(new Intent(context, AuthActivity.class));
+		Intent intent = new Intent(context, AuthActivity.class);
+		context.startActivity(intent);
 	}
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState)
-	{
+	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setFinishOnTouchOutside(false);
 
-		auth = authFlow_auth;
+		options = authFlow_options;
+		xssState = UUID.randomUUID().toString();
 		listener = authFlow_listener;
 		currentAuthActivity = this;
 
-		authFlow_auth = null;
+		authFlow_options = null;
 		authFlow_listener = null;
 
-		// decide response type
-		AuthenticationResponse.Type responseType = AuthenticationResponse.Type.TOKEN;
-		if(auth.tokenSwapURL!=null)
-		{
-			responseType = AuthenticationResponse.Type.CODE;
-		}
-
-		// create auth request
-		AuthenticationRequest.Builder requestBuilder = new AuthenticationRequest.Builder(auth.clientID, responseType, auth.redirectURL);
-		requestBuilder.setScopes(auth.requestedScopes);
-		requestBuilder.setShowDialog(true);
-		AuthenticationRequest request = requestBuilder.build();
+		AuthenticationRequest request = options.getAuthenticationRequest(xssState);
 
 		// show auth activity
 		AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
 	}
 
 	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent intent)
-	{
+	protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
 		super.onActivityResult(requestCode, resultCode, intent);
 
-		if(requestCode == REQUEST_CODE)
-		{
+		if(requestCode == REQUEST_CODE) {
 			AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
 
-			switch(response.getType())
-			{
+			switch(response.getType()) {
 				default:
 					listener.onAuthActivityCancel(this);
 					break;
 
 				case ERROR:
-					if(response.getError().equals("access_denied"))
-					{
+					if(response.getError().equals("access_denied")) {
 						listener.onAuthActivityCancel(this);
 					}
-					else
-					{
-						listener.onAuthActivityFailure(this, new SpotifyError(SpotifyError.Code.AUTHORIZATION_FAILED, response.getError()));
+					else {
+						listener.onAuthActivityFailure(this, new SpotifyError(response.getError(), response.getError()));
 					}
-					break;
-
-				case CODE:
-					listener.onAuthActivityReceivedCode(this, response.getCode());
 					break;
 
 				case TOKEN:
-					listener.onAuthActivityReceivedToken(this, response.getAccessToken(), response.getExpiresIn());
+					if(xssState != null && !xssState.equals(response.getState())) {
+						listener.onAuthActivityFailure(this, new SpotifyError("state_mismatch", "state mismatch"));
+						return;
+					}
+					SessionData sessionData = new SessionData();
+					sessionData.accessToken = response.getAccessToken();
+					sessionData.expireDate = SessionData.getExpireDate(response.getExpiresIn());
+					sessionData.refreshToken = null;
+					sessionData.scopes = options.scopes;
+					listener.onAuthActivityReceiveSession(this, sessionData);
+					break;
+
+				case CODE:
+					if(xssState != null && !xssState.equals(response.getState())) {
+						listener.onAuthActivityFailure(this, new SpotifyError("state_mismatch", "state mismatch"));
+						return;
+					}
+					if(options.tokenSwapURL == null) {
+						listener.onAuthActivityFailure(this, SpotifyError.getMissingOptionError("tokenSwapURL"));
+						return;
+					}
+					final AuthActivity authActivity = this;
+					Auth.swapCodeForToken(response.getCode(), options.tokenSwapURL, new Completion<SessionData>() {
+						@Override
+						public void onReject(SpotifyError error) {
+							listener.onAuthActivityFailure(authActivity, error);
+						}
+
+						@Override
+						public void onResolve(SessionData session) {
+							listener.onAuthActivityReceiveSession(authActivity, session);
+						}
+					});
 					break;
 			}
 		}
 	}
 
-	public void finish(CompletionBlock<Void> completion)
-	{
+	public void finish(Completion<Void> completion) {
 		finishCompletion = completion;
 		this.finish();
 	}
 
 	@Override
-	public void finish()
-	{
+	public void finish() {
 		AuthenticationClient.stopLoginActivity(this, REQUEST_CODE);
 		super.finish();
 	}
 
 	@Override
-	protected void onDestroy()
-	{
+	protected void onDestroy() {
 		super.onDestroy();
-		if(isFinishing())
-		{
+		if(isFinishing()) {
 			currentAuthActivity = null;
-			if(finishCompletion != null)
-			{
-				CompletionBlock<Void> completionTmp = finishCompletion;
+			if(finishCompletion != null) {
+				Completion<Void> completionTmp = finishCompletion;
 				finishCompletion = null;
-				completionTmp.invoke(null, null);
+				completionTmp.resolve(null);
 			}
 		}
 	}

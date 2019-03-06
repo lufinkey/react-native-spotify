@@ -1,9 +1,12 @@
 
 import EventEmitter from 'events';
 import Spotify from './Spotify';
+import RNEvents from 'react-native-events';
 
 
 const Queue = new EventEmitter();
+const nativeEvents = new EventEmitter();
+RNEvents.addPreSubscriber(Spotify, nativeEvents);
 
 let currentURI = null;
 let uris = [];
@@ -13,23 +16,23 @@ let connected = null;
 
 // handle connection
 
-Spotify.on('login', () => {
+nativeEvents.on('login', () => {
 	if(connected === null)
 	{
 		connected = true;
 	}
 });
 
-Spotify.on('logout', () => {
+nativeEvents.on('logout', () => {
 	connected = null;
 	Queue.clear();
 });
 
-Spotify.on('disconnect', () => {
+nativeEvents.on('disconnect', () => {
 	connected = false;
 });
 
-Spotify.on('reconnect', () => {
+nativeEvents.on('reconnect', () => {
 	connected = true;
 });
 
@@ -43,29 +46,28 @@ tryQueuePlayback = () => {
 	{
 		return;
 	}
-	Spotify.playURI(currentURI, 0, 0, (error) => {
-		if(error)
+	Spotify.playURI(currentURI, 0, 0).then(() => {
+		// done
+	}).catch((error) => {
+		// error
+		// ensure we're logged in and we have uris
+		if(connected !== null && uris.length > 0)
 		{
-			// ensure we're logged in and we have uris
-			if(connected !== null && uris.length > 0)
+			if(!connected)
 			{
-				if(!connected)
-				{
-					// we must have failed because we weren't connected, so wait until we are
-					Spotify.once('reconnect', tryQueuePlayback);
-				}
-				else
-				{
-					// unknown error
-					Queue.emit('queueError', error);
-				}
+				// we must have failed because we weren't connected, so wait until we are
+				nativeEvents.once('reconnect', tryQueuePlayback);
 			}
-			return;
+			else
+			{
+				// unknown error
+				Queue.emit('queueError', error);
+			}
 		}
 	});
 };
 
-Spotify.on("trackDelivered", (event) => {
+nativeEvents.on("trackDelivered", (event) => {
 	if(uris.length > 0)
 	{
 		// play the next song in the queue

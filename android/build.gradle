@@ -1,43 +1,40 @@
 
 buildscript {
-    repositories {
-        jcenter()
-    }
+	repositories {
+		google()
+		jcenter()
+	}
 
-    dependencies {
-        classpath 'com.android.tools.build:gradle:1.3.1'
-    }
+	dependencies {
+		classpath 'com.android.tools.build:gradle:3.2.1'
+	}
 }
 
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion '26.0.2'
+	compileSdkVersion 26
+	buildToolsVersion '28.0.3'
 
-    defaultConfig {
-        minSdkVersion 16
-        targetSdkVersion 22
-        versionCode 1
-        versionName "1.0"
-    }
-    lintOptions {
-        abortOnError false
-    }
+	defaultConfig {
+		targetSdkVersion 26
+		versionCode 1
+		versionName "1.0"
+	}
+	lintOptions {
+		abortOnError false
+	}
 }
 
 repositories {
-    mavenCentral()
+	mavenCentral()
 }
 
 dependencies {
-	compile 'com.facebook.react:react-native:+'
-	compile fileTree(dir: 'libs', include: ['*.jar'])
-
-    compile 'com.android.volley:volley:1.0.0'
-
-	compile(name: 'spotify-android-auth-1.0.0', ext: 'aar')
-	compile(name: 'spotify-player-24-noconnect-2.20b', ext: 'aar')
-	compile project(path: ':react-native-events')
+	api 'com.facebook.react:react-native:+'
+	api 'com.android.volley:volley:1.1.0'
+	api(name: 'spotify-android-auth-1.0.0', ext: 'aar')
+	api(name: 'spotify-player-24-noconnect-2.20b', ext: 'aar')
+	api project(path: ':react-native-events')
 }
 

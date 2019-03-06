@@ -6,6 +6,5 @@ public interface AuthActivityListener
 {
 	void onAuthActivityCancel(AuthActivity activity);
 	void onAuthActivityFailure(AuthActivity activity, SpotifyError error);
-	void onAuthActivityReceivedCode(AuthActivity activity, String code);
-	void onAuthActivityReceivedToken(AuthActivity activity, String accessToken, int expiresIn);
+	void onAuthActivityReceiveSession(AuthActivity activity, SessionData session);
 }

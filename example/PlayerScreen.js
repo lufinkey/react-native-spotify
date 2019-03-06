@@ -1,5 +1,5 @@
 
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import {
 	Alert,
 	StyleSheet,
@@ -7,70 +7,50 @@ import {
 	TouchableHighlight,
 	View
 } from 'react-native';
-import { NavigationActions } from 'react-navigation';
-import Spotify from 'react-native-spotify';
+import Spotify from 'rn-spotify-sdk';
 
-export class PlayerScreen extends Component
-{
+
+export default class PlayerScreen extends PureComponent {
 	static navigationOptions = {
 		title: 'Player',
 	};
 
-	constructor()
-	{
-		super();
+	constructor(props) {
+		super(props);
 
-		this.state = { spotifyUserName:null };
+		this.state = {
+			spotifyUserName: null
+		};
 
 		this.spotifyLogoutButtonWasPressed = this.spotifyLogoutButtonWasPressed.bind(this);
 	}
 
-	componentDidMount()
-	{
-		console.log("sending getMe request");
-		Spotify.getMe((result, error) => {
-			console.log("got getMe result");
-			if(error)
-			{
-				Alert.alert("Error Sending getMe request", error.message);
-			}
-			else
-			{
-				this.setState((state) => {
-					state.spotifyUserName = result.display_name;
-					return state;
-				});
-			}
+	componentDidMount() {
+		// send api request to get user info
+		Spotify.getMe().then((result) => {
+			// update state with user info
+			this.setState({ spotifyUserName: result.display_name });
+			// play song
+			return Spotify.playURI("spotify:track:2zk7TQx9Xa4yxYmsjgDCPp", 0, 0);
+		}).then(() => {
+			// success
+		}).catch((error) => {
+			// error
+			Alert.alert("Error", error.message);
 		});
 	}
 
-	goToInitialScreen()
-	{
-		const navAction = NavigationActions.reset({
-			index: 0,
-			actions: [
-			  NavigationActions.navigate({ routeName: 'initial'})
-			]
-		});
-		this.props.navigation.dispatch(navAction);
+	goToInitialScreen() {
+		this.props.navigation.navigate('initial');
 	}
 
-	spotifyLogoutButtonWasPressed()
-	{
-		Spotify.logout((error) => {
-			if(error)
-			{
-				Alert.alert("Error", error.message);
-			}
-			else
-			{
-				this.goToInitialScreen();
-			}
+	spotifyLogoutButtonWasPressed() {
+		Spotify.logout().finally(() => {
+			this.goToInitialScreen();
 		});
 	}
 
-	render()
-	{
+	render() {
 		return (
 			<View style={styles.container}>
 				{ this.state.spotifyUserName!=null ? (
@@ -89,6 +69,7 @@ export class PlayerScreen extends Component
 		);
 	}
 }
+
 
 const styles = StyleSheet.create({
 	container: {

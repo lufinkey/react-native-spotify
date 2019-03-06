@@ -2,3 +2,9 @@
 	path = ios/external/SpotifySDK
 	url = https://github.com/spotify/ios-streaming-sdk
 	ignore = dirty
+[submodule "android/external/SpotifyStreamingSDK"]
+	path = android/external/SpotifyStreamingSDK
+	url = https://github.com/spotify/android-streaming-sdk
+[submodule "android/external/SpotifyAuthSDK"]
+	path = android/external/SpotifyAuthSDK
+	url = https://github.com/spotify/android-auth

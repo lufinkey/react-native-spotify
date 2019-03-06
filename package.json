@@ -1,27 +1,36 @@
 {
-  "name": "react-native-spotify",
+  "name": "rn-spotify-sdk",
   "repository": {
     "type": "git",
     "url": "https://github.com/lufinkey/react-native-spotify.git"
   },
-  "version": "1.0.8",
-  "description": "",
+  "bugs": {
+    "url": "https://github.com/lufinkey/react-native-spotify/issues"
+  },
+  "version": "1.2.2",
+  "description": "A react-native module for the Spotify SDK",
   "author": "lufinkey",
   "nativePackage": true,
-  "license": "",
+  "license": "Zlib",
   "keywords": [
     "react-native",
-    "spotify"
+    "spotify",
+    "music",
+    "playback",
+    "audio",
+    "stream",
+    "streaming",
+    "mobile"
   ],
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepublish": "git submodule update --init --recursive"
+    "prepublishOnly": "git submodule update --init --recursive"
   },
   "peerDependencies": {
-    "react-native": "^0.41.2"
+    "react-native": "^0.53.3"
   },
   "dependencies": {
-    "react-native-events": "git+https://github.com/lufinkey/react-native-events#1.0.2"
+    "react-native-events": "^1.0.13"
   }
 }

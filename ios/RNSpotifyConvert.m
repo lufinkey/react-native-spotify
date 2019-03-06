@@ -1,43 +1,31 @@
 
-#import "RCTSpotifyConvert.h"
+#import "RNSpotifyConvert.h"
 
-@implementation RCTSpotifyConvert
+@implementation RNSpotifyConvert
 
-+(id)ID:(id)obj
-{
-	if(obj == nil)
-	{
++(id)ID:(id)obj {
+	if(obj == nil) {
 		return [NSNull null];
 	}
 	return obj;
 }
 
-+(id)NSError:(NSError*)error
-{
-	if(error==nil)
-	{
++(id)RNSpotifyError:(RNSpotifyError*)error {
+	if(error==nil) {
 		return [NSNull null];
 	}
-	NSDictionary* fields = error.userInfo[@"jsFields"];
-	NSMutableDictionary* obj = nil;
-	if(fields!=nil)
-	{
-		obj = fields.mutableCopy;
-	}
-	else
-	{
-		obj = [NSMutableDictionary dictionary];
-	}
-	obj[@"domain"] = error.domain;
-	obj[@"code"] = @(error.code);
-	obj[@"message"] = error.localizedDescription;
-	return obj;
+	return error.reactObject;
 }
 
-+(id)SPTPlaybackState:(SPTPlaybackState*)state
-{
-	if(state == nil)
-	{
++(id)NSError:(NSError*)error {
+	if(error==nil) {
+		return [NSNull null];
+	}
+	return [self RNSpotifyError:[RNSpotifyError errorWithNSError:error]];
+}
+
++(id)SPTPlaybackState:(SPTPlaybackState*)state {
+	if(state == nil) {
 		return [NSNull null];
 	}
 	return @{
@@ -49,10 +37,8 @@
 	};
 }
 
-+(id)SPTPlaybackTrack:(SPTPlaybackTrack*)track
-{
-	if(track == nil)
-	{
++(id)SPTPlaybackTrack:(SPTPlaybackTrack*)track {
+	if(track == nil) {
 		return [NSNull null];
 	}
 	return @{
@@ -70,10 +56,8 @@
 	};
 }
 
-+(id)SPTPlaybackMetadata:(SPTPlaybackMetadata*)metadata
-{
-	if(metadata == nil)
-	{
++(id)SPTPlaybackMetadata:(SPTPlaybackMetadata*)metadata {
+	if(metadata == nil) {
 		return [NSNull null];
 	}
 	return @{
@@ -83,21 +67,15 @@
 	};
 }
 
-+(id)SPTAuth:(SPTAuth*)auth
-{
-	if(auth == nil)
-	{
-		return [NSNull null];
-	}
-	SPTSession* session = auth.session;
-	if(session == nil)
-	{
++(id)RNSpotifySessionData:(RNSpotifySessionData*)session {
+	if(session == nil) {
 		return [NSNull null];
 	}
 	return @{
-		@"accessToken": [RCTSpotifyConvert ID:session.accessToken],
-		@"refreshToken": [RCTSpotifyConvert ID:session.encryptedRefreshToken],
-		@"expireTime": session.expirationDate ? [NSNumber numberWithLongLong:((long long)session.expirationDate.timeIntervalSince1970*1000)] : [NSNull null]
+		@"accessToken": [RNSpotifyConvert ID:session.accessToken],
+		@"refreshToken": [RNSpotifyConvert ID:session.refreshToken],
+		@"expireTime": (session.expireDate != nil) ? [NSNumber numberWithDouble:(session.expireDate.timeIntervalSince1970*1000.0)] : [NSNull null],
+		@"scopes": [RNSpotifyConvert ID:session.scopes]
 	};
 }
 

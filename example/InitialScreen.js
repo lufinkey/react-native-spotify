@@ -1,5 +1,5 @@
 
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import {
 	ActivityIndicator,
 	Alert,
@@ -8,95 +8,83 @@ import {
 	TouchableHighlight,
 	View
 } from 'react-native';
-import { NavigationActions } from 'react-navigation';
-import Spotify from 'react-native-spotify';
+import Spotify from 'rn-spotify-sdk';
 
-export class InitialScreen extends Component
-{
+
+export default class InitialScreen extends PureComponent {
 	static navigationOptions = {
 		header: null
 	};
 
-	constructor()
-	{
-		super();
+	constructor(props) {
+		super(props);
 
-		this.state = {spotifyInitialized: false};
+		this.state = {
+			spotifyInitialized: false
+		};
 		this.spotifyLoginButtonWasPressed = this.spotifyLoginButtonWasPressed.bind(this);
 	}
 
-	goToPlayer()
-	{
-		const navAction = NavigationActions.reset({
-			index: 0,
-			actions: [
-			  NavigationActions.navigate({ routeName: 'player'})
-			]
-		});
-		this.props.navigation.dispatch(navAction);
+	goToPlayer() {
+		this.props.navigation.navigate('player');
 	}
 
-	componentDidMount()
-	{
-		if(!Spotify.isInitialized())
-		{
-			//initialize spotify
-			var spotifyOptions = {
+	async initializeIfNeeded() {
+		// initialize Spotify if it hasn't been initialized yet
+		if(!await Spotify.isInitializedAsync()) {
+			// initialize spotify
+			const spotifyOptions = {
 				"clientID":"<INSERT-YOUR-CLIENT-ID-HERE>",
 				"sessionUserDefaultsKey":"SpotifySession",
 				"redirectURL":"examplespotifyapp://auth",
 				"scopes":["user-read-private", "playlist-read", "playlist-read-private", "streaming"],
 			};
-			Spotify.initialize(spotifyOptions, (loggedIn, error) => {
-				if(error != null)
-				{
-					Alert.alert("Error", error.message);
-				}
-				//update UI state
-				this.setState((state) => {
-					state.spotifyInitialized = true;
-					return state;
-				});
-				//handle initialization
-				if(loggedIn)
-				{
-					this.goToPlayer();
-				}
+			const loggedIn = await Spotify.initialize(spotifyOptions);
+			// update UI state
+			this.setState({
+				spotifyInitialized: true
 			});
+			// handle initialization
+			if(loggedIn) {
+				this.goToPlayer();
+			}
 		}
-		else
-		{
-			//update UI state
-			this.setState((state) => {
-				state.spotifyInitialized = true;
-				return state;
+		else {
+			// update UI state
+			this.setState({
+				spotifyInitialized: true
 			});
-			//handle logged in
-			if(Spotify.isLoggedIn())
-			{
+			// handle logged in
+			if(await Spotify.isLoggedInAsync()) {
 				this.goToPlayer();
 			}
 		}
 	}
 
-	spotifyLoginButtonWasPressed()
-	{
-		Spotify.login((loggedIn, error) => {
-			if(error)
-			{
-				Alert.alert("Error", error.message);
-			}
-			if(loggedIn)
-			{
-				this.goToPlayer();
-			}
+	componentDidMount() {
+		this.initializeIfNeeded().catch((error) => {
+			Alert.alert("Error", error.message);
 		});
 	}
 
-	render()
-	{
-		if(!this.state.spotifyInitialized)
-		{
+	spotifyLoginButtonWasPressed() {
+		// log into Spotify
+		Spotify.login().then((loggedIn) => {
+			if(loggedIn) {
+				// logged in
+				this.goToPlayer();
+			}
+			else {
+				// cancelled
+			}
+		}).catch((error) => {
+			// error
+			Alert.alert("Error", error.message);
+		});
+	}
+
+	render() {
+		if(!this.state.spotifyInitialized) {
 			return (
 				<View style={styles.container}>
 					<ActivityIndicator animating={true} style={styles.loadIndicator}>
@@ -107,8 +95,7 @@ export class InitialScreen extends Component
 				</View>
 			);
 		}
-		else
-		{
+		else {
 			return (
 				<View style={styles.container}>
 					<Text style={styles.greeting}>
@@ -122,6 +109,7 @@ export class InitialScreen extends Component
 		}
 	}
 }
+
 
 const styles = StyleSheet.create({
 	container: {
