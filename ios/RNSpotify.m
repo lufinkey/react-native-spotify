@@ -21,6 +21,7 @@
 	BOOL _loggingIn;
 	BOOL _loggingInPlayer;
 	BOOL _loggingOutPlayer;
+	BOOL _renewingPlayerSession;
 	
 	RNSpotifyAuth* _auth;
 	NSTimer* _authRenewalTimer;
@@ -32,7 +33,6 @@
 	NSMutableArray<RNSpotifyCompletion*>* _loginPlayerResponses;
 	NSMutableArray<RNSpotifyCompletion*>* _logoutPlayerResponses;
 	
-	BOOL _renewingSession;
 	NSMutableArray<RNSpotifyCompletion*>* _renewCallbacks;
 	
 	NSString* _audioSessionCategory;
@@ -65,6 +65,7 @@
 		_loggingIn = NO;
 		_loggingInPlayer = NO;
 		_loggingOutPlayer = NO;
+		_renewingPlayerSession = NO;
 		
 		_auth = nil;
 		_authRenewalTimer = nil;
@@ -76,7 +77,6 @@
 		_loginPlayerResponses = [NSMutableArray array];
 		_logoutPlayerResponses = [NSMutableArray array];
 		
-		_renewingSession = NO;
 		_renewCallbacks = [NSMutableArray array];
 		
 		_audioSessionCategory = nil;
@@ -307,7 +307,11 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 				return;
 			}
 			else {
+				_renewingPlayerSession = YES;
 				[_player loginWithAccessToken:_auth.session.accessToken];
+				dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^(void){
+					_renewingPlayerSession = NO;
+				});
 			}
 			[self sendEvent:@"sessionRenewed" args:@[[RNSpotifyConvert RNSpotifySessionData:_auth.session]]];
 		}
@@ -1049,11 +1053,13 @@ RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method param
 	
 	// if we didn't explicitly log out, try to renew the session
 	if(!wasLoggingOutPlayer && _auth.canRefreshSession) {
-		// the player gets logged out when the session gets renewed (for some reason) so reuse access token if possible
-		NSDate* expireDate = (_auth.session != nil) ? _auth.session.expireDate : nil;
-		if((expireDate.timeIntervalSince1970 - [NSDate date].timeIntervalSince1970) >= 3500.0) {
-			[_player loginWithAccessToken:_auth.session.accessToken];
-			return;
+		// the player gets logged out when the session gets renewed (for some reason) so reuse access token
+		if(_renewingPlayerSession) {
+			_renewingPlayerSession = NO;
+			if((_auth.session.expireDate.timeIntervalSince1970 - [NSDate date].timeIntervalSince1970) > (self.tokenRefreshEarliness + 60.0)) {
+				[_player loginWithAccessToken:_auth.session.accessToken];
+				return;
+			}
 		}
 		// renew session
 		[self renewSession:[RNSpotifyCompletion onComplete:^(NSNumber* renewed, RNSpotifyError* error) {
