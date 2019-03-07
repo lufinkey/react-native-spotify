@@ -7,7 +7,6 @@ const Spotify = NativeModules.RNSpotify;
 RNEvents.register(Spotify);
 RNEvents.conform(Spotify);
 
-const sendRequest = Spotify.sendRequest;
 const login = Spotify.login;
 const authenticate = Spotify.authenticate;
 
@@ -31,7 +30,7 @@ Spotify.search = (query, types, options) => {
 	const body = {...options};
 	body['q'] = query;
 	body['type'] = types.join(',');
-	const results = sendRequest('v1/search', 'GET', body, false);
+	const results = Spotify.sendRequest('v1/search', 'GET', body, false);
 	for(const type in ['tracks','albums','artists','playlists']) {
 		const typeResults = results[type];
 		if(typeResults) {
@@ -53,7 +52,7 @@ Spotify.getAlbum = (albumID, options) => {
 	if(albumID == null) {
 		return Promise.reject(new Error("albumID cannot be null"));
 	}
-	return sendRequest('v1/albums/'+albumID, 'GET', options, false);
+	return Spotify.sendRequest('v1/albums/'+albumID, 'GET', options, false);
 }
 
 Spotify.getAlbums = (albumIDs, options) => {
@@ -62,7 +61,7 @@ Spotify.getAlbums = (albumIDs, options) => {
 	}
 	const body = {...options};
 	body['ids'] = albumIDs.join(',');
-	return sendRequest('v1/albums', 'GET', body, false);
+	return Spotify.sendRequest('v1/albums', 'GET', body, false);
 }
 
 Spotify.getAlbumTracks = (albumID, options) => {
@@ -70,7 +69,7 @@ Spotify.getAlbumTracks = (albumID, options) => {
 		return Promise.reject(new Error("albumID cannot be null"));
 	}
 	const body = {...options};
-	const results = sendRequest('v1/albums/'+albumID+'/tracks', 'GET', body, false);
+	const results = Spotify.sendRequest('v1/albums/'+albumID+'/tracks', 'GET', body, false);
 	// fix Spotify's mistakes
 	if(results.next === 'null') {
 		results.next = null;
@@ -88,7 +87,7 @@ Spotify.getArtist = (artistID, options) => {
 		return Promise.reject(new Error("artistID cannot be null"));
 	}
 	const body = {...options};
-	return sendRequest('v1/artists/'+artistID, 'GET', body, false);
+	return Spotify.sendRequest('v1/artists/'+artistID, 'GET', body, false);
 }
 
 Spotify.getArtists = (artistIDs, options) => {
@@ -97,7 +96,7 @@ Spotify.getArtists = (artistIDs, options) => {
 	}
 	const body = {...options};
 	body['ids'] = artistIDs.join(',');
-	return sendRequest('v1/artists', 'GET', body, false);
+	return Spotify.sendRequest('v1/artists', 'GET', body, false);
 }
 
 Spotify.getArtistAlbums = (artistID, options) => {
@@ -105,7 +104,7 @@ Spotify.getArtistAlbums = (artistID, options) => {
 		return Promise.reject(new Error("artistID cannot be null"));
 	}
 	const body = {...options};
-	const results = sendRequest('v1/artists/'+artistID+'/albums', 'GET', body, false);
+	const results = Spotify.sendRequest('v1/artists/'+artistID+'/albums', 'GET', body, false);
 	// fix Spotify's bullshit
 	if(results.next === 'null') {
 		results.next = null;
@@ -125,7 +124,7 @@ Spotify.getArtistTopTracks = (artistID, country, options) => {
 	}
 	const body = {...options};
 	body['country'] = country;
-	return sendRequest('v1/artists/'+artistID+'/top-tracks', 'GET', body, false);
+	return Spotify.sendRequest('v1/artists/'+artistID+'/top-tracks', 'GET', body, false);
 }
 
 Spotify.getArtistRelatedArtists = (artistID, options) => {
@@ -133,7 +132,7 @@ Spotify.getArtistRelatedArtists = (artistID, options) => {
 		return Promise.reject(new Error("artistID cannot be null"));
 	}
 	const body = {...options};
-	return sendRequest('v1/artists/'+artistID+'/related-artists', 'GET', body, false);
+	return Spotify.sendRequest('v1/artists/'+artistID+'/related-artists', 'GET', body, false);
 }
 
 
@@ -143,7 +142,7 @@ Spotify.getTrack = (trackID, options) => {
 		return Promise.reject(new Error("trackID cannot be null"));
 	}
 	const body = {...options};
-	return sendRequest('v1/tracks/'+trackID, 'GET', body, false);
+	return Spotify.sendRequest('v1/tracks/'+trackID, 'GET', body, false);
 }
 
 Spotify.getTracks = (trackIDs, options) => {
@@ -152,7 +151,7 @@ Spotify.getTracks = (trackIDs, options) => {
 	}
 	const body = {...options};
 	body['ids'] = trackIDs.join(',');
-	return sendRequest('v1/tracks', 'GET', body, false);
+	return Spotify.sendRequest('v1/tracks', 'GET', body, false);
 }
 
 Spotify.getTrackAudioAnalysis = (trackID, options) => {
@@ -160,7 +159,7 @@ Spotify.getTrackAudioAnalysis = (trackID, options) => {
 		return Promise.reject(new Error("trackID cannot be null"));
 	}
 	const body = {...options};
-	return sendRequest('v1/audio-analysis/'+trackID, 'GET', body, false);
+	return Spotify.sendRequest('v1/audio-analysis/'+trackID, 'GET', body, false);
 }
 
 Spotify.getTrackAudioFeatures = (trackID, options) => {
@@ -168,7 +167,7 @@ Spotify.getTrackAudioFeatures = (trackID, options) => {
 		return Promise.reject(new Error("trackID cannot be null"));
 	}
 	const body = {...options};
-	return sendRequest('v1/audio-features/'+trackID, 'GET', body, false);
+	return Spotify.sendRequest('v1/audio-features/'+trackID, 'GET', body, false);
 }
 
 Spotify.getTracksAudioFeatures = (trackIDs, options) => {
@@ -177,7 +176,7 @@ Spotify.getTracksAudioFeatures = (trackIDs, options) => {
 	}
 	const body = {...options};
 	body['ids'] = trackIDs.join(',');
-	return sendRequest('v1/audio-features', 'GET', body, false);
+	return Spotify.sendRequest('v1/audio-features', 'GET', body, false);
 }
 
 
@@ -187,7 +186,7 @@ Spotify.getPlaylist = (playlistID, options) => {
 		return Promise.reject(new Error("playlistID cannot be null"));
 	}
 	const body = {...options};
-	return sendRequest('v1/playlists/'+playlistID, 'GET', body, false);
+	return Spotify.sendRequest('v1/playlists/'+playlistID, 'GET', body, false);
 }
 
 Spotify.getPlaylistTracks = (playlistID, options) => {
@@ -195,28 +194,28 @@ Spotify.getPlaylistTracks = (playlistID, options) => {
 		return Promise.reject(new Error("playlistID cannot be null"));
 	}
 	const body = {...options};
-	return sendRequest('v1/playlists/'+playlistID+'/tracks', 'GET', body, false);
+	return Spotify.sendRequest('v1/playlists/'+playlistID+'/tracks', 'GET', body, false);
 }
 
 
 
 Spotify.getMe = () => {
-	return sendRequest('v1/me', 'GET', null, false);
+	return Spotify.sendRequest('v1/me', 'GET', null, false);
 }
 
 Spotify.getMyTracks = (options) => {
 	const body = {...options};
-	return sendRequest('v1/me/tracks', 'GET', body, false);
+	return Spotify.sendRequest('v1/me/tracks', 'GET', body, false);
 }
 
 Spotify.getMyPlaylists = (options) => {
 	const body = {...options};
-	return sendRequest('v1/me/playlists', 'GET', body, false);
+	return Spotify.sendRequest('v1/me/playlists', 'GET', body, false);
 }
 
 Spotify.getMyTop = (type, options) => {
 	const body = {...options};
-	return sendRequest(`v1/me/top/${type}`, 'GET', body, false);
+	return Spotify.sendRequest(`v1/me/top/${type}`, 'GET', body, false);
 }
 
 
