@@ -1263,6 +1263,13 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 										JSONObject errorObj = resultObj.getJSONObject("error");
 										int statusCode = errorObj.getInt("status");
 										String errorMessage = errorObj.getString("message");
+										if(response.statusCode == 429) {
+											String retryAfter = response.headers.get("Retry-After");
+											if(retryAfter != null) {
+												errorMessage += ". Retry after "+retryAfter+" seconds";
+											}
+
+										}
 										completion.reject(SpotifyError.getHTTPError(statusCode, errorMessage));
 									}
 									return;

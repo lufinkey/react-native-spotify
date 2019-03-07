@@ -927,15 +927,13 @@ RCT_EXPORT_METHOD(seek:(double)position resolve:(RCTPromiseResolveBlock)resolve 
 			
 			// check if content is json
 			BOOL isJSON = NO;
-			if([response isKindOfClass:[NSHTTPURLResponse class]]) {
-				NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
-				NSString* contentType = httpResponse.allHeaderFields[@"Content-Type"];
-				if(contentType!=nil) {
-					contentType = [contentType componentsSeparatedByString:@";"][0];
-				}
-				if([contentType caseInsensitiveCompare:@"application/json"] == NSOrderedSame) {
-					isJSON = YES;
-				}
+			NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
+			NSString* contentType = httpResponse.allHeaderFields[@"Content-Type"];
+			if(contentType!=nil) {
+				contentType = [contentType componentsSeparatedByString:@";"][0];
+			}
+			if([contentType caseInsensitiveCompare:@"application/json"] == NSOrderedSame) {
+				isJSON = YES;
 			}
 			
 			id result = nil;
@@ -966,6 +964,12 @@ RCT_EXPORT_METHOD(seek:(double)position resolve:(RCTPromiseResolveBlock)resolve 
 						if(statusCode == nil || message == nil || ![statusCode isKindOfClass:[NSNumber class]] || ![message isKindOfClass:[NSString class]]) {
 							[completion reject:[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadResponse]];
 							return;
+						}
+						if(httpResponse.statusCode == 429) {
+							NSString* retryAfter = httpResponse.allHeaderFields[@"Retry-After"];
+							if(retryAfter != nil) {
+								message = [message stringByAppendingString:[NSString stringWithFormat:@". Retry after %@ seconds", retryAfter]];
+							}
 						}
 						[completion reject:[RNSpotifyError httpErrorForStatusCode:[statusCode integerValue] message:message]];
 					}
