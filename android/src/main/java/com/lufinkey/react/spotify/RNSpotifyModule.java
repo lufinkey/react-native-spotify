@@ -195,7 +195,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 		}
 		promise.resolve(loggedIn);
 		if(loggedIn) {
-			sendEvent("login");
+			sendEvent("login", Convert.fromSessionData(auth.getSession()));
 		}
 
 		// try to log back in if necessary
@@ -598,7 +598,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 				}
 				resolve(null);
 				if(!wasLoggedIn) {
-					sendEvent("login");
+					sendEvent("login", Convert.fromSessionData(auth.getSession()));
 				}
 			}
 		});
@@ -690,7 +690,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 									}
 									promise.resolve(loggedIn);
 									if (loggedIn) {
-										sendEvent("login");
+										sendEvent("login", Convert.fromSessionData(auth.getSession()));
 									}
 									startAuthRenewalTimer();
 								}

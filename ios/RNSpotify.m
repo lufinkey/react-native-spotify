@@ -215,7 +215,7 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options resolve:(RCTPromiseResolveBl
 	}
 	resolve(@(_loggedIn));
 	if(_loggedIn) {
-		[self sendEvent:@"login" args:@[]];
+		[self sendEvent:@"login" args:@[[RNSpotifyConvert RNSpotifySessionData:_auth.session]]];
 	}
 	
 	[self logBackInIfNeeded:[RNSpotifyCompletion<NSNumber*> onComplete:^(NSNumber* loggedIn, RNSpotifyError* error) {
@@ -479,7 +479,7 @@ RCT_EXPORT_METHOD(loginWithSession:(NSDictionary*)options resolve:(RCTPromiseRes
 		}
 		resolve(nil);
 		if(!wasLoggedIn) {
-			[self sendEvent:@"login" args:@[]];
+			[self sendEvent:@"login" args:@[[RNSpotifyConvert RNSpotifySessionData:_auth.session]]];
 		}
 	}]];
 }
@@ -548,7 +548,7 @@ RCT_EXPORT_METHOD(login:(NSDictionary*)options resolve:(RCTPromiseResolveBlock)r
 								_loggingIn = NO;
 								resolve(@(_loggedIn));
 								if(_loggedIn) {
-									[self sendEvent:@"login" args:@[]];
+									[self sendEvent:@"login" args:@[[RNSpotifyConvert RNSpotifySessionData:_auth.session]]];
 								}
 								[self startAuthRenewalTimer];
 							}

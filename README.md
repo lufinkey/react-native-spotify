@@ -158,6 +158,8 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 
 - **'login'**
 
+	- `session` {Session}
+	
 	Emitted when the module has successfully logged in.
 
 - **'logout'**
