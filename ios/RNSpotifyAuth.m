@@ -185,7 +185,7 @@
 				_renewingSession = NO;
 				
 				// determine if session was renewed
-				BOOL _renewed = false;
+				BOOL _renewed = NO;
 				if(error == nil && _session != nil && _session.refreshToken != nil) {
 					NSString* newAccessToken = result[@"access_token"];
 					NSNumber* expireSeconds = result[@"expires_in"];

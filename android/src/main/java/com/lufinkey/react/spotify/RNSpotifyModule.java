@@ -195,7 +195,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 		}
 		promise.resolve(loggedIn);
 		if(loggedIn) {
-			sendEvent("login");
+			sendEvent("login", Convert.fromSessionData(auth.getSession()));
 		}
 
 		// try to log back in if necessary
@@ -316,6 +316,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 					else {
 						player.login(auth.getSession().accessToken);
 					}
+					sendEvent("sessionRenewed", Convert.fromSessionData(auth.getSession()));
 				}
 				completion.resolve(renewed);
 			}
@@ -597,7 +598,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 				}
 				resolve(null);
 				if(!wasLoggedIn) {
-					sendEvent("login");
+					sendEvent("login", Convert.fromSessionData(auth.getSession()));
 				}
 			}
 		});
@@ -689,7 +690,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 									}
 									promise.resolve(loggedIn);
 									if (loggedIn) {
-										sendEvent("login");
+										sendEvent("login", Convert.fromSessionData(auth.getSession()));
 									}
 									startAuthRenewalTimer();
 								}
@@ -1262,6 +1263,13 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 										JSONObject errorObj = resultObj.getJSONObject("error");
 										int statusCode = errorObj.getInt("status");
 										String errorMessage = errorObj.getString("message");
+										if(response.statusCode == 429) {
+											String retryAfter = response.headers.get("Retry-After");
+											if(retryAfter != null) {
+												errorMessage += ". Retry after "+retryAfter+" seconds";
+											}
+
+										}
 										completion.reject(SpotifyError.getHTTPError(statusCode, errorMessage));
 									}
 									return;
