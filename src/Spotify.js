@@ -7,18 +7,35 @@ const Spotify = NativeModules.RNSpotify;
 RNEvents.register(Spotify);
 RNEvents.conform(Spotify);
 
+
 const login = Spotify.login;
-const authenticate = Spotify.authenticate;
-
-
 Spotify.login = (options={}) => {
 	options = {...options};
 	return login(options);
 }
 
+const authenticate = Spotify.authenticate;
 Spotify.authenticate = (options={}) => {
 	options = {...options};
 	return authenticate(options);
+}
+
+
+
+const sendRequest = Spotify.sendRequest;
+Spotify.sendRequest = (endpoint, method, params, isJSONBody) => {
+	try {
+		return await sendRequest(endpoint, method, params, isJSONBody);
+	}
+	catch(error) {
+		if(error.code === 'HTTP429') {
+			const match = /[r|R]etry [a|A]fter ([0-9]+) [s|S]econds/.exec(error.message)[0];
+			if(match) {
+				error.retryAfter = Number.parseInt(match);
+			}
+		}
+		throw error;
+	}
 }
 
 
