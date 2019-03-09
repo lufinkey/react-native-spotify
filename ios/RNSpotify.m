@@ -701,7 +701,10 @@ RCT_EXPORT_METHOD(getSessionAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPro
 					[completion resolve:nil];
 				}
 			} onResolve:^(id result) {
-				if(!_player.loggedIn && _auth.hasStreamingScope) {
+				if(!_auth.hasStreamingScope) {
+					[completion reject:[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.PlayerNotReady message:@"Missing streaming scope"]];
+				}
+				else if(_player == nil || !_player.initialized || !_player.loggedIn) {
 					[completion reject:[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.PlayerNotReady]];
 				}
 				else {

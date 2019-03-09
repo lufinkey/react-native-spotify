@@ -876,7 +876,10 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 
 						@Override
 						public void onResolve(Void unused) {
-							if(player == null && auth.hasStreamingScope()) {
+							if(!auth.hasStreamingScope()) {
+								completion.reject(new SpotifyError(SpotifyError.Code.PlayerNotReady, "Missing streaming scope"));
+							}
+							else if(player == null || !player.isInitialized() || !player.isLoggedIn()) {
 								completion.reject(new SpotifyError(SpotifyError.Code.PlayerNotReady));
 							}
 							else {
