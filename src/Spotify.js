@@ -23,7 +23,7 @@ Spotify.authenticate = (options={}) => {
 
 
 const sendRequest = Spotify.sendRequest;
-Spotify.sendRequest = (endpoint, method, params, isJSONBody) => {
+Spotify.sendRequest = async (endpoint, method, params, isJSONBody) => {
 	try {
 		return await sendRequest(endpoint, method, params, isJSONBody);
 	}
