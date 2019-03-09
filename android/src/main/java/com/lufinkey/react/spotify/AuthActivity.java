@@ -113,6 +113,9 @@ public class AuthActivity extends Activity
 
 						@Override
 						public void onResolve(SessionData session) {
+							if(session.scopes == null) {
+								session.scopes = options.scopes;
+							}
 							listener.onAuthActivityReceiveSession(authActivity, session);
 						}
 					});

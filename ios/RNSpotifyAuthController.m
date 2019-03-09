@@ -175,6 +175,9 @@
 				[_completion reject:error];
 			});
 		} onResolve:^(RNSpotifySessionData* session) {
+			if(session.scopes == nil) {
+				session.scopes = _options.scopes;
+			}
 			dispatch_async(dispatch_get_main_queue(), ^{
 				[_completion resolve:session];
 			});
