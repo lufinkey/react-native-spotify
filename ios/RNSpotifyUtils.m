@@ -19,6 +19,7 @@
 			[[value description] stringByAddingPercentEncodingWithAllowedCharacters:NSCharacterSet.URLQueryAllowedCharacterSet]
 		) : nil;
 		if(valueStr != nil) {
+			valueStr = [valueStr stringByReplacingOccurrencesOfString:@"+" withString:@"%2B"];
 			NSString* part = [NSString stringWithFormat: @"%@=%@", keyStr, valueStr];
 			[parts addObject:part];
 		}
