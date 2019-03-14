@@ -1105,26 +1105,18 @@ RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method param
 				[self loginPlayer:[RNSpotifyCompletion onResolve:^(id result) {
 					// reset back to saved player state if we have one
 					if(savedPlayerState != nil) {
-						// wait for pause event
-						RNEventEmitter* eventEmitter = [RNEventBridge moduleForClass:[RNEventEmitter class] bridge:self.bridge];
-						void(^pauseListener)(NSArray*) = ^(NSArray* args){
-							[_player setShuffle:savedPlayerState.shuffling callback:nil];
-							[_player setRepeat:(savedPlayerState.repeating ? SPTRepeatContext : SPTRepeatOff) callback:nil];
-							[_player playSpotifyURI:savedPlayerState.uri startingWithIndex:savedPlayerState.index startingWithPosition:savedPlayerState.position callback:^(NSError* error) {
-								if(error != nil) {
-									printErrLog(@"failed to play uri after unexpected pause: %@", error);
-								}
-							}];
-							[_player setIsPlaying:savedPlayerState.playing callback:^(NSError* error) {
-								if(error != nil) {
-									printErrLog(@"failed to set player playing after unexpected pause: %@", error);
-								}
-							}];
-						};
-						[eventEmitter addListener:pauseListener forEvent:@"pause" fromModule:self runOnce:YES];
-						dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^(void){
-							[eventEmitter removeListener:pauseListener forEvent:@"pause" fromModule:self];
-						});
+						[_player setShuffle:savedPlayerState.shuffling callback:nil];
+						[_player setRepeat:(savedPlayerState.repeating ? SPTRepeatContext : SPTRepeatOff) callback:nil];
+						[_player playSpotifyURI:savedPlayerState.uri startingWithIndex:savedPlayerState.index startingWithPosition:savedPlayerState.position callback:^(NSError* error) {
+							if(error != nil) {
+								printErrLog(@"failed to play uri after unexpected pause: %@", error);
+							}
+						}];
+						[_player setIsPlaying:savedPlayerState.playing callback:^(NSError* error) {
+							if(error != nil) {
+								printErrLog(@"failed to set player playing after unexpected pause: %@", error);
+							}
+						}];
 					}
 				} onReject:^(RNSpotifyError *error) {
 					// we failed to login the player, so clear session and stop player
