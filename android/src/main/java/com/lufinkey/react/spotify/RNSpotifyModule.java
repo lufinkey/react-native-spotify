@@ -47,7 +47,6 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	private Auth auth;
 	private Handler authRenewalTimer;
 	private SpotifyPlayer player;
-	private Double volume = 1.0;
 	private TrackController trackController = new TrackController();
 	private final ArrayList<Completion<Void>> playerInitResponses;
 	private final ArrayList<Completion<Void>> playerLoginResponses;
@@ -387,7 +386,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 			Config config = new Config(reactContext.getApplicationContext(), auth.getAccessToken(), auth.clientID);
 			SpotifyPlayer.Builder builder = new SpotifyPlayer.Builder(config);
 			builder.setAudioController(trackController);
-			
+
 			player = Spotify.getPlayer(builder, reference, new SpotifyPlayer.InitializationObserver() {
 				@Override
 				public void onError(Throwable error) {
@@ -397,7 +396,6 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 						Spotify.destroyPlayer(reference);
 						player = null;
 					}
-
 					// call init responses
 					ArrayList<Completion<Void>> initResponses = null;
 					synchronized (playerInitResponses) {
@@ -908,15 +906,14 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	@ReactMethod
 	//setVolume(volume)
 	public void setVolume(double volume, final Promise promise) {
-		this.volume = volume;
-		trackController.getAudioTrack().setVolume((float)volume);
+		trackController.setVolume((float) volume);
 		promise.resolve(null);
 	}
 
 	@ReactMethod(isBlockingSynchronousMethod = true)
 	//getVolume()
 	public Double getVolume() {
-		return volume;
+		return Double.valueOf(trackController.getVolume());
 	}
 
 	@ReactMethod
