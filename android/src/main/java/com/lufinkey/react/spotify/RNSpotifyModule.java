@@ -378,7 +378,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 			//initialize player
 			final Object reference = this;
 			Config playerConfig = new Config(reactContext.getApplicationContext(), auth.getSession().accessToken, auth.getClientID());
-      SpotifyPlayer.Builder builder = new SpotifyPlayer.Builder(playerConfig);
+			SpotifyPlayer.Builder builder = new SpotifyPlayer.Builder(playerConfig);
 			builder.setAudioController(trackController);
       
 			player = Spotify.getPlayer(builder, reference, new SpotifyPlayer.InitializationObserver() {
