@@ -12,15 +12,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 
 public class TrackController implements AudioController {
-    private static final int DEFAULT_CHANNEL_COUNT = 2;
-    private static final int AUDIO_BUFFER_SIZE_FRAMES = 2048;
-    private static final int BUFFER_LATENCY_FACTOR = 2;
-    private static final int AUDIO_BUFFER_SIZE_SAMPLES = 4096;
-    private static final int AUDIO_BUFFER_CAPACITY = 81920;
     private final AudioRingBuffer mAudioBuffer = new AudioRingBuffer(81920);
     private final ExecutorService mExecutorService = Executors.newSingleThreadExecutor();
     private final Object mPlayingMutex = new Object();
     private AudioTrack mAudioTrack;
+    private float volume = 1;
     private int mSampleRate;
     private int mChannels;
     private final Runnable mAudioRunnable = new Runnable() {
@@ -41,6 +37,21 @@ public class TrackController implements AudioController {
 
     public AudioTrack getAudioTrack() {
         return mAudioTrack;
+    }
+
+    public float getVolume() {
+        return volume;
+    }
+
+    public void setVolume(float volume) {
+        this.volume = volume;
+        if (this.mAudioTrack != null) {
+            if (Build.VERSION.SDK_INT >= 21) {
+                this.mAudioTrack.setVolume(this.volume);
+            } else {
+                this.mAudioTrack.setStereoVolume(this.volume, this.volume);
+            }
+        }
     }
 
     public int onAudioDataDelivered(short[] samples, int sampleCount, int sampleRate, int channels) {
@@ -115,16 +126,10 @@ public class TrackController implements AudioController {
         }
 
         int bufferSize = AudioTrack.getMinBufferSize(sampleRate, channelConfig, 2) * 2;
-        float maxVolume = AudioTrack.getMaxVolume();
         synchronized(this.mPlayingMutex) {
             this.mAudioTrack = new AudioTrack(3, sampleRate, channelConfig, 2, bufferSize, 1);
             if (this.mAudioTrack.getState() == 1) {
-                if (Build.VERSION.SDK_INT >= 21) {
-                    this.mAudioTrack.setVolume(maxVolume);
-                } else {
-                    this.mAudioTrack.setStereoVolume(maxVolume, maxVolume);
-                }
-
+                setVolume(this.volume);
                 this.mAudioTrack.play();
             } else {
                 this.mAudioTrack.release();
