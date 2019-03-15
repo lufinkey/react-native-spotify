@@ -1,17 +1,31 @@
 
 #import "RNSpotify.h"
 #import <AVFoundation/AVFoundation.h>
-#import <SpotifyAuthentication/SpotifyAuthentication.h>
 #import <SpotifyMetadata/SpotifyMetadata.h>
 #import <SpotifyAudioPlayback/SpotifyAudioPlayback.h>
+#import "RNSpotifyAuth.h"
 #import "RNSpotifyAuthController.h"
+#import "RNSpotifyLoginOptions.h"
 #import "RNSpotifyProgressView.h"
 #import "RNSpotifyConvert.h"
 #import "RNSpotifyCompletion.h"
+#import "RNSpotifyUtils.h"
 #import "HelperMacros.h"
 
 #define SPOTIFY_API_BASE_URL @"https://api.spotify.com/"
 #define SPOTIFY_API_URL(endpoint) [NSURL URLWithString:NSString_concat(SPOTIFY_API_BASE_URL, endpoint)]
+
+@interface RNSpotifySavedPlayerState: NSObject
+	@property NSString* uri;
+	@property NSInteger index;
+	@property NSTimeInterval position;
+	@property BOOL shuffling;
+	@property BOOL repeating;
+	@property BOOL playing;
+@end
+
+@implementation RNSpotifySavedPlayerState
+@end
 
 @interface RNSpotify() <SPTAudioStreamingDelegate, SPTAudioStreamingPlaybackDelegate> {
 	BOOL _initialized;
@@ -20,7 +34,10 @@
 	BOOL _loggingInPlayer;
 	BOOL _loggingOutPlayer;
 	
-	SPTAuth* _auth;
+	BOOL _renewingPlayerSession;
+	RNSpotifySavedPlayerState* _renewingPlayerState;
+	
+	RNSpotifyAuth* _auth;
 	NSTimer* _authRenewalTimer;
 	SPTAudioStreamingController* _player;
 	
@@ -30,13 +47,11 @@
 	NSMutableArray<RNSpotifyCompletion*>* _loginPlayerResponses;
 	NSMutableArray<RNSpotifyCompletion*>* _logoutPlayerResponses;
 	
-	BOOL _renewingSession;
 	NSMutableArray<RNSpotifyCompletion*>* _renewCallbacks;
 	
 	NSString* _audioSessionCategory;
 }
 +(NSMutableDictionary*)mutableDictFromDict:(NSDictionary*)dict;
--(BOOL)hasPlayerScope;
 
 -(void)logBackInIfNeeded:(RNSpotifyCompletion<NSNumber*>*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse;
 -(void)initializePlayerIfNeeded:(RNSpotifyCompletion*)completion;
@@ -65,6 +80,9 @@
 		_loggingInPlayer = NO;
 		_loggingOutPlayer = NO;
 		
+		_renewingPlayerSession = NO;
+		_renewingPlayerState = nil;
+		
 		_auth = nil;
 		_authRenewalTimer = nil;
 		_player = nil;
@@ -75,7 +93,6 @@
 		_loginPlayerResponses = [NSMutableArray array];
 		_logoutPlayerResponses = [NSMutableArray array];
 		
-		_renewingSession = NO;
 		_renewCallbacks = [NSMutableArray array];
 		
 		_audioSessionCategory = nil;
@@ -122,17 +139,6 @@ RCT_EXPORT_METHOD(__registerAsJSEventEmitter:(int)moduleId) {
 		return [NSMutableDictionary dictionary];
 	}
 	return dict.mutableCopy;
-}
-
--(BOOL)hasPlayerScope {
-	if(_options==nil) {
-		return NO;
-	}
-	id scopes = _options[@"scopes"];
-	if(scopes==nil || ![scopes isKindOfClass:[NSArray class]]) {
-		return NO;
-	}
-	return [scopes containsObject:@"streaming"];
 }
 
 -(void)activateAudioSession {
@@ -184,28 +190,26 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options resolve:(RCTPromiseResolveBl
 		[[RNSpotifyError nullParameterErrorForName:@"options"] reject:reject];
 		return;
 	}
-	else if(options[@"clientID"] == nil) {
-		[[RNSpotifyError missingOptionErrorForName:@"clientID"] reject:reject];
-		return;
-	}
 	
 	// load default options
 	_options = options;
-	_auth = [SPTAuth defaultInstance];
+	_auth = [[RNSpotifyAuth alloc] init];
 	_player = [SPTAudioStreamingController sharedInstance];
 	_cacheSize = @(1024 * 1024 * 64);
 	
 	// load auth options
-	_auth.clientID = options[@"clientID"];
-	_auth.redirectURL = [NSURL URLWithString:options[@"redirectURL"]];
 	_auth.sessionUserDefaultsKey = options[@"sessionUserDefaultsKey"];
-	_auth.requestedScopes = options[@"scopes"];
-	_auth.tokenSwapURL = [NSURL URLWithString:options[@"tokenSwapURL"]];
-	_auth.tokenRefreshURL = [NSURL URLWithString:options[@"tokenRefreshURL"]];
 	NSNumber* cacheSize = options[@"cacheSize"];
 	if(cacheSize!=nil) {
 		_cacheSize = cacheSize;
 	}
+	RNSpotifyError* loginOptionsError = nil;
+	RNSpotifyLoginOptions* loginOptions = [RNSpotifyLoginOptions optionsFromDictionary:options fallback:nil error:&loginOptionsError];
+	if(loginOptionsError != nil) {
+		[loginOptionsError reject:reject];
+		return;
+	}
+	[_auth loadWithOptions:loginOptions];
 	
 	// load iOS-specific options
 	NSDictionary* iosOptions = options[@"ios"];
@@ -221,13 +225,13 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options resolve:(RCTPromiseResolveBl
 	_initialized = YES;
 	
 	// call callback
-	BOOL authLoggedIn = _auth.session != nil;
+	BOOL authLoggedIn = _auth.isLoggedIn;
 	if(authLoggedIn) {
 		_loggedIn = true;
 	}
 	resolve(@(_loggedIn));
 	if(_loggedIn) {
-		[self sendEvent:@"login" args:@[]];
+		[self sendEvent:@"login" args:@[[RNSpotifyConvert RNSpotifySessionData:_auth.session]]];
 	}
 	
 	[self logBackInIfNeeded:[RNSpotifyCompletion<NSNumber*> onComplete:^(NSNumber* loggedIn, RNSpotifyError* error) {
@@ -254,7 +258,7 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 
 -(void)logBackInIfNeeded:(RNSpotifyCompletion<NSNumber*>*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse {
 	// ensure auth is actually logged in
-	if(_auth.session == nil) {
+	if(!_auth.isLoggedIn) {
 		[completion resolve:@NO];
 		return;
 	}
@@ -294,92 +298,23 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 }
 
 -(void)renewSessionIfNeeded:(RNSpotifyCompletion<NSNumber*>*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse {
-	if(_auth.session == nil || _auth.session.isValid) {
+	if(!_auth.isLoggedIn || _auth.isSessionValid) {
 		// not logged in or session does not need renewal
 		[completion resolve:@NO];
 	}
-	else if(_auth.session.encryptedRefreshToken == nil) {
+	else if(_auth.session.refreshToken == nil) {
 		// no refresh token to renew session with, so the session has expired
 		[completion reject:[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.SessionExpired]];
 	}
 	else {
-		[self renewSession:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
-			[completion reject:error];
-		} onResolve:^(id result) {
-			[completion resolve:result];
-		}] waitForDefinitiveResponse:waitForDefinitiveResponse];
+		[self renewSession:completion waitForDefinitiveResponse:waitForDefinitiveResponse];
 	}
 }
 
--(void)renewSPTAuthSession:(RNSpotifyCompletion<NSNumber*>*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse {
-	dispatch_async(dispatch_get_main_queue(), ^{
-		if(_auth.session == nil) {
-			[completion reject:[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.NotLoggedIn]];
-			return;
-		}
-		else if(!_auth.hasTokenRefreshService) {
-			[completion resolve:@NO];
-			return;
-		}
-		else if(_auth.session.encryptedRefreshToken == nil) {
-			printOutLog(@"No refresh token available. Not renewing session");
-			[completion resolve:@NO];
-			return;
-		}
-		
-		// add completion to be called when the renewal finishes
-		if(completion != nil) {
-			[_renewCallbacks addObject:completion];
-		}
-		
-		// if we're already in the process of renewing the session, don't continue
-		if(_renewingSession) {
-			return;
-		}
-		_renewingSession = YES;
-		
-		// renew session
-		if(_auth.session.accessToken == nil || _auth.session.accessToken.length == 0) {
-			printOutLog(@"we currently have no auth token");
-		}
-		printOutLog(@"calling SPTAuth.renewSession");
-		[_auth renewSession:_auth.session callback:^(NSError* error, SPTSession* session){
-			dispatch_async(dispatch_get_main_queue(), ^{
-				if(error != nil) {
-					printErrLog(@"failed to renew Spotify session: %@", error);
-				}
-				_renewingSession = NO;
-				
-				id renewed = @NO;
-				if(session != nil) {
-					_auth.session = session;
-					renewed = @YES;
-				}
-				
-				//TODO figure out what SPTAuth.renewSession does if the internet is not connected (probably throws an error)
-				
-				NSArray<RNSpotifyCompletion*>* renewCallbacks = [NSArray arrayWithArray:_renewCallbacks];
-				[_renewCallbacks removeAllObjects];
-				for(RNSpotifyCompletion* completion in renewCallbacks) {
-					if(error != nil) {
-						[completion reject:[RNSpotifyError errorWithNSError:error]];
-					}
-					else {
-						[completion resolve:renewed];
-					}
-				}
-			});
-		}];
-	});
-}
-
 -(void)renewSession:(RNSpotifyCompletion<NSNumber*>*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse {
-	printOutLog(@"renewing Spotify session");
-	[self renewSPTAuthSession:[RNSpotifyCompletion onResolve:^(NSNumber* renewed) {
-		printOutLog(@"session renewed?: %@", renewed);
+	[_auth renewSession:[RNSpotifyCompletion onResolve:^(NSNumber* renewed) {
 		if(renewed.boolValue) {
 			if(_player == nil || !_player.loggedIn) {
-				printOutLog(@"re-initializing player");
 				[self initializePlayerIfNeeded:[RNSpotifyCompletion onResolve:^(id unused) {
 					[completion resolve:renewed];
 				} onReject:^(RNSpotifyError* error) {
@@ -388,17 +323,36 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 				return;
 			}
 			else {
-				NSString* accessToken = nil;
-				if(_auth.session != nil) {
-					accessToken = _auth.session.accessToken;
+				// backup player state before we renew, because the spotify SDK is broken and logs you out
+				_renewingPlayerSession = YES;
+				SPTPlaybackMetadata* metadata = _player.metadata;
+				SPTPlaybackState* state = _player.playbackState;
+				if(metadata != nil && metadata.currentTrack != nil) {
+					SPTPlaybackTrack* currentTrack = metadata.currentTrack;
+					_renewingPlayerState = [[RNSpotifySavedPlayerState alloc] init];
+					if(currentTrack.playbackSourceUri != nil) {
+						_renewingPlayerState.uri = currentTrack.playbackSourceUri;
+						_renewingPlayerState.index = currentTrack.indexInContext;
+					}
+					else {
+						_renewingPlayerState.uri = currentTrack.uri;
+						_renewingPlayerState.index = 0;
+					}
+					_renewingPlayerState.position = state.position;
+					_renewingPlayerState.shuffling = state.isShuffling;
+					_renewingPlayerState.repeating = state.isRepeating;
+					_renewingPlayerState.playing = state.isPlaying;
 				}
-				printOutLog(@"logging in player with new access token");
-				[_player loginWithAccessToken:accessToken];
+				[_player loginWithAccessToken:_auth.session.accessToken];
+				dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^(void){
+					_renewingPlayerSession = NO;
+					_renewingPlayerState = nil;
+				});
 			}
+			[self sendEvent:@"sessionRenewed" args:@[[RNSpotifyConvert RNSpotifySessionData:_auth.session]]];
 		}
 		[completion resolve:renewed];
 	} onReject:^(RNSpotifyError* error) {
-		printErrLog(@"Couldn't renew session: %@", error);
 		[completion reject:error];
 	}] waitForDefinitiveResponse:waitForDefinitiveResponse];
 }
@@ -419,7 +373,7 @@ RCT_EXPORT_METHOD(renewSession:(RCTPromiseResolveBlock)resolve reject:(RCTPromis
 
 
 -(void)initializePlayerIfNeeded:(RNSpotifyCompletion*)completion {
-	if(![self hasPlayerScope]) {
+	if(_auth.session == nil || !_auth.hasStreamingScope) {
 		[completion resolve:nil];
 		return;
 	}
@@ -505,67 +459,136 @@ RCT_EXPORT_METHOD(renewSession:(RCTPromiseResolveBlock)resolve reject:(RCTPromis
 	}
 }
 
-RCT_EXPORT_METHOD(login:(NSDictionary*)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
-	// ensure we're not already logging in
-	if(_loggingIn) {
-		[[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.ConflictingCallbacks message:@"Cannot call login multiple times before completing"] reject:reject];
+RCT_EXPORT_METHOD(authenticate:(NSDictionary*)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
+	RNSpotifyError* loginOptionsError = nil;
+	RNSpotifyLoginOptions* loginOptions = [RNSpotifyLoginOptions optionsFromDictionary:options fallback:_options error:&loginOptionsError];
+	if(loginOptionsError != nil) {
+		[loginOptionsError reject:reject];
 		return;
 	}
-	else if([[self isLoggedIn] boolValue]) {
-		resolve(@YES);
-		return;
-	}
-	NSMutableDictionary* loginParams = [NSMutableDictionary dictionary];
-	NSNumber* showDialog = options[@"showDialog"];
-	if(showDialog != nil) {
-		loginParams[@"show_dialog"] = showDialog.boolValue ? @"true" : @"false";
-	}
-	NSArray* scopes = options[@"scopes"];
-	if(scopes != nil) {
-		loginParams[@"scope"] = [scopes componentsJoinedByString:@" "];
-	}
-	_loggingIn = YES;
 	
 	// do UI logic on main thread
 	dispatch_async(dispatch_get_main_queue(), ^{
-		RNSpotifyAuthController* authController = [[RNSpotifyAuthController alloc] initWithAuth:_auth params:loginParams];
+		RNSpotifyAuthController* authController = [[RNSpotifyAuthController alloc] initWithOptions:loginOptions];
 		
 		__weak RNSpotifyAuthController* weakAuthController = authController;
-		authController.completion = [RNSpotifyCompletion<NSNumber*> onReject:^(RNSpotifyError* error) {
-			// login failed
+		authController.completion = [RNSpotifyCompletion<RNSpotifySessionData*> onComplete:^(RNSpotifySessionData* sessionData, RNSpotifyError* error) {
 			RNSpotifyAuthController* authController = weakAuthController;
 			[authController.presentingViewController dismissViewControllerAnimated:YES completion:^{
-				_loggingIn = NO;
-				[error reject:reject];
+				if(error != nil) {
+					[error reject:reject];
+				}
+				else {
+					resolve([RNSpotifyConvert RNSpotifySessionData:sessionData]);
+				}
 			}];
-		} onResolve:^(NSNumber* authenticated) {
+		}];
+		
+		// present auth view controller
+		UIViewController* topViewController = [RNSpotifyAuthController topViewController];
+		[topViewController presentViewController:authController animated:YES completion:nil];
+	});
+}
+
+RCT_EXPORT_METHOD(loginWithSession:(NSDictionary*)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
+	RNSpotifyError* error = nil;
+	RNSpotifyLoginOptions* loginOptions = [RNSpotifyLoginOptions optionsFromDictionary:options fallback:_options ignore:@[@"redirectURL"] error:&error];
+	if(error != nil) {
+		[error reject:reject];
+		return;
+	}
+	RNSpotifySessionData* session = [RNSpotifySessionData sessionFromDictionary:options error:&error];
+	if(error != nil) {
+		[error reject:reject];
+		return;
+	}
+	[_auth startSession:session options:loginOptions];
+	[self initializePlayerIfNeeded:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
+		// error
+		[_auth clearSession];
+		[error reject:reject];
+	} onResolve:^(id unused) {
+		BOOL wasLoggedIn = _loggedIn;
+		BOOL loggedIn = _auth.isLoggedIn;
+		if(!wasLoggedIn) {
+			if(!loggedIn) {
+				[[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.NotLoggedIn message:@"module was logged out"] reject:reject];
+				return;
+			}
+			_loggedIn = YES;
+		}
+		resolve(nil);
+		if(!wasLoggedIn) {
+			[self sendEvent:@"login" args:@[[RNSpotifyConvert RNSpotifySessionData:_auth.session]]];
+		}
+	}]];
+}
+
+RCT_EXPORT_METHOD(login:(NSDictionary*)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
+	dispatch_async(dispatch_get_main_queue(), ^{
+		// ensure we're not already logging in
+		if(_loggingIn) {
+			[[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.ConflictingCallbacks message:@"Cannot call login multiple times before completing"] reject:reject];
+			return;
+		}
+		else if([[self isLoggedIn] boolValue]) {
+			resolve(@YES);
+			return;
+		}
+		
+		RNSpotifyError* loginOptionsError = nil;
+		RNSpotifyLoginOptions* loginOptions = [RNSpotifyLoginOptions optionsFromDictionary:options fallback:_options error:&loginOptionsError];
+		if(loginOptionsError != nil) {
+			[loginOptionsError reject:reject];
+			return;
+		}
+		
+		_loggingIn = YES;
+		
+		RNSpotifyAuthController* authController = [[RNSpotifyAuthController alloc] initWithOptions:loginOptions];
+		
+		__weak RNSpotifyAuthController* weakAuthController = authController;
+		authController.completion = [RNSpotifyCompletion<RNSpotifySessionData*> onReject:^(RNSpotifyError* error) {
+			// login failed
 			RNSpotifyAuthController* authController = weakAuthController;
-			if(!authenticated.boolValue) {
-				// login cancelled
+			dispatch_async(dispatch_get_main_queue(), ^{
 				[authController.presentingViewController dismissViewControllerAnimated:YES completion:^{
 					_loggingIn = NO;
-					resolve(@NO);
+					[error reject:reject];
 				}];
+			});
+		} onResolve:^(RNSpotifySessionData* sessionData) {
+			RNSpotifyAuthController* authController = weakAuthController;
+			if(sessionData == nil) {
+				// login cancelled
+				dispatch_async(dispatch_get_main_queue(), ^{
+					[authController.presentingViewController dismissViewControllerAnimated:YES completion:^{
+						_loggingIn = NO;
+						resolve(@NO);
+					}];
+				});
 			}
 			else {
+				[_auth startSession:sessionData options:loginOptions];
 				// login successful
 				[self initializePlayerIfNeeded:[RNSpotifyCompletion onComplete:^(id unused, RNSpotifyError* error) {
 					// do UI logic on main thread
 					dispatch_async(dispatch_get_main_queue(), ^{
 						[authController.presentingViewController dismissViewControllerAnimated:YES completion:^{
 							if (error != nil) {
-								_auth.session = nil;
+								[_auth clearSession];
+								_loggingIn = NO;
 								[error reject:reject];
 							}
 							else {
-								BOOL authLoggedIn = _auth.session != nil;
+								BOOL authLoggedIn = _auth.isLoggedIn;
 								if(authLoggedIn) {
 									_loggedIn = YES;
 								}
 								_loggingIn = NO;
 								resolve(@(_loggedIn));
 								if(_loggedIn) {
-									[self sendEvent:@"login" args:@[]];
+									[self sendEvent:@"login" args:@[[RNSpotifyConvert RNSpotifySessionData:_auth.session]]];
 								}
 								[self startAuthRenewalTimer];
 							}
@@ -615,13 +638,12 @@ RCT_EXPORT_METHOD(logout:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejec
 }
 
 -(void)scheduleAuthRenewalTimer {
-	if(_auth.tokenRefreshURL == nil || _auth.session == nil || _auth.session.encryptedRefreshToken == nil) {
+	if(!_auth.canRefreshSession) {
 		// we can't perform token refresh, so don't bother scheduling the timer
-		printOutLog(@"we can't do session renewal, so not scheduling timer...");
 		return;
 	}
 	NSTimeInterval now = [NSDate date].timeIntervalSince1970;
-	NSTimeInterval expirationTime = _auth.session.expirationDate.timeIntervalSince1970;
+	NSTimeInterval expirationTime = _auth.session.expireDate.timeIntervalSince1970;
 	NSTimeInterval timeDiff = expirationTime - now;
 	NSTimeInterval tokenRefreshEarliness = [self tokenRefreshEarliness];
 	NSTimeInterval renewalTimeDiff = (expirationTime - tokenRefreshEarliness) - now;
@@ -632,7 +654,6 @@ RCT_EXPORT_METHOD(logout:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejec
 		if(_authRenewalTimer != nil) {
 			[_authRenewalTimer invalidate];
 		}
-		printOutLog(@"scheduling auth renewal timer");
 		NSTimer* timer = [NSTimer timerWithTimeInterval:renewalTimeDiff target:self selector:@selector(authRenewalTimerDidFire) userInfo:nil repeats:NO];
 		[[NSRunLoop mainRunLoop] addTimer:timer forMode:NSRunLoopCommonModes];
 		_authRenewalTimer = timer;
@@ -640,7 +661,6 @@ RCT_EXPORT_METHOD(logout:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejec
 }
 
 -(void)authRenewalTimerDidFire {
-	printOutLog(@"auth renewal timer fired");
 	[self renewSession:[RNSpotifyCompletion onComplete:^(id result, RNSpotifyError* error) {
 		// ensure we're logged in
 		if(_loggedIn) {
@@ -660,7 +680,7 @@ RCT_EXPORT_METHOD(logout:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejec
 -(BOOL)clearSession {
 	BOOL wasLoggedIn = [[self isLoggedIn] boolValue];
 	[self stopAuthRenewalTimer];
-	_auth.session = nil;
+	[_auth clearSession];
 	_loggedIn = NO;
 	return wasLoggedIn;
 }
@@ -668,7 +688,7 @@ RCT_EXPORT_METHOD(logout:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejec
 
 
 RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(isLoggedIn) {
-	if(_initialized && _loggedIn && _auth.session != nil) {
+	if(_initialized && _loggedIn && _auth.isLoggedIn) {
 		return @YES;
 	}
 	return @NO;
@@ -678,12 +698,15 @@ RCT_EXPORT_METHOD(isLoggedInAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPro
 	resolve([self isLoggedIn]);
 }
 
-RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getAuth) {
-	return [RNSpotifyConvert SPTAuth:_auth];
+RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getSession) {
+	if(_auth == nil) {
+		return [NSNull null];
+	}
+	return [RNSpotifyConvert RNSpotifySessionData:_auth.session];
 }
 
-RCT_EXPORT_METHOD(getAuthAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
-	resolve([RNSpotifyConvert ID:[self getAuth]]);
+RCT_EXPORT_METHOD(getSessionAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
+	resolve([RNSpotifyConvert ID:[self getSession]]);
 }
 
 
@@ -698,7 +721,7 @@ RCT_EXPORT_METHOD(getAuthAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromis
 		return;
 	}
 	[self logBackInIfNeeded:[RNSpotifyCompletion<NSNumber*> onReject:^(RNSpotifyError* error) {
-		if(!_player.loggedIn && [self hasPlayerScope]) {
+		if(!_player.loggedIn && _auth.hasStreamingScope) {
 			[completion reject:error];
 		}
 		else {
@@ -707,14 +730,17 @@ RCT_EXPORT_METHOD(getAuthAsync:(RCTPromiseResolveBlock)resolve reject:(RCTPromis
 	} onResolve:^(NSNumber* unused) {
 		if([[self isLoggedIn] boolValue]) {
 			[self initializePlayerIfNeeded:[RNSpotifyCompletion onReject:^(RNSpotifyError* error) {
-				if(!_player.loggedIn && [self hasPlayerScope]) {
+				if(!_player.loggedIn && _auth.hasStreamingScope) {
 					[completion reject:error];
 				}
 				else {
 					[completion resolve:nil];
 				}
 			} onResolve:^(id result) {
-				if(!_player.loggedIn && [self hasPlayerScope]) {
+				if(!_auth.hasStreamingScope) {
+					[completion reject:[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.PlayerNotReady message:@"Missing streaming scope"]];
+				}
+				else if(_player == nil || !_player.initialized || !_player.loggedIn) {
 					[completion reject:[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.PlayerNotReady]];
 				}
 				else {
@@ -914,8 +940,12 @@ RCT_EXPORT_METHOD(seek:(double)position resolve:(RCTPromiseResolveBlock)resolve 
 	} onResolve:^(id unused) {
 		// build request
 		NSError* error = nil;
+		NSString* accessToken = nil;
+		if(_auth.session != nil) {
+			accessToken = _auth.session.accessToken;
+		}
 		NSURLRequest* request = [SPTRequest createRequestForURL:SPOTIFY_API_URL(endpoint)
-												withAccessToken:_auth.session.accessToken
+												withAccessToken:accessToken
 													 httpMethod:method
 														 values:params
 												valueBodyIsJSON:jsonBody
@@ -936,15 +966,13 @@ RCT_EXPORT_METHOD(seek:(double)position resolve:(RCTPromiseResolveBlock)resolve 
 			
 			// check if content is json
 			BOOL isJSON = NO;
-			if([response isKindOfClass:[NSHTTPURLResponse class]]) {
-				NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
-				NSString* contentType = httpResponse.allHeaderFields[@"Content-Type"];
-				if(contentType!=nil) {
-					contentType = [contentType componentsSeparatedByString:@";"][0];
-				}
-				if([contentType caseInsensitiveCompare:@"application/json"] == NSOrderedSame) {
-					isJSON = YES;
-				}
+			NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
+			NSString* contentType = httpResponse.allHeaderFields[@"Content-Type"];
+			if(contentType!=nil) {
+				contentType = [contentType componentsSeparatedByString:@";"][0];
+			}
+			if([contentType caseInsensitiveCompare:@"application/json"] == NSOrderedSame) {
+				isJSON = YES;
 			}
 			
 			id result = nil;
@@ -975,6 +1003,12 @@ RCT_EXPORT_METHOD(seek:(double)position resolve:(RCTPromiseResolveBlock)resolve 
 						if(statusCode == nil || message == nil || ![statusCode isKindOfClass:[NSNumber class]] || ![message isKindOfClass:[NSString class]]) {
 							[completion reject:[RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadResponse]];
 							return;
+						}
+						if(httpResponse.statusCode == 429) {
+							NSString* retryAfter = httpResponse.allHeaderFields[@"Retry-After"];
+							if(retryAfter != nil) {
+								message = [message stringByAppendingString:[NSString stringWithFormat:@". Retry after %@ seconds", retryAfter]];
+							}
 						}
 						[completion reject:[RNSpotifyError httpErrorForStatusCode:[statusCode integerValue] message:message]];
 					}
@@ -1008,6 +1042,7 @@ RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method param
 #pragma mark - SPTAudioStreamingDelegate
 
 -(void)audioStreamingDidLogin:(SPTAudioStreamingController*)audioStreaming {
+	printOutLog(@"player logged in");
 	_loggingInPlayer = NO;
 	
 	// handle loginPlayer callbacks
@@ -1060,12 +1095,43 @@ RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method param
 	}
 	
 	// if we didn't explicitly log out, try to renew the session
-	if(!wasLoggingOutPlayer && _auth.hasTokenRefreshService && _auth.session != nil && _auth.session.encryptedRefreshToken != nil) {
-		printOutLog(@"player logged out, so session needs renewal");
+	if(!wasLoggingOutPlayer && _auth.canRefreshSession) {
+		// the player gets logged out when the session gets renewed (for some reason) so reuse access token
+		if(_renewingPlayerSession) {
+			_renewingPlayerSession = NO;
+			RNSpotifySavedPlayerState* savedPlayerState = _renewingPlayerState;
+			_renewingPlayerState = nil;
+			if((_auth.session.expireDate.timeIntervalSince1970 - [NSDate date].timeIntervalSince1970) > (self.tokenRefreshEarliness + 60.0)) {
+				[self loginPlayer:[RNSpotifyCompletion onResolve:^(id result) {
+					// reset back to saved player state if we have one
+					if(savedPlayerState != nil) {
+						[_player setShuffle:savedPlayerState.shuffling callback:nil];
+						[_player setRepeat:(savedPlayerState.repeating ? SPTRepeatContext : SPTRepeatOff) callback:nil];
+						[_player playSpotifyURI:savedPlayerState.uri startingWithIndex:savedPlayerState.index startingWithPosition:savedPlayerState.position callback:^(NSError* error) {
+							if(error != nil) {
+								printErrLog(@"failed to play uri after unexpected pause: %@", error);
+							}
+						}];
+						[_player setIsPlaying:savedPlayerState.playing callback:^(NSError* error) {
+							if(error != nil) {
+								printErrLog(@"failed to set player playing after unexpected pause: %@", error);
+							}
+						}];
+					}
+				} onReject:^(RNSpotifyError *error) {
+					// we failed to login the player, so clear session and stop player
+					[self clearSession];
+					[_player stopWithError:nil];
+					[self sendEvent:@"logout" args:@[]];
+				}]];
+				return;
+			}
+		}
+		// renew session
 		[self renewSession:[RNSpotifyCompletion onComplete:^(NSNumber* renewed, RNSpotifyError* error) {
 			if(error != nil || !renewed.boolValue) {
 				if([[self isLoggedIn] boolValue]) {
-					// clear session and stop player
+					// we failed to renew, so clear session and stop player
 					[self clearSession];
 					[_player stopWithError:nil];
 					[self sendEvent:@"logout" args:@[]];

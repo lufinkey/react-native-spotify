@@ -7,19 +7,17 @@
 //
 
 #import <UIKit/UIKit.h>
-#import <SpotifyAuthentication/SpotifyAuthentication.h>
+#import "RNSpotifySessionData.h"
+#import "RNSpotifyLoginOptions.h"
 #import "RNSpotifyCompletion.h"
 
-typedef void(^RNSpotifyAuthCallback)(BOOL authenticated, NSError* error);
 
 @interface RNSpotifyAuthController : UINavigationController
 
--(id)initWithAuth:(SPTAuth*)auth params:(NSDictionary<NSString*,NSString*>*)params;
-
--(void)clearCookies:(void(^)())completion;
+-(id)initWithOptions:(RNSpotifyLoginOptions*)options;
 
 +(UIViewController*)topViewController;
 
-@property (strong) RNSpotifyCompletion<NSNumber*>* completion;
+@property (nonatomic) RNSpotifyCompletion<RNSpotifySessionData*>* completion;
 
 @end

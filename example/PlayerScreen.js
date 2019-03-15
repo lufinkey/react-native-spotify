@@ -1,5 +1,5 @@
 
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import {
 	Alert,
 	StyleSheet,
@@ -7,11 +7,10 @@ import {
 	TouchableHighlight,
 	View
 } from 'react-native';
-import { StackActions, NavigationActions } from 'react-navigation';
 import Spotify from 'rn-spotify-sdk';
 
-export class PlayerScreen extends Component
-{
+
+export default class PlayerScreen extends PureComponent {
 	static navigationOptions = {
 		title: 'Player',
 	};
@@ -19,7 +18,9 @@ export class PlayerScreen extends Component
 	constructor(props) {
 		super(props);
 
-		this.state = { spotifyUserName: null };
+		this.state = {
+			spotifyUserName: null
+		};
 
 		this.spotifyLogoutButtonWasPressed = this.spotifyLogoutButtonWasPressed.bind(this);
 	}
@@ -40,13 +41,7 @@ export class PlayerScreen extends Component
 	}
 
 	goToInitialScreen() {
-		const navAction = StackActions.reset({
-			index: 0,
-			actions: [
-			  NavigationActions.navigate({ routeName: 'initial'})
-			]
-		});
-		this.props.navigation.dispatch(navAction);
+		this.props.navigation.navigate('initial');
 	}
 
 	spotifyLogoutButtonWasPressed() {
@@ -74,6 +69,7 @@ export class PlayerScreen extends Component
 		);
 	}
 }
+
 
 const styles = StyleSheet.create({
 	container: {

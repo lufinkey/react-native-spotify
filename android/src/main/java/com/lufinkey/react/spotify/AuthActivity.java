@@ -10,34 +10,36 @@ import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
 
+import java.util.UUID;
+
 public class AuthActivity extends Activity
 {
 	private static final int REQUEST_CODE = 6969;
 
-	private static Auth authFlow_auth;
-	private static ReadableMap authFlow_options;
+	private static LoginOptions authFlow_options;
 	private static AuthActivityListener authFlow_listener;
 	private static AuthActivity currentAuthActivity;
 
-	private Auth auth;
+	private LoginOptions options;
+	private String xssState;
 	private AuthActivityListener listener;
 	private Completion<Void> finishCompletion;
 
-	public static void performAuthFlow(Activity context, Auth auth, ReadableMap options, AuthActivityListener listener) {
+	public static void performAuthFlow(Activity context, LoginOptions options, AuthActivityListener listener) {
 		// ensure no conflicting callbacks
-		if(authFlow_auth != null || authFlow_options != null || authFlow_listener != null || currentAuthActivity != null) {
-			SpotifyError error = new SpotifyError(SpotifyError.Code.ConflictingCallbacks, "Cannot call login multiple times before completing");
+		if(authFlow_options != null || authFlow_listener != null || currentAuthActivity != null) {
+			SpotifyError error = new SpotifyError(SpotifyError.Code.ConflictingCallbacks, "Cannot call login or authenticate multiple times before completing");
 			listener.onAuthActivityFailure(null, error);
 			return;
 		}
 
 		// store temporary static variables
-		authFlow_auth = auth;
 		authFlow_options = options;
 		authFlow_listener = listener;
 
 		// start activity
-		context.startActivity(new Intent(context, AuthActivity.class));
+		Intent intent = new Intent(context, AuthActivity.class);
+		context.startActivity(intent);
 	}
 
 	@Override
@@ -45,38 +47,15 @@ public class AuthActivity extends Activity
 		super.onCreate(savedInstanceState);
 		setFinishOnTouchOutside(false);
 
-		auth = authFlow_auth;
+		options = authFlow_options;
+		xssState = UUID.randomUUID().toString();
 		listener = authFlow_listener;
-		ReadableMap options = authFlow_options;
 		currentAuthActivity = this;
 
-		authFlow_auth = null;
 		authFlow_options = null;
 		authFlow_listener = null;
 
-		// decide response type
-		AuthenticationResponse.Type responseType = AuthenticationResponse.Type.TOKEN;
-		if(auth.tokenSwapURL!=null) {
-			responseType = AuthenticationResponse.Type.CODE;
-		}
-
-		// create auth request
-		AuthenticationRequest.Builder requestBuilder = new AuthenticationRequest.Builder(auth.clientID, responseType, auth.redirectURL);
-		if(options.hasKey("scopes")) {
-			ReadableArray scopeArray = options.getArray("scopes");
-			String[] scopes = new String[scopeArray.size()];
-			for(int i=0; i<scopeArray.size(); i++) {
-				scopes[i] = scopeArray.getString(i);
-			}
-			requestBuilder.setScopes(scopes);
-		}
-		else {
-			requestBuilder.setScopes(auth.requestedScopes);
-		}
-		if(options.hasKey("showDialog")) {
-			requestBuilder.setShowDialog(options.getBoolean("showDialog"));
-		}
-		AuthenticationRequest request = requestBuilder.build();
+		AuthenticationRequest request = options.getAuthenticationRequest(xssState);
 
 		// show auth activity
 		AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
@@ -103,12 +82,43 @@ public class AuthActivity extends Activity
 					}
 					break;
 
-				case CODE:
-					listener.onAuthActivityReceivedCode(this, response.getCode());
+				case TOKEN:
+					if(xssState != null && !xssState.equals(response.getState())) {
+						listener.onAuthActivityFailure(this, new SpotifyError("state_mismatch", "state mismatch"));
+						return;
+					}
+					SessionData sessionData = new SessionData();
+					sessionData.accessToken = response.getAccessToken();
+					sessionData.expireDate = SessionData.getExpireDate(response.getExpiresIn());
+					sessionData.refreshToken = null;
+					sessionData.scopes = options.scopes;
+					listener.onAuthActivityReceiveSession(this, sessionData);
 					break;
 
-				case TOKEN:
-					listener.onAuthActivityReceivedToken(this, response.getAccessToken(), response.getExpiresIn());
+				case CODE:
+					if(xssState != null && !xssState.equals(response.getState())) {
+						listener.onAuthActivityFailure(this, new SpotifyError("state_mismatch", "state mismatch"));
+						return;
+					}
+					if(options.tokenSwapURL == null) {
+						listener.onAuthActivityFailure(this, SpotifyError.getMissingOptionError("tokenSwapURL"));
+						return;
+					}
+					final AuthActivity authActivity = this;
+					Auth.swapCodeForToken(response.getCode(), options.tokenSwapURL, new Completion<SessionData>() {
+						@Override
+						public void onReject(SpotifyError error) {
+							listener.onAuthActivityFailure(authActivity, error);
+						}
+
+						@Override
+						public void onResolve(SessionData session) {
+							if(session.scopes == null) {
+								session.scopes = options.scopes;
+							}
+							listener.onAuthActivityReceiveSession(authActivity, session);
+						}
+					});
 					break;
 			}
 		}

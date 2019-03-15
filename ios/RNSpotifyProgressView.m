@@ -9,8 +9,7 @@
 #import "RNSpotifyProgressView.h"
 #import <QuartzCore/QuartzCore.h>
 
-@interface RNSpotifyProgressView()
-{
+@interface RNSpotifyProgressView() {
 	UIView* _hudView;
 }
 @end

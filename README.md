@@ -15,7 +15,7 @@ react-native link rn-spotify-sdk
 Next, do the manual setup for each platform:
 
 #### iOS
-Manually add the frameworks from `node_modules/rn-spotify-sdk/ios/external/SpotifySDK` to *Linked Frameworks and Libraries* in your project settings. Then add `../node_modules/rn-spotify-sdk/ios/external/SpotifySDK` to *Framework Search Paths* in your project settings.
+Manually add `SpotifyMetadata.framework` and `SpotifyAudioPlayback.framework` from `node_modules/rn-spotify-sdk/ios/external/SpotifySDK` to *Linked Frameworks and Libraries* in your project settings. Then add `../node_modules/rn-spotify-sdk/ios/external/SpotifySDK` to *Framework Search Paths* in your project settings.
 
 #### Android
 
@@ -52,11 +52,21 @@ buildTypes {
 packagingOptions {
     pickFirst 'lib/armeabi-v7a/libgnustl_shared.so'
     pickFirst 'lib/x86/libgnustl_shared.so'
+    exclude 'lib/arm64-v8a/libgnustl_shared.so'
+    exclude 'lib/x86_64/libgnustl_shared.so'
 }
 ...
 ```
 
-If you have issues linking the module, please check that gradle is updated to the latest version and that your project is synced.
+On Android, `react-native link` has a bug where it imports `RNSpotifyPackage` using the wrong bundle. You may have to make the following change to `MainApplication.java`:
+```java
+...
+import com.spotify.sdk.android.authentication.RNSpotifyPackage; // remove this line
+import com.lufinkey.react.spotify.RNSpotifyPackage; // replace with this line
+...
+```
+
+If you have issues linking the module, please check that gradle is updated to the latest version and that your project is synced. Please reference the [example app](example) to ensure you've implemented things correctly before opening any issues.
 
 
 
@@ -68,15 +78,16 @@ import Spotify from 'rn-spotify-sdk';
 
 ### Types
 
-- **Auth**
+- **Session**
 
-	Contains information about authentication data
+	Contains information about a session
 	
 	- *Properties*
 	
 		- **accessToken** - A token used to communicate with the Spotify API
-		- **refreshToken** - An encrypted token used to get a new access token when they expire. This should be encrypted by your token swap service, as per OAuth standards.
 		- **expireTime** - The time that the access token expires, in milliseconds from January 1, 1970 00:00:00 UTC
+		- **refreshToken** - An encrypted token used to get a new access token when they expire. This should be encrypted by your token swap service, as per OAuth standards.
+		- **scopes** - An array of scopes that the session has access to. A list of scopes can be found [here](https://developer.spotify.com/web-api/using-scopes/).
 
 
 
@@ -137,7 +148,6 @@ import Spotify from 'rn-spotify-sdk';
 	
 		- **state** - the player's current *PlaybackState*
 		- **metadata** - the player's current *PlaybackMetadata*
-		- **error** - an *Error*
 
 
 
@@ -148,11 +158,19 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 
 - **'login'**
 
+	- `session` {Session}
+	
 	Emitted when the module has successfully logged in.
 
 - **'logout'**
 
 	Emitted when the module is logged out.
+
+- **'sessionRenewed'**
+
+	- `session` {Session}
+	
+	Emitted when the session has been renewed.
 
 - **'play'**
 
@@ -260,8 +278,9 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	Initializes the Spotify module and resumes a logged in session if there is one. This must be the first method you call when using this module.
 	
 	- *Parameters*
+	
 		- **options** - an object with options to pass to the Spotify Module
-			- **clientID** - (*Required*) Your spotify application's ClientID that you registered with spotify [here](https://developer.spotify.com/my-applications)
+			- **clientID** - (*Required*) Your spotify application's client ID that you registered with spotify [here](https://developer.spotify.com/my-applications)
 			- **redirectURL** - (*Required*) The redirect URL to use when you've finished logging in. You NEED to set this URL for your application [here](https://developer.spotify.com/my-applications), otherwise the login screen will not close
 			- **sessionUserDefaultsKey** - The preference key to use in order to store session data for this module. Set this to a string of your choice when you initialize in order to persist user information between app uses.
 			- **scopes** - An array of scopes that define permissions for the Spotify API. A list of scopes can be found [here](https://developer.spotify.com/web-api/using-scopes/)
@@ -308,8 +327,13 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	Opens a UI to log into Spotify.
 	
 	- *Parameters*
+	
 		- **options**
 			- **showDialog** - Whether or not to force the user to approve the app again if they’ve already done so.
+			- **clientID** - Your spotify application's client ID that you registered with spotify [here](https://developer.spotify.com/my-applications). Falls back to value given in **initialize**.
+			- **redirectURL** - The redirect URL to use when you've finished logging in. You NEED to set this URL for your application [here](https://developer.spotify.com/my-applications), otherwise the login screen will not close. Falls back to value given in **initialize**.
+			- **scopes** - An array of scopes that define permissions for the Spotify API. A list of scopes can be found [here](https://developer.spotify.com/web-api/using-scopes/). Falls back to value given in **initialize**.
+			- **tokenSwapURL** - The URL to use to swap an authentication code for an access token (see [Token swap and refresh](#token-swap-and-refresh) section for more info). Falls back to value given in **initialize**.
 	
 	- *Returns*
 	
@@ -352,24 +376,24 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 
 
 
-- **getAuth**()
+- **getSession**()
 
-	Gives information about authentication data.
+	Gives information about the current session.
 	
 	- *Returns*
 	
-		- An *Auth* object, or *null* if not logged in
+		- An *Session* object, or *null* if not logged in
 
 
 
 
-- **getAuthAsync**()
+- **getSessionAsync**()
 
-	Gives information about authentication data, but returns a *Promise* that resolves to the result.
+	Gives information about the current session, but returns a *Promise* that resolves to the result.
 	
 	- *Returns*
 	
-		- A *Promise* that resolves to an *Auth* object, or *null* if not logged in
+		- A *Promise* that resolves to an *Session* object, or *null* if not logged in
 
 
 
@@ -385,6 +409,47 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 
 
 
+- **authenticate**( *options*? )
+
+	Opens a UI to perform the auth flow for Spotify, but returns a session instead of logging in.
+	
+	- *Parameters*
+	
+		- **options**
+			- **showDialog** - Whether or not to force the user to approve the app again if they’ve already done so.
+			- **clientID** - Your spotify application's client ID that you registered with spotify [here](https://developer.spotify.com/my-applications). Falls back to value given in **initialize**.
+			- **redirectURL** - The redirect URL to use when you've finished logging in. You NEED to set this URL for your application [here](https://developer.spotify.com/my-applications), otherwise the login screen will not close. Falls back to value given in **initialize**.
+			- **scopes** - An array of scopes that define permissions for the Spotify API. A list of scopes can be found [here](https://developer.spotify.com/web-api/using-scopes/). Falls back to value given in **initialize**.
+			- **tokenSwapURL** - The URL to use to swap an authentication code for an access token (see [Token swap and refresh](#token-swap-and-refresh) section for more info). Falls back to value given in **initialize**.
+	
+	- *Returns*
+	
+		- A *Promise* that resolves to an *Session* object, or *null* if login is cancelled
+
+
+
+
+- **loginWithSession**( *options* )
+
+	Logs into the app with a given session
+	
+	- *Parameters*
+	
+		- **options**
+			- **accessToken** (*Required*) - The token to use to communicate with the Spotify API.
+			- **expireTime** (*Required*) - The time that the access token expires, in milliseconds from January 1, 1970 00:00:00 UTC
+			- **refreshToken** - An encrypted token used to get a new access token when it expires.
+			- **scopes** - An array of scopes that the session has access to. A list of scopes can be found [here](https://developer.spotify.com/web-api/using-scopes/).
+			- **clientID** - Your spotify application's client ID that you registered with spotify [here](https://developer.spotify.com/my-applications). Falls back to value given in **initialize**.
+			- **tokenRefreshURL** - The URL to use to get a new access token from a refresh token (see [Token swap and refresh](#token-swap-and-refresh) section for more info). Falls back to value given in **initialize**.
+	
+	- *Returns*
+	
+		- A *Promise* that resolves when the login finishes
+
+
+
+
 ### Playback Methods
 
 - **playURI**( *spotifyURI*, *startIndex*, *startPosition* )
@@ -394,9 +459,7 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	- *Parameters*
 		
 		- **spotifyURI** - The Spotify URI to play
-		
 		- **startIndex** - The index of an item that should be played first, e.g. 0 - for the very first track in the playlist or a single track
-		
 		- **startPosition** - starting position for playback in seconds
 	
 	- *Returns*
@@ -551,11 +614,8 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	- *Parameters*
 	
 		- **endpoint** - the api endpoint, without a leading slash, e.g. `'v1/browse/new-releases'`
-		
 		- **method** - the HTTP method to use
-		
 		- **params** - the request parameters
-		
 		- **isJSONBody** - whether or not to send the parameters as json in the body of the request
 	
 	- *Returns*
@@ -583,9 +643,7 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	- *Parameters*
 	
 		- **query** - The search query string. Same as the *q* parameter on the [search](https://developer.spotify.com/web-api/search-item/) endpoint
-		
 		- **types** - An array of item types to search for. Valid types are: `'album'`, `'artist'`, `'playlist'`, and `'track'`.
-		
 		- **options** - A map of other optional parameters to specify for the query
 	
 	- *Returns*
@@ -602,7 +660,6 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	- *Parameters*
 	
 		- **albumID** - The Spotify ID for the album
-		
 		- **options** - A map of other optional parameters to specify for the query
 	
 	- *Returns*
@@ -619,7 +676,6 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	- *Parameters*
 	
 		- **albumIDs** - An array of the Spotify IDs for the albums
-		
 		- **options** - A map of other optional parameters to specify for the query
 	
 	- *Returns*
@@ -636,7 +692,6 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	- *Parameters*
 	
 		- **albumID** - The Spotify ID for the album
-		
 		- **options** - A map of other optional parameters to specify for the query
 	
 	- *Returns*
@@ -653,7 +708,6 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	- *Parameters*
 	
 		- **artistID** - The Spotify ID for the artist
-		
 		- **options** - A map of other optional parameters to specify for the query
 	
 	- *Returns*
@@ -670,7 +724,6 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	- *Parameters*
 	
 		- **artistIDs** - An array of the Spotify IDs for the artists
-		
 		- **options** - A map of other optional parameters to specify for the query
 	
 	- *Returns*
@@ -687,7 +740,6 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	- *Parameters*
 	
 		- **artistID** - The Spotify ID for the artist
-		
 		- **options** - A map of other optional parameters to specify for the query
 	
 	- *Returns*
@@ -704,9 +756,7 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	- *Parameters*
 	
 		- **artistID** - The Spotify ID for the artist
-		
 		- **country** - The country: an [ISO 3166-1 alpha-2 country code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2).
-		
 		- **options** - A map of other optional parameters to specify for the query
 	
 	- *Returns*
@@ -723,7 +773,6 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	- *Parameters*
 	
 		- **artistID** - The Spotify ID for the artist
-		
 		- **options** - A map of other optional parameters to specify for the query
 	
 	- *Returns*
@@ -740,7 +789,6 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	- *Parameters*
 	
 		- **trackID** - The Spotify ID for the track
-		
 		- **options** - A map of other optional parameters to specify for the query
 	
 	- *Returns*
@@ -757,7 +805,6 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	- *Parameters*
 	
 		- **trackIDs** - An array of the Spotify IDs for the tracks
-		
 		- **options** - A map of other optional parameters to specify for the query
 	
 	- *Returns*
@@ -774,7 +821,6 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	- *Parameters*
 	
 		- **trackID** - The Spotify ID for the track
-		
 		- **options** - A map of other optional parameters to specify for the query
 	
 	- *Returns*
@@ -791,7 +837,6 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	- *Parameters*
 	
 		- **trackID** - The Spotify ID for the track
-		
 		- **options** - A map of other optional parameters to specify for the query
 	
 	- *Returns*
@@ -808,7 +853,6 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 	- *Parameters*
 	
 		- **trackIDs** - An array of the Spotify IDs for the tracks
-		
 		- **options** - A map of other optional parameters to specify for the query
 	
 	- *Returns*

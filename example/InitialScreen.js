@@ -1,5 +1,5 @@
 
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import {
 	ActivityIndicator,
 	Alert,
@@ -8,11 +8,10 @@ import {
 	TouchableHighlight,
 	View
 } from 'react-native';
-import { StackActions, NavigationActions } from 'react-navigation';
 import Spotify from 'rn-spotify-sdk';
 
-export class InitialScreen extends Component
-{
+
+export default class InitialScreen extends PureComponent {
 	static navigationOptions = {
 		header: null
 	};
@@ -20,53 +19,52 @@ export class InitialScreen extends Component
 	constructor(props) {
 		super(props);
 
-		this.state = {spotifyInitialized: false};
+		this.state = {
+			spotifyInitialized: false
+		};
 		this.spotifyLoginButtonWasPressed = this.spotifyLoginButtonWasPressed.bind(this);
 	}
 
 	goToPlayer() {
-		const navAction = StackActions.reset({
-			index: 0,
-			actions: [
-			  NavigationActions.navigate({ routeName: 'player'})
-			]
-		});
-		this.props.navigation.dispatch(navAction);
+		this.props.navigation.navigate('player');
 	}
 
-	componentDidMount() {
+	async initializeIfNeeded() {
 		// initialize Spotify if it hasn't been initialized yet
-		if(!Spotify.isInitialized()) {
+		if(!await Spotify.isInitializedAsync()) {
 			// initialize spotify
-			var spotifyOptions = {
+			const spotifyOptions = {
 				"clientID":"<INSERT-YOUR-CLIENT-ID-HERE>",
 				"sessionUserDefaultsKey":"SpotifySession",
 				"redirectURL":"examplespotifyapp://auth",
 				"scopes":["user-read-private", "playlist-read", "playlist-read-private", "streaming"],
 			};
-			Spotify.initialize(spotifyOptions).then((loggedIn) => {
-				// update UI state
-				this.setState({spotifyInitialized: true});
-				// handle initialization
-				if(loggedIn)
-				{
-					this.goToPlayer();
-				}
-			}).catch((error) => {
-				Alert.alert("Error", error.message);
-			});
-		}
-		else {
+			const loggedIn = await Spotify.initialize(spotifyOptions);
 			// update UI state
-			this.setState((state) => {
-				state.spotifyInitialized = true;
-				return state;
+			this.setState({
+				spotifyInitialized: true
 			});
-			// handle logged in
-			if(Spotify.isLoggedIn()) {
+			// handle initialization
+			if(loggedIn) {
 				this.goToPlayer();
 			}
 		}
+		else {
+			// update UI state
+			this.setState({
+				spotifyInitialized: true
+			});
+			// handle logged in
+			if(await Spotify.isLoggedInAsync()) {
+				this.goToPlayer();
+			}
+		}
+	}
+
+	componentDidMount() {
+		this.initializeIfNeeded().catch((error) => {
+			Alert.alert("Error", error.message);
+		});
 	}
 
 	spotifyLoginButtonWasPressed() {
@@ -111,6 +109,7 @@ export class InitialScreen extends Component
 		}
 	}
 }
+
 
 const styles = StyleSheet.create({
 	container: {

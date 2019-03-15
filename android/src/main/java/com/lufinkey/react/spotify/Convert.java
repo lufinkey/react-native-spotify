@@ -211,17 +211,21 @@ public class Convert
 		return map;
 	}
 
-	public static WritableMap fromAuth(Auth auth) {
-		if(auth == null) {
-			return null;
-		}
-		else if(auth.getAccessToken() == null && auth.getRefreshToken() == null) {
+	public static WritableMap fromSessionData(SessionData session) {
+		if(session == null) {
 			return null;
 		}
 		WritableMap map = Arguments.createMap();
-		map.putString("accessToken", auth.getAccessToken());
-		map.putString("refreshToken", auth.getRefreshToken());
-		map.putDouble("expireTime", (double)auth.getExpireDate().getTime());
+		map.putString("accessToken", session.accessToken);
+		map.putString("refreshToken",session.refreshToken);
+		map.putDouble("expireTime", session.expireDate.getTime());
+		WritableArray scopes = Arguments.createArray();
+		if(session.scopes != null) {
+			for(String scope : session.scopes) {
+				scopes.pushString(scope);
+			}
+		}
+		map.putArray("scopes", scopes);
 		return map;
 	}
 }

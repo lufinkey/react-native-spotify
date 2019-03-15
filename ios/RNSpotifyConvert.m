@@ -67,18 +67,15 @@
 	};
 }
 
-+(id)SPTAuth:(SPTAuth*)auth {
-	if(auth == nil) {
-		return [NSNull null];
-	}
-	SPTSession* session = auth.session;
++(id)RNSpotifySessionData:(RNSpotifySessionData*)session {
 	if(session == nil) {
 		return [NSNull null];
 	}
 	return @{
 		@"accessToken": [RNSpotifyConvert ID:session.accessToken],
-		@"refreshToken": [RNSpotifyConvert ID:session.encryptedRefreshToken],
-		@"expireTime": session.expirationDate ? [NSNumber numberWithLongLong:((long long)session.expirationDate.timeIntervalSince1970*1000)] : [NSNull null]
+		@"refreshToken": [RNSpotifyConvert ID:session.refreshToken],
+		@"expireTime": (session.expireDate != nil) ? [NSNumber numberWithDouble:(session.expireDate.timeIntervalSince1970*1000.0)] : [NSNull null],
+		@"scopes": [RNSpotifyConvert ID:session.scopes]
 	};
 }
 

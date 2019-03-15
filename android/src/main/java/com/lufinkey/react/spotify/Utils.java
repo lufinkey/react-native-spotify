@@ -9,9 +9,13 @@ import com.android.volley.RequestQueue;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.Volley;
+import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReadableMap;
 import com.spotify.sdk.android.player.Connectivity;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -117,6 +121,31 @@ public class Utils
 		}
 		else {
 			return Connectivity.OFFLINE;
+		}
+	}
+
+	public static Dynamic getOption(String option, ReadableMap options, ReadableMap fallback) {
+		if(options.hasKey(option)) {
+			Dynamic object = options.getDynamic(option);
+			if(!object.isNull()) {
+				return object;
+			}
+		}
+		if(fallback != null && fallback.hasKey(option)) {
+			Dynamic object = fallback.getDynamic(option);
+			if(!object.isNull()) {
+				return object;
+			}
+		}
+		return null;
+	}
+
+	public static Object getObject(String key, JSONObject object) {
+		try {
+			return object.get(key);
+		}
+		catch(JSONException e) {
+			return null;
 		}
 	}
 }

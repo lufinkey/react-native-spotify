@@ -7,7 +7,7 @@ import com.facebook.react.bridge.WritableMap;
 
 import com.spotify.sdk.android.player.Error;
 
-public class SpotifyError
+public class SpotifyError extends Throwable
 {
 	public enum Code {
 		AlreadyInitialized("Spotify has already been initialized"),
@@ -37,7 +37,6 @@ public class SpotifyError
 	};
 
 	private String code;
-	private String message;
 
 	public static String getSDKErrorCode(Error error) {
 		String code = error.name();
@@ -111,33 +110,28 @@ public class SpotifyError
 	}
 
 	public SpotifyError(Error error) {
+		super(getSDKErrorMessage(error));
 		this.code = getSDKErrorCode(error);
-		this.message = getSDKErrorMessage(error);
 	}
 
 	public SpotifyError(Error error, String message) {
+		super((message != null && message.length() > 0) ? message : getSDKErrorMessage(error));
 		this.code = getSDKErrorCode(error);
-		if(message != null && message.length() > 0) {
-			this.message = message;
-		}
-		else {
-			this.message = getSDKErrorMessage(error);
-		}
 	}
 
 	public SpotifyError(Code code) {
+		super(code.description);
 		this.code = code.getCodeName();
-		this.message = code.description;
 	}
 
 	public SpotifyError(Code code, String message) {
+		super(message);
 		this.code = code.getCodeName();
-		this.message = message;
 	}
 
 	public SpotifyError(String code, String message) {
+		super(message);
 		this.code = code;
-		this.message = message;
 
 	}
 
@@ -145,19 +139,15 @@ public class SpotifyError
 		return code;
 	}
 
-	public String getMessage() {
-		return message;
-	}
-
 	public ReadableMap toReactObject() {
 		WritableMap map = Arguments.createMap();
 		map.putString("code", code);
-		map.putString("message", message);
+		map.putString("message", getMessage());
 		return map;
 	}
 
 	public void reject(Promise promise) {
-		promise.reject(code, message);
+		promise.reject(code, getMessage());
 	}
 
 	public static SpotifyError getNullParameterError(String parameterName) {
