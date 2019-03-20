@@ -58,7 +58,7 @@ packagingOptions {
 ...
 ```
 
-Note: In some cases, the two `exclude` lines cause issues when compiling and can be omitted. I need to look further into what causes this.
+In some cases, the two `exclude` lines cause issues when compiling and can be omitted. I need to look further into what causes this.
 
 On Android, `react-native link` has a bug where it imports `RNSpotifyPackage` using the wrong bundle. You may have to make the following change to `MainApplication.java`:
 ```java
