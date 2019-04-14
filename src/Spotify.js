@@ -249,7 +249,7 @@ Spotify.getRecommendations = (artistIDs, genres, trackIDs, options) => {
 	}
 
 	const numSeeds = artistIDs.length + genres.length + trackIDs.length;
-	if (numSeeds === 0 || numSeeds > 5) {
+	if(numSeeds === 0 || numSeeds > 5) {
 		return Promise.reject(new Error("number of seeds must be between 1 and 5"));
 	}
 
@@ -258,6 +258,25 @@ Spotify.getRecommendations = (artistIDs, genres, trackIDs, options) => {
 	body['seed_genres'] = genres.join(',');
 	body['seed_tracks'] = trackIDs.join(',');
 	return Spotify.sendRequest('v1/recommendations', 'GET', body, false);
+}
+
+Spotify.addTracksToPlaylist = (playlistID, trackURIs, position, options) => {
+	if(playlistID == null) {
+		return Promise.reject(new Error("playlistID cannot be null"));
+	}
+
+	const numTracks = trackURIs.length;
+	if(numTracks === 0 || numTracks > 100) {
+		return Promise.reject(new Error("number of tracks must be between 1 and 100"));
+	}
+
+	const body = {...options};
+	body['uris'] = trackURIs;
+	if(position !== undefined) {
+		body['position'] = position;
+	}
+
+	return Spotify.sendRequest('v1/playlists/' + playlistID + '/tracks', 'POST', body, false);
 }
 
 
