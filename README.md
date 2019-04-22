@@ -473,7 +473,7 @@ This module uses [react-native-events](https://www.npmjs.com/package/react-nativ
 
 - **queueURI**( *spotifyURI* )
 
-	Queue a Spotify URI. **WARNING: This function has proven to be very [inconsistent and buggy](https://github.com/spotify/ios-sdk/issues/717).**
+	Queue a Spotify URI. **WARNING: This function has proven to be very [inconsistent and buggy](https://github.com/spotify/ios-streaming-sdk/issues/717).**
 	
 	- *Parameters*
 	
