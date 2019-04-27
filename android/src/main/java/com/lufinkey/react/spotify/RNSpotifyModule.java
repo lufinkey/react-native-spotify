@@ -596,7 +596,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 					}
 					module.loggedIn = true;
 				}
-				resolve(null);
+				promise.resolve(null);
 				if(!wasLoggedIn) {
 					sendEvent("login", Convert.fromSessionData(auth.getSession()));
 				}
