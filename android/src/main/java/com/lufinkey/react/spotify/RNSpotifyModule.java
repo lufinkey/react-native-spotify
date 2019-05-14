@@ -47,7 +47,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	private Auth auth;
 	private Handler authRenewalTimer;
 	private SpotifyPlayer player;
-	private TrackController trackController = new TrackController();
+	private TrackController trackController = null;
 	private final ArrayList<Completion<Void>> playerInitResponses;
 	private final ArrayList<Completion<Void>> playerLoginResponses;
 	private final ArrayList<Completion<Void>> playerLogoutResponses;
@@ -159,6 +159,12 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 		}
 		if(androidOptions.hasKey("loginLoadingText")) {
 			loginLoadingText = androidOptions.getString("loginLoadingText");
+		}
+		if(androidOptions.hasKey("useCustomTrackController")) {
+			boolean useCustomTrackController = androidOptions.getBoolean("useCustomTrackController");
+			if(useCustomTrackController) {
+				trackController = new TrackController();
+			}
 		}
 
 		// add connectivity state listener
@@ -379,8 +385,9 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 			final Object reference = this;
 			Config playerConfig = new Config(reactContext.getApplicationContext(), auth.getSession().accessToken, auth.getClientID());
 			SpotifyPlayer.Builder builder = new SpotifyPlayer.Builder(playerConfig);
-			builder.setAudioController(trackController);
-      
+			if(trackController != null) {
+				builder.setAudioController(trackController);
+			}
 			player = Spotify.getPlayer(builder, reference, new SpotifyPlayer.InitializationObserver() {
 				@Override
 				public void onError(Throwable error) {
@@ -961,20 +968,24 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	@ReactMethod
 	//setVolume(volume)
 	public void setVolume(double volume, final Promise promise) {
-		trackController.setVolume((float) volume);
+		if(trackController != null) {
+			trackController.setVolume((float) volume);
+		}
 		promise.resolve(null);
 	}
 
 	@ReactMethod(isBlockingSynchronousMethod = true)
 	//getVolume()
 	public Double getVolume() {
-		return Double.valueOf(trackController.getVolume());
+		if(trackController != null) {
+			return Double.valueOf(trackController.getVolume());
+		}
+		return 1.0;
 	}
 
 	@ReactMethod
 	//getVolumeAsync()
-	public void getVolumeAsync(final Promise promise)
-	{
+	public void getVolumeAsync(final Promise promise) {
 		promise.resolve(getVolume());
 	}
 
