@@ -7,9 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <WebKit/WebKit.h>
 
 @interface RNSpotifyWebViewController : UIViewController
 
-@property (readonly) UIWebView* webView;
+@property (readonly) WKWebView* webView;
 
 @end
