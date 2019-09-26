@@ -15,13 +15,27 @@
 #define SPOTIFY_API_BASE_URL @"https://api.spotify.com/"
 #define SPOTIFY_API_URL(endpoint) [NSURL URLWithString:NSString_concat(SPOTIFY_API_BASE_URL, endpoint)]
 
+@interface RNSpotifySavedPlayerState: NSObject
+	@property NSString* uri;
+	@property NSInteger index;
+	@property NSTimeInterval position;
+	@property BOOL shuffling;
+	@property BOOL repeating;
+	@property BOOL playing;
+@end
+
+@implementation RNSpotifySavedPlayerState
+@end
+
 @interface RNSpotify() <SPTAudioStreamingDelegate, SPTAudioStreamingPlaybackDelegate> {
 	BOOL _initialized;
 	BOOL _loggedIn;
 	BOOL _loggingIn;
 	BOOL _loggingInPlayer;
 	BOOL _loggingOutPlayer;
+	
 	BOOL _renewingPlayerSession;
+	RNSpotifySavedPlayerState* _renewingPlayerState;
 	
 	RNSpotifyAuth* _auth;
 	NSTimer* _authRenewalTimer;
@@ -65,7 +79,9 @@
 		_loggingIn = NO;
 		_loggingInPlayer = NO;
 		_loggingOutPlayer = NO;
+		
 		_renewingPlayerSession = NO;
+		_renewingPlayerState = nil;
 		
 		_auth = nil;
 		_authRenewalTimer = nil;
@@ -307,10 +323,30 @@ RCT_EXPORT_METHOD(isInitializedAsync:(RCTPromiseResolveBlock)resolve reject:(RCT
 				return;
 			}
 			else {
+				// backup player state before we renew, because the spotify SDK is broken and logs you out
 				_renewingPlayerSession = YES;
+				SPTPlaybackMetadata* metadata = _player.metadata;
+				SPTPlaybackState* state = _player.playbackState;
+				if(metadata != nil && metadata.currentTrack != nil) {
+					SPTPlaybackTrack* currentTrack = metadata.currentTrack;
+					_renewingPlayerState = [[RNSpotifySavedPlayerState alloc] init];
+					if(currentTrack.playbackSourceUri != nil) {
+						_renewingPlayerState.uri = currentTrack.playbackSourceUri;
+						_renewingPlayerState.index = currentTrack.indexInContext;
+					}
+					else {
+						_renewingPlayerState.uri = currentTrack.uri;
+						_renewingPlayerState.index = 0;
+					}
+					_renewingPlayerState.position = state.position;
+					_renewingPlayerState.shuffling = state.isShuffling;
+					_renewingPlayerState.repeating = state.isRepeating;
+					_renewingPlayerState.playing = state.isPlaying;
+				}
 				[_player loginWithAccessToken:_auth.session.accessToken];
 				dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^(void){
 					_renewingPlayerSession = NO;
+					_renewingPlayerState = nil;
 				});
 			}
 			[self sendEvent:@"sessionRenewed" args:@[[RNSpotifyConvert RNSpotifySessionData:_auth.session]]];
@@ -1063,8 +1099,31 @@ RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method param
 		// the player gets logged out when the session gets renewed (for some reason) so reuse access token
 		if(_renewingPlayerSession) {
 			_renewingPlayerSession = NO;
+			RNSpotifySavedPlayerState* savedPlayerState = _renewingPlayerState;
+			_renewingPlayerState = nil;
 			if((_auth.session.expireDate.timeIntervalSince1970 - [NSDate date].timeIntervalSince1970) > (self.tokenRefreshEarliness + 60.0)) {
-				[_player loginWithAccessToken:_auth.session.accessToken];
+				[self loginPlayer:[RNSpotifyCompletion onResolve:^(id result) {
+					// reset back to saved player state if we have one
+					if(savedPlayerState != nil) {
+						[_player setShuffle:savedPlayerState.shuffling callback:nil];
+						[_player setRepeat:(savedPlayerState.repeating ? SPTRepeatContext : SPTRepeatOff) callback:nil];
+						[_player playSpotifyURI:savedPlayerState.uri startingWithIndex:savedPlayerState.index startingWithPosition:savedPlayerState.position callback:^(NSError* error) {
+							if(error != nil) {
+								printErrLog(@"failed to play uri after unexpected pause: %@", error);
+							}
+						}];
+						[_player setIsPlaying:savedPlayerState.playing callback:^(NSError* error) {
+							if(error != nil) {
+								printErrLog(@"failed to set player playing after unexpected pause: %@", error);
+							}
+						}];
+					}
+				} onReject:^(RNSpotifyError *error) {
+					// we failed to login the player, so clear session and stop player
+					[self clearSession];
+					[_player stopWithError:nil];
+					[self sendEvent:@"logout" args:@[]];
+				}]];
 				return;
 			}
 		}
@@ -1072,7 +1131,7 @@ RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method param
 		[self renewSession:[RNSpotifyCompletion onComplete:^(NSNumber* renewed, RNSpotifyError* error) {
 			if(error != nil || !renewed.boolValue) {
 				if([[self isLoggedIn] boolValue]) {
-					// clear session and stop player
+					// we failed to renew, so clear session and stop player
 					[self clearSession];
 					[_player stopWithError:nil];
 					[self sendEvent:@"logout" args:@[]];

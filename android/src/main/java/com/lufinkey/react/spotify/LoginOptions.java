@@ -27,9 +27,9 @@ public class LoginOptions {
 		if(scopes != null) {
 			requestBuilder.setScopes(scopes);
 		}
-		if(state != null) {
+		/*if(state != null) {
 			requestBuilder.setState(state);
-		}
+		}*/
 		if(params != null) {
 			String showDialog = params.get("show_dialog");
 			if(showDialog != null) {

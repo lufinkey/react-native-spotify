@@ -83,10 +83,10 @@ public class AuthActivity extends Activity
 					break;
 
 				case TOKEN:
-					if(xssState != null && !xssState.equals(response.getState())) {
+					/*if(xssState != null && !xssState.equals(response.getState())) {
 						listener.onAuthActivityFailure(this, new SpotifyError("state_mismatch", "state mismatch"));
 						return;
-					}
+					}*/
 					SessionData sessionData = new SessionData();
 					sessionData.accessToken = response.getAccessToken();
 					sessionData.expireDate = SessionData.getExpireDate(response.getExpiresIn());
@@ -96,10 +96,10 @@ public class AuthActivity extends Activity
 					break;
 
 				case CODE:
-					if(xssState != null && !xssState.equals(response.getState())) {
+					/*if(xssState != null && !xssState.equals(response.getState())) {
 						listener.onAuthActivityFailure(this, new SpotifyError("state_mismatch", "state mismatch"));
 						return;
-					}
+					}*/
 					if(options.tokenSwapURL == null) {
 						listener.onAuthActivityFailure(this, SpotifyError.getMissingOptionError("tokenSwapURL"));
 						return;

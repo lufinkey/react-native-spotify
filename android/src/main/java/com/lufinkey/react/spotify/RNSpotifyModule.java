@@ -47,6 +47,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	private Auth auth;
 	private Handler authRenewalTimer;
 	private SpotifyPlayer player;
+	private TrackController trackController = null;
 	private final ArrayList<Completion<Void>> playerInitResponses;
 	private final ArrayList<Completion<Void>> playerLoginResponses;
 	private final ArrayList<Completion<Void>> playerLogoutResponses;
@@ -158,6 +159,12 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 		}
 		if(androidOptions.hasKey("loginLoadingText")) {
 			loginLoadingText = androidOptions.getString("loginLoadingText");
+		}
+		if(androidOptions.hasKey("useCustomTrackController")) {
+			boolean useCustomTrackController = androidOptions.getBoolean("useCustomTrackController");
+			if(useCustomTrackController) {
+				trackController = new TrackController();
+			}
 		}
 
 		// add connectivity state listener
@@ -377,7 +384,11 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 			//initialize player
 			final Object reference = this;
 			Config playerConfig = new Config(reactContext.getApplicationContext(), auth.getSession().accessToken, auth.getClientID());
-			player = Spotify.getPlayer(playerConfig, reference, new SpotifyPlayer.InitializationObserver(){
+			SpotifyPlayer.Builder builder = new SpotifyPlayer.Builder(playerConfig);
+			if(trackController != null) {
+				builder.setAudioController(trackController);
+			}
+			player = Spotify.getPlayer(builder, reference, new SpotifyPlayer.InitializationObserver() {
 				@Override
 				public void onError(Throwable error) {
 					// error initializing the player
@@ -386,7 +397,6 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 						Spotify.destroyPlayer(reference);
 						player = null;
 					}
-
 					// call init responses
 					ArrayList<Completion<Void>> initResponses = null;
 					synchronized (playerInitResponses) {
@@ -596,7 +606,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 					}
 					module.loggedIn = true;
 				}
-				resolve(null);
+				promise.resolve(null);
 				if(!wasLoggedIn) {
 					sendEvent("login", Convert.fromSessionData(auth.getSession()));
 				}
@@ -958,21 +968,24 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	@ReactMethod
 	//setVolume(volume)
 	public void setVolume(double volume, final Promise promise) {
-		//TODO implement this with a custom AudioController
-		new SpotifyError(SpotifyError.Code.NotImplemented, "setVolume does not work on android").reject(promise);
+		if(trackController != null) {
+			trackController.setVolume((float) volume);
+		}
+		promise.resolve(null);
 	}
 
 	@ReactMethod(isBlockingSynchronousMethod = true)
 	//getVolume()
 	public Double getVolume() {
-		//TODO implement this with a custom AudioController
+		if(trackController != null) {
+			return Double.valueOf(trackController.getVolume());
+		}
 		return 1.0;
 	}
 
 	@ReactMethod
 	//getVolumeAsync()
-	public void getVolumeAsync(final Promise promise)
-	{
+	public void getVolumeAsync(final Promise promise) {
 		promise.resolve(getVolume());
 	}
 

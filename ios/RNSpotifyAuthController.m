@@ -12,7 +12,7 @@
 #import "RNSpotifyAuth.h"
 #import "HelperMacros.h"
 
-@interface RNSpotifyAuthController() <UIWebViewDelegate> {
+@interface RNSpotifyAuthController() <WKNavigationDelegate> {
 	RNSpotifyLoginOptions* _options;
 	NSString* _xssState;
 	
@@ -48,7 +48,7 @@
 		self.view.backgroundColor = [UIColor whiteColor];
 		self.modalPresentationStyle = UIModalPresentationFormSheet;
 		
-		_webController.webView.delegate = self;
+		_webController.webView.navigationDelegate = self;
 		//_webController.title = @"Log into Spotify";
 		_webController.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(didSelectCancelButton)];
 		
@@ -191,13 +191,17 @@
 
 #pragma mark - UIWebViewDelegate
 
--(BOOL)webView:(UIWebView*)webView shouldStartLoadWithRequest:(NSURLRequest*)request navigationType:(UIWebViewNavigationType)navigationType {
-	if([self canHandleRedirectURL:request.URL]) {
+-(void)webView:(WKWebView*)webView
+decidePolicyForNavigationAction:(WKNavigationAction*)navigationAction
+decisionHandler:(void(^)(WKNavigationActionPolicy))decisionHandler {
+	if([self canHandleRedirectURL:navigationAction.request.URL]) {
 		[_progressView showInView:self.view animated:YES completion:nil];
-		[self handleRedirectURL:request.URL];
-		return NO;
+		[self handleRedirectURL:navigationAction.request.URL];
+		decisionHandler(WKNavigationActionPolicyCancel);
 	}
-	return YES;
+	else {
+		decisionHandler(WKNavigationActionPolicyAllow);
+	}
 }
 
 @end
