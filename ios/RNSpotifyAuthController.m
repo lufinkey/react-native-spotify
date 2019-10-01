@@ -59,11 +59,22 @@
 	return self;
 }
 
+-(void)viewDidLoad {
+	[super viewDidLoad];
+	self.presentationController.delegate = self;
+}
+
 -(UIStatusBarStyle)preferredStatusBarStyle {
 	return UIStatusBarStyleLightContent;
 }
 
 -(void)didSelectCancelButton {
+	if(_completion != nil) {
+		[_completion resolve:nil];
+	}
+}
+
+-(void)presentationControllerDidDismiss:(UIPresentationController*)presentationController {
 	if(_completion != nil) {
 		[_completion resolve:nil];
 	}

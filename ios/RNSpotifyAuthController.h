@@ -12,7 +12,7 @@
 #import "RNSpotifyCompletion.h"
 
 
-@interface RNSpotifyAuthController : UINavigationController
+@interface RNSpotifyAuthController: UINavigationController <UIAdaptivePresentationControllerDelegate>
 
 -(id)initWithOptions:(RNSpotifyLoginOptions*)options;
 
