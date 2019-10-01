@@ -474,7 +474,7 @@ RCT_EXPORT_METHOD(authenticate:(NSDictionary*)options resolve:(RCTPromiseResolve
 		__weak RNSpotifyAuthController* weakAuthController = authController;
 		authController.completion = [RNSpotifyCompletion<RNSpotifySessionData*> onComplete:^(RNSpotifySessionData* sessionData, RNSpotifyError* error) {
 			RNSpotifyAuthController* authController = weakAuthController;
-			if(authController.isBeingPresented) {
+			if(authController.presentingViewController != nil) {
 				[authController.presentingViewController dismissViewControllerAnimated:YES completion:^{
 					if(error != nil) {
 						[error reject:reject];
