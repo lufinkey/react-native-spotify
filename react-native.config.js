@@ -2,7 +2,7 @@ module.exports = {
   dependency: {
     platforms: {
       android: {
-        packageImportPath: 'com.lufinkey.react.spotify.RNSpotifyPackage',
+        packageImportPath: 'import com.lufinkey.react.spotify.RNSpotifyPackage;',
       },
     },
   },
