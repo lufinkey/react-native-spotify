@@ -177,11 +177,11 @@
 	}
 	else if(params[@"code"] != nil) {
 		// authentication code
-		if(_options.tokenSwapURL == nil) {
+		if(_options.tokenSwapURL == nil && _options.clientSecret == nil) {
 			[_completion reject:[RNSpotifyError missingOptionErrorForName:@"tokenSwapURL"]];
 			return;
 		}
-		[RNSpotifyAuth swapCodeForToken:params[@"code"] url:_options.tokenSwapURL completion:[RNSpotifyCompletion onReject:^(RNSpotifyError *error) {
+		[RNSpotifyAuth swapCodeForToken:params[@"code"] url:_options.tokenSwapURL clientSecret:_options.clientSecret clientID: _options.clientID redirectURL: _options.redirectURL completion:[RNSpotifyCompletion onReject:^(RNSpotifyError *error) {
 			dispatch_async(dispatch_get_main_queue(), ^{
 				[_completion reject:error];
 			});

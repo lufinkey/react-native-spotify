@@ -18,6 +18,7 @@
 
 @property (nonatomic, readonly) NSString* clientID;
 @property (nonatomic, readonly) NSURL* tokenRefreshURL;
+@property (nonatomic, readonly) NSString* clientSecret;
 
 @property (nonatomic, readonly) RNSpotifySessionData* session;
 
@@ -35,7 +36,8 @@
 -(void)renewSessionIfNeeded:(RNSpotifyCompletion*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse;
 -(void)renewSession:(RNSpotifyCompletion*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse;
 
++(NSString *)getAuthorizationHeader:(NSString *)clientSecret clientID:(NSString *)clientID;
 +(void)performTokenURLRequestTo:(NSURL*)url params:(NSDictionary*)params completion:(RNSpotifyCompletion<NSDictionary*>*)completion;
-+(void)swapCodeForToken:(NSString*)code url:(NSURL*)url completion:(RNSpotifyCompletion<RNSpotifySessionData*>*)completion;
++(void)swapCodeForToken:(NSString*)code url:(NSURL*)url clientSecret:(NSString *)clientSecret clientID:(NSString *)clientID redirectURL:(NSURL*)redirectURL completion:(RNSpotifyCompletion<RNSpotifySessionData*>*)completion;
 
 @end

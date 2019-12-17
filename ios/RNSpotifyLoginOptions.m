@@ -18,7 +18,7 @@
 	if(_clientID != nil) {
 		[queryItems addObject:[NSURLQueryItem queryItemWithName:@"client_id" value:_clientID]];
 	}
-	if(_tokenSwapURL != nil) {
+	if(_tokenSwapURL != nil || _clientSecret != nil) {
 		[queryItems addObject:[NSURLQueryItem queryItemWithName:@"response_type" value:@"code"]];
 	}
 	else {
@@ -57,6 +57,24 @@
 
 +(RNSpotifyLoginOptions*)optionsFromDictionary:(NSDictionary*)dict fallback:(NSDictionary*)fallbackDict ignore:(NSArray<NSString*>*)ignore error:(RNSpotifyError**)error {
 	RNSpotifyLoginOptions* options = [[RNSpotifyLoginOptions alloc] init];
+
+	//clientSecret
+	options.clientSecret = [RNSpotifyUtils getOption:@"clientSecret" from:dict fallback:fallbackDict];
+	if(options.clientSecret == nil) {
+		if(![ignore containsObject:@"clientSecret"]) {
+			if(error != nil) {
+				*error = [RNSpotifyError missingOptionErrorForName:@"clientSecret"];
+			}
+			return nil;
+		}
+	}
+	else if(![options.clientSecret isKindOfClass:[NSString class]]) {
+		if(error != nil) {
+			*error = [RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadParameter message:@"clientSecret must be a string"];
+		}
+		return nil;
+	}
+
 	// clientID
 	options.clientID = [RNSpotifyUtils getOption:@"clientID" from:dict fallback:fallbackDict];
 	if(options.clientID == nil) {
