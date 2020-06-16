@@ -10,7 +10,6 @@
 		A00A83BE1FB5188A00394AF0 /* RNSpotifyConvert.m in Sources */ = {isa = PBXBuildFile; fileRef = A00A83BC1FB5188A00394AF0 /* RNSpotifyConvert.m */; };
 		A01F099F1FAED1DB002AA48C /* RNSpotifyAuthController.m in Sources */ = {isa = PBXBuildFile; fileRef = A01F099E1FAED1DB002AA48C /* RNSpotifyAuthController.m */; };
 		A0A4341D1FAE256D0073DAB9 /* SpotifyAudioPlayback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A0A4341B1FAE25690073DAB9 /* SpotifyAudioPlayback.framework */; };
-		A0A4341E1FAE256F0073DAB9 /* SpotifyAuthentication.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A0A4341C1FAE25690073DAB9 /* SpotifyAuthentication.framework */; };
 		A0A4341F1FAE25720073DAB9 /* SpotifyMetadata.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A0A4341A1FAE25690073DAB9 /* SpotifyMetadata.framework */; };
 		A0AD6943200E5B00003EC7D8 /* RNSpotifyProgressView.m in Sources */ = {isa = PBXBuildFile; fileRef = A0AD6942200E5B00003EC7D8 /* RNSpotifyProgressView.m */; };
 		A0AD6946200E7277003EC7D8 /* RNSpotifyWebViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A0AD6945200E7277003EC7D8 /* RNSpotifyWebViewController.m */; };
@@ -72,7 +71,6 @@
 			files = (
 				A0A4341D1FAE256D0073DAB9 /* SpotifyAudioPlayback.framework in Frameworks */,
 				A0A4341F1FAE25720073DAB9 /* SpotifyMetadata.framework in Frameworks */,
-				A0A4341E1FAE256F0073DAB9 /* SpotifyAuthentication.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -168,6 +166,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = 58B511D21A9E6C8500147676;
