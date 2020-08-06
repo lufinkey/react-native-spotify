@@ -14,7 +14,7 @@ Pod::Spec.new do |s|
 
   s.source       = { :git => package['repository']['url'], :tag => "v#{s.version}" }
   s.source_files  = "ios/*.{h,m}"
-  s.vendored_frameworks = "ios/external/SpotifySDK/SpotifyAudioPlayback.framework", "ios/external/SpotifySDK/SpotifyAuthentication.framework", "ios/external/SpotifySDK/SpotifyMetadata.framework"
+  s.vendored_frameworks = "ios/external/SpotifySDK/SpotifyAudioPlayback.framework", "ios/external/SpotifySDK/SpotifyMetadata.framework"
 
   s.dependency 'React'
   s.dependency 'RNEventEmitter'
