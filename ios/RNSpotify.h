@@ -11,6 +11,7 @@
 #import <RNEventEmitter/RNEventEmitter.h>
 #endif
 
+
 @interface RNSpotify : NSObject <RCTBridgeModule, RNEventConformer>
 
 //test()

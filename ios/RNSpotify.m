@@ -51,9 +51,11 @@
 	
 	NSString* _audioSessionCategory;
 }
+
 +(NSMutableDictionary*)mutableDictFromDict:(NSDictionary*)dict;
 
 -(void)logBackInIfNeeded:(RNSpotifyCompletion<NSNumber*>*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse;
+-(SPTCoreAudioController*)getAudioController;
 -(void)initializePlayerIfNeeded:(RNSpotifyCompletion*)completion;
 -(void)loginPlayer:(RNSpotifyCompletion*)completion;
 -(void)logoutPlayer:(RNSpotifyCompletion*)completion;
@@ -194,7 +196,7 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options resolve:(RCTPromiseResolveBl
 	// load default options
 	_options = options;
 	_auth = [[RNSpotifyAuth alloc] init];
-	_player = [SPTAudioStreamingController sharedInstance];
+    _player = [SPTAudioStreamingController sharedInstance];
 	_cacheSize = @(1024 * 1024 * 64);
 	
 	// load auth options
@@ -370,7 +372,10 @@ RCT_EXPORT_METHOD(renewSession:(RCTPromiseResolveBlock)resolve reject:(RCTPromis
 	}] waitForDefinitiveResponse:NO];
 }
 
-
+-(SPTCoreAudioController*)getAudioController {
+    // By default no external audio controller is used
+    return nil;
+}
 
 -(void)initializePlayerIfNeeded:(RNSpotifyCompletion*)completion {
 	if(_auth.session == nil || !_auth.hasStreamingScope) {
@@ -388,7 +393,8 @@ RCT_EXPORT_METHOD(renewSession:(RCTPromiseResolveBlock)resolve reject:(RCTPromis
 			initializedPlayer = YES;
 		}
 		else {
-			initializedPlayer = [_player startWithClientId:_auth.clientID audioController:nil allowCaching:allowCaching error:&error];
+            SPTCoreAudioController* controller = [self getAudioController];
+            initializedPlayer = [_player startWithClientId:_auth.clientID audioController:controller allowCaching:allowCaching error:&error];
 		}
 	}
 	
