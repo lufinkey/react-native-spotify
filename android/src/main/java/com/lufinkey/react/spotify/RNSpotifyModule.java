@@ -47,6 +47,7 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 	private Auth auth;
 	private Handler authRenewalTimer;
 	private SpotifyPlayer player;
+	private HighPassFilter highPassFilter;
 	private TrackController trackController = null;
 	private final ArrayList<Completion<Void>> playerInitResponses;
 	private final ArrayList<Completion<Void>> playerLoginResponses;
@@ -160,12 +161,13 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 		if(androidOptions.hasKey("loginLoadingText")) {
 			loginLoadingText = androidOptions.getString("loginLoadingText");
 		}
-		if(androidOptions.hasKey("useCustomTrackController")) {
-			boolean useCustomTrackController = androidOptions.getBoolean("useCustomTrackController");
-			if(useCustomTrackController) {
-				trackController = new TrackController();
-			}
-		}
+//		if(androidOptions.hasKey("useCustomTrackController")) {
+//			boolean useCustomTrackController = androidOptions.getBoolean("useCustomTrackController");
+//			if(useCustomTrackController) {
+		highPassFilter = new HighPassFilter();
+		trackController = new TrackController(highPassFilter);
+//			}
+//		}
 
 		// add connectivity state listener
 		currentConnectivity = Utils.getNetworkConnectivity();
@@ -230,7 +232,16 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 		promise.resolve(isInitialized());
 	}
 
-
+	@ReactMethod
+	public void updateCutoffFrequency(int cutoffFreq, Promise promise) {
+		if (highPassFilter != null) {
+			highPassFilter.setFilter(cutoffFreq);
+			promise.resolve(true);
+		}
+		else {
+			promise.reject("AB-SPOT-1", "High Pass Filter not initialized");
+		}
+	}
 
 	private void logBackInIfNeeded(final Completion<Boolean> completion, final boolean waitForDefinitiveResponse) {
 		// ensure auth is actually logged in

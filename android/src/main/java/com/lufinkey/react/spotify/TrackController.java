@@ -19,6 +19,8 @@ public class TrackController implements AudioController {
     private float volume = 1;
     private int mSampleRate;
     private int mChannels;
+    private HighPassFilter mHighPassFilter;
+
     private final Runnable mAudioRunnable = new Runnable() {
         final short[] pendingSamples = new short[4096];
 
@@ -32,7 +34,8 @@ public class TrackController implements AudioController {
         }
     };
 
-    public TrackController() {
+    public TrackController(HighPassFilter highPassFilter) {
+        this.mHighPassFilter = highPassFilter;
     }
 
     public AudioTrack getAudioTrack() {
@@ -62,6 +65,10 @@ public class TrackController implements AudioController {
             }
         }
 
+        if (this.mSampleRate != sampleRate) {
+            mHighPassFilter.setSamplingRate(sampleRate);
+        }
+
         this.mSampleRate = sampleRate;
         this.mChannels = channels;
         if (this.mAudioTrack == null) {
@@ -71,6 +78,8 @@ public class TrackController implements AudioController {
         try {
             this.mExecutorService.execute(this.mAudioRunnable);
         } catch (RejectedExecutionException e) { }
+
+        samples = mHighPassFilter.filterBlock(samples, sampleCount, channels);
 
         return this.mAudioBuffer.write(samples, sampleCount);
     }
