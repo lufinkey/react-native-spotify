@@ -27,10 +27,12 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepublishOnly": "git submodule update --init --recursive"
   },
-  "peerDependencies": {
-    "react-native": "^0.53.3"
-  },
+  "peerDependencies": {},
   "dependencies": {
     "react-native-events": "^1.0.15"
+  },
+  "devDependencies": {
+    "react": "16.13.1",
+    "react-native": "0.63.2"
   }
 }

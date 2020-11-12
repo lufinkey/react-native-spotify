@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		95276EF99A31A30F9AAD232C /* libPods-RNSpotify.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5A192FD9EBFAA2699C2C27BE /* libPods-RNSpotify.a */; };
 		A00A83BE1FB5188A00394AF0 /* RNSpotifyConvert.m in Sources */ = {isa = PBXBuildFile; fileRef = A00A83BC1FB5188A00394AF0 /* RNSpotifyConvert.m */; };
 		A01F099F1FAED1DB002AA48C /* RNSpotifyAuthController.m in Sources */ = {isa = PBXBuildFile; fileRef = A01F099E1FAED1DB002AA48C /* RNSpotifyAuthController.m */; };
 		A0A4341D1FAE256D0073DAB9 /* SpotifyAudioPlayback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A0A4341B1FAE25690073DAB9 /* SpotifyAudioPlayback.framework */; };
@@ -41,6 +42,7 @@
 
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libRNSpotify.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRNSpotify.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		5A192FD9EBFAA2699C2C27BE /* libPods-RNSpotify.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-RNSpotify.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A00A83BC1FB5188A00394AF0 /* RNSpotifyConvert.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNSpotifyConvert.m; sourceTree = "<group>"; };
 		A00A83BD1FB5188A00394AF0 /* RNSpotifyConvert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNSpotifyConvert.h; sourceTree = "<group>"; };
 		A01F099D1FAED1DB002AA48C /* RNSpotifyAuthController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RNSpotifyAuthController.h; sourceTree = "<group>"; };
@@ -74,6 +76,8 @@
 		B6F2BFF0255D5F33009AE116 /* HighpassFilter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HighpassFilter.swift; sourceTree = "<group>"; };
 		B6F2BFF1255D5F33009AE116 /* AudioFilter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioFilter.swift; sourceTree = "<group>"; };
 		B6F2BFF2255D5F33009AE116 /* FirstOrderHighpassFilterSimulator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FirstOrderHighpassFilterSimulator.swift; sourceTree = "<group>"; };
+		DB80966FAD81356F40EE684A /* Pods-RNSpotify.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RNSpotify.release.xcconfig"; path = "Target Support Files/Pods-RNSpotify/Pods-RNSpotify.release.xcconfig"; sourceTree = "<group>"; };
+		E75027DD81CB02A7F3406DF3 /* Pods-RNSpotify.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RNSpotify.debug.xcconfig"; path = "Target Support Files/Pods-RNSpotify/Pods-RNSpotify.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -83,6 +87,7 @@
 			files = (
 				A0A4341D1FAE256D0073DAB9 /* SpotifyAudioPlayback.framework in Frameworks */,
 				A0A4341F1FAE25720073DAB9 /* SpotifyMetadata.framework in Frameworks */,
+				95276EF99A31A30F9AAD232C /* libPods-RNSpotify.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -129,6 +134,7 @@
 				A01F099E1FAED1DB002AA48C /* RNSpotifyAuthController.m */,
 				A0A434191FAE254F0073DAB9 /* Frameworks */,
 				134814211AA4EA7D00B7C361 /* Products */,
+				A72E20C500823BD5640F468A /* Pods */,
 			);
 			sourceTree = "<group>";
 			usesTabs = 1;
@@ -139,8 +145,18 @@
 				A0A4341B1FAE25690073DAB9 /* SpotifyAudioPlayback.framework */,
 				A0A4341C1FAE25690073DAB9 /* SpotifyAuthentication.framework */,
 				A0A4341A1FAE25690073DAB9 /* SpotifyMetadata.framework */,
+				5A192FD9EBFAA2699C2C27BE /* libPods-RNSpotify.a */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		A72E20C500823BD5640F468A /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				E75027DD81CB02A7F3406DF3 /* Pods-RNSpotify.debug.xcconfig */,
+				DB80966FAD81356F40EE684A /* Pods-RNSpotify.release.xcconfig */,
+			);
+			path = Pods;
 			sourceTree = "<group>";
 		};
 		B6F2BFED255D5EDC009AE116 /* AudioFilters */ = {
@@ -161,6 +177,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "RNSpotify" */;
 			buildPhases = (
+				DB25F1A20F9618E91A4C3EAC /* [CP] Check Pods Manifest.lock */,
 				58B511D71A9E6C8500147676 /* Sources */,
 				58B511D81A9E6C8500147676 /* Frameworks */,
 				58B511D91A9E6C8500147676 /* CopyFiles */,
@@ -206,6 +223,31 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		DB25F1A20F9618E91A4C3EAC /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-RNSpotify-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		58B511D71A9E6C8500147676 /* Sources */ = {
@@ -337,6 +379,7 @@
 		};
 		58B511F01A9E6C8500147676 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = E75027DD81CB02A7F3406DF3 /* Pods-RNSpotify.debug.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -353,7 +396,8 @@
 				);
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				OTHER_LDFLAGS = "-ObjC";
+				OTHER_LDFLAGS = "$(inherit)";
+				"OTHER_LDFLAGS[arch=*]" = "-objc";
 				PRODUCT_NAME = RNSpotify;
 				SKIP_INSTALL = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "RNSpotify-Bridging-Header.h";
@@ -364,6 +408,7 @@
 		};
 		58B511F11A9E6C8500147676 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = DB80966FAD81356F40EE684A /* Pods-RNSpotify.release.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -380,7 +425,8 @@
 				);
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				OTHER_LDFLAGS = "-ObjC";
+				OTHER_LDFLAGS = "$(inherit)";
+				"OTHER_LDFLAGS[arch=*]" = "-objc";
 				PRODUCT_NAME = RNSpotify;
 				SKIP_INSTALL = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "RNSpotify-Bridging-Header.h";
