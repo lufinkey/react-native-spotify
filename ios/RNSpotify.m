@@ -12,6 +12,11 @@
 #import "RNSpotifyUtils.h"
 #import "HelperMacros.h"
 
+#import "RNSpotify-Swift.h"
+
+#import "EQCoreAudioController.h"
+
+
 #define SPOTIFY_API_BASE_URL @"https://api.spotify.com/"
 #define SPOTIFY_API_URL(endpoint) [NSURL URLWithString:NSString_concat(SPOTIFY_API_BASE_URL, endpoint)]
 
@@ -41,6 +46,8 @@
 	NSTimer* _authRenewalTimer;
 	SPTAudioStreamingController* _player;
 	
+	EQCoreAudioController* _audioController;
+	
 	NSDictionary* _options;
 	NSNumber* _cacheSize;
 	
@@ -51,6 +58,13 @@
 	
 	NSString* _audioSessionCategory;
 }
+
+@interface RNSpotify() {
+	-(SPTAudioStreamingController*)createPlayer;
+	
+	-(void)_getAudioFilter:(id<AudioFilter>*)filter error:(RNSpotifyError**)error;
+}
+
 +(NSMutableDictionary*)mutableDictFromDict:(NSDictionary*)dict;
 
 -(void)logBackInIfNeeded:(RNSpotifyCompletion<NSNumber*>*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse;
@@ -86,6 +100,8 @@
 		_auth = nil;
 		_authRenewalTimer = nil;
 		_player = nil;
+		
+		_audioController = nil;
 		
 		_options = nil;
 		_cacheSize = nil;
