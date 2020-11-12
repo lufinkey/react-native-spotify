@@ -59,12 +59,6 @@
 	NSString* _audioSessionCategory;
 }
 
-@interface RNSpotify() {
-	-(SPTAudioStreamingController*)createPlayer;
-	
-	-(void)_getAudioFilter:(id<AudioFilter>*)filter error:(RNSpotifyError**)error;
-}
-
 +(NSMutableDictionary*)mutableDictFromDict:(NSDictionary*)dict;
 
 -(void)logBackInIfNeeded:(RNSpotifyCompletion<NSNumber*>*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse;
@@ -80,6 +74,11 @@
 -(void)prepareForPlayer:(RNSpotifyCompletion*)completion;
 -(void)prepareForRequest:(RNSpotifyCompletion*)completion;
 -(void)doAPIRequest:(NSString*)endpoint method:(NSString*)method params:(NSDictionary*)params jsonBody:(BOOL)jsonBody completion:(RNSpotifyCompletion*)completion;
+
+// **************** AUDIO FILTERING **************
+-(SPTCoreAudioController*)getAudioController;
+-(void)_getAudioFilter:(id<AudioFilter>*)filter error:(RNSpotifyError**)error;
+
 @end
 
 @implementation RNSpotify
@@ -210,7 +209,7 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options resolve:(RCTPromiseResolveBl
 	// load default options
 	_options = options;
 	_auth = [[RNSpotifyAuth alloc] init];
-	_player = [SPTAudioStreamingController sharedInstance];
+    _player = [SPTAudioStreamingController sharedInstance];
 	_cacheSize = @(1024 * 1024 * 64);
 	
 	// load auth options
@@ -386,7 +385,10 @@ RCT_EXPORT_METHOD(renewSession:(RCTPromiseResolveBlock)resolve reject:(RCTPromis
 	}] waitForDefinitiveResponse:NO];
 }
 
-
+-(SPTCoreAudioController*)getAudioController {
+    // By default no external audio controller is used
+    return nil;
+}
 
 -(void)initializePlayerIfNeeded:(RNSpotifyCompletion*)completion {
 	if(_auth.session == nil || !_auth.hasStreamingScope) {
@@ -404,7 +406,8 @@ RCT_EXPORT_METHOD(renewSession:(RCTPromiseResolveBlock)resolve reject:(RCTPromis
 			initializedPlayer = YES;
 		}
 		else {
-			initializedPlayer = [_player startWithClientId:_auth.clientID audioController:nil allowCaching:allowCaching error:&error];
+            SPTCoreAudioController* controller = [self getAudioController];
+            initializedPlayer = [_player startWithClientId:_auth.clientID audioController:controller allowCaching:allowCaching error:&error];
 		}
 	}
 	
