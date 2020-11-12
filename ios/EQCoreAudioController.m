@@ -38,7 +38,7 @@
 
 #import <AVFoundation/AVFoundation.h>
 
-#import "alphabeatsapp-Swift.h"
+#import "RNSpotify-Swift.h"
 
 @implementation EQCoreAudioController {
 	AUNode _eqNode;
