@@ -10,21 +10,21 @@ import Foundation
 import AVFoundation
 
 
-class HighpassFilter: NSObject, AudioFilter  {
+@objc public class HighpassFilter: NSObject, AudioFilter  {
   
-  var _equalizer: AudioUnit
-  var _isEnabled: Bool
+  public var audioEqualizer: AudioUnit
+  public var isEnabled: Bool
   
-  @objc init(equalizer: AudioUnit) {
-    _equalizer = equalizer
-    _isEnabled = false;
+  @objc public init(equalizer: AudioUnit) {
+    audioEqualizer = equalizer
+    isEnabled = false;
   }
   
   deinit {
-    AudioUnitUninitialize(_equalizer);
+    AudioUnitUninitialize(audioEqualizer);
   }
   
-  @objc func setup() -> Bool {
+  @objc public func setup() -> Bool {
     // set first band to kAUNBandEQFilterType_2ndOrderButterworthHighPass
     let success = _setParam(parameter: kAUNBandEQParam_FilterType,
                        toValue: AudioUnitParameterValue(kAUNBandEQFilterType_2ndOrderButterworthHighPass),
@@ -34,7 +34,7 @@ class HighpassFilter: NSObject, AudioFilter  {
     }
     
     // Init the EQ
-    let status = AudioUnitInitialize(_equalizer);
+    let status = AudioUnitInitialize(audioEqualizer);
     if (status != noErr) {
       _log(methodName: "\(#function)", message: "unable to initialize the equalizer: OSState = \(status)");
       return false;
@@ -43,9 +43,9 @@ class HighpassFilter: NSObject, AudioFilter  {
     return true
   }
   
-  @objc func reset() -> Bool {
+  @objc public func reset() -> Bool {
     var success = true
-    if (_isEnabled) {
+    if (isEnabled) {
       success = updateCutoffFrequency(frequency:0) && success;
     }
     
@@ -54,32 +54,32 @@ class HighpassFilter: NSObject, AudioFilter  {
     return success;
   }
 
-  @objc func enable() -> Bool {
+  @objc public func enable() -> Bool {
     let success = _setParam(parameter: kAUNBandEQParam_BypassBand,
                        toValue: 0,
                        description: "enable first equalizer band");
     
     if (success) {
-      _isEnabled = true
+      isEnabled = true
     }
     
     return success
   }
 
-  @objc func disable() -> Bool {
+  @objc public func disable() -> Bool {
     let success = _setParam(parameter: kAUNBandEQParam_BypassBand,
                        toValue: 1,
                        description: "disable first equalizer band");
     
     if (success) {
-      _isEnabled = false
+      isEnabled = false
     }
     
     return success
   }
 
-  @objc func updateCutoffFrequency(frequency: Float32) -> Bool {
-    if (!_isEnabled) {
+  @objc public func updateCutoffFrequency(frequency: Float32) -> Bool {
+    if (!isEnabled) {
       _log(methodName: "updateCutoffFrequency", message: "Error : Filter is disabled unable to update cuttoff frequency")
       return false;
     }

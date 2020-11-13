@@ -19,10 +19,10 @@ let DEFAULT_EQUALIZER_BANDS: [(lower: Float32, upper: Float32)] = [
 ];
 
 
-class FirstOrderHighpassFilterSimulator: NSObject, AudioFilter  {
+@objc public class FirstOrderHighpassFilterSimulator: NSObject, AudioFilter  {
   
-  var _equalizer: AudioUnit
-  var _isEnabled: Bool
+  public var audioEqualizer: AudioUnit
+  public var isEnabled: Bool
   
   var _bands: [(lower: Float32, upper: Float32)]
   
@@ -33,7 +33,7 @@ class FirstOrderHighpassFilterSimulator: NSObject, AudioFilter  {
   /// - Parameter equalizer: The created Equalizer AudioUnit
   /// - Parameter bands: Optional array with equalizer bands. Each band is a tuple of an `lower` frequency and an `upper` frequency
   init(equalizer: AudioUnit, bands: [(lower: Float32, upper: Float32)]?) throws {
-    _equalizer = equalizer
+    audioEqualizer = equalizer
     
     _bands = bands ?? DEFAULT_EQUALIZER_BANDS;
         
@@ -41,11 +41,11 @@ class FirstOrderHighpassFilterSimulator: NSObject, AudioFilter  {
       throw AlphaBeatsError.invalidParameter(message: "Empty bands array provided.")
     }
     
-    _isEnabled = false;
+    isEnabled = false;
   }
 
   /// This initializer can be used from Objective-C
-  @objc convenience init(equalizer: AudioUnit, lowerBandFrequencies: [Float32]?, upperBandFrequencies: [Float32]?) throws {
+  @objc convenience public init(equalizer: AudioUnit, lowerBandFrequencies: [Float32]?, upperBandFrequencies: [Float32]?) throws {
     
     var bands: [(lower: Float32, upper: Float32)]?;
     
@@ -64,16 +64,16 @@ class FirstOrderHighpassFilterSimulator: NSObject, AudioFilter  {
   }
   
   /// This initializer can be used from Objective-C
-  @objc convenience init(equalizer: AudioUnit) throws {
+    @objc convenience public init(equalizer: AudioUnit) throws {
     try self.init(equalizer: equalizer, bands: nil);
   }
   
   deinit {
-    AudioUnitUninitialize(_equalizer);
+    AudioUnitUninitialize(audioEqualizer);
   }
   
   /// Only call once after intstantiation, before your start using the filter
-  @objc func setup() -> Bool {
+  @objc public func setup() -> Bool {
     _bandwidths = _calcBandwiths();
     _centreFrequencies = _calcCentreFrequencies();
 
@@ -108,7 +108,7 @@ class FirstOrderHighpassFilterSimulator: NSObject, AudioFilter  {
     }
     
     // Init the EQ
-    let status = AudioUnitInitialize(_equalizer);
+    let status = AudioUnitInitialize(audioEqualizer);
     if (status != noErr) {
       _log(methodName: "\(#function)", message: "unable to initialize the equalizer: OSState = \(status)");
       return false;
@@ -117,7 +117,7 @@ class FirstOrderHighpassFilterSimulator: NSObject, AudioFilter  {
     return true
   }
   
-  @objc func reset() -> Bool {
+  @objc public func reset() -> Bool {
     _bandGains = [Float32](repeating: 0.0, count: _bands.count)
     
     var success = _updateBandGain();
@@ -127,28 +127,28 @@ class FirstOrderHighpassFilterSimulator: NSObject, AudioFilter  {
     return success;
   }
 
-  @objc func enable() -> Bool {
+  @objc public func enable() -> Bool {
     let success = _enableFilter(enable: true);
     
     if (success) {
-      _isEnabled = true
+      isEnabled = true
     }
     
     return success
   }
 
-  @objc func disable() -> Bool {
+  @objc public func disable() -> Bool {
     let success = _enableFilter(enable: false);
     
     if (success) {
-      _isEnabled = false
+      isEnabled = false
     }
     
     return success
   }
 
-  @objc func updateCutoffFrequency(frequency: Float32) -> Bool {
-    if (!_isEnabled) {
+  @objc public func updateCutoffFrequency(frequency: Float32) -> Bool {
+    if (!isEnabled) {
       _log(methodName: "updateCutoffFrequency", message: "Error: Filter is disabled, unable to update cuttoff frequency")
       return false;
     }
