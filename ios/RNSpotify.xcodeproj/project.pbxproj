@@ -396,8 +396,7 @@
 				);
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				OTHER_LDFLAGS = "$(inherit)";
-				"OTHER_LDFLAGS[arch=*]" = "-objc";
+				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = RNSpotify;
 				SKIP_INSTALL = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "RNSpotify-Bridging-Header.h";
@@ -425,8 +424,7 @@
 				);
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				OTHER_LDFLAGS = "$(inherit)";
-				"OTHER_LDFLAGS[arch=*]" = "-objc";
+				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = RNSpotify;
 				SKIP_INSTALL = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "RNSpotify-Bridging-Header.h";
