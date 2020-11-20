@@ -12,6 +12,11 @@
 #import "RNSpotifyUtils.h"
 #import "HelperMacros.h"
 
+#import "RNSpotify-Swift.h"
+
+#import "EQCoreAudioController.h"
+
+
 #define SPOTIFY_API_BASE_URL @"https://api.spotify.com/"
 #define SPOTIFY_API_URL(endpoint) [NSURL URLWithString:NSString_concat(SPOTIFY_API_BASE_URL, endpoint)]
 
@@ -41,6 +46,8 @@
 	NSTimer* _authRenewalTimer;
 	SPTAudioStreamingController* _player;
 	
+	EQCoreAudioController* _audioController;
+	
 	NSDictionary* _options;
 	NSNumber* _cacheSize;
 	
@@ -51,6 +58,7 @@
 	
 	NSString* _audioSessionCategory;
 }
+
 +(NSMutableDictionary*)mutableDictFromDict:(NSDictionary*)dict;
 
 -(void)logBackInIfNeeded:(RNSpotifyCompletion<NSNumber*>*)completion waitForDefinitiveResponse:(BOOL)waitForDefinitiveResponse;
@@ -66,6 +74,11 @@
 -(void)prepareForPlayer:(RNSpotifyCompletion*)completion;
 -(void)prepareForRequest:(RNSpotifyCompletion*)completion;
 -(void)doAPIRequest:(NSString*)endpoint method:(NSString*)method params:(NSDictionary*)params jsonBody:(BOOL)jsonBody completion:(RNSpotifyCompletion*)completion;
+
+// ******************** AUDIO FILTERING ***********************
+-(SPTCoreAudioController*)getAudioController;
+-(void)_getAudioFilter:(id<AudioFilter>*)filter error:(RNSpotifyError**)error;
+
 @end
 
 @implementation RNSpotify
@@ -86,6 +99,8 @@
 		_auth = nil;
 		_authRenewalTimer = nil;
 		_player = nil;
+		
+		_audioController = nil;
 		
 		_options = nil;
 		_cacheSize = nil;
@@ -194,7 +209,7 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary*)options resolve:(RCTPromiseResolveBl
 	// load default options
 	_options = options;
 	_auth = [[RNSpotifyAuth alloc] init];
-	_player = [SPTAudioStreamingController sharedInstance];
+    _player = [SPTAudioStreamingController sharedInstance];
 	_cacheSize = @(1024 * 1024 * 64);
 	
 	// load auth options
@@ -371,7 +386,6 @@ RCT_EXPORT_METHOD(renewSession:(RCTPromiseResolveBlock)resolve reject:(RCTPromis
 }
 
 
-
 -(void)initializePlayerIfNeeded:(RNSpotifyCompletion*)completion {
 	if(_auth.session == nil || !_auth.hasStreamingScope) {
 		[completion resolve:nil];
@@ -388,7 +402,8 @@ RCT_EXPORT_METHOD(renewSession:(RCTPromiseResolveBlock)resolve reject:(RCTPromis
 			initializedPlayer = YES;
 		}
 		else {
-			initializedPlayer = [_player startWithClientId:_auth.clientID audioController:nil allowCaching:allowCaching error:&error];
+            SPTCoreAudioController* controller = [self getAudioController];
+            initializedPlayer = [_player startWithClientId:_auth.clientID audioController:controller allowCaching:allowCaching error:&error];
 		}
 	}
 	
@@ -1046,6 +1061,121 @@ RCT_EXPORT_METHOD(sendRequest:(NSString*)endpoint method:(NSString*)method param
 	}]];
 }
 
+#pragma mark - Audio filtering functions
+
+-(SPTCoreAudioController*)getAudioController {
+  if (!_audioController) {
+	NSLog( @"Creating EQCoreAudioController ...");
+	_audioController = [[EQCoreAudioController alloc] init];
+  } else {
+	NSLog( @"Providing exising EQCoreAudioController instance ...");
+  }
+  
+  return _audioController;
+}
+
+-(void)_getAudioFilter:(id<AudioFilter>*)filter error:(RNSpotifyError**)error {
+  if (!_audioController) {
+	*error = [[RNSpotifyError alloc] initWithCode:@"NO_CONTROLLER"
+										 message:@"No audio controller instance available"];
+	return;
+  }
+  
+  *filter = [_audioController audioFilter];
+  
+  if (filter == NULL) {
+	*error = [[RNSpotifyError alloc] initWithCode:@"NO_AUDIO_FILTER"
+										 message:@"No audio filter instance available"];
+  }
+}
+
+RCT_EXPORT_METHOD(resetAudioFilter:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
+  RNSpotifyError* error;
+  id<AudioFilter> filter;
+  
+  [self _getAudioFilter:&filter error:&error];
+  
+  if (error) {
+	[error reject:reject];
+	return;
+  }
+  
+  BOOL success = [filter reset];
+  if (success) {
+	resolve(@"AUDIOFILTER_RESET");
+  } else {
+	NSString *errMessage = [NSString stringWithFormat:@"Failed to reset the audio"];
+	error = [[RNSpotifyError alloc] initWithCode:@"AUDIOFILTER_RESET_FAILED" message:errMessage];
+	
+	[error reject:reject];
+  }
+}
+
+RCT_EXPORT_METHOD(enableAudioFilter:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
+  RNSpotifyError* error;
+  id<AudioFilter> filter;
+  
+  [self _getAudioFilter:&filter error:&error];
+  
+  if (error) {
+	[error reject:reject];
+	return;
+  }
+  
+  BOOL success = [filter enable];
+  if (success) {
+	resolve(@"AUDIOFILTER_ENABLED");
+  } else {
+	NSString *errMessage = [NSString stringWithFormat:@"Failed to reset the audio"];
+	error = [[RNSpotifyError alloc] initWithCode:@"ENABLE_AUDIOFILTER_FAILED" message:errMessage];
+	
+	[error reject:reject];
+  }
+}
+
+RCT_EXPORT_METHOD(disableAudioFilter:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
+  RNSpotifyError* error;
+  id<AudioFilter> filter;
+  
+  [self _getAudioFilter:&filter error:&error];
+  
+  if (error) {
+	[error reject:reject];
+	return;
+  }
+  
+  BOOL success = [filter disable];
+  if (success) {
+	resolve(@"AUDIOFILTER_DISABLED");
+  } else {
+	NSString *errMessage = [NSString stringWithFormat:@"Failed to reset the audio"];
+	error = [[RNSpotifyError alloc] initWithCode:@"DISABLE_AUDIOFILTER_FAILED" message:errMessage];
+	
+	[error reject:reject];
+  }
+}
+
+RCT_EXPORT_METHOD(updateCutoffFrequency:(float)frequency resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
+  RNSpotifyError* error;
+  id<AudioFilter> filter;
+  
+  [self _getAudioFilter:&filter error:&error];
+  
+  if (error) {
+	[error reject:reject];
+	return;
+  }
+
+  BOOL success = [[_audioController audioFilter] updateCutoffFrequencyWithFrequency:frequency];
+  if (success) {
+	resolve(@"CUTOFF_FREQ_UPDATED");
+  } else {
+	NSString *errMessage = [NSString stringWithFormat:@"Failed to update the audio filter cutoff frequency to %f [Hz]", frequency];
+	error = [[RNSpotifyError alloc] initWithCode:@"CUTOFF_FREQ_UPDATE_FAILED" message:errMessage];
+	
+	[error reject:reject];
+  }
+}
 
 
 #pragma mark - SPTAudioStreamingDelegate
