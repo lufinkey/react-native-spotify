@@ -1,10 +1,3 @@
-//
-//  FirstOrderHighpassFilterSimulator.swift
-//  alphabeatsapp
-//
-//  Created by Freddy Snijder on 11/11/2020.
-//
-
 import Foundation
 
 import AVFoundation
@@ -20,58 +13,58 @@ let DEFAULT_EQUALIZER_BANDS: [(lower: Float32, upper: Float32)] = [
 
 
 @objc public class FirstOrderHighpassFilterSimulator: NSObject, AudioFilter  {
-  
+
   public var audioEqualizer: AudioUnit
   public var isEnabled: Bool
-  
+
   var _bands: [(lower: Float32, upper: Float32)]
-  
+
   var _centreFrequencies: [Float32]?
   var _bandwidths: [Float32]?
   var _bandGains: [Float32]?
-  
+
   /// - Parameter equalizer: The created Equalizer AudioUnit
   /// - Parameter bands: Optional array with equalizer bands. Each band is a tuple of an `lower` frequency and an `upper` frequency
   init(equalizer: AudioUnit, bands: [(lower: Float32, upper: Float32)]?) throws {
     audioEqualizer = equalizer
-    
+
     _bands = bands ?? DEFAULT_EQUALIZER_BANDS;
-        
+
     if (_bands.count == 0) {
       throw AlphaBeatsError.invalidParameter(message: "Empty bands array provided.")
     }
-    
+
     isEnabled = false;
   }
 
   /// This initializer can be used from Objective-C
   @objc convenience public init(equalizer: AudioUnit, lowerBandFrequencies: [Float32]?, upperBandFrequencies: [Float32]?) throws {
-    
+
     var bands: [(lower: Float32, upper: Float32)]?;
-    
+
     if let lowerBounds = lowerBandFrequencies, let upperBounds = upperBandFrequencies {
       if (lowerBounds.count == 0 || upperBounds.count == 0 || (lowerBounds.count != upperBounds.count)) {
         throw AlphaBeatsError.invalidParameter(message: "lowerBounds.count = \(lowerBounds.count), upperBounds.count = \(upperBounds.count)")
       }
-      
+
       bands = []
       for (lowerBound, upperBound) in zip(lowerBounds, upperBounds) {
         bands?.append((lower: lowerBound, upper: upperBound))
       }
     }
-    
+
     try self.init(equalizer: equalizer, bands: bands)
   }
-  
+
   /// This initializer can be used from Objective-C
     @objc convenience public init(equalizer: AudioUnit) throws {
     try self.init(equalizer: equalizer, bands: nil);
   }
-  
+
   deinit {
     AudioUnitUninitialize(audioEqualizer);
   }
-  
+
   /// Only call once after intstantiation, before your start using the filter
   @objc public func setup() -> Bool {
     _bandwidths = _calcBandwiths();
@@ -84,12 +77,12 @@ let DEFAULT_EQUALIZER_BANDS: [(lower: Float32, upper: Float32)] = [
     if (!success) {
       return success
     }
-    
+
     for idx in 0 ..< _bands.count {
       success = _setParam(parameter: kAUNBandEQParam_FilterType + UInt32(idx),
                           toValue: AudioUnitParameterValue(kAUNBandEQFilterType_Parametric),
                           description: "set type of equalizer band \(idx) to parametric") && success;
-      
+
       let f = _centreFrequencies![idx]
       success = _setParam(parameter: kAUNBandEQParam_Frequency + UInt32(idx),
                           toValue: AudioUnitParameterValue(f),
@@ -100,50 +93,50 @@ let DEFAULT_EQUALIZER_BANDS: [(lower: Float32, upper: Float32)] = [
                           toValue: AudioUnitParameterValue(b),
                           description: "set bandwith of equalizer band \(idx) to \(b) [Octaves]") && success;
     }
-    
+
     success = reset() && success;
 
     if (!success) {
       return success
     }
-    
+
     // Init the EQ
     let status = AudioUnitInitialize(audioEqualizer);
     if (status != noErr) {
       _log(methodName: "\(#function)", message: "unable to initialize the equalizer: OSState = \(status)");
       return false;
     }
-    
+
     return true
   }
-  
+
   @objc public func reset() -> Bool {
     _bandGains = [Float32](repeating: 0.0, count: _bands.count)
-    
+
     var success = _updateBandGain();
-        
+
     success = disable() && success;
-    
+
     return success;
   }
 
   @objc public func enable() -> Bool {
     let success = _enableFilter(enable: true);
-    
+
     if (success) {
       isEnabled = true
     }
-    
+
     return success
   }
 
   @objc public func disable() -> Bool {
     let success = _enableFilter(enable: false);
-    
+
     if (success) {
       isEnabled = false
     }
-    
+
     return success
   }
 
@@ -152,23 +145,23 @@ let DEFAULT_EQUALIZER_BANDS: [(lower: Float32, upper: Float32)] = [
       _log(methodName: "updateCutoffFrequency", message: "Error: Filter is disabled, unable to update cuttoff frequency")
       return false;
     }
-    
+
     if (frequency < 20) {
       // Disable equalizer
       return _enableFilter(enable: false);
     }
-    
+
     // Ensure the equalizer is enabled
     var success = _enableFilter(enable: true);
     if (!success) {
       return success;
     }
-    
+
     if var bandGains = _bandGains {
       for idx in 0 ..< _bands.count {
         bandGains[idx] = _calcBandGain(cutoffFreq: frequency, atBand: idx);
       }
-      
+
       _bandGains = bandGains
       success = _updateBandGain() && success;
     } else {
@@ -178,33 +171,33 @@ let DEFAULT_EQUALIZER_BANDS: [(lower: Float32, upper: Float32)] = [
 
     return success;
   }
-  
+
   func _calcBandwiths() -> [Float32] {
     var bandwidth: [Float32] = []
-    
+
     // The bandwidth is specifed as the relationship of the upper bandedge frequency to the
     // lower bandedge frequency in octaves
     for band in _bands {
       let b = log2(band.upper/band.lower);
-      
+
       bandwidth.append(b)
     }
-    
+
     return bandwidth;
   }
 
   func _calcCentreFrequencies() -> [Float32] {
     var centreFrequencies: [Float32] = []
-    
+
     for band in _bands {
       let c = (band.upper + band.lower)/2;
-      
+
       centreFrequencies.append(c)
     }
-    
+
     return centreFrequencies;
   }
-  
+
   func _enableFilter(enable: Bool) -> Bool {
     var success = true
     for idx in 0 ..< _bands.count {
@@ -212,34 +205,34 @@ let DEFAULT_EQUALIZER_BANDS: [(lower: Float32, upper: Float32)] = [
                           toValue: enable ? 0 : 1,
                           description: "enabling equalizer band \(idx)") && success;
     }
-    
+
     return success
   }
-  
+
   func _calcBandGain(cutoffFreq: Float32, atBand bandIdx: Int) -> Float32 {
     let centreFreq = _centreFrequencies![bandIdx];
-    
+
     var gain = 1.0 / (1.0 + (cutoffFreq * cutoffFreq) / ((centreFreq + 1)*(centreFreq + 1)));
-    
+
     gain = 10*log10(gain)
-    
+
     // -96->24
     gain = max(gain, -96.0);
     gain = min(gain, 24.0);
 
     return gain;
   }
-  
+
   func _updateBandGain() -> Bool {
     var success = true
     for idx in 0 ..< _bands.count {
       let g = _bandGains![idx]
-      
+
       success = _setParam(parameter: kAUNBandEQParam_Gain + UInt32(idx),
                           toValue: AudioUnitParameterValue(g),
                           description: "set gain of equalizer band \(idx)") && success;
     }
-    
+
     return success;
   }
 

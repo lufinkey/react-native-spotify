@@ -1,11 +1,3 @@
-//
-//  AudioFilter.swift
-//  alphabeatsapp
-//
-//  Created by Freddy Snijder on 09/11/2020.
-//  Copyright © 2020 Facebook. All rights reserved.
-//
-
 import Foundation
 import AVFoundation
 
@@ -18,11 +10,11 @@ func sizeof<T:FixedWidthInteger>(_ int:T) -> Int {
   var isEnabled: Bool {get}
 
   func setup() -> Bool
-  
+
   func reset() -> Bool
   func enable() -> Bool
   func disable() -> Bool
-  
+
   func updateCutoffFrequency(frequency: Float32) -> Bool
 }
 
@@ -33,7 +25,7 @@ extension AudioFilter {
       _log(methodName: "\(#function)", message: "unable to \(description): OSState = \(state)");
       return false;
     }
-    
+
     return true;
   }
 
@@ -43,12 +35,12 @@ extension AudioFilter {
       _log(methodName: "\(#function)", message: "unable to \(description): OSState = \(state)");
       return false;
     }
-    
+
     return true;
   }
 
   func _log(methodName: String, message: String) {
     NSLog("[\(self) \(methodName)] :\(message)");
   }
-  
+
 }
