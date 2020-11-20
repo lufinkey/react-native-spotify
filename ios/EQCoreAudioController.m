@@ -68,8 +68,6 @@
 	// Override this method to connect the source node to the destination node via an EQ node.
 
   NSLog( @"Connecting equalizer ...");
-	// A description for the EQ Device
-  // AudioComponentDescription eqDescription = [equalizer audioComponentDescription];
   AudioComponentDescription eqDescription;
 	eqDescription.componentType = kAudioUnitType_Effect;
   eqDescription.componentSubType = kAudioUnitSubType_NBandEQ;
