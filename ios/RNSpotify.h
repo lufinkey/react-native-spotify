@@ -11,6 +11,7 @@
 #import <RNEventEmitter/RNEventEmitter.h>
 #endif
 
+
 @interface RNSpotify : NSObject <RCTBridgeModule, RNEventConformer>
 
 //test()
@@ -75,5 +76,15 @@
 
 //sendRequest(endpoint, method, params, isJSONBody)
 -(void)sendRequest:(NSString*)endpoint method:(NSString*)method params:(NSDictionary*)params isJSONBody:(BOOL)jsonBody resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
+
+
+// ******************** AUDIO FILTERING ***********************
+-(void)resetAudioFilter:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
+-(void)enableAudioFilter:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
+-(void)disableAudioFilter:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
+
+-(void)updateCutoffFrequency:(float)frequency resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
+
+
 
 @end
