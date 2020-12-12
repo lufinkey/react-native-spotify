@@ -27,6 +27,7 @@ public class TrackController implements AudioController {
         public void run() {
             int itemsRead = TrackController.this.mAudioBuffer.peek(this.pendingSamples);
             if (itemsRead > 0) {
+
                 int itemsWritten = TrackController.this.writeSamplesToAudioOutput(this.pendingSamples, itemsRead);
                 TrackController.this.mAudioBuffer.remove(itemsWritten);
             }
@@ -78,8 +79,6 @@ public class TrackController implements AudioController {
         try {
             this.mExecutorService.execute(this.mAudioRunnable);
         } catch (RejectedExecutionException e) { }
-
-        samples = mHighPassFilter.filterBlock(samples, sampleCount, channels);
 
         return this.mAudioBuffer.write(samples, sampleCount);
     }
@@ -148,9 +147,10 @@ public class TrackController implements AudioController {
         }
     }
 
-    private int writeSamplesToAudioOutput(short[] samples, int samplesCount) {
+    private int writeSamplesToAudioOutput(short[] samples, int sampleCount) {
         if (this.isAudioTrackPlaying()) {
-            int itemsWritten = this.mAudioTrack.write(samples, 0, samplesCount);
+            samples = mHighPassFilter.filterBlock(samples, sampleCount / mChannels, mChannels);
+            int itemsWritten = this.mAudioTrack.write(samples, 0, sampleCount);
             if (itemsWritten > 0) {
                 return itemsWritten;
             }

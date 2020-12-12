@@ -37,4 +37,3 @@ dependencies {
 	api(name: 'spotify-player-24-noconnect-2.20b', ext: 'aar')
 	api project(path: ':react-native-events')
 }
-
