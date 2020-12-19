@@ -161,13 +161,8 @@ public class RNSpotifyModule extends ReactContextBaseJavaModule implements Playe
 		if(androidOptions.hasKey("loginLoadingText")) {
 			loginLoadingText = androidOptions.getString("loginLoadingText");
 		}
-//		if(androidOptions.hasKey("useCustomTrackController")) {
-//			boolean useCustomTrackController = androidOptions.getBoolean("useCustomTrackController");
-//			if(useCustomTrackController) {
 		highPassFilter = new HighPassFilter();
 		trackController = new TrackController(highPassFilter);
-//			}
-//		}
 
 		// add connectivity state listener
 		currentConnectivity = Utils.getNetworkConnectivity();
