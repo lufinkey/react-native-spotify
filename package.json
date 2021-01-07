@@ -25,7 +25,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepublishOnly": "git submodule update --init --recursive"
+    "prepublishOnly": "git submodule update --init --recursive",
+    "postinstall": "./postinstall.sh"
   },
   "peerDependencies": {
     "react-native": "0.63.2"
