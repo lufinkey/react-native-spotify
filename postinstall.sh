@@ -2,7 +2,7 @@
 
 MODULES=`sed -n -e '/path/,/url/p' .gitmodules | sed 'N;s/\\n/\\$$$/'`
 echo "$MODULES" | while IFS= read -r line; do
-  if [[ $line =~ (.*)\$\$\$(.*) ]] ; then
+  if [[ $line =~ '(.*)\$\$\$(.*)' ]] ; then
     path=$(echo ${BASH_REMATCH[1]} | sed 's/.*= //')
     url=$(echo ${BASH_REMATCH[2]} | sed 's/.*= //')
     echo $PWD
