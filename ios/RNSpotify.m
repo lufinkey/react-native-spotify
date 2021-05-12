@@ -992,10 +992,10 @@ RCT_EXPORT_METHOD(seek:(double)position resolve:(RCTPromiseResolveBlock)resolve 
 					return;
 				}
 
-        id errorObj = nil;
-        if ([result isKindOfClass:[NSDictionary class]]) {
-          errorObj = result[@"error"];
-        }
+				id errorObj = nil;
+				if ([result isKindOfClass:[NSDictionary class]]) {
+					errorObj = result[@"error"];
+				}
 
 				if(errorObj != nil) {
 					id errorDescription = result[@"error_description"];
