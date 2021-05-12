@@ -991,8 +991,12 @@ RCT_EXPORT_METHOD(seek:(double)position resolve:(RCTPromiseResolveBlock)resolve 
 					[completion reject:[RNSpotifyError errorWithNSError:error]];
 					return;
 				}
-				
-				id errorObj = result[@"error"];
+
+				id errorObj = nil;
+				if ([result isKindOfClass:[NSDictionary class]]) {
+					errorObj = result[@"error"];
+				}
+
 				if(errorObj != nil) {
 					id errorDescription = result[@"error_description"];
 					if(errorDescription != nil) {
