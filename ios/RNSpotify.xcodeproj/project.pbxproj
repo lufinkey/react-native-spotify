@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		78295BC510370A2B52F0DEF1 /* libPods-RNSpotify.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6A87FA59A433E536C79C835E /* libPods-RNSpotify.a */; };
 		A00A83BE1FB5188A00394AF0 /* RNSpotifyConvert.m in Sources */ = {isa = PBXBuildFile; fileRef = A00A83BC1FB5188A00394AF0 /* RNSpotifyConvert.m */; };
 		A01F099F1FAED1DB002AA48C /* RNSpotifyAuthController.m in Sources */ = {isa = PBXBuildFile; fileRef = A01F099E1FAED1DB002AA48C /* RNSpotifyAuthController.m */; };
 		A0A4341D1FAE256D0073DAB9 /* SpotifyAudioPlayback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A0A4341B1FAE25690073DAB9 /* SpotifyAudioPlayback.framework */; };
@@ -20,6 +21,11 @@
 		A58F101C222D82FB00B04887 /* RNSpotifySessionData.m in Sources */ = {isa = PBXBuildFile; fileRef = A58F101B222D82FB00B04887 /* RNSpotifySessionData.m */; };
 		A58F101F222DAE2D00B04887 /* RNSpotifyLoginOptions.m in Sources */ = {isa = PBXBuildFile; fileRef = A58F101E222DAE2D00B04887 /* RNSpotifyLoginOptions.m */; };
 		B3E7B58A1CC2AC0600A0062D /* RNSpotify.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* RNSpotify.m */; };
+		B6F2BFEB255D5EC5009AE116 /* EQCoreAudioController.m in Sources */ = {isa = PBXBuildFile; fileRef = B6F2BFE9255D5EC5009AE116 /* EQCoreAudioController.m */; };
+		B6F2BFF3255D5F33009AE116 /* Errors.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6F2BFEF255D5F33009AE116 /* Errors.swift */; };
+		B6F2BFF4255D5F33009AE116 /* HighpassFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6F2BFF0255D5F33009AE116 /* HighpassFilter.swift */; };
+		B6F2BFF5255D5F33009AE116 /* AudioFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6F2BFF1255D5F33009AE116 /* AudioFilter.swift */; };
+		B6F2BFF6255D5F33009AE116 /* FirstOrderHighpassFilterSimulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6F2BFF2255D5F33009AE116 /* FirstOrderHighpassFilterSimulator.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -36,6 +42,8 @@
 
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libRNSpotify.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRNSpotify.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		2A45483C1EF0A159B9CF9B0B /* Pods-RNSpotify.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RNSpotify.debug.xcconfig"; path = "Target Support Files/Pods-RNSpotify/Pods-RNSpotify.debug.xcconfig"; sourceTree = "<group>"; };
+		6A87FA59A433E536C79C835E /* libPods-RNSpotify.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-RNSpotify.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A00A83BC1FB5188A00394AF0 /* RNSpotifyConvert.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNSpotifyConvert.m; sourceTree = "<group>"; };
 		A00A83BD1FB5188A00394AF0 /* RNSpotifyConvert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNSpotifyConvert.h; sourceTree = "<group>"; };
 		A01F099D1FAED1DB002AA48C /* RNSpotifyAuthController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RNSpotifyAuthController.h; sourceTree = "<group>"; };
@@ -62,6 +70,14 @@
 		A58F101E222DAE2D00B04887 /* RNSpotifyLoginOptions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNSpotifyLoginOptions.m; sourceTree = "<group>"; };
 		B3E7B5881CC2AC0600A0062D /* RNSpotify.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNSpotify.h; sourceTree = "<group>"; };
 		B3E7B5891CC2AC0600A0062D /* RNSpotify.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNSpotify.m; sourceTree = "<group>"; };
+		B6F2BFE9255D5EC5009AE116 /* EQCoreAudioController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EQCoreAudioController.m; sourceTree = "<group>"; };
+		B6F2BFEA255D5EC5009AE116 /* EQCoreAudioController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EQCoreAudioController.h; sourceTree = "<group>"; };
+		B6F2BFEE255D5F32009AE116 /* RNSpotify-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RNSpotify-Bridging-Header.h"; sourceTree = "<group>"; };
+		B6F2BFEF255D5F33009AE116 /* Errors.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Errors.swift; sourceTree = "<group>"; };
+		B6F2BFF0255D5F33009AE116 /* HighpassFilter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HighpassFilter.swift; sourceTree = "<group>"; };
+		B6F2BFF1255D5F33009AE116 /* AudioFilter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioFilter.swift; sourceTree = "<group>"; };
+		B6F2BFF2255D5F33009AE116 /* FirstOrderHighpassFilterSimulator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FirstOrderHighpassFilterSimulator.swift; sourceTree = "<group>"; };
+		C869FF7A799030D3037521AD /* Pods-RNSpotify.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RNSpotify.release.xcconfig"; path = "Target Support Files/Pods-RNSpotify/Pods-RNSpotify.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,6 +87,7 @@
 			files = (
 				A0A4341D1FAE256D0073DAB9 /* SpotifyAudioPlayback.framework in Frameworks */,
 				A0A4341F1FAE25720073DAB9 /* SpotifyMetadata.framework in Frameworks */,
+				78295BC510370A2B52F0DEF1 /* libPods-RNSpotify.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -88,6 +105,10 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				B6F2BFEE255D5F32009AE116 /* RNSpotify-Bridging-Header.h */,
+				B6F2BFED255D5EDC009AE116 /* AudioFilters */,
+				B6F2BFEA255D5EC5009AE116 /* EQCoreAudioController.h */,
+				B6F2BFE9255D5EC5009AE116 /* EQCoreAudioController.m */,
 				A0CB1CFF1FB4D718009989EA /* HelperMacros.h */,
 				B3E7B5881CC2AC0600A0062D /* RNSpotify.h */,
 				B3E7B5891CC2AC0600A0062D /* RNSpotify.m */,
@@ -113,6 +134,7 @@
 				A01F099E1FAED1DB002AA48C /* RNSpotifyAuthController.m */,
 				A0A434191FAE254F0073DAB9 /* Frameworks */,
 				134814211AA4EA7D00B7C361 /* Products */,
+				A72E20C500823BD5640F468A /* Pods */,
 			);
 			sourceTree = "<group>";
 			usesTabs = 1;
@@ -123,8 +145,29 @@
 				A0A4341B1FAE25690073DAB9 /* SpotifyAudioPlayback.framework */,
 				A0A4341C1FAE25690073DAB9 /* SpotifyAuthentication.framework */,
 				A0A4341A1FAE25690073DAB9 /* SpotifyMetadata.framework */,
+				6A87FA59A433E536C79C835E /* libPods-RNSpotify.a */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		A72E20C500823BD5640F468A /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				2A45483C1EF0A159B9CF9B0B /* Pods-RNSpotify.debug.xcconfig */,
+				C869FF7A799030D3037521AD /* Pods-RNSpotify.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		B6F2BFED255D5EDC009AE116 /* AudioFilters */ = {
+			isa = PBXGroup;
+			children = (
+				B6F2BFF1255D5F33009AE116 /* AudioFilter.swift */,
+				B6F2BFEF255D5F33009AE116 /* Errors.swift */,
+				B6F2BFF2255D5F33009AE116 /* FirstOrderHighpassFilterSimulator.swift */,
+				B6F2BFF0255D5F33009AE116 /* HighpassFilter.swift */,
+			);
+			path = AudioFilters;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -134,6 +177,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "RNSpotify" */;
 			buildPhases = (
+				06F1E0B53249665956B30A48 /* [CP] Check Pods Manifest.lock */,
 				58B511D71A9E6C8500147676 /* Sources */,
 				58B511D81A9E6C8500147676 /* Frameworks */,
 				58B511D91A9E6C8500147676 /* CopyFiles */,
@@ -153,11 +197,12 @@
 		58B511D31A9E6C8500147676 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0830;
+				LastUpgradeCheck = 1210;
 				ORGANIZATIONNAME = Facebook;
 				TargetAttributes = {
 					58B511DA1A9E6C8500147676 = {
 						CreatedOnToolsVersion = 6.1.1;
+						LastSwiftMigration = 1210;
 					};
 				};
 			};
@@ -179,6 +224,31 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		06F1E0B53249665956B30A48 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-RNSpotify-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		58B511D71A9E6C8500147676 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -187,13 +257,18 @@
 				A01F099F1FAED1DB002AA48C /* RNSpotifyAuthController.m in Sources */,
 				A58F101F222DAE2D00B04887 /* RNSpotifyLoginOptions.m in Sources */,
 				A58F101C222D82FB00B04887 /* RNSpotifySessionData.m in Sources */,
+				B6F2BFF6255D5F33009AE116 /* FirstOrderHighpassFilterSimulator.swift in Sources */,
+				B6F2BFEB255D5EC5009AE116 /* EQCoreAudioController.m in Sources */,
+				B6F2BFF5255D5F33009AE116 /* AudioFilter.swift in Sources */,
 				A00A83BE1FB5188A00394AF0 /* RNSpotifyConvert.m in Sources */,
 				A58F1016222C8D1800B04887 /* RNSpotifyAuth.m in Sources */,
 				A0AD6943200E5B00003EC7D8 /* RNSpotifyProgressView.m in Sources */,
+				B6F2BFF3255D5F33009AE116 /* Errors.swift in Sources */,
 				B3E7B58A1CC2AC0600A0062D /* RNSpotify.m in Sources */,
 				A0C233722036800A0063A745 /* RNSpotifyCompletion.m in Sources */,
 				A0C233752036800A0063A745 /* RNSpotifyError.m in Sources */,
 				A0AD6946200E7277003EC7D8 /* RNSpotifyWebViewController.m in Sources */,
+				B6F2BFF4255D5F33009AE116 /* HighpassFilter.swift in Sources */,
 				A58F1019222CA04D00B04887 /* RNSpotifyUtils.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -205,18 +280,28 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -238,7 +323,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -249,18 +334,28 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -275,7 +370,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
@@ -284,7 +379,9 @@
 		};
 		58B511F01A9E6C8500147676 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2A45483C1EF0A159B9CF9B0B /* Pods-RNSpotify.debug.xcconfig */;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/external/SpotifySDK",
@@ -297,16 +394,22 @@
 					"$(SRCROOT)/../../react-native-events/ios",
 					"$(SRCROOT)/../../../react-native-events/ios",
 				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = RNSpotify;
 				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "RNSpotify-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
 		58B511F11A9E6C8500147676 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = C869FF7A799030D3037521AD /* Pods-RNSpotify.release.xcconfig */;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/external/SpotifySDK",
@@ -319,10 +422,13 @@
 					"$(SRCROOT)/../../react-native-events/ios",
 					"$(SRCROOT)/../../../react-native-events/ios",
 				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = RNSpotify;
 				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "RNSpotify-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};

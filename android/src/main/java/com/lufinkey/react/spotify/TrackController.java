@@ -19,12 +19,15 @@ public class TrackController implements AudioController {
     private float volume = 1;
     private int mSampleRate;
     private int mChannels;
+    private HighPassFilter mHighPassFilter;
+
     private final Runnable mAudioRunnable = new Runnable() {
         final short[] pendingSamples = new short[4096];
 
         public void run() {
             int itemsRead = TrackController.this.mAudioBuffer.peek(this.pendingSamples);
             if (itemsRead > 0) {
+
                 int itemsWritten = TrackController.this.writeSamplesToAudioOutput(this.pendingSamples, itemsRead);
                 TrackController.this.mAudioBuffer.remove(itemsWritten);
             }
@@ -32,7 +35,8 @@ public class TrackController implements AudioController {
         }
     };
 
-    public TrackController() {
+    public TrackController(HighPassFilter highPassFilter) {
+        this.mHighPassFilter = highPassFilter;
     }
 
     public AudioTrack getAudioTrack() {
@@ -60,6 +64,10 @@ public class TrackController implements AudioController {
                 this.mAudioTrack.release();
                 this.mAudioTrack = null;
             }
+        }
+
+        if (this.mSampleRate != sampleRate) {
+            mHighPassFilter.setSamplingRate(sampleRate);
         }
 
         this.mSampleRate = sampleRate;
@@ -139,9 +147,10 @@ public class TrackController implements AudioController {
         }
     }
 
-    private int writeSamplesToAudioOutput(short[] samples, int samplesCount) {
+    private int writeSamplesToAudioOutput(short[] samples, int sampleCount) {
         if (this.isAudioTrackPlaying()) {
-            int itemsWritten = this.mAudioTrack.write(samples, 0, samplesCount);
+            samples = mHighPassFilter.filterBlock(samples, sampleCount / mChannels, mChannels);
+            int itemsWritten = this.mAudioTrack.write(samples, 0, sampleCount);
             if (itemsWritten > 0) {
                 return itemsWritten;
             }
