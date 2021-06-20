@@ -31,6 +31,6 @@
     "react-native": "^0.53.3"
   },
   "dependencies": {
-    "react-native-events": "^1.0.15"
+    "react-native-events": "^1.0.17"
   }
 }
