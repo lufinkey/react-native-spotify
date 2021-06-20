@@ -15,6 +15,7 @@
 @property (nonatomic) NSArray<NSString*>* scopes;
 @property (nonatomic) NSURL* tokenSwapURL;
 @property (nonatomic) NSURL* tokenRefreshURL;
+@property (nonatomic) NSString* loginUserAgent;
 @property (nonatomic) NSDictionary* params;
 
 -(NSURL*)spotifyWebAuthenticationURLWithState:(NSString*)state;

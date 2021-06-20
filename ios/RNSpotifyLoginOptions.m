@@ -149,6 +149,14 @@
 			}
 		}
 	}
+	// loginUserAgent
+	options.loginUserAgent = [RNSpotifyUtils getOption:@"loginUserAgent" from:dict fallback:fallbackDict];
+	if(options.loginUserAgent != nil && ![options.loginUserAgent isKindOfClass:[NSString class]]) {
+		if(error != nil) {
+			*error = [RNSpotifyError errorWithCodeObj:RNSpotifyErrorCode.BadParameter message:@"loginUserAgent must be a string"];
+		}
+		return nil;
+	}
 	// params
 	NSMutableDictionary* params = [NSMutableDictionary dictionary];
 	NSNumber* showDialog = [RNSpotifyUtils getOption:@"showDialog" from:dict fallback:fallbackDict];
