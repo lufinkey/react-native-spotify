@@ -3,7 +3,9 @@
 
 A react native module for the Spotify SDK
 
-**NOTE:** This repo is using the deprecated Spotify streaming SDKs. I have been told by users that it is now no longer functional, since Spotify has [turned off the API](https://developer.spotify.com/community/news/2022/07/15/mobile-streaming-sdks-update/). [react-native-spotify-remote](https://github.com/cjam/react-native-spotify-remote) is being worked on by [cjam](https://github.com/cjam) to use the newer "remote" SDK.
+**NOTE:** This repo is using the deprecated Spotify streaming SDKs. I have been told by users that it is now no longer functional, since Spotify has [turned off the API](https://developer.spotify.com/community/news/2022/07/15/mobile-streaming-sdks-update/).
+
+[react-native-spotify-remote](https://github.com/cjam/react-native-spotify-remote) is being worked on by [cjam](https://github.com/cjam) to use the newer "remote" SDK.
 
 ## Install
 
